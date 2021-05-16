@@ -1,0 +1,4 @@
+gevent
+colorama
+deprecated
+kafka-python
