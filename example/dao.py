@@ -26,23 +26,25 @@ class TestDao(BaseDao):
         """
         # Running directly
         if isinstance(self._Connection_Strategy, MultiConnections):
-            self._logger.debug("Running all things with Bounded Semaphore.")
+            # self._logger.debug("Running all things with Bounded Semaphore.")
             # data = RunnableBuilder.run_with_semaphore(function=self.sql_process_new)
             data = RunnableBuilder.run_with_bounded_semaphore(function=self.sql_process_new)
             print("[DEBUG] at fun 'run': ", data)
             return data
-        else:
-            self._logger.debug("Running all things with Lock.")
+        elif isinstance(self._Connection_Strategy, SingleConnection):
+            # self._logger.debug("Running all things with Lock.")
             return RunnableBuilder.run_with_lock(function=self.sql_process_new)
+        else:
+            pass
 
 
     def sql_process_new(self):
         sql_tasks = self.get_all_sql_tasks()
-        self._logger.debug(f"SQL tasks: {sql_tasks}")
+        # self._logger.debug(f"SQL tasks: {sql_tasks}")
         sql_query = sql_tasks.get()
-        self._logger.debug(f"SQL tasks query: {sql_query}")
+        # self._logger.debug(f"SQL tasks query: {sql_query}")
         data = self.running_sql_query_process(sql_query=sql_query)
-        self._logger.debug(f"at fun 'sql_process_new': {data}")
+        # self._logger.debug(f"at fun 'sql_process_new': {data}")
         return data
 
 
