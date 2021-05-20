@@ -1,4 +1,4 @@
-from multiprocessing.pool import ThreadPool, ApplyResult
+from package_multiprocessing.pool import ThreadPool, ApplyResult
 from typing import List
 import os
 

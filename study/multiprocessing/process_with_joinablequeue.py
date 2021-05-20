@@ -1,7 +1,7 @@
 from .process_factory  import ProcessFactory
 
-from multiprocessing import Pool, JoinableQueue
-from multiprocessing.pool import AsyncResult
+from package_multiprocessing import Pool, JoinableQueue
+from package_multiprocessing.pool import AsyncResult
 from typing import List
 from datetime import datetime
 

@@ -1,2 +1,2 @@
-from gevent.threading import Thread
+from package_gevent.threading import Thread
 

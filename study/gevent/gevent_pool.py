@@ -1,7 +1,7 @@
-from gevent.pool import Pool
-from gevent.threadpool import ThreadPool, ThreadPoolExecutor, Greenlet
+from package_gevent.pool import Pool
+from package_gevent.threadpool import ThreadPool, ThreadPoolExecutor, Greenlet
 # from gevent.thread import Greenlet
-from gevent.threading import Thread
+from package_gevent.threading import Thread
 from typing import List
 import os
 

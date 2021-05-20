@@ -3,7 +3,7 @@ from ...framework.strategy import Globalize as RunningGlobalize
 from ...framework.features import BaseQueueType
 from ...api.features_adapter import RunningMode, RunningStrategyAPI
 
-from abc import ABC, abstractmethod
+from abc import ABC
 
 
 
@@ -43,3 +43,7 @@ class SingleConnection(BaseConnection, ABC):
         __running_feature_api = RunningStrategyAPI(mode=mode)
         __lock = __running_feature_api.lock()
         RunningGlobalize.lock(lock=__lock)
+
+
+    def get_one_connection(self) -> object:
+        return self.connect_database()

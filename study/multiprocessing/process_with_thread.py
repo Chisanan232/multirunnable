@@ -1,7 +1,7 @@
-from multiprocessing.pool import Pool, AsyncResult
-from multiprocessing import Manager
+from package_multiprocessing.pool import Pool, AsyncResult
+from package_multiprocessing import Manager
 from threading import Thread, currentThread
-from greenlet import greenlet, getcurrent as get_current_greenlet
+from package_greenlet import greenlet, getcurrent as get_current_greenlet
 from typing import List, Callable, Iterable, Union
 from datetime import datetime
 import asyncio
