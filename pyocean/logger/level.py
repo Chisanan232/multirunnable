@@ -1,5 +1,5 @@
-from ..logging import Ocean_Logging
-from .config import LoggingConfig
+from pyocean.logger import Ocean_Logging
+from pyocean.logger.config import LoggingConfig
 
 from multiprocessing import Lock
 # from threading import Lock

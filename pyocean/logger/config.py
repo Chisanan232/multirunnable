@@ -1,5 +1,3 @@
-from ..logging import Ocean_Logging
-
 from logging import Formatter
 from typing import Dict
 from enum import Enum
@@ -9,11 +7,11 @@ import logging
 
 class LogLevel(Enum):
 
-    DEBUG = Ocean_Logging.DEBUG
-    INFO = Ocean_Logging.INFO
-    WARNING = Ocean_Logging.WARNING
-    ERROR = Ocean_Logging.ERROR
-    CRITICAL = Ocean_Logging.CRITICAL
+    DEBUG = logging.DEBUG
+    INFO = logging.INFO
+    WARNING = logging.WARNING
+    ERROR = logging.ERROR
+    CRITICAL = logging.CRITICAL
 
 
 
