@@ -1,7 +1,6 @@
-from pyocean.persistence.database.multi_connections import MultiConnections
-from pyocean.persistence.database.single_connection import SingleConnection
+from pyocean.persistence.database import SingleConnection, MultiConnections
 from pyocean.persistence.database.configuration import BaseConfiguration
-from pyocean.logging.level import Logger, LogLevel
+from pyocean.logger import OceanLogger, LogLevel
 
 from mysql.connector.pooling import MySQLConnectionPool, PooledMySQLConnection
 from mysql.connector.errors import PoolError
@@ -15,6 +14,11 @@ import os
 
 
 class SingleTestConnectionStrategy(SingleConnection):
+
+    def __init__(self, configuration: BaseConfiguration, logger):
+        super().__init__(configuration)
+        self._logger = logger
+
 
     def connect_database(self) -> MySQLConnection:
         """
@@ -42,8 +46,9 @@ class SingleTestConnectionStrategy(SingleConnection):
 
 class MultiTestConnectionStrategy(MultiConnections):
 
-    def __init__(self, configuration: BaseConfiguration = None, logger: Logger = None):
+    def __init__(self, configuration: BaseConfiguration = None, logger: OceanLogger = None):
         super().__init__(configuration=configuration)
+        self._logger = logger
         self._logger.debug("Class MultiTestConnectionStrategy be newed (including logging) ...")
 
 
@@ -60,7 +65,7 @@ class MultiTestConnectionStrategy(MultiConnections):
             self._Database_Config[key] = value
         print("[DEBUG] database config: ", self._Database_Config)
         connection_pool = MySQLConnectionPool(**self._Database_Config)
-        self._logger.debug_level_log(f"MySQL_Connection_Pool at 'connection_strategy.init_connection_pool': {connection_pool}")
+        self._logger.debug(f"MySQL_Connection_Pool at 'connection_strategy.init_connection_pool': {connection_pool}")
         return connection_pool
 
 
@@ -69,7 +74,7 @@ class MultiTestConnectionStrategy(MultiConnections):
             try:
                 # return self.database_connection_pool.get_connection()
                 __connection = self.database_connection_pool.get_connection()
-                self._logger.info_level_log(f"Get a valid connection: {__connection}")
+                self._logger.info(f"Get a valid connection: {__connection}")
                 return __connection
             except PoolError as e:
                 self._logger.error(f"Connection Pool: {self.database_connection_pool.pool_size} ")

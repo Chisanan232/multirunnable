@@ -1,9 +1,7 @@
-from pyocean.framework.builder import RunnableBuilder
-from pyocean.persistence.database.connection import BaseConnection
-from pyocean.persistence.database.single_connection import SingleConnection
-from pyocean.persistence.database.multi_connections import MultiConnections
-from pyocean.persistence.database.access_object import BaseDao
-from pyocean.logging.level import Logger
+from pyocean.framework import RunnableBuilder
+from pyocean.persistence import OceanPersistence
+from pyocean.persistence.database import BaseDao, BaseConnection, SingleConnection, MultiConnections
+from pyocean.logger import OceanLogger
 
 from mysql.connector import Error
 from mysql.connector.cursor import MySQLCursor
@@ -14,8 +12,9 @@ import os
 
 class TestDao(BaseDao):
 
-    def __init__(self, connection_strategy: BaseConnection, logger: Logger):
+    def __init__(self, connection_strategy: OceanPersistence, logger: OceanLogger):
         super().__init__(connection_strategy=connection_strategy)
+        self._logger = logger
 
 
     def run(self) -> object:

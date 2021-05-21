@@ -8,21 +8,16 @@ sys.path.append(package_pyocean_path)
 
 # pyocean package
 from pyocean.framework.factory import RunningFactory, RunningTask
-from pyocean.framework.builder import BaseBuilder
-from pyocean.framework.strategy import RunnableStrategy
-from pyocean.parallel.factory import ParallelFactory
-from pyocean.parallel.builder import ParallelBuilder
-from pyocean.parallel.strategy import ParallelStrategy, MultiProcessingStrategy
-from pyocean.persistence.interface import OceanPersistence
-from pyocean.persistence.database.access_object import BaseDao
+from pyocean.framework import BaseBuilder, RunnableStrategy
+from pyocean.parallel import ParallelBuilder, ParallelStrategy, ParallelFactory
+from pyocean.persistence import OceanPersistence
+from pyocean.persistence.database import BaseDao
 from pyocean.persistence.database.configuration import DatabaseConfig, DatabaseDriver, HostEnvType
-from pyocean.logging.level import LogLevel, Logger
-from pyocean.logging.kafka import KafkaHandler
-from pyocean.logging.config import LoggingConfig
+from pyocean.logger import LogLevel, LoggingConfig, OceanLogger, KafkaHandler
 
 # code component
 from connection_strategy import SingleTestConnectionStrategy, MultiTestConnectionStrategy
-from dao import DatabaseSqlQuery, TestDao
+from dao import TestDao
 from sql_query import SqlQuery
 
 from multiprocessing import cpu_count
@@ -33,7 +28,7 @@ import time
 
 class TestParallelBuilder(ParallelBuilder):
 
-    def __init__(self, running_strategy: ParallelStrategy, db_connection_number: int, logger: Logger):
+    def __init__(self, running_strategy: ParallelStrategy, db_connection_number: int, logger: OceanLogger):
         super().__init__(running_strategy=running_strategy)
         self.__db_connection_number = db_connection_number
         self.__logger = logger
@@ -42,12 +37,12 @@ class TestParallelBuilder(ParallelBuilder):
 
 class TestParallelFactory(ParallelFactory):
 
-    def __init__(self, process_number: int, db_connection_number: int, logger: Logger):
+    def __init__(self, process_number: int, db_connection_number: int, logger: OceanLogger):
         super().__init__(process_number, db_connection_number)
         self.__logger = logger
 
 
-    def running_builder(self, running_strategy: RunnableStrategy) -> BaseBuilder:
+    def running_builder(self, running_strategy: ParallelStrategy) -> BaseBuilder:
         test_builder = TestParallelBuilder(running_strategy=running_strategy,
                                            db_connection_number=self._db_connection_num,
                                            logger=self.__logger)
@@ -89,9 +84,9 @@ class TestCode:
         file_io_hdlr = FileHandler(filename="/Users/bryantliu/Downloads/test_new.log")
         __producer_config = {"bootstrap_servers": "localhost:9092"}
         __sender_config = {"topic": "logging_test", "key": "test"}
-        kafka_stream_hdlr = KafkaHandler(producer_configs=__producer_config, sender_configs=__sender_config)
+        # kafka_stream_hdlr = KafkaHandler(producer_configs=__producer_config, sender_configs=__sender_config)
         # # Initialize Logger instance
-        self.__logger = Logger(config=__logging_config, handlers=[sys_stream_hdlr])
+        self.__logger = OceanLogger(config=__logging_config, handlers=[sys_stream_hdlr])
         self.__logger.debug(f"first init logging, level is {log_level}")
         print("[DEBUG] new class TestCode (including  logging)")
 
