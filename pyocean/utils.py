@@ -1,3 +1,7 @@
+"""
+It's possible that deprecated this class because it's useless currently.
+"""
+
 import re
 
 
