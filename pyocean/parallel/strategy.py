@@ -1,15 +1,11 @@
-from ..framework.strategy import RunnableStrategy, Resultable, Globalize as RunningGlobalize
-from ..framework.features import BaseQueueType
-# from ..api.mode import RunningMode
-# from ..api.limited_flag import Lock as OceanLock, Semaphore as OceanSemaphore
-from ..api.features_adapter import RunningMode, RunningStrategyAPI
-from .features import MultiProcessingQueueType
-from ..persistence.interface import OceanPersistence
-# from ..persistence.database.connection import BaseConnection
-from ..persistence.database.multi_connections import MultiConnections, Globalize as DatabaseGlobalize
-from ..persistence.database.single_connection import SingleConnection
-from ..persistence.file.saver import BaseFileSaver, SingleFileSaver, MultiFileSaver
-# from .exceptions import ClassReferenceParsingException
+from pyocean.framework.strategy import RunnableStrategy, Resultable, Globalize as RunningGlobalize
+from pyocean.framework.features import BaseQueueType
+from pyocean.api.features_adapter import RunningMode, RunningStrategyAPI
+from pyocean.parallel.features import MultiProcessingQueueType
+from pyocean.persistence import OceanPersistence
+from pyocean.persistence.database import SingleConnection, MultiConnections
+from pyocean.persistence.database.multi_connections import Globalize as DatabaseGlobalize
+from pyocean.persistence.file.saver import BaseFileSaver, SingleFileSaver, MultiFileSaver
 
 from abc import abstractmethod
 from multiprocessing import Pool, Manager, Lock, Semaphore, Queue as Process_Queue

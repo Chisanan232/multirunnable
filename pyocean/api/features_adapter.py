@@ -1,9 +1,8 @@
-from ..framework.features import BaseAPI, BaseQueueType
+from pyocean.framework.features import BaseAPI, BaseQueueType
 
 from importlib import import_module
 from typing import Dict, Callable
 from enum import Enum
-import sys
 
 
 _Package: str = "pyocean"

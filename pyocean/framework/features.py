@@ -1,4 +1,4 @@
-from .exceptions import ParameterCannotBeEmpty
+from pyocean.framework.exceptions import ParameterCannotBeEmpty
 
 from abc import ABCMeta, abstractmethod
 from enum import Enum

@@ -1,6 +1,5 @@
-from ..framework.strategy import Resultable
-from ..framework.builder import BaseBuilder, RunnableBuilder
-from .strategy import ParallelStrategy
+from pyocean.framework import BaseBuilder, RunnableBuilder, Resultable
+from pyocean.parallel.strategy import ParallelStrategy
 
 from abc import ABCMeta, abstractmethod
 from typing import List, Tuple, Dict, Callable, Iterable, Union

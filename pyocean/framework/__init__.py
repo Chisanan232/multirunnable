@@ -32,7 +32,7 @@ The framework section code:
 
 """
 
-from .builder import BaseBuilder
+from .builder import BaseBuilder, RunnableBuilder
 from .strategy import RunnableStrategy, Resultable
-from .factory import RunningFactory
+from .factory import RunningFactory, RunningTask
 from .features import BaseQueueType, BaseAPI, BaseGlobalizeAPI

@@ -1,6 +1,6 @@
-from .features import BaseAPI, BaseQueueType, BaseGlobalizeAPI
-from ..persistence.interface import OceanPersistence
-from ..exceptions import GlobalizeObjectError
+from pyocean.framework.features import BaseAPI, BaseQueueType, BaseGlobalizeAPI
+from pyocean.persistence.interface import OceanPersistence
+from pyocean.exceptions import GlobalizeObjectError
 
 from abc import ABCMeta, abstractmethod
 from typing import List, Iterable, Callable, Union
@@ -22,8 +22,6 @@ Running_Queue: Union[Process_Queue, Queue]
 
 
 class RunnableStrategy(metaclass=ABCMeta):
-
-    # __Persistence_Mode: PersistenceMode = None
 
     def __init__(self, threads_num: int, persistence_strategy: OceanPersistence = None,
                  db_connection_pool_size: int = None, **kwargs):
@@ -81,11 +79,6 @@ class RunnableStrategy(metaclass=ABCMeta):
                 print("Warning about suggestion is the best configuration of database connection instance should be "
                       "less than CPU amounts.")
             return self.__db_conn_instance_num
-
-
-    # @property
-    # def persistence_mode(self) -> PersistenceMode:
-    #     return self.__Persistence_Mode
 
 
     def init_multi_working(self, tasks: Iterable, *args, **kwargs) -> None:

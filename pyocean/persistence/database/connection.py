@@ -1,12 +1,10 @@
-from ..interface import OceanPersistence
-from .configuration import BaseConfiguration, BaseConfigurationKey, BaseConfigDefaultValue
-from ...framework.features import BaseAPI, BaseQueueType
-from ...api.features_adapter import RunningMode
-from ...logging.level import LogLevel, OceanLogger
+from pyocean.framework.features import BaseAPI, BaseQueueType
+from pyocean.api.features_adapter import RunningMode
+from pyocean.persistence.interface import OceanPersistence
+from pyocean.persistence.database.configuration import BaseConfiguration, BaseConfigurationKey, BaseConfigDefaultValue
 
 from abc import ABCMeta, abstractmethod
 from typing import List, Dict, Tuple, Callable, Iterable, Union
-import logging
 
 
 

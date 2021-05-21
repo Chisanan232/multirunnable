@@ -1,7 +1,7 @@
-from .connection import BaseConnection
-from ...framework.strategy import Globalize as RunningGlobalize
-from ...framework.features import BaseQueueType
-from ...api.features_adapter import RunningMode, RunningStrategyAPI
+from pyocean.framework.strategy import Globalize as RunningGlobalize
+from pyocean.framework.features import BaseQueueType
+from pyocean.api.features_adapter import RunningMode, RunningStrategyAPI
+from pyocean.persistence.database.connection import BaseConnection
 
 from abc import ABC
 

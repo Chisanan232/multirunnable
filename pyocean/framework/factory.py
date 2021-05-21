@@ -1,7 +1,6 @@
-from .strategy import RunnableStrategy
-from .builder import BaseBuilder
-from ..persistence.interface import OceanPersistence
-from ..persistence.database.access_object import BaseDao
+from pyocean.framework import BaseBuilder, RunnableStrategy
+from pyocean.persistence.interface import OceanPersistence
+from pyocean.persistence.database.access_object import BaseDao
 
 from abc import ABCMeta, abstractmethod
 

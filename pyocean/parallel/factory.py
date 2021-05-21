@@ -1,6 +1,6 @@
-from ..framework.factory import RunningFactory, RunningTask, RunnableStrategy
-from ..persistence.interface import OceanPersistence
-from .strategy import MultiProcessingStrategy
+from pyocean.framework import RunningFactory, RunningTask, RunnableStrategy
+from pyocean.persistence.interface import OceanPersistence
+from pyocean.parallel import MultiProcessingStrategy
 
 from abc import ABC
 

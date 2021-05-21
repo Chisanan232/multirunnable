@@ -1,17 +1,13 @@
-from .connection import BaseConnection
-from .configuration import BaseConfiguration
-from ...framework.strategy import Globalize as RunningGlobalize
-from ...framework.features import BaseQueueType
-# from ...api.mode import RunningMode
-# from ...api.limited_flag import RunningLimitation
-from ...api.features_adapter import RunningMode, RunningStrategyAPI
-from ...exceptions import GlobalizeObjectError
+from pyocean.framework.strategy import Globalize as RunningGlobalize
+from pyocean.framework.features import BaseQueueType
+from pyocean.api.features_adapter import RunningMode, RunningStrategyAPI
+from pyocean.persistence.database.connection import BaseConnection
+from pyocean.exceptions import GlobalizeObjectError
 
 from abc import abstractmethod
 from typing import List, Tuple, Dict, Iterable, Callable, Union, cast
 import re
 
-# from deprecated.sphinx import deprecated, versionadded, versionchanged
 from deprecation import deprecated
 
 

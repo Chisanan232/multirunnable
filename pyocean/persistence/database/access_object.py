@@ -1,5 +1,6 @@
-from .connection import BaseConnection
-from ...framework.builder import RunnableBuilder
+from pyocean.framework.builder import RunnableBuilder
+from pyocean.persistence.interface import OceanPersistence
+from pyocean.persistence.database.connection import BaseConnection
 
 from abc import ABCMeta, abstractmethod
 from typing import List, Tuple, Dict, Iterable, Union, Callable
@@ -9,7 +10,10 @@ import os
 
 class BaseDao(metaclass=ABCMeta):
 
-    _Connection_Strategy: BaseConnection = None
+    _Connection_Strategy: OceanPersistence = None
+
+    def __init__(self, connection_strategy: OceanPersistence):
+        self._Connection_Strategy = connection_strategy
 
 
     def get_connection(self) -> object:

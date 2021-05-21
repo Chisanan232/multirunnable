@@ -1,5 +1,5 @@
-from .strategy import RunnableStrategy
-from ..exceptions import GlobalObjectIsNoneError
+from pyocean.framework.strategy import RunnableStrategy
+from pyocean.exceptions import GlobalObjectIsNoneError
 
 from abc import ABCMeta, abstractmethod
 from typing import Tuple, Dict, Callable, Iterable, Union
@@ -73,7 +73,7 @@ class BaseBuilder(metaclass=ABCMeta):
             self._Running_Strategy = running_strategy
         else:
             raise TypeError("The strategy object should be 'RunnableStrategy' type. "
-                            "Please import pyocean.framework.strategy.RunnableStrategy to build one.")
+                            "Please import pyocean.framework.RunnableStrategy to build one.")
 
 
     def run_with_lock(self, function: Callable, arg: Tuple = (), kwarg: Dict = {}) -> object:

@@ -1,4 +1,4 @@
-from ..framework.features import BaseAPI, BaseQueueType, FeatureUtils
+from pyocean.framework.features import BaseAPI, BaseQueueType, FeatureUtils
 
 from multiprocessing import Lock, RLock, Event, Condition, Semaphore, BoundedSemaphore
 from multiprocessing import Queue as Process_Queue, SimpleQueue as Process_SimpleQueue, JoinableQueue as Process_JoinableQueue

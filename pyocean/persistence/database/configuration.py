@@ -1,4 +1,4 @@
-from .exceptions import InvalidDriverException, InvalidHostTypeException
+from pyocean.persistence.database.exceptions import InvalidDriverException, InvalidHostTypeException
 
 from abc import ABCMeta, abstractmethod
 from enum import Enum
