@@ -23,28 +23,9 @@ Running_Queue: Union[Process_Queue, Queue]
 
 class RunnableStrategy(metaclass=ABCMeta):
 
-    def __init__(self, threads_num: int, persistence_strategy: OceanPersistence = None,
-                 db_connection_pool_size: int = None, **kwargs):
+    def __init__(self, threads_num: int, persistence_strategy: OceanPersistence = None, **kwargs):
         self._persistence_strategy = persistence_strategy
         self.__db_conn_instance_num = kwargs.get("db_connection_pool_size", None)
-        # # Note:
-        # Modify the code to be persistence_mode and it would determine the strategy should use database or file.
-        # Question (?) Hoe to handle with the option 'db_connection_pool_size' parameterize?
-        # if isinstance(persistence_strategy, BaseFileSaver):
-        #     self.__Persistence_Mode = PersistenceMode.FILE_MODE
-        #     self._persistence_strategy = persistence_strategy
-        # elif isinstance(persistence_strategy, BaseConnection):
-        #     self.__Persistence_Mode = PersistenceMode.DATABASE_MODE
-        #     self._persistence_strategy = persistence_strategy
-        #     if isinstance(persistence_strategy, MultiConnections):
-        #         # The database connection instance number should be configure if the persistence mode is database.
-        #         # self.__db_conn_instance_num = db_connection_pool_size
-        #         self.__db_conn_instance_num = kwargs.get("db_connection_pool_size", None)
-        # else:
-        #     # Remove the typeerror raised in the future.
-        #     raise TypeError("The strategy object should be 'BaseFileSaver' type or 'BaseConnection' type. "
-        #                     "Please import pyocean.database.connection.BaseConnection to build one.")
-
         self.__threads_num = threads_num
 
 
