@@ -54,5 +54,4 @@ class MultiProcessing(BaseAPI):
 
 
     def queue(self, qtype: MultiProcessingQueueType):
-        print("[DEBUG] queue type: ", qtype)
         return qtype.value
