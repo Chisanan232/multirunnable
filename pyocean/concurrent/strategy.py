@@ -1,44 +1,51 @@
-from ..framework.strategy import RunnableStrategy, Resultable, Globalize as RunningGlobalize
-from ..framework.features import BaseQueueType
-from ..persistence.database.multi_connections import Globalize as DatabaseGlobalize
+from pyocean.framework.strategy import RunnableStrategy, Resultable, Globalize as RunningGlobalize
+from pyocean.framework.features import BaseQueueType
+from pyocean.api import RunningMode, RunningStrategyAPI
+from pyocean.concurrent.features import MultiThreadingQueueType
+from pyocean.persistence.database import SingleConnection, MultiConnections
+from pyocean.persistence.database.multi_connections import Globalize as DatabaseGlobalize
+from pyocean.persistence.file.saver import BaseFileSaver, SingleFileSaver, MultiFileSaver
 
+from abc import ABCMeta, abstractmethod, ABC
+from typing import List, Tuple, Dict, Iterable, Union, Callable
 from multiprocessing.pool import ApplyResult
 from multiprocessing.queues import Queue as Process_Queue
 from queue import Queue
 from threading import Thread, Semaphore as ThreadingSemaphore
 from greenlet import greenlet
 
-from abc import ABCMeta, abstractmethod, ABC
-from typing import List, Tuple, Dict, Iterable, Union, Callable
+from deprecated.sphinx import deprecated
 
 
 
 class ConcurrentStrategy(RunnableStrategy, ABC):
 
-    pass
+    _Running_Mode: RunningMode = RunningMode.MultiThreading
+    _Threads_List: List[Thread] = None
+    _Threads_Running_Result: Dict[str, Dict[str, Union[object, bool]]] = {}
 
 
 
 class MultiThreadingStrategy(ConcurrentStrategy):
 
-    __Threads_List: List[Thread] = None
-
     def init_multi_working(self, tasks: Iterable, *args, **kwargs) -> None:
-        # Initialize the Database Connection Instances Pool and Processes Semaphore.
-        database_connections_pool = self._persistence_strategy.connect_database(pool_name="stock_crawler",
-                                                                                pool_size=self.threads_number)
-        DatabaseGlobalize.connection_pool(pool=database_connections_pool)
+        # # Initialize and assign task queue object.
+        self.initialize_queue(tasks=tasks, qtype=MultiThreadingQueueType.Queue)
 
-        threading_semaphore = ThreadingSemaphore(value=self.threads_number)
-        RunningGlobalize.semaphore(smp=threading_semaphore)
+        # Initialize parameter and object with different scenario.
+        self.initialize_persistence()
 
-        process_queue = self.init_tasks_queue()
-        tasks_queue = self.add_task_to_queue(queue=process_queue, task=tasks)
-        RunningGlobalize.tasks_queue(tasks_queue=tasks_queue)
+
+    def initialize_queue(self, tasks: Iterable, qtype: BaseQueueType):
+        __queue = self.init_tasks_queue(qtype=qtype)
+        __tasks_queue = self.add_task_to_queue(queue=__queue, task=tasks)
+        RunningGlobalize.queue(queue=__tasks_queue)
 
 
     def init_tasks_queue(self, qtype: BaseQueueType) -> Union[Process_Queue, Queue]:
-        return Queue()
+        __running_api = RunningStrategyAPI(mode=self._Running_Mode)
+        __queue = __running_api.queue(qtype=qtype)
+        return __queue
 
 
     def add_task_to_queue(self, queue: Union[Process_Queue, Queue], task: Iterable) -> Union[Process_Queue, Queue]:
@@ -51,8 +58,26 @@ class MultiThreadingStrategy(ConcurrentStrategy):
         print("function: ", function)
         print("args: ", args)
         print("kwargs: ", kwargs)
-        self.__Threads_List = [Thread(target=function, args=args, kwargs=kwargs) for _ in range(self.threads_number)]
-        return self.__Threads_List
+        self._Threads_List = [Thread(target=function, args=args, kwargs=kwargs) for _ in range(self.threads_number)]
+        return self._Threads_List
+
+
+    def initialize_persistence(self):
+        pre_init_params: Dict = {}
+        if isinstance(self._persistence_strategy, SingleConnection):
+            pass
+        elif isinstance(self._persistence_strategy, MultiConnections):
+            pre_init_params["db_connection_instances_number"] = self.db_connection_instances_number
+        elif isinstance(self._persistence_strategy, SingleFileSaver):
+            pass
+        elif isinstance(self._persistence_strategy, MultiFileSaver):
+            pass
+        else:
+            # Unexpected scenario
+            print("[DEBUG] issue ...")
+            raise Exception
+        print("[DEBUG] Pre-Init process start ....")
+        self._persistence_strategy.initialize(mode=self._Running_Mode, **pre_init_params)
 
 
     def activate_worker(self, worker: Union[Thread, ApplyResult]) -> None:
@@ -62,14 +87,15 @@ class MultiThreadingStrategy(ConcurrentStrategy):
 
 
     def end_multi_working(self) -> None:
-        if isinstance(self.__Threads_List, List) and isinstance(self.__Threads_List[0], Thread):
+        if isinstance(self._Threads_List, List) and isinstance(self._Threads_List[0], Thread):
             for threed_index in range(self.threads_number):
-                self.__Threads_List[threed_index].join()
+                self._Threads_List[threed_index].join()
         else:
             raise
 
 
 
+@deprecated(version="0.8", reason="Move the class into module 'coroutine'")
 class CoroutineStrategy(ConcurrentStrategy, Resultable):
 
     __Greenlet_List: List[greenlet] = None

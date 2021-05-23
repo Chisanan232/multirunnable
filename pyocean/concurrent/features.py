@@ -1,4 +1,4 @@
-from ..framework.features import BaseAPI, BaseQueueType, FeatureUtils
+from pyocean.framework.features import BaseAPI, BaseQueueType, FeatureUtils
 
 from deprecated.sphinx import deprecated
 
@@ -6,12 +6,12 @@ from deprecated.sphinx import deprecated
 
 class MultiThreadingQueueType(BaseQueueType):
 
-    from queue import Queue, SimpleQueue, LifoQueue, PriorityQueue
+    from queue import Queue as _Queue, SimpleQueue as _SimpleQueue, LifoQueue as _LifoQueue, PriorityQueue as _PriorityQueue
 
-    Queue = Queue
-    SimpleQueue = SimpleQueue
-    LifoQueue = LifoQueue
-    PriorityQueue = PriorityQueue
+    Queue = _Queue()
+    SimpleQueue = _SimpleQueue()
+    LifoQueue = _LifoQueue()
+    PriorityQueue = _PriorityQueue()
 
 
 
@@ -48,22 +48,23 @@ class MultiThreading(BaseAPI):
 
 
     def queue(self, qtype: MultiThreadingQueueType):
-        return qtype.value()
+        return qtype.value
 
 
 
+@deprecated(version="0.8", reason="Move the class into module 'coroutine'")
 class CoroutineQueueType(BaseQueueType):
 
     from gevent.queue import Queue, SimpleQueue, JoinableQueue, PriorityQueue, LifoQueue
 
-    Queue = Queue
-    SimpleQueue = SimpleQueue
-    JoinableQueue = JoinableQueue
-    PriorityQueue = PriorityQueue
-    LifoQueue = LifoQueue
+    # Queue = Queue
+    # SimpleQueue = SimpleQueue
+    # JoinableQueue = JoinableQueue
+    # PriorityQueue = PriorityQueue
+    # LifoQueue = LifoQueue
 
 
-
+@deprecated(version="0.8", reason="Move the class into module 'coroutine'")
 class Coroutine(BaseAPI):
 
     def lock(self):
@@ -100,16 +101,18 @@ class Coroutine(BaseAPI):
 
 
 
+@deprecated(version="0.8", reason="Move the method into module 'coroutine'")
 class AsynchronousQueueType(BaseQueueType):
 
     from asyncio.queues import Queue, PriorityQueue, LifoQueue
 
-    Queue = Queue
-    PriorityQueue = PriorityQueue
-    LifoQueue = LifoQueue
+    # Queue = Queue
+    # PriorityQueue = PriorityQueue
+    # LifoQueue = LifoQueue
 
 
 
+@deprecated(version="0.8", reason="Move the class into module 'coroutine'")
 class Asynchronous(BaseAPI):
 
     def lock(self):

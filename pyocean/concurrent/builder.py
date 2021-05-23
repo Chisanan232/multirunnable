@@ -1,9 +1,9 @@
-from ..framework.strategy import Resultable
-from ..framework.builder import BaseBuilder
-from .strategy import ConcurrentStrategy
+from pyocean.framework.strategy import Resultable
+from pyocean.framework.builder import BaseBuilder
 
-from abc import abstractmethod
 from typing import Union, Callable, Tuple, Dict, Iterable
+
+from deprecated.sphinx import deprecated
 
 
 
@@ -100,6 +100,7 @@ class ThreadsBuilder(BaseBuilder):
 
 
 
+@deprecated(version="0.8", reason="Move the class into module 'coroutine'")
 class GreenletBuilder(BaseBuilder):
 
     def run(self,
@@ -140,6 +141,7 @@ class GreenletBuilder(BaseBuilder):
 
 
 
+@deprecated(version="0.8", reason="Move the class into module 'coroutine'")
 class CoroutineBuilder(BaseBuilder):
 
     def run(self,

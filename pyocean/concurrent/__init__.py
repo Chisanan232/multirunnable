@@ -1,6 +1,4 @@
-from .builder import ThreadsBuilder, GreenletBuilder, CoroutineBuilder
-from .strategy import MultiThreadingStrategy, CoroutineStrategy
-from .factory import MultiThreadsFactory, CoroutineFactory
-from .features import (MultiThreadingQueueType, MultiThreading,
-                       CoroutineQueueType, Coroutine,
-                       AsynchronousQueueType, Asynchronous)
+from pyocean.concurrent.builder import ThreadsBuilder
+from pyocean.concurrent.strategy import MultiThreadingStrategy
+from pyocean.concurrent.factory import MultiThreadsFactory
+from pyocean.concurrent.features import MultiThreadingQueueType, MultiThreading
