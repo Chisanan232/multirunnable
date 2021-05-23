@@ -1,5 +1,4 @@
 from pyocean.framework.strategy import Globalize as RunningGlobalize
-from pyocean.framework.features import BaseQueueType
 from pyocean.api.features_adapter import RunningMode, RunningStrategyAPI
 from pyocean.persistence.database.connection import BaseConnection
 from pyocean.exceptions import GlobalizeObjectError
@@ -18,14 +17,13 @@ class MultiConnections(BaseConnection):
     __Connection_Pool_Name: str = "stock_crawler"
 
 
-    def initialize(self, mode: RunningMode, queue_type: BaseQueueType, **kwargs) -> None:
+    def initialize(self, mode: RunningMode, **kwargs) -> None:
         """
         Description:
             Target to initialize Process Semaphore and Database connection pool object, and globalize them to let
             processes to use.
         Note:
             RLock mostly like Semaphore, so doesn't do anything with RLock currently.
-        :param queue_type:
         :param mode:
         :param kwargs:
         :return:

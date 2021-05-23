@@ -1,5 +1,4 @@
 from pyocean.framework.strategy import Globalize as RunningGlobalize
-from pyocean.framework.features import BaseQueueType
 from pyocean.api.features_adapter import RunningMode, RunningStrategyAPI
 from pyocean.persistence.database.connection import BaseConnection
 
@@ -9,7 +8,7 @@ from abc import ABC
 
 class SingleConnection(BaseConnection, ABC):
 
-    def initialize(self, mode: RunningMode, queue_type: BaseQueueType, **kwargs) -> None:
+    def initialize(self, mode: RunningMode, **kwargs) -> None:
         """
         Note:
             Deprecated the method about multiprocessing saving with one connection and change to use multiprocessing
@@ -22,7 +21,6 @@ class SingleConnection(BaseConnection, ABC):
 
             Because only one connection instance, the every process take turns to using it to saving data. In other words,
             here doesn't need to initial anything about database connection.
-        :param queue_type:
         :param mode:
         :param kwargs:
         :return:

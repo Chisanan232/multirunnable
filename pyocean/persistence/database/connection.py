@@ -50,11 +50,10 @@ class BaseConnection(OceanPersistence):
 
 
     @abstractmethod
-    def initialize(self, mode: RunningMode, queue_type: BaseQueueType, **kwargs) -> None:
+    def initialize(self, mode: RunningMode, **kwargs) -> None:
         """
         Description:
             Initialize something which be needed before operate something with database.
-        :param queue_type:
         :param mode:
         :param kwargs:
         :return:

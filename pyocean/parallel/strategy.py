@@ -153,7 +153,7 @@ class MultiProcessingStrategy(ParallelStrategy, Resultable):
             print("[DEBUG] issue ...")
             raise Exception
         print("[DEBUG] Pre-Init process start ....")
-        self._persistence_strategy.initialize(mode=self._Running_Mode, queue_type=MultiProcessingQueueType.Queue, **pre_init_params)
+        self._persistence_strategy.initialize(mode=self._Running_Mode, **pre_init_params)
 
 
     def build_multi_workers(self,
