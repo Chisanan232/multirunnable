@@ -124,8 +124,8 @@ class TestCode:
 if __name__ == '__main__':
 
     start_time = time.time()
-    __process_number = 1
-    __db_connection_thread_number = 1
+    __process_number = 5
+    __db_connection_thread_number = 5
     print(f"Process Number: {cpu_count()}")
     test_code = TestCode(process_num=__process_number,
                          db_connection_number=__db_connection_thread_number,
