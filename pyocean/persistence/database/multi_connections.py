@@ -5,8 +5,7 @@ from pyocean.persistence.database.connection import BaseConnection
 from pyocean.exceptions import GlobalizeObjectError
 
 from abc import abstractmethod
-from typing import List, Tuple, Dict, Iterable, Callable, Union, cast
-import re
+from typing import Callable, Union, cast
 
 from deprecation import deprecated
 
@@ -31,27 +30,12 @@ class MultiConnections(BaseConnection):
         :param kwargs:
         :return:
         """
-        # Get value
-        # tasks_queue = self.__get_value(param=kwargs.get("tasks_queue", None))
+        # # Get value
         db_connection_instances_number = cast(int, self.__get_value(param=kwargs.get("db_connection_instances_number", None)))
-        # limited_obj = self.__get_value(param=kwargs.get("limited_obj", None))
         pool_name = kwargs.get("pool_name", self.__Connection_Pool_Name)
 
-        # # # Older version written (version 0.6)
-        # # Initialize process semaphore
-        # limitation_obj = getattr(limitation, mode.value)(value=db_connection_instances_number)
-        # # Globalize object to share between different multiple processes
-        # globalize_fun = getattr(limitation, "Globalize")
-        # globalize_fun(limitation_obj)
-
-        # # # Latest version written (version 0.7)
-        # # Queue part (Limitation)
         __running_feature_api = RunningStrategyAPI(mode=mode)
-        __queue = __running_feature_api.queue(qtype=queue_type)
-        RunningGlobalize.queue(queue=__queue)
-
         # # Semaphore part (Limitation)
-        __running_feature_api = RunningStrategyAPI(mode=mode)
         __bounded_semaphore = __running_feature_api.bounded_semaphore(value=db_connection_instances_number)
         RunningGlobalize.bounded_semaphore(bsmp=__bounded_semaphore)
 
@@ -85,17 +69,6 @@ class MultiConnections(BaseConnection):
         """
         Description:
             Set the database connection pool size.
-        :return:
-        """
-        pass
-
-
-    @deprecated(deprecated_in="0.2", removed_in="0.7", details="Move the abstracted method up to parent class.")
-    @abstractmethod
-    def get_one_connection(self) -> object:
-        """
-        Description:
-            Get one database connection instance.
         :return:
         """
         pass

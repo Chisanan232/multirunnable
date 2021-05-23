@@ -1,10 +1,9 @@
 from pyocean.framework.strategy import RunnableStrategy, Resultable, Globalize as RunningGlobalize
 from pyocean.framework.features import BaseQueueType
-from pyocean.api.features_adapter import RunningMode, RunningStrategyAPI
+from pyocean.api import RunningMode, RunningStrategyAPI
 from pyocean.parallel.features import MultiProcessingQueueType
 from pyocean.persistence import OceanPersistence
 from pyocean.persistence.database import SingleConnection, MultiConnections
-from pyocean.persistence.database.multi_connections import Globalize as DatabaseGlobalize
 from pyocean.persistence.file.saver import BaseFileSaver, SingleFileSaver, MultiFileSaver
 
 from abc import abstractmethod
@@ -21,7 +20,6 @@ import re
 
 class ParallelStrategy(RunnableStrategy):
 
-    # _Running_Mode: RunningMode = RunningMode.Process
     _Running_Mode: RunningMode = RunningMode.MultiProcessing
     _Manager: Manager = None
     _Namespace_Object: Namespace = None
@@ -75,175 +73,15 @@ class MultiProcessingStrategy(ParallelStrategy, Resultable):
                            pool_initializer: Callable = None,
                            pool_initargs: Iterable = None,
                            *args, **kwargs) -> None:
-        # Initialize and assign task queue object.
-        process_queue = self.init_tasks_queue(qtype=MultiProcessingQueueType.Queue)
-        tasks_queue = self.add_task_to_queue(queue=process_queue, task=tasks)
-        # Globalize object to share between different multiple processes
-        RunningGlobalize.tasks_queue(tasks_queue=tasks_queue)
-        print("[DEBUG] queue: ", process_queue)
-        print("[DEBUG] tasks: ", tasks)
+        # # Initialize and assign task queue object.
+        self.initialize_queue(tasks=tasks, qtype=MultiProcessingQueueType.Queue)
 
         # Initialize parameter and object with different scenario.
-        # self.__init_by_strategy(tasks_queue=tasks_queue)
-        pre_init_params: Dict = {}
-        if isinstance(self._persistence_strategy, SingleConnection):
-            # Single Connection Initialize Procedure
-            # from multiprocessing import Lock
-            # # pre_init_params["tasks_queue"] = tasks_queue
-            # pre_init_params["limited_obj"] = Lock
-            pass
-        elif isinstance(self._persistence_strategy, MultiConnections):
-            # Multiple Connection Initialize Procedure
-            # from multiprocessing import Semaphore
-            # # pre_init_params["tasks_queue"] = tasks_queue
-            # pre_init_params["limited_obj"] = Semaphore
-            # # pre_init_params["pool_name"] = "stock_crawler"
-            pre_init_params["db_connection_instances_number"] = self.db_connection_instances_number
-        elif isinstance(self._persistence_strategy, SingleFileSaver):
-            # Single File Saver Initialize Procedure
-            # from multiprocessing import Lock
-            # # pre_init_params["tasks_queue"] = tasks_queue
-            # pre_init_params["limited_obj"] = Lock
-            pass
-        elif isinstance(self._persistence_strategy, MultiFileSaver):
-            # Multiple File Savers Initialize Procedure
-            # from multiprocessing import Semaphore
-            # # pre_init_params["tasks_queue"] = tasks_queue
-            # pre_init_params["limited_obj"] = Semaphore
-            pass
-        else:
-            # Unexpected scenario
-            print("[DEBUG] issue ...")
-            raise Exception
-        # self._persistence_strategy.initialize(**pre_init_params)
-        print("[DEBUG] Pre-Init process start ....")
-        # self._persistence_strategy.initialize(limitation=OceanSemaphore,  mode=self._Running_Mode, **pre_init_params)
-        self._persistence_strategy.initialize(mode=self._Running_Mode,  queue_type=MultiProcessingQueueType.Queue, **pre_init_params)
+        self.initialize_persistence()
 
         # Initialize and build the Processes Pool.
         self._Processors_Pool = Pool(processes=self.threads_number, initializer=pool_initializer, initargs=pool_initargs)
         print("[DEBUG] Pre-Init process finish.")
-
-
-    @deprecated(version="0.6", reason="Remove useless logic code")
-    def __init_by_strategy(self, tasks_queue: Queue) -> None:
-        """
-        Description:
-            Initialize something which be needed.
-
-        Note:
-            For every running strategy, they have something must to be initial: Lock or Semaphore, connection pool if it needs.
-            And base on the persistence mode, it has different ways to save data:
-            1. Multi-Worker with One Connection Instance (SingleConnection)
-               one connection instance, lock
-               -> Deprecated one connection instance and change to use connection pool. Deprecated lock and change to use semaphore.
-               -> Reason: efficiency
-            2. Multi-Worker with Multi-Connection Instances (MultiConnection)
-               one connection pool which saving multiple connection instances, semaphore
-            3. Multi-Worker with One file (SingleSaver-BaseFileFormatter)
-               one IO instance, lock (Saving into same file)
-            4. Multi-Worker with Multi-Files (MultiSaver-BaseFileFormatter)
-               multiple IO instances in each process, lock (Saving into many different file)
-
-        :param tasks_queue:
-        :return:
-        """
-        if isinstance(self._persistence_strategy, MultiConnections):
-            # # # # Multiprocessing with database connection pool
-            # Initialize Processes Semaphore. (related with persistence)
-            # It has 2 possible that the step has: Lock (For database - one connection instance and file) or
-            # Semaphore (For database - connection pool).
-            # RLock mostly like Semaphore, so doesn't do anything with RLock currently.
-            process_semaphore = Semaphore(value=self.db_connection_instances_number)
-
-            # Initialize the Database Connection Instances Pool. (related with persistence)
-            database_connections_pool = self._persistence_strategy.connect_database(pool_name="stock_crawler",
-                                                                                    pool_size=self.db_connection_instances_number)
-
-            # (related with persistence)
-            self.__globalize_init_object_new(tasks_queue, process_semaphore, database_connections_pool)
-            # pool_initializer = self.__init_something
-            # pool_initargs = (running_initializer, running_initargs, tasks_queue, process_semaphore, database_connections_pool, )
-
-        elif isinstance(self._persistence_strategy, SingleConnection):
-            # # # # Multiprocessing with oen database connection instance
-            # Deprecated the method about mutiprocessing saving with one connection and change to use multiprocessing
-            # saving with pool size is 1 connection pool. The reason is database instance of connection pool is already,
-            # but for the locking situation, we should:
-            # lock acquire -> new instance -> execute something -> close instance -> lock release . and loop and loop until task finish.
-            # But connection pool would:
-            # new connection instances and save to pool -> semaphore acquire -> GET instance (not NEW) ->
-            # execute something -> release instance back to pool (not CLOSE instance) -> semaphore release
-            from multiprocessing import Lock
-            process_lock = Lock()
-            # Because only one connection instance, the every process take turns to using it to saving data. In other words,
-            # here doesn't need to initial anything about database connection.
-
-            # (related with persistence)
-            self.__globalize_init_object_new(tasks_queue, process_lock)
-            # pool_initializer = self.__init_something
-            # pool_initargs = (running_initializer, running_initargs, tasks_queue, process_lock, )
-
-        elif isinstance(self._persistence_strategy, SingleFileSaver):
-            # # # # Multiprocessing with each mapping file. So this options shouldn't be run with multiprocessing or
-            # no matter use which one strategy, it would garuntee the result report is ONE file. (consider ...?)
-            raise Exception("MultiProcessing running strategy shouldn't use SingleFileSaver persistence strategy. "
-                            "Please select others persistence strategy.")
-
-        elif isinstance(self._persistence_strategy, MultiFileSaver):
-            # # # # Multiprocessing with multiple files to saving data and compress data finally.
-            # Each processes save data as file with the stock symbol as file name, but program will distribute task by
-            # stock symbol, so it's impossible that occur resources rare condition between with each different processes
-            # when running.
-            self.__globalize_init_object_new(tasks_queue)
-            # pool_initializer = self.__init_something
-            # pool_initargs = (running_initializer, running_initargs, tasks_queue, )
-
-        else:
-            raise Exception("It's impossible issue.")
-
-
-    @deprecated(version="0.4", reason="Remove useless logic code")
-    def __init_something(self, running_initializer: Callable = None, running_initargs: Iterable = None, *args, **kwargs):
-        if running_initializer:
-            running_initializer(running_initargs)
-        self.__globalize_init_object_new(*args, **kwargs)
-
-
-    @deprecated(version="0.6", reason="Remove useless logic code")
-    def __globalize_init_object_new(self, *args, **kwargs) -> None:
-        """
-        Note:
-            Question (?):
-              Here has a bad solution about the globalize procedure be determined by string of object. it will add the
-              risk about unexpected bug occur in the future.
-        :param args:
-        :param kwargs:
-        :return:
-        """
-        # (related with persistence)
-        for arg in args:
-            print("arg: ", arg)
-            if "Queue" in repr(arg):
-                RunningGlobalize.tasks_queue(tasks_queue=arg)
-            elif "Lock" in repr(arg):
-                RunningGlobalize.lock(lock=arg)
-            elif "Semaphore" in repr(arg):
-                RunningGlobalize.semaphore(smp=arg)
-            else:
-                print("Connection Pool: ", arg)
-                DatabaseGlobalize.connection_pool(pool=arg)
-
-        if kwargs.get("pool", None):
-            print("Connection Pool: ", kwargs["pool"])
-            DatabaseGlobalize.connection_pool(pool=kwargs["pool"])
-
-
-    @deprecated(version="0.6", reason="Remove useless logic code")
-    def __globalize_init_object(self, tasks_queue: Process_Queue, semaphore: Semaphore, database_connections_pool: object) -> None:
-        RunningGlobalize.semaphore(smp=semaphore)
-        RunningGlobalize.tasks_queue(tasks_queue=tasks_queue)
-        DatabaseGlobalize.connection_pool(pool=database_connections_pool)
 
 
     def namespacilize_object(self, objects: Iterable[Callable]) -> Namespace:
@@ -282,10 +120,13 @@ class MultiProcessingStrategy(ParallelStrategy, Resultable):
         return str(object_char).split(".")[-1].split("'>")[0]
 
 
+    def initialize_queue(self, tasks: Iterable, qtype: BaseQueueType):
+        __queue = self.init_tasks_queue(qtype=qtype)
+        __tasks_queue = self.add_task_to_queue(queue=__queue, task=tasks)
+        RunningGlobalize.queue(queue=__tasks_queue)
+
+
     def init_tasks_queue(self, qtype: BaseQueueType) -> Union[Process_Queue, Queue]:
-        # Older written
-        # return Process_Queue()
-        # New written
         __running_api = RunningStrategyAPI(mode=self._Running_Mode)
         __queue = __running_api.queue(qtype=qtype)
         return __queue
@@ -295,6 +136,24 @@ class MultiProcessingStrategy(ParallelStrategy, Resultable):
         for t in task:
             queue.put(t)
         return queue
+
+
+    def initialize_persistence(self):
+        pre_init_params: Dict = {}
+        if isinstance(self._persistence_strategy, SingleConnection):
+            pass
+        elif isinstance(self._persistence_strategy, MultiConnections):
+            pre_init_params["db_connection_instances_number"] = self.db_connection_instances_number
+        elif isinstance(self._persistence_strategy, SingleFileSaver):
+            pass
+        elif isinstance(self._persistence_strategy, MultiFileSaver):
+            pass
+        else:
+            # Unexpected scenario
+            print("[DEBUG] issue ...")
+            raise Exception
+        print("[DEBUG] Pre-Init process start ....")
+        self._persistence_strategy.initialize(mode=self._Running_Mode, queue_type=MultiProcessingQueueType.Queue, **pre_init_params)
 
 
     def build_multi_workers(self,

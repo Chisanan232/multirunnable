@@ -12,7 +12,7 @@ class SingleConnection(BaseConnection, ABC):
     def initialize(self, mode: RunningMode, queue_type: BaseQueueType, **kwargs) -> None:
         """
         Note:
-            Deprecated the method about mutiprocessing saving with one connection and change to use multiprocessing
+            Deprecated the method about multiprocessing saving with one connection and change to use multiprocessing
             saving with pool size is 1 connection pool. The reason is database instance of connection pool is already,
             but for the locking situation, we should:
             lock acquire -> new instance -> execute something -> close instance -> lock release . and loop and loop until task finish.
@@ -27,20 +27,12 @@ class SingleConnection(BaseConnection, ABC):
         :param kwargs:
         :return:
         """
-        # # Initialize process semaphore
-        # limitation_obj = getattr(limitation, mode.value)()
-        # # Globalize object to share between different multiple processes
-        # globalize_fun = getattr(limitation, "Globalize")
-        # globalize_fun(limitation_obj)
-
-        # # Latest version written
-        # # Queue part (Limitation)
         __running_feature_api = RunningStrategyAPI(mode=mode)
+        # # Queue part (Limitation)
         __queue = __running_feature_api.queue(qtype=queue_type)
         RunningGlobalize.queue(queue=__queue)
 
-        # # Semaphore part (Limitation)
-        __running_feature_api = RunningStrategyAPI(mode=mode)
+        # # Lock part (Limitation)
         __lock = __running_feature_api.lock()
         RunningGlobalize.lock(lock=__lock)
 
