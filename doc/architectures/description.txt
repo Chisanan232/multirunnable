@@ -1,0 +1,5 @@
+###########################################
+#          Software Architecture          #
+###########################################
+
+These are draw.io configuration files.
