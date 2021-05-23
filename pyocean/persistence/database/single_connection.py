@@ -26,10 +26,6 @@ class SingleConnection(BaseConnection, ABC):
         :return:
         """
         __running_feature_api = RunningStrategyAPI(mode=mode)
-        # # Queue part (Limitation)
-        __queue = __running_feature_api.queue(qtype=queue_type)
-        RunningGlobalize.queue(queue=__queue)
-
         # # Lock part (Limitation)
         __lock = __running_feature_api.lock()
         RunningGlobalize.lock(lock=__lock)
