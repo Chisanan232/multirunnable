@@ -120,46 +120,6 @@ class MultiProcessingStrategy(ParallelStrategy, Resultable):
         return str(object_char).split(".")[-1].split("'>")[0]
 
 
-    @deprecated(version="0.8", reason="Move the method up to super-class 'RunnableStrategy'")
-    def initialize_queue(self, tasks: Iterable, qtype: BaseQueueType):
-        __queue = self.init_tasks_queue(qtype=qtype)
-        __tasks_queue = self.add_task_to_queue(queue=__queue, task=tasks)
-        RunningGlobalize.queue(queue=__tasks_queue)
-
-
-    @deprecated(version="0.8", reason="Move the method up to super-class 'RunnableStrategy'")
-    def init_tasks_queue(self, qtype: BaseQueueType) -> Union[Process_Queue, Queue]:
-        __running_api = RunningStrategyAPI(mode=self._Running_Mode)
-        __queue = __running_api.queue(qtype=qtype)
-        return __queue
-
-
-    @deprecated(version="0.8", reason="Move the method up to super-class 'RunnableStrategy'")
-    def add_task_to_queue(self, queue: Union[Process_Queue, Queue], task: Iterable) -> Union[Process_Queue, Queue]:
-        for t in task:
-            queue.put(t)
-        return queue
-
-
-    @deprecated(version="0.8", reason="Move the method up to super-class 'RunnableStrategy'")
-    def initialize_persistence(self):
-        pre_init_params: Dict = {}
-        if isinstance(self._persistence_strategy, SingleConnection):
-            pass
-        elif isinstance(self._persistence_strategy, MultiConnections):
-            pre_init_params["db_connection_instances_number"] = self.db_connection_instances_number
-        elif isinstance(self._persistence_strategy, SingleFileSaver):
-            pass
-        elif isinstance(self._persistence_strategy, MultiFileSaver):
-            pass
-        else:
-            # Unexpected scenario
-            print("[DEBUG] issue ...")
-            raise Exception
-        print("[DEBUG] Pre-Init process start ....")
-        self._persistence_strategy.initialize(mode=self._Running_Mode, **pre_init_params)
-
-
     def build_multi_workers(self,
                             function: Callable,
                             args: Tuple = (),

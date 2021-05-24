@@ -126,32 +126,6 @@ class RunnableStrategy(metaclass=ABCMeta):
         pass
 
 
-    @deprecated(version="0.8", reason="Remove the method from abstracted method.")
-    @abstractmethod
-    def init_tasks_queue(self, qtype: BaseQueueType) -> Union[Process_Queue, Queue]:
-        """
-        Description:
-            Initialize a queue object.
-
-        Note:
-            For multiprocessing part, the queue should be determined by parameter which be initialized as general queue
-            or others special object like SimpleQueue or JoinableQueue.
-        :return:
-        """
-        pass
-
-
-    @deprecated(version="0.8", reason="Remove the method from abstracted method.")
-    @abstractmethod
-    def add_task_to_queue(self, queue: Union[Process_Queue, Queue], task: Iterable) -> Union[Process_Queue, Queue]:
-        """
-        Description:
-            Add target task(s) to appointed queue object.
-        :return:
-        """
-        pass
-
-
     @abstractmethod
     def build_multi_workers(self, function: Callable, *args, **kwargs) -> List[Union[Thread, ApplyResult]]:
         """
