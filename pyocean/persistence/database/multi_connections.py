@@ -44,14 +44,6 @@ class MultiConnections(BaseConnection):
         Globalize.connection_pool(pool=database_connections_pool)
 
 
-    @deprecated(deprecated_in="0.6", removed_in="0.8", details="Adjust the software architecture")
-    def __get_value(self, param: object) -> Union[object, Callable]:
-        if param is None:
-            raise Exception("Parameter object shouldn't be empty.")
-        else:
-            return param
-
-
     @property
     def database_connection_pool(self) -> object:
         """
