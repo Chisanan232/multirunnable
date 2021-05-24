@@ -1,4 +1,4 @@
-from pyocean.framework.strategy import RunnableStrategy, Resultable, Globalize as RunningGlobalize
+from pyocean.framework.strategy import InitializeUtils, RunnableStrategy, Resultable, Globalize as RunningGlobalize
 from pyocean.framework.features import BaseQueueType
 from pyocean.api import RunningMode, RunningStrategyAPI
 from pyocean.parallel.features import MultiProcessingQueueType
@@ -73,11 +73,11 @@ class MultiProcessingStrategy(ParallelStrategy, Resultable):
                            pool_initializer: Callable = None,
                            pool_initargs: Iterable = None,
                            *args, **kwargs) -> None:
-        # # Initialize and assign task queue object.
-        self.initialize_queue(tasks=tasks, qtype=MultiProcessingQueueType.Queue)
-
+        __init_utils = InitializeUtils(running_mode=self._Running_Mode, persistence=self._persistence_strategy)
+        # Initialize and assign task queue object.
+        __init_utils.initialize_queue(tasks=tasks, qtype=MultiProcessingQueueType.Queue)
         # Initialize parameter and object with different scenario.
-        self.initialize_persistence()
+        __init_utils.initialize_persistence(db_conn_instances_num=self.db_connection_instances_number)
 
         # Initialize and build the Processes Pool.
         self._Processors_Pool = Pool(processes=self.threads_number, initializer=pool_initializer, initargs=pool_initargs)
@@ -120,24 +120,28 @@ class MultiProcessingStrategy(ParallelStrategy, Resultable):
         return str(object_char).split(".")[-1].split("'>")[0]
 
 
+    @deprecated(version="0.8", reason="Move the method up to super-class 'RunnableStrategy'")
     def initialize_queue(self, tasks: Iterable, qtype: BaseQueueType):
         __queue = self.init_tasks_queue(qtype=qtype)
         __tasks_queue = self.add_task_to_queue(queue=__queue, task=tasks)
         RunningGlobalize.queue(queue=__tasks_queue)
 
 
+    @deprecated(version="0.8", reason="Move the method up to super-class 'RunnableStrategy'")
     def init_tasks_queue(self, qtype: BaseQueueType) -> Union[Process_Queue, Queue]:
         __running_api = RunningStrategyAPI(mode=self._Running_Mode)
         __queue = __running_api.queue(qtype=qtype)
         return __queue
 
 
+    @deprecated(version="0.8", reason="Move the method up to super-class 'RunnableStrategy'")
     def add_task_to_queue(self, queue: Union[Process_Queue, Queue], task: Iterable) -> Union[Process_Queue, Queue]:
         for t in task:
             queue.put(t)
         return queue
 
 
+    @deprecated(version="0.8", reason="Move the method up to super-class 'RunnableStrategy'")
     def initialize_persistence(self):
         pre_init_params: Dict = {}
         if isinstance(self._persistence_strategy, SingleConnection):

@@ -1,9 +1,13 @@
 from pyocean.framework.features import BaseAPI, BaseQueueType, BaseGlobalizeAPI
+from pyocean.api import RunningMode, RunningStrategyAPI
+from pyocean.api.types import OceanQueue, OceanLock, OceanRLock, OceanSemaphore, OceanEvent, OceanCondition
 from pyocean.persistence.interface import OceanPersistence
+# from pyocean.persistence.database import SingleConnection, MultiConnections
+# from pyocean.persistence.file.saver import SingleFileSaver, MultiFileSaver
 from pyocean.exceptions import GlobalizeObjectError
 
 from abc import ABCMeta, abstractmethod
-from typing import List, Iterable, Callable, Union
+from typing import List, Dict, Iterable, Callable, Union
 from multiprocessing import Lock as ProcessLock, RLock as ProcessRLock, Semaphore as ProcessSemaphore, Queue as Process_Queue
 from multiprocessing.pool import ApplyResult
 from threading import Thread, Lock as ThreadLock, RLock as ThreadRLock, Semaphore as ThreadSemaphore
@@ -19,6 +23,53 @@ Running_Condition = None
 Running_Semaphore: Union[ProcessSemaphore, ThreadSemaphore] = None
 Running_Bounded_Semaphore: Union[ProcessSemaphore, ThreadSemaphore] = None
 Running_Queue: Union[Process_Queue, Queue]
+
+Database_Connection_Instance_Number = 1
+
+
+class InitializeUtils:
+
+    def __init__(self, running_mode: RunningMode, persistence: OceanPersistence):
+        self.__running_mode = running_mode
+        self.__persistence_strategy = persistence
+
+
+    def initialize_queue(self, tasks: Iterable, qtype: BaseQueueType):
+        __queue = self._init_tasks_queue(qtype=qtype)
+        __tasks_queue = self._add_task_to_queue(queue=__queue, task=tasks)
+        Globalize.queue(queue=__tasks_queue)
+
+
+    def _init_tasks_queue(self, qtype: BaseQueueType) -> Union[Process_Queue, Queue]:
+        __running_api = RunningStrategyAPI(mode=self.__running_mode)
+        __queue = __running_api.queue(qtype=qtype)
+        return __queue
+
+
+    def _add_task_to_queue(self, queue: Union[Process_Queue, Queue], task: Iterable) -> Union[Process_Queue, Queue]:
+        for t in task:
+            queue.put(t)
+        return queue
+
+
+    def initialize_persistence(self, **kwargs):
+        # pre_init_params: Dict = {}
+        # if isinstance(self.__persistence_strategy, SingleConnection):
+        #     pass
+        # elif isinstance(self.__persistence_strategy, MultiConnections):
+        #     __db_conn_instances_num = kwargs.get("db_connection_instances_number", Database_Connection_Instance_Number)
+        #     pre_init_params["db_connection_instances_number"] = __db_conn_instances_num
+        # elif isinstance(self.__persistence_strategy, SingleFileSaver):
+        #     pass
+        # elif isinstance(self.__persistence_strategy, MultiFileSaver):
+        #     pass
+        # else:
+        #     # Unexpected scenario
+        #     print("[DEBUG] issue ...")
+        #     raise Exception
+        print("[DEBUG] Pre-Init process start ....")
+        self.__persistence_strategy.initialize(mode=self.__running_mode, **kwargs)
+
 
 
 class RunnableStrategy(metaclass=ABCMeta):
@@ -75,6 +126,7 @@ class RunnableStrategy(metaclass=ABCMeta):
         pass
 
 
+    @deprecated(version="0.8", reason="Remove the method from abstracted method.")
     @abstractmethod
     def init_tasks_queue(self, qtype: BaseQueueType) -> Union[Process_Queue, Queue]:
         """
@@ -89,6 +141,7 @@ class RunnableStrategy(metaclass=ABCMeta):
         pass
 
 
+    @deprecated(version="0.8", reason="Remove the method from abstracted method.")
     @abstractmethod
     def add_task_to_queue(self, queue: Union[Process_Queue, Queue], task: Iterable) -> Union[Process_Queue, Queue]:
         """

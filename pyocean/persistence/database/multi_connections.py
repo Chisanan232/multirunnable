@@ -29,17 +29,17 @@ class MultiConnections(BaseConnection):
         :return:
         """
         # # Get value
-        db_connection_instances_number = cast(int, self.__get_value(param=kwargs.get("db_connection_instances_number", None)))
-        pool_name = kwargs.get("pool_name", self.__Connection_Pool_Name)
+        __db_connection_instances_number = cast(int, kwargs["db_conn_instances_num"])
+        __pool_name = kwargs.get("pool_name", self.__Connection_Pool_Name)
 
         __running_feature_api = RunningStrategyAPI(mode=mode)
         # # Semaphore part (Limitation)
-        __bounded_semaphore = __running_feature_api.bounded_semaphore(value=db_connection_instances_number)
+        __bounded_semaphore = __running_feature_api.bounded_semaphore(value=__db_connection_instances_number)
         RunningGlobalize.bounded_semaphore(bsmp=__bounded_semaphore)
 
         # # Database Connections Pool part
         # Initialize the Database Connection Instances Pool.
-        database_connections_pool = self.connect_database(pool_name=pool_name, pool_size=db_connection_instances_number)
+        database_connections_pool = self.connect_database(pool_name=__pool_name, pool_size=__db_connection_instances_number)
         # Globalize object to share between different multiple processes
         Globalize.connection_pool(pool=database_connections_pool)
 
