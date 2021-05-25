@@ -8,8 +8,7 @@ sys.path.append(package_pyocean_path)
 # pyocean package
 from pyocean.framework.factory import RunningFactory, RunningTask
 from pyocean.framework import BaseBuilder, RunnableStrategy
-from pyocean.concurrent.builder import ThreadsBuilder, GreenletBuilder, ConcurrentBuilder
-from pyocean.concurrent.factory import MultiThreadsFactory
+from pyocean.concurrent import ThreadsBuilder, MultiThreadsFactory
 from pyocean.persistence import OceanPersistence
 from pyocean.persistence.database import BaseDao
 from pyocean.persistence.database.configuration import DatabaseConfig, DatabaseDriver, HostEnvType
