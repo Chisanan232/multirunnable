@@ -1,20 +1,11 @@
-from pyocean.framework.strategy import InitializeUtils, RunnableStrategy, Resultable, Globalize as RunningGlobalize
-from pyocean.framework.features import BaseQueueType
-from pyocean.api import RunningMode, RunningStrategyAPI
+from pyocean.framework.strategy import InitializeUtils, RunnableStrategy
+from pyocean.api import RunningMode
 from pyocean.concurrent.features import MultiThreadingQueueType
-from pyocean.persistence.database import SingleConnection, MultiConnections
-from pyocean.persistence.database.multi_connections import Globalize as DatabaseGlobalize
-from pyocean.persistence.file.saver import BaseFileSaver, SingleFileSaver, MultiFileSaver
 
 from abc import ABCMeta, abstractmethod, ABC
 from typing import List, Tuple, Dict, Iterable, Union, Callable
 from multiprocessing.pool import ApplyResult
-from multiprocessing.queues import Queue as Process_Queue
-from queue import Queue
-from threading import Thread, Semaphore as ThreadingSemaphore
-from greenlet import greenlet
-
-from deprecated.sphinx import deprecated
+from threading import Thread
 
 
 
@@ -56,58 +47,3 @@ class MultiThreadingStrategy(ConcurrentStrategy):
                 self._Threads_List[threed_index].join()
         else:
             raise
-
-
-
-@deprecated(version="0.8", reason="Move the class into module 'coroutine'")
-class CoroutineStrategy(ConcurrentStrategy, Resultable):
-
-    __Greenlet_List: List[greenlet] = None
-    __Coroutine_Running_Result: List[object] = []
-
-    def init_multi_working(self, tasks: Iterable, *args, **kwargs) -> None:
-        # Initialize the Database Connection Instances Pool and Processes Semaphore.
-        database_connections_pool = self._persistence_strategy.connect_database(pool_name="stock_crawler",
-                                                                                pool_size=self.threads_number)
-        DatabaseGlobalize.connection_pool(pool=database_connections_pool)
-
-        threading_semaphore = ThreadingSemaphore(value=self.threads_number)
-        RunningGlobalize.semaphore(smp=threading_semaphore)
-
-        process_queue = self.init_tasks_queue()
-        tasks_queue = self.add_task_to_queue(queue=process_queue, task=tasks)
-        RunningGlobalize.tasks_queue(tasks_queue=tasks_queue)
-
-
-    def init_tasks_queue(self) -> Union[Process_Queue, Queue]:
-        return Queue()
-
-
-    def add_task_to_queue(self, queue: Union[Process_Queue, Queue], task: Iterable) -> Union[Process_Queue, Queue]:
-        for t in task:
-            queue.put(t)
-        return queue
-
-
-    def build_multi_workers(self, function: Callable, *args, **kwargs) -> List[Union[greenlet, Thread, ApplyResult]]:
-        self.__Greenlet_List = [greenlet(run=function) for _ in range(self.threads_number)]
-        return self.__Greenlet_List
-
-
-    def activate_worker(self, worker: Union[greenlet, Thread, ApplyResult]) -> None:
-        value = worker.switch()
-        self.__Coroutine_Running_Result.append(value)
-
-
-    def end_multi_working(self) -> None:
-        # if isinstance(self.__Greenlet_List, List) and isinstance(self.__Greenlet_List[0], greenlet):
-        #     for threed_index in range(self.threads_number):
-        #         self.__Greenlet_List[threed_index]
-        # else:
-        #     raise
-        pass
-
-
-    def get_multi_working_result(self) -> Iterable[object]:
-        return self.__Coroutine_Running_Result
-
