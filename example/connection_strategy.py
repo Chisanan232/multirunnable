@@ -1,13 +1,12 @@
 from pyocean.persistence.database import SingleConnection, MultiConnections
 from pyocean.persistence.database.configuration import BaseConfiguration
-from pyocean.logger import OceanLogger, LogLevel
+from pyocean.logger import OceanLogger
 
+from mysql.connector.connection import MySQLConnection
 from mysql.connector.pooling import MySQLConnectionPool, PooledMySQLConnection
 from mysql.connector.errors import PoolError
 from mysql.connector.cursor import MySQLCursor
 import mysql.connector
-from mysql.connector.connection import MySQLConnection
-from typing import Dict
 import time
 import os
 
