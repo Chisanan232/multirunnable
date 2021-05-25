@@ -1,28 +1,24 @@
 from pyocean.framework.features import BaseAPI, BaseQueueType, BaseGlobalizeAPI
 from pyocean.api import RunningMode, RunningStrategyAPI
-from pyocean.api.types import OceanQueue, OceanLock, OceanRLock, OceanSemaphore, OceanEvent, OceanCondition
+from pyocean.api.types import OceanQueue, OceanLock, OceanRLock, OceanSemaphore, OceanBoundedSemaphore, OceanEvent, OceanCondition
 from pyocean.persistence.interface import OceanPersistence
-# from pyocean.persistence.database import SingleConnection, MultiConnections
-# from pyocean.persistence.file.saver import SingleFileSaver, MultiFileSaver
 from pyocean.exceptions import GlobalizeObjectError
 
 from abc import ABCMeta, abstractmethod
 from typing import List, Dict, Iterable, Callable, Union
-from multiprocessing import Lock as ProcessLock, RLock as ProcessRLock, Semaphore as ProcessSemaphore, Queue as Process_Queue
 from multiprocessing.pool import ApplyResult
-from threading import Thread, Lock as ThreadLock, RLock as ThreadRLock, Semaphore as ThreadSemaphore
-from queue import Queue
+from threading import Thread
 
 from deprecated.sphinx import deprecated
 
 
-Running_Lock: Union[ProcessLock, ThreadLock] = None
-Running_RLock: Union[ProcessRLock, ThreadRLock] = None
-Running_Event = None
-Running_Condition = None
-Running_Semaphore: Union[ProcessSemaphore, ThreadSemaphore] = None
-Running_Bounded_Semaphore: Union[ProcessSemaphore, ThreadSemaphore] = None
-Running_Queue: Union[Process_Queue, Queue]
+Running_Lock: OceanLock = None
+Running_RLock: OceanRLock = None
+Running_Event: OceanEvent = None
+Running_Condition: OceanCondition = None
+Running_Semaphore: OceanSemaphore = None
+Running_Bounded_Semaphore: OceanBoundedSemaphore = None
+Running_Queue: OceanQueue
 
 Database_Connection_Instance_Number = 1
 
@@ -40,13 +36,13 @@ class InitializeUtils:
         Globalize.queue(queue=__tasks_queue)
 
 
-    def _init_tasks_queue(self, qtype: BaseQueueType) -> Union[Process_Queue, Queue]:
+    def _init_tasks_queue(self, qtype: BaseQueueType) -> OceanQueue:
         __running_api = RunningStrategyAPI(mode=self.__running_mode)
         __queue = __running_api.queue(qtype=qtype)
         return __queue
 
 
-    def _add_task_to_queue(self, queue: Union[Process_Queue, Queue], task: Iterable) -> Union[Process_Queue, Queue]:
+    def _add_task_to_queue(self, queue: OceanQueue, task: Iterable) -> OceanQueue:
         for t in task:
             queue.put(t)
         return queue
@@ -194,7 +190,7 @@ class Resultable(metaclass=ABCMeta):
 class Globalize(BaseGlobalizeAPI):
 
     @staticmethod
-    def lock(lock: Union[ThreadLock, ProcessLock]) -> None:
+    def lock(lock: OceanLock) -> None:
         """
         Description:
             Globalize Lock so that it could run between each different threads or processes.
@@ -210,7 +206,7 @@ class Globalize(BaseGlobalizeAPI):
 
 
     @staticmethod
-    def rlock(rlock: Union[ThreadLock, ProcessLock]) -> None:
+    def rlock(rlock: OceanRLock) -> None:
         """
         Description:
             Globalize Lock so that it could run between each different threads or processes.
@@ -226,7 +222,7 @@ class Globalize(BaseGlobalizeAPI):
 
 
     @staticmethod
-    def event(event) -> None:
+    def event(event: OceanEvent) -> None:
         if event is not None:
             global Running_Event
             Running_Event = event
@@ -235,7 +231,7 @@ class Globalize(BaseGlobalizeAPI):
 
 
     @staticmethod
-    def condition(condition) -> None:
+    def condition(condition: OceanCondition) -> None:
         if condition is not None:
             global Running_Condition
             Running_Condition = condition
@@ -244,7 +240,7 @@ class Globalize(BaseGlobalizeAPI):
 
 
     @staticmethod
-    def semaphore(smp: Union[ThreadSemaphore, ProcessSemaphore]) -> None:
+    def semaphore(smp: OceanSemaphore) -> None:
         """
         Description:
             Globalize Semaphore so that it could run between each different threads or processes.
@@ -260,7 +256,7 @@ class Globalize(BaseGlobalizeAPI):
 
 
     @staticmethod
-    def bounded_semaphore(bsmp: Union[ThreadSemaphore, ProcessSemaphore]) -> None:
+    def bounded_semaphore(bsmp: OceanBoundedSemaphore) -> None:
         """
         Description:
             Globalize Semaphore so that it could run between each different threads or processes.
@@ -276,28 +272,10 @@ class Globalize(BaseGlobalizeAPI):
 
 
     @staticmethod
-    def queue(queue) -> None:
+    def queue(queue: OceanQueue) -> None:
         if queue is not None:
             global Running_Queue
             Running_Queue = queue
-        else:
-            raise GlobalizeObjectError
-
-
-    @staticmethod
-    @deprecated(version="0.7", reason="Rename the method to 'queue'.")
-    def tasks_queue(tasks_queue: Union[ThreadSemaphore, ProcessSemaphore]) -> None:
-        """
-        Description:
-            Globalize Queue object which saving target tasks the thread or process, etc. target to do so that it could
-            run between each different threads or processes.
-        :param tasks_queue:
-        :return:
-        """
-
-        if tasks_queue is not None:
-            global Running_Queue
-            Running_Queue = tasks_queue
         else:
             raise GlobalizeObjectError
 

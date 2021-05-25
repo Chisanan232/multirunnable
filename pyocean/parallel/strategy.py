@@ -1,20 +1,17 @@
-from pyocean.framework.strategy import InitializeUtils, RunnableStrategy, Resultable, Globalize as RunningGlobalize
-from pyocean.framework.features import BaseQueueType
-from pyocean.api import RunningMode, RunningStrategyAPI
+from pyocean.framework.strategy import InitializeUtils, RunnableStrategy, Resultable
+from pyocean.api import RunningMode
 from pyocean.parallel.features import MultiProcessingQueueType
 from pyocean.persistence import OceanPersistence
-from pyocean.persistence.database import SingleConnection, MultiConnections
-from pyocean.persistence.file.saver import BaseFileSaver, SingleFileSaver, MultiFileSaver
 
 from abc import abstractmethod
-from multiprocessing import Pool, Manager, Lock, Semaphore, Queue as Process_Queue
+from multiprocessing import Pool, Manager
 from multiprocessing.managers import Namespace
 from multiprocessing.pool import Pool, AsyncResult, ApplyResult
 from threading import Thread
-from queue import Queue
 from typing import List, Tuple, Dict, Iterable, Union, Callable, cast
-from deprecated.sphinx import deprecated
 import re
+
+from deprecated.sphinx import deprecated
 
 
 
