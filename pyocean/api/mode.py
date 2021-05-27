@@ -3,8 +3,6 @@ from typing import Dict
 
 
 _Package: str = "pyocean"
-# _Parallel_Module: str = "..parallel.features"
-# _Concurrent_Module: str = "..concurrent.features"
 _Parallel_Module: str = ".parallel.features"
 _Concurrent_Module: str = ".concurrent.features"
 _Coroutine_Module: str = ".coroutine.features"
