@@ -8,7 +8,8 @@ sys.path.append(package_pyocean_path)
 # pyocean package
 from pyocean.framework.factory import RunningFactory, RunningTask
 from pyocean.framework import BaseBuilder, RunnableStrategy
-from pyocean.coroutine import GeventBuilder, GeventStrategy, GeventFactory
+from pyocean.coroutine import (GeventBuilder, GeventStrategy, GeventFactory,
+                               AsynchronousBuilder, AsyncStrategy, AsynchronousFactory)
 from pyocean.persistence import OceanPersistence
 from pyocean.persistence.database import BaseDao
 from pyocean.persistence.database.configuration import DatabaseConfig, DatabaseDriver, HostEnvType
@@ -34,7 +35,7 @@ class TestGeventBuilder(GeventBuilder):
 
 
 
-class TestCoroutineFactory(GeventFactory):
+class TestGreenletFactory(GeventFactory):
 
     def __init__(self, process_number: int, db_connection_number: int, logger):
         super().__init__(process_number, db_connection_number)
@@ -45,6 +46,46 @@ class TestCoroutineFactory(GeventFactory):
         test_builder = TestGeventBuilder(running_strategy=running_strategy,
                                          db_connection_number=self._db_connection_num,
                                          logger=self.__logger)
+        return test_builder
+
+
+    def persistence_strategy(self) -> OceanPersistence:
+        connection_strategy = MultiTestConnectionStrategy(
+            configuration=DatabaseConfig(database_driver=DatabaseDriver.MySQL, host_type=HostEnvType.Localhost),
+            logger=self.__logger)
+        # connection_strategy = SingleTestConnectionStrategy(
+        #     configuration=DatabaseConfig(database_driver=DatabaseDriver.MySQL, host_type=HostEnvType.Localhost),
+        #     logger=self.__logger)
+        return connection_strategy
+
+
+    def dao(self, connection_strategy: OceanPersistence) -> BaseDao:
+        # sql_query_obj = DatabaseSqlQuery(strategy=connection_strategy, logger=self.__logger)
+        sql_query_obj = TestDao(connection_strategy=connection_strategy, logger=self.__logger)
+        return sql_query_obj
+
+
+
+class TestAsyncBuilder(AsynchronousBuilder):
+
+    def __init__(self, running_strategy: RunnableStrategy, db_connection_number: int, logger: OceanLogger):
+        super().__init__(running_strategy=running_strategy)
+        self.__db_connection_number = db_connection_number
+        self.__logger = logger
+
+
+
+class TestAsyncFactory(AsynchronousFactory):
+
+    def __init__(self, process_number: int, db_connection_number: int, logger):
+        super().__init__(process_number, db_connection_number)
+        self.__logger = logger
+
+
+    def running_builder(self, running_strategy: RunnableStrategy) -> BaseBuilder:
+        test_builder = TestAsyncBuilder(running_strategy=running_strategy,
+                                        db_connection_number=self._db_connection_num,
+                                        logger=self.__logger)
         return test_builder
 
 
@@ -96,9 +137,14 @@ class TestCode:
         :return:
         """
         # Initial running factory
-        test_factory = TestCoroutineFactory(process_number=self.__process_num,
-                                            db_connection_number=self.__db_connection_number,
-                                            logger=self.__logger)
+        # # Greenlet
+        # test_factory = TestGreenletFactory(process_number=self.__process_num,
+        #                                    db_connection_number=self.__db_connection_number,
+        #                                    logger=self.__logger)
+        # # Asynchronous
+        test_factory = TestAsyncFactory(process_number=self.__process_num,
+                                        db_connection_number=self.__db_connection_number,
+                                        logger=self.__logger)
         # Initial running task object
         test_task = RunningTask(process_number=self.__process_num,
                                 db_connection_number=self.__db_connection_number,
