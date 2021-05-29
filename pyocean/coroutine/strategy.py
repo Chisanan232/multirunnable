@@ -1,54 +1,60 @@
-from pyocean.framework.strategy import InitializeUtils, RunnableStrategy, Resultable, Globalize as RunningGlobalize
+from pyocean.framework.strategy import InitializeUtils, RunnableStrategy, AsyncRunnableStrategy, Resultable
 from pyocean.api.mode import RunningMode
 from pyocean.coroutine.features import GeventQueueType, AsynchronousQueueType
 
-from abc import ABC
+from abc import ABCMeta, ABC, abstractmethod
 from typing import List, Tuple, Dict, Iterable, Union, Callable
 from multiprocessing.pool import ApplyResult
 from threading import Thread
 from greenlet import greenlet, getcurrent
+from asyncio.tasks import Task
 import asyncio
+import gevent
 
 
 
-class CoroutineStrategy(RunnableStrategy, ABC):
+class CoroutineStrategy(metaclass=ABCMeta):
 
-    _Running_Mode: RunningMode = None
-    _Gevent_List: List[greenlet] = None
-    _Gevent_Running_Result: Dict[str, Dict[str, Union[object, bool]]] = {}
+    pass
 
 
 
-class GeventStrategy(CoroutineStrategy, Resultable):
+class GreenletStrategy(CoroutineStrategy, RunnableStrategy, ABC):
 
     _Running_Mode: RunningMode = RunningMode.MultiGreenlet
+    _Gevent_List: List[greenlet] = None
+    _Gevent_Running_Result: List = []
 
+
+
+class GeventStrategy(GreenletStrategy, Resultable):
 
     def init_multi_working(self, tasks: Iterable, *args, **kwargs) -> None:
         __init_utils = InitializeUtils(running_mode=self._Running_Mode, persistence=self._persistence_strategy)
         # Initialize and assign task queue object.
         __init_utils.initialize_queue(tasks=tasks, qtype=GeventQueueType.Queue)
-        # Initialize parameter and object with different scenario.
+        # Initialize persistence object.
         __init_utils.initialize_persistence(db_conn_instances_num=self.db_connection_instances_number)
 
 
     def build_multi_workers(self, function: Callable, *args, **kwargs) -> List[Union[greenlet, Thread, ApplyResult]]:
-        self._Gevent_List = [greenlet(run=function) for _ in range(self.threads_number)]
+        # # General Greenlet
+        # self._Gevent_List = [greenlet(run=function) for _ in range(self.threads_number)]
+        # # Greenlet framework -- Gevent
+        self._Gevent_List = [gevent.spawn(function, *args, **kwargs) for _ in range(self.threads_number)]
         return self._Gevent_List
 
 
-    def activate_worker(self, worker: Union[greenlet, Thread, ApplyResult]) -> None:
-        value = worker.switch()
-        print(f"The greenlet running result: {value}")
-        self._Gevent_Running_Result[getcurrent()] = value
+    def activate_multi_workers(self, workers_list: List[Union[Thread, ApplyResult]]) -> None:
+        # # General Greenlet
+        # value = worker.switch()
+        # # Greenlet framework -- Gevent
+        greenlets_list = gevent.joinall(workers_list)
+        for one_greenlet in greenlets_list:
+            self._Gevent_Running_Result.append({getcurrent(): one_greenlet.value})
 
 
     def end_multi_working(self) -> None:
-        # if isinstance(self.__Greenlet_List, List) and isinstance(self.__Greenlet_List[0], greenlet):
-        #     for threed_index in range(self.threads_number):
-        #         self.__Greenlet_List[threed_index]
-        # else:
-        #     raise
         pass
 
 
@@ -57,43 +63,53 @@ class GeventStrategy(CoroutineStrategy, Resultable):
 
 
 
-class AsynchronousStrategy(CoroutineStrategy, Resultable):
+class AsyncStrategy(CoroutineStrategy, AsyncRunnableStrategy, ABC):
 
     _Running_Mode: RunningMode = RunningMode.Asynchronous
-    __Async_Loop = None
+    _Async_Event_Loop = None
+    _Async_Running_Result: List = []
 
-
-    def init_multi_working(self, tasks: Iterable, *args, **kwargs) -> None:
-        __init_utils = InitializeUtils(running_mode=self._Running_Mode, persistence=self._persistence_strategy)
-        # Initialize and assign task queue object.
-        __init_utils.initialize_queue(tasks=tasks, qtype=AsynchronousQueueType.Queue)
-        # Initialize parameter and object with different scenario.
-        __init_utils.initialize_persistence(db_conn_instances_num=self.db_connection_instances_number)
-
-        # Initialize Event Loop object
-        self.__Async_Loop = asyncio.get_event_loop()
-
-
-    def build_multi_workers(self, function: Callable, *args, **kwargs) -> List[Union[greenlet, Thread, ApplyResult]]:
-        self.__Async_Loop.run_until_complete(future=function(*args, **kwargs))
-        return self._Greenlet_List
-
-
-    def activate_worker(self, worker: Union[greenlet, Thread, ApplyResult]) -> None:
-        value = worker.switch()
-        print(f"The greenlet running result: {value}")
-        # self._Gevent_Running_Result.append(value)
-
-
-    def end_multi_working(self) -> None:
-        # if isinstance(self.__Greenlet_List, List) and isinstance(self.__Greenlet_List[0], greenlet):
-        #     for threed_index in range(self.threads_number):
-        #         self.__Greenlet_List[threed_index]
-        # else:
-        #     raise
+    def get_event_loop(self):
         pass
 
 
+
+class AsynchronousStrategy(AsyncStrategy, Resultable):
+
+    def get_event_loop(self):
+        self._Async_Event_Loop = asyncio.get_event_loop()
+        return self._Async_Event_Loop
+
+
+    async def init_multi_working(self, tasks: Iterable, *args, **kwargs) -> None:
+        __init_utils = InitializeUtils(running_mode=self._Running_Mode, persistence=self._persistence_strategy)
+        # # Initialize and assign task queue object.
+        await __init_utils.async_initialize_queue(tasks=tasks, qtype=AsynchronousQueueType.Queue)
+        # Initialize persistence object.
+        __init_utils.initialize_persistence(db_conn_instances_num=self.db_connection_instances_number)
+
+
+    def build_multi_workers(self, function: Callable, *args, **kwargs) -> List[Union[greenlet, Thread, ApplyResult, Task]]:
+        __async_tasks = [self._Async_Event_Loop.create_task(function(*args, **kwargs)) for _ in range(self.threads_number)]
+        return __async_tasks
+
+
+    async def activate_multi_workers(self, workers_list: List[Union[Thread, ApplyResult, Task]]) -> None:
+        finished, unfinished = await asyncio.wait(workers_list)
+        for finish in finished:
+            self._Async_Running_Result.append(
+                {"async_id": id,
+                 "event_loop": finish.get_loop(),
+                 "done_flag": finish.done(),
+                 "result_data": finish.result(),
+                 "exceptions": finish.exception()}
+            )
+
+
+    def end_multi_working(self) -> None:
+        self._Async_Event_Loop.close()
+
+
     def get_multi_working_result(self) -> Iterable[object]:
-        return self._Gevent_Running_Result
+        return self._Async_Running_Result
 
