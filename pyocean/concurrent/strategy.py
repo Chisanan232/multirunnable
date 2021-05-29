@@ -1,11 +1,11 @@
 from pyocean.framework.strategy import InitializeUtils, RunnableStrategy
 from pyocean.api import RunningMode
+from pyocean.api.types import OceanTasks
 from pyocean.concurrent.features import MultiThreadingQueueType
 from pyocean.concurrent.exceptions import ThreadsListIsEmptyError
 
 from abc import ABCMeta, abstractmethod, ABC
 from typing import List, Tuple, Dict, Iterable, Union, Callable
-from multiprocessing.pool import ApplyResult
 from threading import Thread
 
 
@@ -16,7 +16,7 @@ class ConcurrentStrategy(RunnableStrategy, ABC):
     _Threads_List: List[Thread] = []
     _Threads_Running_Result: Dict[str, Dict[str, Union[object, bool]]] = {}
 
-    def activate_multi_workers(self, workers_list: List[Union[Thread, ApplyResult]]) -> None:
+    def activate_multi_workers(self, workers_list: List[OceanTasks]) -> None:
         # # Method 1.
         for worker in workers_list:
             self.activate_worker(worker=worker)
@@ -27,7 +27,7 @@ class ConcurrentStrategy(RunnableStrategy, ABC):
 
 
     @abstractmethod
-    def activate_worker(self, worker: Union[Thread, ApplyResult]) -> None:
+    def activate_worker(self, worker: OceanTasks) -> None:
         """
         Description:
             Each one thread or process running task implementation.
@@ -48,12 +48,12 @@ class MultiThreadingStrategy(ConcurrentStrategy):
         __init_utils.initialize_persistence(db_conn_instances_num=self.db_connection_instances_number)
 
 
-    def build_multi_workers(self, function: Callable, args: Tuple = (), kwargs: Dict = {}) -> List[Union[Thread, ApplyResult]]:
+    def build_multi_workers(self, function: Callable, args: Tuple = (), kwargs: Dict = {}) -> List[OceanTasks]:
         self._Threads_List = [Thread(target=function, args=args, kwargs=kwargs) for _ in range(self.threads_number)]
         return self._Threads_List
 
 
-    def activate_worker(self, worker: Union[Thread, ApplyResult]) -> None:
+    def activate_worker(self, worker: OceanTasks) -> None:
         worker.start()
 
 

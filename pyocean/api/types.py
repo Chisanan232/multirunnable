@@ -41,12 +41,14 @@ asynchronous:
 """
 
 from queue import Queue
-from threading import (Lock as ThreadingLock,
+from threading import (Thread,
+                       Lock as ThreadingLock,
                        RLock as ThreadingRLock,
                        Semaphore as ThreadingSemaphore,
                        BoundedSemaphore as ThreadingBoundedSemaphore,
                        Event as ThreadingEvent,
                        Condition as ThreadingCondition)
+from multiprocessing.pool import AsyncResult, ApplyResult
 from multiprocessing import (Queue as MultiProcessingQueue,
                              Lock as MultiProcessingLock,
                              RLock as MultiProcessingRLock,
@@ -54,9 +56,11 @@ from multiprocessing import (Queue as MultiProcessingQueue,
                              Semaphore as MultiProcessingSemaphore,
                              Event as MultiProcessingEvent,
                              Condition as MultiProcessingCondition)
+from gevent.greenlet import Greenlet
 from gevent.queue import Queue as GeventQueue
 from gevent.lock import RLock as GeventRLock, Semaphore as GeventSemaphore, BoundedSemaphore as GeventBoundedSemaphore
 from gevent.event import Event as GeventEvent
+from asyncio.tasks import Task
 from asyncio.queues import Queue as AsyncIOQueue
 from asyncio.locks import (Lock as AsyncIOLock,
                            Semaphore as AsyncIOSemaphore,
@@ -66,6 +70,7 @@ from asyncio.locks import (Lock as AsyncIOLock,
 from typing import Union
 
 
+OceanTasks = Union[Thread, AsyncResult, ApplyResult, Greenlet, Task]
 OceanQueue = Union[Queue, MultiProcessingQueue, GeventQueue, AsyncIOQueue]
 OceanLock = Union[ThreadingLock, MultiProcessingLock, AsyncIOLock]
 OceanRLock = Union[ThreadingRLock, MultiProcessingRLock, GeventRLock]

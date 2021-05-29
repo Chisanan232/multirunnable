@@ -1,5 +1,6 @@
 from pyocean.framework.strategy import InitializeUtils, RunnableStrategy, Resultable
 from pyocean.api import RunningMode
+from pyocean.api.types import OceanTasks
 from pyocean.parallel.features import MultiProcessingQueueType
 from pyocean.persistence import OceanPersistence
 
@@ -7,7 +8,6 @@ from abc import abstractmethod
 from multiprocessing import Pool, Manager
 from multiprocessing.managers import Namespace
 from multiprocessing.pool import Pool, AsyncResult, ApplyResult
-from threading import Thread
 from typing import List, Tuple, Dict, Iterable, Union, Callable, cast
 import re
 
@@ -44,7 +44,7 @@ class ParallelStrategy(RunnableStrategy):
         self._Namespace_Object = self._Manager.Namespace()
 
 
-    def activate_multi_workers(self, workers_list: List[Union[Thread, ApplyResult]]) -> None:
+    def activate_multi_workers(self, workers_list: List[OceanTasks]) -> None:
         # # Method 1.
         for worker in workers_list:
             self.activate_worker(worker=worker)
@@ -55,7 +55,7 @@ class ParallelStrategy(RunnableStrategy):
 
 
     @abstractmethod
-    def activate_worker(self, worker: Union[Thread, ApplyResult]) -> None:
+    def activate_worker(self, worker: OceanTasks) -> None:
         """
         Description:
             Each one thread or process running task implementation.
@@ -143,7 +143,7 @@ class MultiProcessingStrategy(ParallelStrategy, Resultable):
                             args: Tuple = (),
                             kwargs: Dict = {},
                             callback: Callable = None,
-                            error_callback: Callable = None) -> List[Union[Thread, ApplyResult]]:
+                            error_callback: Callable = None) -> List[OceanTasks]:
         return [self._Processors_Pool.apply_async(func=function,
                                                   args=args,
                                                   kwds=kwargs,
@@ -155,7 +155,7 @@ class MultiProcessingStrategy(ParallelStrategy, Resultable):
         #             for _ in range(self.threads_number)]
 
 
-    def activate_worker(self, worker: Union[Thread, ApplyResult]) -> None:
+    def activate_worker(self, worker: OceanTasks) -> None:
         __process_running_result = worker.get()
         __process_run_successful = worker.successful()
 

@@ -1,12 +1,12 @@
 from pyocean.framework.strategy import InitializeUtils, RunnableStrategy, AsyncRunnableStrategy, Resultable
 from pyocean.api.mode import RunningMode
+from pyocean.api.types import OceanTasks
 from pyocean.coroutine.features import GeventQueueType, AsynchronousQueueType
 
 from abc import ABCMeta, ABC, abstractmethod
-from typing import List, Tuple, Dict, Iterable, Union, Callable
-from multiprocessing.pool import ApplyResult
-from threading import Thread
+from typing import List, Iterable, Callable
 from greenlet import greenlet, getcurrent
+from gevent.greenlet import Greenlet
 from asyncio.tasks import Task
 import asyncio
 import gevent
@@ -22,7 +22,7 @@ class CoroutineStrategy(metaclass=ABCMeta):
 class GreenletStrategy(CoroutineStrategy, RunnableStrategy, ABC):
 
     _Running_Mode: RunningMode = RunningMode.MultiGreenlet
-    _Gevent_List: List[greenlet] = None
+    _Gevent_List: List[Greenlet] = None
     _Gevent_Running_Result: List = []
 
 
@@ -37,7 +37,7 @@ class GeventStrategy(GreenletStrategy, Resultable):
         __init_utils.initialize_persistence(db_conn_instances_num=self.db_connection_instances_number)
 
 
-    def build_multi_workers(self, function: Callable, *args, **kwargs) -> List[Union[greenlet, Thread, ApplyResult]]:
+    def build_multi_workers(self, function: Callable, *args, **kwargs) -> List[OceanTasks]:
         # # General Greenlet
         # self._Gevent_List = [greenlet(run=function) for _ in range(self.threads_number)]
         # # Greenlet framework -- Gevent
@@ -45,7 +45,7 @@ class GeventStrategy(GreenletStrategy, Resultable):
         return self._Gevent_List
 
 
-    def activate_multi_workers(self, workers_list: List[Union[Thread, ApplyResult]]) -> None:
+    def activate_multi_workers(self, workers_list: List[OceanTasks]) -> None:
         # # General Greenlet
         # value = worker.switch()
         # # Greenlet framework -- Gevent
@@ -67,6 +67,7 @@ class AsyncStrategy(CoroutineStrategy, AsyncRunnableStrategy, ABC):
 
     _Running_Mode: RunningMode = RunningMode.Asynchronous
     _Async_Event_Loop = None
+    _Async_Task_List: List[Task] = None
     _Async_Running_Result: List = []
 
     def get_event_loop(self):
@@ -89,12 +90,12 @@ class AsynchronousStrategy(AsyncStrategy, Resultable):
         __init_utils.initialize_persistence(db_conn_instances_num=self.db_connection_instances_number)
 
 
-    def build_multi_workers(self, function: Callable, *args, **kwargs) -> List[Union[greenlet, Thread, ApplyResult, Task]]:
-        __async_tasks = [self._Async_Event_Loop.create_task(function(*args, **kwargs)) for _ in range(self.threads_number)]
-        return __async_tasks
+    def build_multi_workers(self, function: Callable, *args, **kwargs) -> List[OceanTasks]:
+        self._Async_Task_List = [self._Async_Event_Loop.create_task(function(*args, **kwargs)) for _ in range(self.threads_number)]
+        return self._Async_Task_List
 
 
-    async def activate_multi_workers(self, workers_list: List[Union[Thread, ApplyResult, Task]]) -> None:
+    async def activate_multi_workers(self, workers_list: List[OceanTasks]) -> None:
         finished, unfinished = await asyncio.wait(workers_list)
         for finish in finished:
             self._Async_Running_Result.append(

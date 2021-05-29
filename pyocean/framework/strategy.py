@@ -1,13 +1,15 @@
-from pyocean.framework.features import BaseAPI, BaseQueueType, BaseGlobalizeAPI
+from pyocean.framework.features import BaseQueueType, BaseGlobalizeAPI
 from pyocean.api import RunningMode, RunningStrategyAPI
-from pyocean.api.types import OceanQueue, OceanLock, OceanRLock, OceanSemaphore, OceanBoundedSemaphore, OceanEvent, OceanCondition
+from pyocean.api.types import (OceanTasks,
+                               OceanQueue,
+                               OceanLock, OceanRLock,
+                               OceanSemaphore, OceanBoundedSemaphore,
+                               OceanEvent, OceanCondition)
 from pyocean.persistence.interface import OceanPersistence
 from pyocean.exceptions import GlobalizeObjectError
 
 from abc import ABCMeta, ABC, abstractmethod
-from typing import List, Dict, Iterable, Callable, Union
-from multiprocessing.pool import ApplyResult
-from threading import Thread
+from typing import List, Iterable, Callable
 
 
 Running_Lock: OceanLock = None
@@ -34,7 +36,7 @@ class InitializeUtils:
         self.__persistence_strategy = persistence
 
 
-    def initialize_queue(self, tasks: Iterable, qtype: BaseQueueType):
+    def initialize_queue(self, tasks: Iterable, qtype: BaseQueueType) -> None:
         """
         Description:
             Initialize Queue object with the queue type. It should use the queue type which be annotated by each running
@@ -53,7 +55,7 @@ class InitializeUtils:
         Globalize.queue(queue=__tasks_queue)
 
 
-    async def async_initialize_queue(self, tasks: Iterable, qtype: BaseQueueType):
+    async def async_initialize_queue(self, tasks: Iterable, qtype: BaseQueueType) -> None:
         """
         Description:
             Asynchronously initialize Queue object with the queue type. Here Queue type only for Asynchronous strategy queue.
@@ -96,7 +98,7 @@ class InitializeUtils:
         return queue
 
 
-    async def _async_add_task_to_queue(self, queue: OceanQueue, task: Iterable):
+    async def _async_add_task_to_queue(self, queue: OceanQueue, task: Iterable) -> OceanQueue:
         """
         Description:
             Adding target tasks into queue object asynchronously.
@@ -109,28 +111,13 @@ class InitializeUtils:
         return queue
 
 
-    def initialize_persistence(self, **kwargs):
+    def initialize_persistence(self, **kwargs) -> None:
         """
         Description:
             Initialize persistence strategy needed conditions.
         :param kwargs:
         :return:
         """
-        # pre_init_params: Dict = {}
-        # if isinstance(self.__persistence_strategy, SingleConnection):
-        #     pass
-        # elif isinstance(self.__persistence_strategy, MultiConnections):
-        #     __db_conn_instances_num = kwargs.get("db_connection_instances_number", Database_Connection_Instance_Number)
-        #     pre_init_params["db_connection_instances_number"] = __db_conn_instances_num
-        # elif isinstance(self.__persistence_strategy, SingleFileSaver):
-        #     pass
-        # elif isinstance(self.__persistence_strategy, MultiFileSaver):
-        #     pass
-        # else:
-        #     # Unexpected scenario
-        #     print("[DEBUG] issue ...")
-        #     raise Exception
-        print("[DEBUG] Pre-Init process start ....")
         self.__persistence_strategy.initialize(mode=self.__running_mode, **kwargs)
 
 
@@ -190,7 +177,7 @@ class RunnableStrategy(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def build_multi_workers(self, function: Callable, *args, **kwargs) -> List[Union[Thread, ApplyResult]]:
+    def build_multi_workers(self, function: Callable, *args, **kwargs) -> List[OceanTasks]:
         """
         Description:
             Assign tasks into each different threads or processes.
@@ -203,7 +190,7 @@ class RunnableStrategy(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def activate_multi_workers(self, workers_list: List[Union[Thread, ApplyResult]]) -> None:
+    def activate_multi_workers(self, workers_list: List[OceanTasks]) -> None:
         """
         Description:
             Activate multiple threads or processes to run target task(s).
@@ -231,7 +218,7 @@ class AsyncRunnableStrategy(RunnableStrategy, ABC):
 
 
     @abstractmethod
-    async def build_multi_workers(self, function: Callable, *args, **kwargs) -> List[Union[Thread, ApplyResult]]:
+    async def build_multi_workers(self, function: Callable, *args, **kwargs) -> List[OceanTasks]:
         """
         Description:
             Assign tasks into each different threads or processes.
@@ -244,7 +231,7 @@ class AsyncRunnableStrategy(RunnableStrategy, ABC):
 
 
     @abstractmethod
-    async def activate_multi_workers(self, workers_list: List[Union[Thread, ApplyResult]]) -> None:
+    async def activate_multi_workers(self, workers_list: List[OceanTasks]) -> None:
         """
         Description:
             Activate multiple threads or processes to run target task(s).
