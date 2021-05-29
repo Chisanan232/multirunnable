@@ -8,7 +8,7 @@ sys.path.append(package_pyocean_path)
 
 # pyocean package
 from pyocean.framework.factory import RunningFactory, RunningTask
-from pyocean.framework import BaseBuilder, RunnableStrategy
+from pyocean.framework import BaseRunnableBuilder, RunnableStrategy
 from pyocean.parallel import ParallelBuilder, ParallelStrategy, ParallelFactory
 from pyocean.persistence import OceanPersistence
 from pyocean.persistence.database import BaseDao
@@ -42,7 +42,7 @@ class TestParallelFactory(ParallelFactory):
         self.__logger = logger
 
 
-    def running_builder(self, running_strategy: ParallelStrategy) -> BaseBuilder:
+    def running_builder(self, running_strategy: ParallelStrategy) -> BaseRunnableBuilder:
         test_builder = TestParallelBuilder(running_strategy=running_strategy,
                                            db_connection_number=self._db_connection_num,
                                            logger=self.__logger)

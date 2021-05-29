@@ -7,7 +7,7 @@ sys.path.append(package_pyocean_path)
 
 # pyocean package
 from pyocean.framework.factory import RunningFactory, RunningTask
-from pyocean.framework import BaseBuilder, RunnableStrategy
+from pyocean.framework import BaseRunnableBuilder, RunnableStrategy
 from pyocean.concurrent import ThreadsBuilder, MultiThreadsFactory
 from pyocean.persistence import OceanPersistence
 from pyocean.persistence.database import BaseDao
@@ -43,7 +43,7 @@ class TestMultiThreadFactory(MultiThreadsFactory):
         self.__logger = logger
 
 
-    def running_builder(self, running_strategy: RunnableStrategy) -> BaseBuilder:
+    def running_builder(self, running_strategy: RunnableStrategy) -> BaseRunnableBuilder:
         test_builder = TestThreadBuilder(running_strategy=running_strategy,
                                          db_connection_number=self._db_connection_num,
                                          logger=self.__logger)
