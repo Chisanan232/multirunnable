@@ -1,4 +1,4 @@
-from pyocean.framework import BaseBuilder, RunnableBuilder, Resultable
+from pyocean.framework import BaseRunnableBuilder, Resultable
 from pyocean.parallel.strategy import ParallelStrategy
 
 from abc import ABCMeta, abstractmethod
@@ -14,7 +14,7 @@ class MultiProcessesCommonObject(metaclass=ABCMeta):
 
 
 
-class ParallelBuilder(BaseBuilder):
+class ParallelBuilder(BaseRunnableBuilder):
 
     _Manager: Manager = None
     _Namespace_Object: Namespace = None
