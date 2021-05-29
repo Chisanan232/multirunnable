@@ -7,7 +7,7 @@ sys.path.append(package_pyocean_path)
 
 # pyocean package
 from pyocean.framework.factory import RunningFactory, RunningTask
-from pyocean.framework import BaseBuilder, RunnableStrategy
+from pyocean.framework import BaseRunnableBuilder, RunnableStrategy
 from pyocean.coroutine import (GeventBuilder, GeventStrategy, GeventFactory,
                                AsynchronousBuilder, AsyncStrategy, AsynchronousFactory)
 from pyocean.persistence import OceanPersistence
@@ -17,7 +17,7 @@ from pyocean.logger import LogLevel, LoggingConfig, OceanLogger, KafkaHandler
 
 # code component
 from connection_strategy import SingleTestConnectionStrategy, MultiTestConnectionStrategy
-from dao import TestDao
+from dao import TestDao, AsyncTestDao
 from sql_query import SqlQuery
 
 from multiprocessing import cpu_count
@@ -42,7 +42,7 @@ class TestGreenletFactory(GeventFactory):
         self.__logger = logger
 
 
-    def running_builder(self, running_strategy: RunnableStrategy) -> BaseBuilder:
+    def running_builder(self, running_strategy: RunnableStrategy) -> BaseRunnableBuilder:
         test_builder = TestGeventBuilder(running_strategy=running_strategy,
                                          db_connection_number=self._db_connection_num,
                                          logger=self.__logger)
@@ -82,7 +82,7 @@ class TestAsyncFactory(AsynchronousFactory):
         self.__logger = logger
 
 
-    def running_builder(self, running_strategy: RunnableStrategy) -> BaseBuilder:
+    def running_builder(self, running_strategy: RunnableStrategy) -> BaseRunnableBuilder:
         test_builder = TestAsyncBuilder(running_strategy=running_strategy,
                                         db_connection_number=self._db_connection_num,
                                         logger=self.__logger)
@@ -100,8 +100,7 @@ class TestAsyncFactory(AsynchronousFactory):
 
 
     def dao(self, connection_strategy: OceanPersistence) -> BaseDao:
-        # sql_query_obj = DatabaseSqlQuery(strategy=connection_strategy, logger=self.__logger)
-        sql_query_obj = TestDao(connection_strategy=connection_strategy, logger=self.__logger)
+        sql_query_obj = AsyncTestDao(connection_strategy=connection_strategy, logger=self.__logger)
         return sql_query_obj
 
 
