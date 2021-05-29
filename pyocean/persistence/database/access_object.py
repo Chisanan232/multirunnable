@@ -1,16 +1,16 @@
-from pyocean.framework.builder import RunnableBuilder
+from pyocean.framework.builder import MultiRunnableOperator
 from pyocean.persistence.interface import OceanPersistence
 from pyocean.persistence.database.connection import BaseConnection
 
 from abc import ABCMeta, abstractmethod
-from typing import List, Tuple, Dict, Iterable, Union, Callable
+from typing import Dict, Union
 import os
 
 
 
 class BaseDao(metaclass=ABCMeta):
 
-    _Connection_Strategy: OceanPersistence = None
+    _Connection_Strategy: BaseConnection = None
 
     def __init__(self, connection_strategy: OceanPersistence):
         self._Connection_Strategy = connection_strategy
@@ -52,7 +52,7 @@ class BaseDao(metaclass=ABCMeta):
             Get one task from Queue.
         :return:
         """
-        return RunnableBuilder.get_one_value_of_queue()
+        return MultiRunnableOperator.get_one_value_of_queue()
 
 
     def get_all_sql_tasks(self) -> object:
@@ -61,7 +61,7 @@ class BaseDao(metaclass=ABCMeta):
             Get all tasks (Queue).
         :return:
         """
-        return RunnableBuilder.get_queue()
+        return MultiRunnableOperator.get_queue()
 
 
     def running_sql_query_process(self, sql_query: str) -> Dict[str, object]:
