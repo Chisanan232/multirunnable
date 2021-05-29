@@ -44,6 +44,27 @@ class ParallelStrategy(RunnableStrategy):
         self._Namespace_Object = self._Manager.Namespace()
 
 
+    def activate_multi_workers(self, workers_list: List[Union[Thread, ApplyResult]]) -> None:
+        # # Method 1.
+        for worker in workers_list:
+            self.activate_worker(worker=worker)
+
+        # # Method 2.
+        # with workers_list as worker:
+        #     self.activate_worker(worker=worker)
+
+
+    @abstractmethod
+    def activate_worker(self, worker: Union[Thread, ApplyResult]) -> None:
+        """
+        Description:
+            Each one thread or process running task implementation.
+        :param worker:
+        :return:
+        """
+        pass
+
+
     def __namespacing_instance(self, instance: object) -> object:
         setattr(self._Namespace_Object, repr(instance), instance)
         return getattr(self._Namespace_Object, repr(instance))

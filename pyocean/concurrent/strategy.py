@@ -16,6 +16,26 @@ class ConcurrentStrategy(RunnableStrategy, ABC):
     _Threads_List: List[Thread] = []
     _Threads_Running_Result: Dict[str, Dict[str, Union[object, bool]]] = {}
 
+    def activate_multi_workers(self, workers_list: List[Union[Thread, ApplyResult]]) -> None:
+        # # Method 1.
+        for worker in workers_list:
+            self.activate_worker(worker=worker)
+
+        # # Method 2.
+        # with workers_list as worker:
+        #     self.activate_worker(worker=worker)
+
+
+    @abstractmethod
+    def activate_worker(self, worker: Union[Thread, ApplyResult]) -> None:
+        """
+        Description:
+            Each one thread or process running task implementation.
+        :param worker:
+        :return:
+        """
+        pass
+
 
 
 class MultiThreadingStrategy(ConcurrentStrategy):
