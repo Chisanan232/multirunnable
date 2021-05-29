@@ -1,4 +1,4 @@
-from pyocean.framework import BaseBuilder, RunnableStrategy
+from pyocean.framework import BaseRunnableBuilder, RunnableStrategy
 from pyocean.persistence.interface import OceanPersistence
 from pyocean.persistence.database.access_object import BaseDao
 
@@ -14,7 +14,7 @@ class RunningFactory(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def running_builder(self, running_strategy: RunnableStrategy) -> BaseBuilder:
+    def running_builder(self, running_strategy: RunnableStrategy) -> BaseRunnableBuilder:
         """
         Description:
             Generate BaseBuilder type instance.
@@ -63,12 +63,12 @@ class RunningTask:
         self._process_num: int = process_number
         self._db_connection_number: int = db_connection_number
         self._factory: RunningFactory = factory
-        self._running_builder: BaseBuilder = None
+        self._running_builder: BaseRunnableBuilder = None
         self._running_strategy: RunnableStrategy = None
         self._persistence_strategy: OceanPersistence = None
 
 
-    def running_builder(self) -> BaseBuilder:
+    def running_builder(self) -> BaseRunnableBuilder:
         """
         Description:
             Return running builder object.
@@ -95,7 +95,7 @@ class RunningTask:
         return self._persistence_strategy
 
 
-    def generate(self) -> BaseBuilder:
+    def generate(self) -> BaseRunnableBuilder:
         """
         Description:
             generate a running task.
