@@ -1,20 +1,53 @@
 from pyocean.framework.strategy import RunnableStrategy
+from pyocean.api.types import OceanQueue
 from pyocean.exceptions import GlobalObjectIsNoneError
 
 from abc import ABCMeta, abstractmethod
 from typing import Tuple, Dict, Callable, Iterable, Union
-from multiprocessing import Manager, Queue as ProcessQueue
-from queue import Queue
 
 
 
-class RunnableBuilder:
+class RunnableOperator(metaclass=ABCMeta):
+
+    @classmethod
+    def _checking_init(cls, target_obj: object) -> bool:
+        if target_obj is None:
+            raise GlobalObjectIsNoneError
+        return True
+
+
+    @classmethod
+    @abstractmethod
+    def run_with_lock(cls, function: Callable, arg: Tuple = (), kwarg: Dict = {}) -> object:
+        pass
+
+
+    @classmethod
+    @abstractmethod
+    def run_with_semaphore(cls, function: Callable, arg: Tuple = (), kwarg: Dict = {}) -> object:
+        pass
+
+
+    @classmethod
+    @abstractmethod
+    def run_with_bounded_semaphore(cls, function: Callable, arg: Tuple = (), kwarg: Dict = {}) -> object:
+        pass
+
+
+    @classmethod
+    @abstractmethod
+    def get_one_value_of_queue(cls) -> object:
+        pass
+
+
+
+class MultiRunnableOperator(RunnableOperator):
 
     @classmethod
     def run_with_lock(cls, function: Callable, arg: Tuple = (), kwarg: Dict = {}) -> object:
         from .strategy import Running_Lock
 
-        cls.__checking_init(target_obj=Running_Lock)
+        cls._checking_init(target_obj=Running_Lock)
         with Running_Lock:
             value = function(*arg, **kwarg)
         return value
@@ -24,7 +57,7 @@ class RunnableBuilder:
     def run_with_semaphore(cls, function: Callable, arg: Tuple = (), kwarg: Dict = {}) -> object:
         from .strategy import Running_Semaphore
 
-        cls.__checking_init(target_obj=Running_Semaphore)
+        cls._checking_init(target_obj=Running_Semaphore)
         with Running_Semaphore:
             value = function(*arg, **kwarg)
         return value
@@ -34,17 +67,17 @@ class RunnableBuilder:
     def run_with_bounded_semaphore(cls, function: Callable, arg: Tuple = (), kwarg: Dict = {}) -> object:
         from .strategy import Running_Bounded_Semaphore
 
-        cls.__checking_init(target_obj=Running_Bounded_Semaphore)
+        cls._checking_init(target_obj=Running_Bounded_Semaphore)
         with Running_Bounded_Semaphore:
             value = function(*arg, **kwarg)
         return value
 
 
     @classmethod
-    def get_queue(cls) -> Union[Queue, ProcessQueue]:
+    def get_queue(cls) -> OceanQueue:
         from .strategy import Running_Queue
 
-        cls.__checking_init(target_obj=Running_Queue)
+        cls._checking_init(target_obj=Running_Queue)
         return Running_Queue
 
 
@@ -52,19 +85,61 @@ class RunnableBuilder:
     def get_one_value_of_queue(cls) -> object:
         from .strategy import Running_Queue
 
-        cls.__checking_init(target_obj=Running_Queue)
+        cls._checking_init(target_obj=Running_Queue)
         return Running_Queue.get()
 
 
+
+class AsyncRunnableOperator(RunnableOperator):
+
     @classmethod
-    def __checking_init(cls, target_obj: object) -> bool:
-        if target_obj is None:
-            raise GlobalObjectIsNoneError
-        return True
+    async def run_with_lock(cls, function: Callable, arg: Tuple = (), kwarg: Dict = {}) -> object:
+        from .strategy import Running_Lock
+
+        cls._checking_init(target_obj=Running_Lock)
+        async with Running_Lock:
+            value = await function(*arg, **kwarg)
+        return value
+
+
+    @classmethod
+    async def run_with_semaphore(cls, function: Callable, arg: Tuple = (), kwarg: Dict = {}) -> object:
+        from .strategy import Running_Semaphore
+
+        cls._checking_init(target_obj=Running_Semaphore)
+        async with Running_Semaphore:
+            value = await function(*arg, **kwarg)
+        return value
+
+
+    @classmethod
+    async def run_with_bounded_semaphore(cls, function: Callable, arg: Tuple = (), kwarg: Dict = {}) -> object:
+        from .strategy import Running_Bounded_Semaphore
+
+        cls._checking_init(target_obj=Running_Bounded_Semaphore)
+        async with Running_Bounded_Semaphore:
+            value = await function(*arg, **kwarg)
+        return value
+
+
+    @classmethod
+    def get_queue(cls) -> OceanQueue:
+        from .strategy import Running_Queue
+
+        cls._checking_init(target_obj=Running_Queue)
+        return Running_Queue
+
+
+    @classmethod
+    async def get_one_value_of_queue(cls) -> object:
+        from .strategy import Running_Queue
+
+        cls._checking_init(target_obj=Running_Queue)
+        return await Running_Queue.get()
 
 
 
-class BaseBuilder(metaclass=ABCMeta):
+class BaseRunnableBuilder(metaclass=ABCMeta):
 
     _Running_Strategy: RunnableStrategy = None
 
@@ -74,26 +149,6 @@ class BaseBuilder(metaclass=ABCMeta):
         else:
             raise TypeError("The strategy object should be 'RunnableStrategy' type. "
                             "Please import pyocean.framework.RunnableStrategy to build one.")
-
-
-    def run_with_lock(self, function: Callable, arg: Tuple = (), kwarg: Dict = {}) -> object:
-        return RunnableBuilder.run_with_lock(function=function, arg=arg, kwarg=kwarg)
-
-
-    def run_with_semaphore(self, function: Callable, arg: Tuple = (), kwarg: Dict = {}) -> object:
-        return RunnableBuilder.run_with_semaphore(function=function, arg=arg, kwarg=kwarg)
-
-
-    def run_with_bounded_semaphore(self, function: Callable, arg: Tuple = (), kwarg: Dict = {}) -> object:
-        return RunnableBuilder.run_with_bounded_semaphore(function=function, arg=arg, kwarg=kwarg)
-
-
-    def get_queue(self) -> Union[Queue, ProcessQueue]:
-        return RunnableBuilder.get_queue()
-
-
-    def get_one_value_of_queue(self) -> object:
-        return RunnableBuilder.get_one_value_of_queue()
 
 
     @abstractmethod
