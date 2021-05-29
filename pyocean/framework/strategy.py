@@ -4,12 +4,10 @@ from pyocean.api.types import OceanQueue, OceanLock, OceanRLock, OceanSemaphore,
 from pyocean.persistence.interface import OceanPersistence
 from pyocean.exceptions import GlobalizeObjectError
 
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta, ABC, abstractmethod
 from typing import List, Dict, Iterable, Callable, Union
 from multiprocessing.pool import ApplyResult
 from threading import Thread
-
-from deprecated.sphinx import deprecated
 
 
 Running_Lock: OceanLock = None
@@ -38,7 +36,8 @@ class InitializeUtils:
 
     def initialize_queue(self, tasks: Iterable, qtype: BaseQueueType):
         """
-        Initialize Queue object with the queue type. It should use the queue type which be annotated by each running
+        Description:
+            Initialize Queue object with the queue type. It should use the queue type which be annotated by each running
         strategy.
         Example:
             from pyocean.concurrent.feature import MultiThreadingQueueType
@@ -54,9 +53,28 @@ class InitializeUtils:
         Globalize.queue(queue=__tasks_queue)
 
 
+    async def async_initialize_queue(self, tasks: Iterable, qtype: BaseQueueType):
+        """
+        Description:
+            Asynchronously initialize Queue object with the queue type. Here Queue type only for Asynchronous strategy queue.
+        Example:
+            from pyocean.coroutine.feature import AsynchronousQueueType
+
+            queue = AsynchronousQueueType.Queue
+            queue.put("This is your async task content.")
+        :param tasks:
+        :param qtype:
+        :return:
+        """
+        __queue = self._init_tasks_queue(qtype=qtype)
+        __tasks_queue = await self._async_add_task_to_queue(queue=__queue, task=tasks)
+        Globalize.queue(queue=__tasks_queue)
+
+
     def _init_tasks_queue(self, qtype: BaseQueueType) -> OceanQueue:
         """
-        Annotating Queue object with queue type.
+        Description:
+            Annotating Queue object with queue type.
         :param qtype:
         :return:
         """
@@ -67,7 +85,8 @@ class InitializeUtils:
 
     def _add_task_to_queue(self, queue: OceanQueue, task: Iterable) -> OceanQueue:
         """
-        Adding target tasks into queue object.
+        Description:
+            Adding target tasks into queue object.
         :param queue:
         :param task:
         :return:
@@ -77,9 +96,23 @@ class InitializeUtils:
         return queue
 
 
+    async def _async_add_task_to_queue(self, queue: OceanQueue, task: Iterable):
+        """
+        Description:
+            Adding target tasks into queue object asynchronously.
+        :param queue:
+        :param task:
+        :return:
+        """
+        for t in task:
+            await queue.put(t)
+        return queue
+
+
     def initialize_persistence(self, **kwargs):
         """
-        Initialize persistence strategy needed conditions.
+        Description:
+            Initialize persistence strategy needed conditions.
         :param kwargs:
         :return:
         """
@@ -169,6 +202,7 @@ class RunnableStrategy(metaclass=ABCMeta):
         pass
 
 
+    @abstractmethod
     def activate_multi_workers(self, workers_list: List[Union[Thread, ApplyResult]]) -> None:
         """
         Description:
@@ -176,29 +210,52 @@ class RunnableStrategy(metaclass=ABCMeta):
         :param workers_list:
         :return:
         """
-
-        # # Method 1.
-        for worker in workers_list:
-            self.activate_worker(worker=worker)
-
-        # # Method 2.
-        # with workers_list as worker:
-        #     self.activate_worker(worker=worker)
+        pass
 
 
     @abstractmethod
-    def activate_worker(self, worker: Union[Thread, ApplyResult]) -> None:
+    def end_multi_working(self) -> None:
         """
         Description:
-            Each one thread or process running task implementation.
-        :param worker:
+            The final in procedure which the progeram should be run.
+        :return:
+        """
+        pass
+
+
+
+class AsyncRunnableStrategy(RunnableStrategy, ABC):
+
+    async def init_multi_working(self, tasks: Iterable, *args, **kwargs) -> None:
+        pass
+
+
+    @abstractmethod
+    async def build_multi_workers(self, function: Callable, *args, **kwargs) -> List[Union[Thread, ApplyResult]]:
+        """
+        Description:
+            Assign tasks into each different threads or processes.
+        :param function:
+        :param args:
+        :param kwargs:
         :return:
         """
         pass
 
 
     @abstractmethod
-    def end_multi_working(self) -> None:
+    async def activate_multi_workers(self, workers_list: List[Union[Thread, ApplyResult]]) -> None:
+        """
+        Description:
+            Activate multiple threads or processes to run target task(s).
+        :param workers_list:
+        :return:
+        """
+        pass
+
+
+    @abstractmethod
+    async def end_multi_working(self) -> None:
         """
         Description:
             The final in procedure which the progeram should be run.
