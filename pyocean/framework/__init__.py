@@ -32,7 +32,8 @@ The framework section code:
 
 """
 
-from .builder import BaseRunnableBuilder, MultiRunnableOperator, AsyncRunnableOperator
-from .strategy import RunnableStrategy, Resultable
-from .factory import RunningFactory, RunningTask
-from .features import BaseQueueType, BaseAPI, BaseGlobalizeAPI
+from pyocean.framework.builder import BaseRunnableBuilder, MultiRunnableOperator, AsyncRunnableOperator
+from pyocean.framework.strategy import RunnableStrategy, Resultable
+from pyocean.framework.factory import SimpleTaskFactory, PersistenceTaskFactory
+from pyocean.framework.tasks import SimpleRunnableTask, PersistenceRunnableTask
+from pyocean.framework.features import BaseQueueType, BaseAPI, BaseGlobalizeAPI

@@ -1,4 +1,4 @@
-from .builder import ParallelBuilder
-from .strategy import ParallelStrategy, MultiProcessingStrategy
-from .factory import ParallelFactory
-from .features import MultiProcessingQueueType, MultiProcessing
+from pyocean.parallel.builder import ParallelBuilder
+from pyocean.parallel.strategy import ParallelStrategy, MultiProcessingStrategy
+from pyocean.parallel.factory import ParallelSimpleFactory, ParallelPersistenceFactory
+from pyocean.parallel.features import MultiProcessingQueueType, MultiProcessing

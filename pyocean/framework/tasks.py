@@ -1,6 +1,6 @@
 from .factory import RunningFactory
 from .strategy import RunnableStrategy
-from .builder import BaseBuilder
+from .builder import BaseRunnableBuilder
 from ..persistence.interface import OceanPersistence
 
 from abc import ABCMeta, abstractmethod
@@ -13,12 +13,12 @@ class RunningTask:
         self._process_num: int = process_number
         self._db_connection_number: int = db_connection_number
         self._factory: RunningFactory = factory
-        self._running_builder: BaseBuilder = None
+        self._running_builder: BaseRunnableBuilder = None
         self._running_strategy: RunnableStrategy = None
         self._persistence_strategy: OceanPersistence = None
 
 
-    def running_builder(self) -> BaseBuilder:
+    def running_builder(self) -> BaseRunnableBuilder:
         """
         Description:
             Return running builder object.
@@ -45,7 +45,7 @@ class RunningTask:
         return self._persistence_strategy
 
 
-    def generate(self) -> BaseBuilder:
+    def generate(self) -> BaseRunnableBuilder:
         """
         Description:
             generate a running task.
