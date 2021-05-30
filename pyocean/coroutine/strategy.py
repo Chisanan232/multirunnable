@@ -57,7 +57,8 @@ class GeventStrategy(GreenletStrategy, Resultable):
 
 
     def end_multi_working(self) -> None:
-        pass
+        for one_greenlet in self._Gevent_List:
+            one_greenlet.join()
 
 
     def get_multi_working_result(self) -> Iterable[object]:
