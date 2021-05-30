@@ -36,7 +36,7 @@ class ExampleParallelClient:
 class ExampleBuilderClient(ExampleParallelClient):
 
     def main_run(self):
-        _builder = ParallelBuilder(running_strategy=MultiProcessingStrategy(threads_num=1))
+        _builder = ParallelBuilder(running_strategy=MultiProcessingStrategy(workers_num=1))
         _builder.run(function=self.target_function, fun_kwargs={"index": f"test_{random.randrange(10,20)}"})
         result = _builder.result
         print(f"This is final result: {result}")

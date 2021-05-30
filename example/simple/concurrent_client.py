@@ -37,7 +37,7 @@ class ExampleConcurrentClient:
 class ExampleBuilderClient(ExampleConcurrentClient):
 
     def main_run(self):
-        _builder = ThreadsBuilder(running_strategy=MultiThreadingStrategy(threads_num=1))
+        _builder = ThreadsBuilder(running_strategy=MultiThreadingStrategy(workers_num=1))
         _builder.run(function=self.target_function, fun_kwargs={"index": f"test_{random.randrange(10,20)}"})
         # result = _builder.result
         # print(f"This is final result: {result}")

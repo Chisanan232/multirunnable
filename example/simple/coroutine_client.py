@@ -54,14 +54,14 @@ class ExampleCoroutineClient:
 class ExampleBuilderClient(ExampleCoroutineClient):
 
     def main_run_with_gevent(self):
-        _builder = GeventBuilder(running_strategy=GeventStrategy(threads_num=1))
+        _builder = GeventBuilder(running_strategy=GeventStrategy(workers_num=1))
         _builder.run(function=self.target_function, fun_kwargs={"index": f"test_{random.randrange(10,20)}"})
         # result = _builder.result
         # print(f"This is final result: {result}")
 
 
     def main_run_with_async(self):
-        _builder = AsynchronousBuilder(running_strategy=AsynchronousStrategy(threads_num=1))
+        _builder = AsynchronousBuilder(running_strategy=AsynchronousStrategy(workers_num=1))
         _builder.run(function=self.async_target_function, fun_kwargs={"index": f"test_{random.randrange(10,20)}"})
         # result = _builder.result
         # print(f"This is final result: {result}")
