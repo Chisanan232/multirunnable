@@ -31,7 +31,7 @@ class InitializeUtils:
     running strategy.
     """
 
-    def __init__(self, running_mode: RunningMode, persistence: OceanPersistence):
+    def __init__(self, running_mode: RunningMode, persistence: OceanPersistence = None):
         self.__running_mode = running_mode
         self.__persistence_strategy = persistence
 
@@ -118,26 +118,28 @@ class InitializeUtils:
         :param kwargs:
         :return:
         """
+        if self.__persistence_strategy is None:
+            raise Exception
         self.__persistence_strategy.initialize(mode=self.__running_mode, **kwargs)
 
 
 
 class RunnableStrategy(metaclass=ABCMeta):
 
-    def __init__(self, threads_num: int, persistence_strategy: OceanPersistence = None, **kwargs):
+    def __init__(self, workers_num: int, persistence_strategy: OceanPersistence = None, **kwargs):
+        self.__workers_num = workers_num
         self._persistence_strategy = persistence_strategy
         self.__db_conn_instance_num = kwargs.get("db_connection_pool_size", None)
-        self.__threads_num = threads_num
 
 
     @property
-    def threads_number(self) -> int:
+    def workers_number(self) -> int:
         """
         Description:
             The number of threads or processes be create and activate to do something.
         :return:
         """
-        return self.__threads_num
+        return self.__workers_num
 
 
     @property
@@ -152,8 +154,8 @@ class RunnableStrategy(metaclass=ABCMeta):
         from multiprocessing import cpu_count
 
         if self.__db_conn_instance_num is None:
-            if self.__threads_num < cpu_count():
-                return self.__threads_num
+            if self.__workers_num < cpu_count():
+                return self.__workers_num
             else:
                 return cpu_count()
         else:

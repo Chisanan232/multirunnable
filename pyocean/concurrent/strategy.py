@@ -40,16 +40,18 @@ class ConcurrentStrategy(RunnableStrategy, ABC):
 
 class MultiThreadingStrategy(ConcurrentStrategy):
 
-    def init_multi_working(self, tasks: Iterable, *args, **kwargs) -> None:
+    def init_multi_working(self, tasks: Iterable = None, *args, **kwargs) -> None:
         __init_utils = InitializeUtils(running_mode=self._Running_Mode, persistence=self._persistence_strategy)
         # Initialize and assign task queue object.
-        __init_utils.initialize_queue(tasks=tasks, qtype=MultiThreadingQueueType.Queue)
+        if tasks:
+            __init_utils.initialize_queue(tasks=tasks, qtype=MultiThreadingQueueType.Queue)
         # Initialize parameter and object with different scenario.
-        __init_utils.initialize_persistence(db_conn_instances_num=self.db_connection_instances_number)
+        if self._persistence_strategy is not None:
+            __init_utils.initialize_persistence(db_conn_instances_num=self.db_connection_instances_number)
 
 
-    def build_multi_workers(self, function: Callable, args: Tuple = (), kwargs: Dict = {}) -> List[OceanTasks]:
-        self._Threads_List = [Thread(target=function, args=args, kwargs=kwargs) for _ in range(self.threads_number)]
+    def build_multi_workers(self, function: Callable, args: Tuple = (), kwargs: Dict = {}) -> List[Thread]:
+        self._Threads_List = [Thread(target=function, args=args, kwargs=kwargs) for _ in range(self.workers_number)]
         return self._Threads_List
 
 
@@ -59,7 +61,7 @@ class MultiThreadingStrategy(ConcurrentStrategy):
 
     def end_multi_working(self) -> None:
         if self._Threads_List:
-            for threed_index in range(self.threads_number):
+            for threed_index in range(self.workers_number):
                 self._Threads_List[threed_index].join()
         else:
             raise ThreadsListIsEmptyError

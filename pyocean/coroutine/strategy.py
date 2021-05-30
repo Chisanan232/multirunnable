@@ -29,23 +29,25 @@ class GreenletStrategy(CoroutineStrategy, RunnableStrategy, ABC):
 
 class GeventStrategy(GreenletStrategy, Resultable):
 
-    def init_multi_working(self, tasks: Iterable, *args, **kwargs) -> None:
+    def init_multi_working(self, tasks: Iterable = None, *args, **kwargs) -> None:
         __init_utils = InitializeUtils(running_mode=self._Running_Mode, persistence=self._persistence_strategy)
         # Initialize and assign task queue object.
-        __init_utils.initialize_queue(tasks=tasks, qtype=GeventQueueType.Queue)
+        if tasks:
+            __init_utils.initialize_queue(tasks=tasks, qtype=GeventQueueType.Queue)
         # Initialize persistence object.
-        __init_utils.initialize_persistence(db_conn_instances_num=self.db_connection_instances_number)
+        if self._persistence_strategy is not None:
+            __init_utils.initialize_persistence(db_conn_instances_num=self.db_connection_instances_number)
 
 
-    def build_multi_workers(self, function: Callable, *args, **kwargs) -> List[OceanTasks]:
+    def build_multi_workers(self, function: Callable, *args, **kwargs) -> List[Greenlet]:
         # # General Greenlet
         # self._Gevent_List = [greenlet(run=function) for _ in range(self.threads_number)]
         # # Greenlet framework -- Gevent
-        self._Gevent_List = [gevent.spawn(function, *args, **kwargs) for _ in range(self.threads_number)]
+        self._Gevent_List = [gevent.spawn(function, *args, **kwargs) for _ in range(self.workers_number)]
         return self._Gevent_List
 
 
-    def activate_multi_workers(self, workers_list: List[OceanTasks]) -> None:
+    def activate_multi_workers(self, workers_list: List[Greenlet]) -> None:
         # # General Greenlet
         # value = worker.switch()
         # # Greenlet framework -- Gevent
@@ -82,20 +84,22 @@ class AsynchronousStrategy(AsyncStrategy, Resultable):
         return self._Async_Event_Loop
 
 
-    async def init_multi_working(self, tasks: Iterable, *args, **kwargs) -> None:
+    async def init_multi_working(self, tasks: Iterable = None, *args, **kwargs) -> None:
         __init_utils = InitializeUtils(running_mode=self._Running_Mode, persistence=self._persistence_strategy)
         # # Initialize and assign task queue object.
-        await __init_utils.async_initialize_queue(tasks=tasks, qtype=AsynchronousQueueType.Queue)
+        if tasks:
+            await __init_utils.async_initialize_queue(tasks=tasks, qtype=AsynchronousQueueType.Queue)
         # Initialize persistence object.
-        __init_utils.initialize_persistence(db_conn_instances_num=self.db_connection_instances_number)
+        if self._persistence_strategy is not None:
+            __init_utils.initialize_persistence(db_conn_instances_num=self.db_connection_instances_number)
 
 
-    def build_multi_workers(self, function: Callable, *args, **kwargs) -> List[OceanTasks]:
-        self._Async_Task_List = [self._Async_Event_Loop.create_task(function(*args, **kwargs)) for _ in range(self.threads_number)]
+    def build_multi_workers(self, function: Callable, *args, **kwargs) -> List[Task]:
+        self._Async_Task_List = [self._Async_Event_Loop.create_task(function(*args, **kwargs)) for _ in range(self.workers_number)]
         return self._Async_Task_List
 
 
-    async def activate_multi_workers(self, workers_list: List[OceanTasks]) -> None:
+    async def activate_multi_workers(self, workers_list: List[Task]) -> None:
         finished, unfinished = await asyncio.wait(workers_list)
         for finish in finished:
             self._Async_Running_Result.append(

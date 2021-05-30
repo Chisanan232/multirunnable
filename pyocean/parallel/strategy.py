@@ -21,22 +21,24 @@ class ParallelStrategy(RunnableStrategy):
     _Manager: Manager = None
     _Namespace_Object: Namespace = None
     _Processors_Pool: Pool = None
-    _Processors_Running_Result: Dict[str, Dict[str, Union[AsyncResult, bool]]] = {}
+    _Processors_Running_Result: List[Dict[str, Union[AsyncResult, bool]]] = {}
 
-    def __init__(self, persistence_strategy: OceanPersistence, threads_num: int, db_connection_pool_size: int = None):
+    def __init__(self, workers_num: int, persistence_strategy: OceanPersistence = None, **kwargs):
         """
         Description:
             Converting the object to multiprocessing.manager.Namespace type object at initial state.
-        :param persistence_strategy:
-        :param threads_num:
+        :param workers_num:
         :param db_connection_pool_size:
+        :param persistence_strategy:
         """
+        super().__init__(workers_num, persistence_strategy, **kwargs)
         self.__init_namespace_obj()
-        namespace_persistence_strategy = cast(OceanPersistence, self.__namespacing_instance(instance=persistence_strategy))
-        super().__init__(persistence_strategy=namespace_persistence_strategy,
-                         threads_num=threads_num,
-                         db_connection_pool_size=db_connection_pool_size)
-        self._Processors_Running_Result = self._Manager.dict()
+        if persistence_strategy is not None:
+            namespace_persistence_strategy = cast(OceanPersistence, self.__namespacing_instance(instance=persistence_strategy))
+            super().__init__(persistence_strategy=namespace_persistence_strategy,
+                             workers_num=workers_num,
+                             db_connection_pool_size=self.db_connection_instances_number)
+        self._Processors_Running_Result = self._Manager.list()
 
 
     def __init_namespace_obj(self) -> None:
@@ -87,19 +89,20 @@ class ParallelStrategy(RunnableStrategy):
 class MultiProcessingStrategy(ParallelStrategy, Resultable):
 
     def init_multi_working(self,
-                           tasks: Iterable,
+                           tasks: Iterable = [],
                            pool_initializer: Callable = None,
                            pool_initargs: Iterable = None,
                            *args, **kwargs) -> None:
         __init_utils = InitializeUtils(running_mode=self._Running_Mode, persistence=self._persistence_strategy)
         # Initialize and assign task queue object.
-        __init_utils.initialize_queue(tasks=tasks, qtype=MultiProcessingQueueType.Queue)
+        if tasks:
+            __init_utils.initialize_queue(tasks=tasks, qtype=MultiProcessingQueueType.Queue)
         # Initialize parameter and object with different scenario.
-        __init_utils.initialize_persistence(db_conn_instances_num=self.db_connection_instances_number)
+        if self._persistence_strategy is not None:
+            __init_utils.initialize_persistence(db_conn_instances_num=self.db_connection_instances_number)
 
         # Initialize and build the Processes Pool.
-        self._Processors_Pool = Pool(processes=self.threads_number, initializer=pool_initializer, initargs=pool_initargs)
-        print("[DEBUG] Pre-Init process finish.")
+        self._Processors_Pool = Pool(processes=self.workers_number, initializer=pool_initializer, initargs=pool_initargs)
 
 
     def namespacilize_object(self, objects: Iterable[Callable]) -> Namespace:
@@ -143,38 +146,33 @@ class MultiProcessingStrategy(ParallelStrategy, Resultable):
                             args: Tuple = (),
                             kwargs: Dict = {},
                             callback: Callable = None,
-                            error_callback: Callable = None) -> List[OceanTasks]:
+                            error_callback: Callable = None) -> List[Union[AsyncResult, ApplyResult]]:
         return [self._Processors_Pool.apply_async(func=function,
                                                   args=args,
                                                   kwds=kwargs,
                                                   callback=callback,
                                                   error_callback=error_callback)
-                for _ in range(self.threads_number)]
+                for _ in range(self.workers_number)]
         # elif kwargs:
         #     return [self._Processors_Pool.apply_async(func=function, kwds=kwargs, callback=callaback, error_callback=error_callback)
         #             for _ in range(self.threads_number)]
 
 
-    def activate_worker(self, worker: OceanTasks) -> None:
+    def activate_worker(self, worker: Union[AsyncResult, ApplyResult]) -> None:
         __process_running_result = worker.get()
         __process_run_successful = worker.successful()
 
-        # __process_memory_addr = str(worker).split("at")[-1]
-        __process_pid = f"process_{__process_running_result['pid']}"
         # Save Running result state and Running result value as dict
         process_result = {"successful": __process_run_successful, "result": __process_running_result}
-        # Initial and saving value
-        self._Processors_Running_Result[__process_pid] = process_result
+        # Saving value into list
+        self._Processors_Running_Result.append(process_result)
 
 
     def end_multi_working(self) -> None:
-        print("Close multi-Process ...")
         self._Processors_Pool.close()
         self._Processors_Pool.join()
-        print("Close !")
 
 
     def get_multi_working_result(self) -> Iterable[object]:
-        print(f"[DEBUG] self._Processors_Running_Result: {self._Processors_Running_Result}")
         return self._Processors_Running_Result
 
