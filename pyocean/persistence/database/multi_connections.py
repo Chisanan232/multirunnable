@@ -6,8 +6,6 @@ from pyocean.exceptions import GlobalizeObjectError
 from abc import abstractmethod
 from typing import Callable, Union, cast
 
-from deprecation import deprecated
-
 
 Database_Connection_Pool: object = None
 
