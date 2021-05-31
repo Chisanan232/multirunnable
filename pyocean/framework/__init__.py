@@ -32,7 +32,7 @@ The framework section code:
 
 """
 
-from pyocean.framework.builder import BaseRunnableBuilder, MultiRunnableOperator, AsyncRunnableOperator
+from pyocean.framework.operator import RunnableOperator, BaseRunnableProcedure
 from pyocean.framework.strategy import RunnableStrategy, Resultable
 from pyocean.framework.factory import SimpleTaskFactory, PersistenceTaskFactory
 from pyocean.framework.tasks import SimpleRunnableTask, PersistenceRunnableTask

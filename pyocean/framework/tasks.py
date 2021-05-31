@@ -1,6 +1,6 @@
 from pyocean.framework.factory import RunnableTaskFactory, SimpleTaskFactory, PersistenceTaskFactory
 from pyocean.framework.strategy import RunnableStrategy
-from pyocean.framework.builder import BaseRunnableBuilder
+from pyocean.framework.operator import BaseRunnableProcedure
 from pyocean.persistence.interface import OceanPersistence
 
 from abc import ABC, ABCMeta, abstractmethod
@@ -14,7 +14,7 @@ class RunnableTask(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def generate(self) -> BaseRunnableBuilder:
+    def generate(self) -> BaseRunnableProcedure:
         """
         Description:
             generate a running task.
@@ -28,7 +28,7 @@ class RunnableTask(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def running_director(self, strategy: RunnableStrategy) -> BaseRunnableBuilder:
+    def running_director(self, strategy: RunnableStrategy) -> BaseRunnableProcedure:
         """
         Description:
             Return running builder object.
@@ -45,7 +45,7 @@ class AbstractedSimpleRunnableTask(RunnableTask, ABC):
         self._factory: SimpleTaskFactory = factory
 
 
-    def generate(self) -> BaseRunnableBuilder:
+    def generate(self) -> BaseRunnableProcedure:
         # Initial the running program strategy
         _running_strategy = self.running_strategy()
         # Initial the running procedure builder
@@ -71,7 +71,7 @@ class AbstractedPersistenceRunnableTask(RunnableTask, ABC):
         self._factory: PersistenceTaskFactory = factory
 
 
-    def generate(self) -> BaseRunnableBuilder:
+    def generate(self) -> BaseRunnableProcedure:
         """
         Description:
             generate a running task.
@@ -113,7 +113,7 @@ class AbstractedPersistenceRunnableTask(RunnableTask, ABC):
 
 class SimpleRunnableTask(AbstractedSimpleRunnableTask):
 
-    def running_director(self, strategy: RunnableStrategy) -> BaseRunnableBuilder:
+    def running_director(self, strategy: RunnableStrategy) -> BaseRunnableProcedure:
         _running_builder = self._factory.running_builder(running_strategy=strategy)
         return _running_builder
 
@@ -126,7 +126,7 @@ class SimpleRunnableTask(AbstractedSimpleRunnableTask):
 
 class PersistenceRunnableTask(AbstractedPersistenceRunnableTask):
 
-    def running_director(self, strategy: RunnableStrategy) -> BaseRunnableBuilder:
+    def running_director(self, strategy: RunnableStrategy) -> BaseRunnableProcedure:
         _running_builder = self._factory.running_builder(running_strategy=strategy)
         return _running_builder
 
@@ -148,12 +148,12 @@ class RunningTask:
         self._process_num: int = process_number
         self._db_connection_number: int = db_connection_number
         self._factory: RunnableTaskFactory = factory
-        self._running_builder: BaseRunnableBuilder = None
+        self._running_builder: BaseRunnableProcedure = None
         self._running_strategy: RunnableStrategy = None
         self._persistence_strategy: OceanPersistence = None
 
 
-    def running_builder(self) -> BaseRunnableBuilder:
+    def running_builder(self) -> BaseRunnableProcedure:
         """
         Description:
             Return running builder object.
@@ -180,7 +180,7 @@ class RunningTask:
         return self._persistence_strategy
 
 
-    def generate(self) -> BaseRunnableBuilder:
+    def generate(self) -> BaseRunnableProcedure:
         """
         Description:
             generate a running task.

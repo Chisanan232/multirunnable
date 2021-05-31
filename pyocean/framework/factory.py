@@ -1,6 +1,5 @@
-from pyocean.framework import BaseRunnableBuilder, RunnableStrategy
-from pyocean.persistence.interface import OceanPersistence
-from pyocean.persistence.database.access_object import BaseDao
+from pyocean.framework import BaseRunnableProcedure, RunnableStrategy
+from pyocean.persistence.interface import OceanPersistence, OceanDao
 
 from abc import ABC, ABCMeta, abstractmethod
 
@@ -13,7 +12,7 @@ class RunnableTaskFactory(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def running_builder(self, running_strategy: RunnableStrategy) -> BaseRunnableBuilder:
+    def running_builder(self, running_strategy: RunnableStrategy) -> BaseRunnableProcedure:
         """
         Description:
             Generate BaseBuilder type instance.
@@ -65,7 +64,7 @@ class PersistenceTaskFactory(RunnableTaskFactory):
 
 
     @abstractmethod
-    def dao(self, connection_strategy: OceanPersistence) -> BaseDao:
+    def dao(self, connection_strategy: OceanPersistence) -> OceanDao:
         """
         Description: (is it used?)
             Generate DAO instance.
