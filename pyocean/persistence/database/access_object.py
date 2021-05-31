@@ -1,14 +1,14 @@
-from pyocean.framework.builder import MultiRunnableOperator
-from pyocean.persistence.interface import OceanPersistence
+from pyocean.operator import MultiRunnableOperator, AsyncRunnableOperator
+from pyocean.persistence.interface import OceanPersistence, OceanDao
 from pyocean.persistence.database.connection import BaseConnection
 
-from abc import ABCMeta, abstractmethod
+from abc import abstractmethod
 from typing import Dict, Union
 import os
 
 
 
-class BaseDao(metaclass=ABCMeta):
+class BaseDao(OceanDao):
 
     _Connection_Strategy: BaseConnection = None
 
