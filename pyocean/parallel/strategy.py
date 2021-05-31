@@ -1,4 +1,5 @@
 from pyocean.framework.strategy import InitializeUtils, RunnableStrategy, Resultable
+from pyocean.framework.features import BaseQueueType
 from pyocean.api import RunningMode
 from pyocean.api.types import OceanTasks
 from pyocean.parallel.features import MultiProcessingQueueType
@@ -88,21 +89,19 @@ class ParallelStrategy(RunnableStrategy):
 
 class MultiProcessingStrategy(ParallelStrategy, Resultable):
 
-    def init_multi_working(self,
-                           tasks: Iterable = [],
-                           pool_initializer: Callable = None,
-                           pool_initargs: Iterable = None,
-                           *args, **kwargs) -> None:
+    def init_multi_working(self, tasks: Iterable = [], queue_type: BaseQueueType = MultiProcessingQueueType.Queue, *args, **kwargs) -> None:
         __init_utils = InitializeUtils(running_mode=self._Running_Mode, persistence=self._persistence_strategy)
         # Initialize and assign task queue object.
         if tasks:
-            __init_utils.initialize_queue(tasks=tasks, qtype=MultiProcessingQueueType.Queue)
+            __init_utils.initialize_queue(tasks=tasks, qtype=queue_type)
         # Initialize parameter and object with different scenario.
         if self._persistence_strategy is not None:
             __init_utils.initialize_persistence(db_conn_instances_num=self.db_connection_instances_number)
 
         # Initialize and build the Processes Pool.
-        self._Processors_Pool = Pool(processes=self.workers_number, initializer=pool_initializer, initargs=pool_initargs)
+        __pool_initializer: Callable = kwargs.get("pool_initializer", None)
+        __pool_initargs: Iterable = kwargs.get("pool_initargs", None)
+        self._Processors_Pool = Pool(processes=self.workers_number, initializer=__pool_initializer, initargs=__pool_initargs)
 
 
     def namespacilize_object(self, objects: Iterable[Callable]) -> Namespace:

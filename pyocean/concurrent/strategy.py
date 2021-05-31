@@ -1,4 +1,5 @@
 from pyocean.framework.strategy import InitializeUtils, RunnableStrategy
+from pyocean.framework.features import BaseQueueType
 from pyocean.api import RunningMode
 from pyocean.api.types import OceanTasks
 from pyocean.concurrent.features import MultiThreadingQueueType
@@ -40,11 +41,11 @@ class ConcurrentStrategy(RunnableStrategy, ABC):
 
 class MultiThreadingStrategy(ConcurrentStrategy):
 
-    def init_multi_working(self, tasks: Iterable = None, *args, **kwargs) -> None:
+    def init_multi_working(self, tasks: Iterable = [], queue_type: BaseQueueType = MultiThreadingQueueType.Queue, *args, **kwargs) -> None:
         __init_utils = InitializeUtils(running_mode=self._Running_Mode, persistence=self._persistence_strategy)
         # Initialize and assign task queue object.
         if tasks:
-            __init_utils.initialize_queue(tasks=tasks, qtype=MultiThreadingQueueType.Queue)
+            __init_utils.initialize_queue(tasks=tasks, qtype=queue_type)
         # Initialize parameter and object with different scenario.
         if self._persistence_strategy is not None:
             __init_utils.initialize_persistence(db_conn_instances_num=self.db_connection_instances_number)

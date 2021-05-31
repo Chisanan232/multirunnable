@@ -165,12 +165,13 @@ class RunnableStrategy(metaclass=ABCMeta):
             return self.__db_conn_instance_num
 
 
-    def init_multi_working(self, tasks: Iterable, *args, **kwargs) -> None:
+    def init_multi_working(self, tasks: Iterable, queue_type: BaseQueueType, *args, **kwargs) -> None:
         """
         Description:
             Initialize something configurations or something which be needed to be already before run multiple
             threads or processes.
         :param tasks:
+        :param queue_type:
         :param args:
         :param kwargs:
         :return:
