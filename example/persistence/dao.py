@@ -1,7 +1,7 @@
-from pyocean.framework import MultiRunnableOperator, AsyncRunnableOperator
+from pyocean.operator import MultiRunnableOperator, AsyncRunnableOperator
 from pyocean.persistence import OceanPersistence
 from pyocean.persistence.database import BaseDao, BaseConnection, SingleConnection, MultiConnections
-from pyocean.logger import OceanLogger
+from pyocean.logger import ocean_logger
 
 from mysql.connector import Error
 from mysql.connector.cursor import MySQLCursor
@@ -12,9 +12,9 @@ import os
 
 class TestDao(BaseDao):
 
-    def __init__(self, connection_strategy: OceanPersistence, logger: OceanLogger):
+    def __init__(self, connection_strategy: OceanPersistence):
         super().__init__(connection_strategy=connection_strategy)
-        self._logger = logger
+        self._logger = ocean_logger
 
 
     def run(self, *args, **kwargs) -> object:
@@ -73,9 +73,9 @@ class TestDao(BaseDao):
 
 class AsyncTestDao(BaseDao):
 
-    def __init__(self, connection_strategy: OceanPersistence, logger: OceanLogger):
+    def __init__(self, connection_strategy: OceanPersistence):
         super().__init__(connection_strategy=connection_strategy)
-        self._logger = logger
+        self._logger = ocean_logger
 
 
     def run(self, *args, **kwargs) -> object:
