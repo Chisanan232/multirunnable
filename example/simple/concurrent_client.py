@@ -6,19 +6,11 @@ package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute(
 sys.path.append(package_pyocean_path)
 
 # pyocean package
-from pyocean.framework import BaseRunnableBuilder, RunnableStrategy, SimpleRunnableTask
-from pyocean.concurrent import ThreadsBuilder, MultiThreadingStrategy, MultiThreadsSimpleFactory
-from pyocean.concurrent.strategy import ConcurrentStrategy
+from pyocean.framework import SimpleRunnableTask
+from pyocean.concurrent import ConcurrentProcedure, MultiThreadingStrategy, MultiThreadsSimpleFactory
 
 import random
 import time
-
-
-
-class ExampleThreadingFactory(MultiThreadsSimpleFactory):
-
-    def running_builder(self, running_strategy: ConcurrentStrategy) -> BaseRunnableBuilder:
-        return ThreadsBuilder(running_strategy=running_strategy)
 
 
 
@@ -37,7 +29,7 @@ class ExampleConcurrentClient:
 class ExampleBuilderClient(ExampleConcurrentClient):
 
     def main_run(self):
-        _builder = ThreadsBuilder(running_strategy=MultiThreadingStrategy(workers_num=1))
+        _builder = ConcurrentProcedure(running_strategy=MultiThreadingStrategy(workers_num=2))
         _builder.run(function=self.target_function, fun_kwargs={"index": f"test_{random.randrange(10,20)}"})
         # result = _builder.result
         # print(f"This is final result: {result}")
@@ -47,7 +39,7 @@ class ExampleBuilderClient(ExampleConcurrentClient):
 class ExampleFactoryClient(ExampleConcurrentClient):
 
     def main_run(self):
-        __example_factory = ExampleThreadingFactory(workers_number=1)
+        __example_factory = MultiThreadsSimpleFactory(workers_number=2)
         __task = SimpleRunnableTask(factory=__example_factory)
         __directory = __task.generate()
         result = __directory.run(function=self.target_function, fun_kwargs={"index": f"test_{random.randrange(10,20)}"})
