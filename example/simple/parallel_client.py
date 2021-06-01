@@ -6,18 +6,12 @@ package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute(
 sys.path.append(package_pyocean_path)
 
 # pyocean package
-from pyocean.framework import BaseRunnableBuilder, RunnableStrategy, SimpleRunnableTask
-from pyocean.parallel import ParallelBuilder, MultiProcessingStrategy, ParallelStrategy, ParallelSimpleFactory
+from pyocean import ParallelProcedure
+from pyocean.framework import BaseRunnableProcedure, RunnableStrategy, SimpleRunnableTask
+from pyocean.parallel import MultiProcessingStrategy, ParallelStrategy, ParallelSimpleFactory
 
 import random
 import time
-
-
-
-class ExampleParallelFactory(ParallelSimpleFactory):
-
-    def running_builder(self, running_strategy: ParallelStrategy) -> BaseRunnableBuilder:
-        return ParallelBuilder(running_strategy=running_strategy)
 
 
 
@@ -36,7 +30,7 @@ class ExampleParallelClient:
 class ExampleBuilderClient(ExampleParallelClient):
 
     def main_run(self):
-        _builder = ParallelBuilder(running_strategy=MultiProcessingStrategy(workers_num=1))
+        _builder = ParallelProcedure(running_strategy=MultiProcessingStrategy(workers_num=3))
         _builder.run(function=self.target_function, fun_kwargs={"index": f"test_{random.randrange(10,20)}"})
         result = _builder.result
         print(f"This is final result: {result}")
@@ -46,7 +40,7 @@ class ExampleBuilderClient(ExampleParallelClient):
 class ExampleFactoryClient(ExampleParallelClient):
 
     def main_run(self):
-        __example_factory = ExampleParallelFactory(workers_number=1)
+        __example_factory = ParallelSimpleFactory(workers_number=4)
         __task = SimpleRunnableTask(factory=__example_factory)
         __directory = __task.generate()
         result = __directory.run(function=self.target_function, fun_kwargs={"index": f"test_{random.randrange(10,20)}"})
