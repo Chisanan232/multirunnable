@@ -12,7 +12,7 @@ class RunnableTaskFactory(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def running_builder(self, running_strategy: RunnableStrategy) -> BaseRunnableProcedure:
+    def running_procedure(self, running_strategy: RunnableStrategy) -> BaseRunnableProcedure:
         """
         Description:
             Generate BaseBuilder type instance.
