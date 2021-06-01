@@ -1,6 +1,7 @@
 from pyocean.framework.strategy import Resultable
 from pyocean.framework.operator import BaseRunnableProcedure
 from pyocean.framework.features import BaseQueueType
+from pyocean.coroutine.features import GeventQueueType, AsynchronousQueueType
 
 from typing import Union, Callable, Tuple, Dict, Iterable
 
@@ -12,8 +13,8 @@ class GeventProcedure(BaseRunnableProcedure):
             function: Callable,
             fun_args: Tuple[Union[object, Callable]] = (),
             fun_kwargs: Dict[str, Union[object, Callable]] = {},
-            tasks: Iterable = None,
-            queue_type: BaseQueueType = None, *args, **kwargs) -> Union[object, None]:
+            tasks: Iterable = [],
+            queue_type: BaseQueueType = GeventQueueType.Queue, *args, **kwargs) -> Union[object, None]:
         self.initial(tasks=tasks, queue_type=queue_type)
         # Build and run multiple processes
         self.start(function=function, fun_args=fun_args, fun_kwargs=fun_kwargs)
@@ -22,7 +23,7 @@ class GeventProcedure(BaseRunnableProcedure):
         return None
 
 
-    def initial(self, tasks: Iterable = None, queue_type: BaseQueueType = None, *args, **kwargs) -> None:
+    def initial(self, tasks: Iterable = [], queue_type: BaseQueueType = GeventQueueType.Queue, *args, **kwargs) -> None:
         self._Running_Strategy.init_multi_working(tasks=tasks, queue_type=queue_type, *args, **kwargs)
 
 
@@ -30,7 +31,7 @@ class GeventProcedure(BaseRunnableProcedure):
               function: Callable,
               fun_args: Tuple[Union[object, Callable]] = (),
               fun_kwargs: Dict[str, Union[object, Callable]] = {}) -> None:
-        __worker_list = self._Running_Strategy.build_multi_workers(function=function, *fun_args, *fun_kwargs)
+        __worker_list = self._Running_Strategy.build_multi_workers(function=function, *fun_args, **fun_kwargs)
         self._Running_Strategy.activate_multi_workers(workers_list=__worker_list)
 
 
@@ -58,8 +59,8 @@ class AsynchronousProcedure(BaseRunnableProcedure):
             function: Callable,
             fun_args: Tuple[Union[object, Callable]] = (),
             fun_kwargs: Dict[str, Union[object, Callable]] = {},
-            tasks: Iterable = None,
-            queue_type: BaseQueueType = None, *args, **kwargs) -> Union[object, None]:
+            tasks: Iterable = [],
+            queue_type: BaseQueueType = AsynchronousQueueType.Queue, *args, **kwargs) -> Union[object, None]:
         __event_loop = self._Running_Strategy.get_event_loop()
         __event_loop.run_until_complete(
             future=self._async_process(function=function, fun_args=fun_args, fun_kwargs=fun_kwargs,
@@ -74,8 +75,8 @@ class AsynchronousProcedure(BaseRunnableProcedure):
                              function: Callable,
                              fun_args: Tuple[Union[object, Callable]] = (),
                              fun_kwargs: Dict[str, Union[object, Callable]] = {},
-                             tasks: Iterable = None,
-                             queue_type: BaseQueueType = None):
+                             tasks: Iterable = [],
+                             queue_type: BaseQueueType = AsynchronousQueueType.Queue):
         await self.initial(tasks=tasks, queue_type=queue_type)
         await self.start(function=function, fun_args=fun_args, fun_kwargs=fun_kwargs)
 

@@ -44,7 +44,7 @@ class ParallelProcedure(BaseRunnableProcedure):
         self.start(function=function, fun_args=fun_args, fun_kwargs=fun_kwargs)
         self.done()
         self.after_treatment()
-        return None
+        return self.result
 
 
     def initial(self, tasks: Iterable = None, queue_type: BaseQueueType = None, *args, **kwargs) -> None:

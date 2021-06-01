@@ -1,5 +1,7 @@
-from pyocean.framework import BaseRunnableProcedure, Resultable
+from pyocean.framework.operator import BaseRunnableProcedure
+from pyocean.framework.strategy import Resultable
 from pyocean.framework.features import BaseQueueType
+from pyocean.concurrent.features import MultiThreadingQueueType
 
 from typing import Union, Callable, Tuple, Dict, Iterable
 
@@ -11,8 +13,8 @@ class ConcurrentProcedure(BaseRunnableProcedure):
             function: Callable,
             fun_args: Tuple[Union[object, Callable]] = (),
             fun_kwargs: Dict[str, Union[object, Callable]] = {},
-            tasks: Iterable = None,
-            queue_type: BaseQueueType = None, *args, **kwargs) -> Union[object, None]:
+            tasks: Iterable = [],
+            queue_type: BaseQueueType = MultiThreadingQueueType.Queue, *args, **kwargs) -> Union[object, None]:
         self.initial(tasks=tasks, queue_type=queue_type)
         # Build and run multiple processes
         self.start(function=function, fun_args=fun_args, fun_kwargs=fun_kwargs)
@@ -21,7 +23,7 @@ class ConcurrentProcedure(BaseRunnableProcedure):
         return None
 
 
-    def initial(self, tasks: Iterable = None, queue_type: BaseQueueType = None, *args, **kwargs) -> None:
+    def initial(self, tasks: Iterable = [], queue_type: BaseQueueType = MultiThreadingQueueType.Queue, *args, **kwargs) -> None:
         self._Running_Strategy.init_multi_working(tasks=tasks, queue_type=queue_type, *args, **kwargs)
 
 
