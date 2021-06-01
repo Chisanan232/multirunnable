@@ -1,4 +1,4 @@
-from pyocean.concurrent.builder import ThreadsBuilder
+from pyocean.concurrent.operator import ConcurrentProcedure
 from pyocean.concurrent.strategy import MultiThreadingStrategy
 from pyocean.concurrent.factory import MultiThreadsSimpleFactory, MultiThreadsPersistenceFactory
 from pyocean.concurrent.features import MultiThreadingQueueType, MultiThreading
