@@ -6,19 +6,13 @@ package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute(
 sys.path.append(package_pyocean_path)
 
 # pyocean package
-from pyocean.framework import BaseRunnableBuilder, RunnableStrategy, SimpleRunnableTask
-from pyocean.coroutine import AsynchronousBuilder, AsynchronousStrategy, AsynchronousSimpleFactory
+from pyocean import AsynchronousProcedure
+from pyocean.framework import BaseRunnableProcedure, RunnableStrategy, SimpleRunnableTask
+from pyocean.coroutine import AsynchronousStrategy, AsynchronousSimpleFactory
 from pyocean.coroutine.strategy import CoroutineStrategy
 
 import random
 import time
-
-
-
-class ExampleAsyncFactory(AsynchronousSimpleFactory):
-
-    def running_builder(self, running_strategy: CoroutineStrategy) -> BaseRunnableBuilder:
-        return AsynchronousBuilder(running_strategy=running_strategy)
 
 
 
@@ -37,7 +31,7 @@ class ExampleCoroutineClient:
 class ExampleBuilderClient(ExampleCoroutineClient):
 
     def main_run_with_async(self):
-        _builder = AsynchronousBuilder(running_strategy=AsynchronousStrategy(workers_num=1))
+        _builder = AsynchronousProcedure(running_strategy=AsynchronousStrategy(workers_num=1))
         _builder.run(function=self.async_target_function, fun_kwargs={"index": f"test_{random.randrange(10,20)}"})
         # result = _builder.result
         # print(f"This is final result: {result}")
@@ -47,7 +41,7 @@ class ExampleBuilderClient(ExampleCoroutineClient):
 class ExampleFactoryClient(ExampleCoroutineClient):
 
     def main_run_with_async(self):
-        __example_factory = ExampleAsyncFactory(workers_number=1)
+        __example_factory = AsynchronousSimpleFactory(workers_number=1)
         __task = SimpleRunnableTask(factory=__example_factory)
         __directory = __task.generate()
         result = __directory.run(function=self.async_target_function, fun_kwargs={"index": f"test_{random.randrange(10,20)}"})
@@ -63,4 +57,4 @@ if __name__ == '__main__':
 
     print("This is factory client: ")
     __factory = ExampleFactoryClient()
-    __factory.main_run_with_async()
+    # __factory.main_run_with_async()

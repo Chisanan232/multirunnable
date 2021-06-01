@@ -6,27 +6,12 @@ package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute(
 sys.path.append(package_pyocean_path)
 
 # pyocean package
-from pyocean.framework import BaseRunnableBuilder, RunnableStrategy, SimpleRunnableTask
-from pyocean.coroutine import (GeventBuilder, GeventStrategy, GeventSimpleFactory,
-                               AsynchronousBuilder, AsynchronousStrategy, AsynchronousSimpleFactory)
-from pyocean.coroutine.strategy import CoroutineStrategy
+from pyocean import GeventProcedure
+from pyocean.framework import SimpleRunnableTask
+from pyocean.coroutine import GeventProcedure, GeventStrategy, GeventSimpleFactory
 
 import random
 import time
-
-
-
-class ExampleGeventFactory(GeventSimpleFactory):
-
-    def running_builder(self, running_strategy: CoroutineStrategy) -> BaseRunnableBuilder:
-        return GeventBuilder(running_strategy=running_strategy)
-
-
-
-class ExampleAsyncFactory(AsynchronousSimpleFactory):
-
-    def running_builder(self, running_strategy: CoroutineStrategy) -> BaseRunnableBuilder:
-        return AsynchronousBuilder(running_strategy=running_strategy)
 
 
 
@@ -54,15 +39,8 @@ class ExampleCoroutineClient:
 class ExampleBuilderClient(ExampleCoroutineClient):
 
     def main_run_with_gevent(self):
-        _builder = GeventBuilder(running_strategy=GeventStrategy(workers_num=1))
+        _builder = GeventProcedure(running_strategy=GeventStrategy(workers_num=1))
         _builder.run(function=self.target_function, fun_kwargs={"index": f"test_{random.randrange(10,20)}"})
-        # result = _builder.result
-        # print(f"This is final result: {result}")
-
-
-    def main_run_with_async(self):
-        _builder = AsynchronousBuilder(running_strategy=AsynchronousStrategy(workers_num=1))
-        _builder.run(function=self.async_target_function, fun_kwargs={"index": f"test_{random.randrange(10,20)}"})
         # result = _builder.result
         # print(f"This is final result: {result}")
 
@@ -71,18 +49,10 @@ class ExampleBuilderClient(ExampleCoroutineClient):
 class ExampleFactoryClient(ExampleCoroutineClient):
 
     def main_run_with_gevent(self):
-        __example_factory = ExampleGeventFactory(workers_number=1)
+        __example_factory = GeventSimpleFactory(workers_number=1)
         __task = SimpleRunnableTask(factory=__example_factory)
         __directory = __task.generate()
         result = __directory.run(function=self.target_function, fun_kwargs={"index": f"test_{random.randrange(10,20)}"})
-        print(f"This is final result: {result}")
-
-
-    def main_run_with_async(self):
-        __example_factory = ExampleAsyncFactory(workers_number=1)
-        __task = SimpleRunnableTask(factory=__example_factory)
-        __directory = __task.generate()
-        result = __directory.run(function=self.async_target_function, fun_kwargs={"index": f"test_{random.randrange(10,20)}"})
         print(f"This is final result: {result}")
 
 
@@ -91,14 +61,9 @@ if __name__ == '__main__':
 
     print("This is builder client: ")
     __builder = ExampleBuilderClient()
-    # print("+++++++++++++ Gevent part +++++++++++++")
-    # __builder.main_run_with_gevent()
-    print("+++++++++++++ Async part +++++++++++++")
-    # __builder.main_run_with_async()
+    __builder.main_run_with_gevent()
 
     print("This is factory client: ")
     __factory = ExampleFactoryClient()
-    # print("+++++++++++++ Gevent part +++++++++++++")
-    # __factory.main_run_with_gevent()
-    print("+++++++++++++ Async part +++++++++++++")
-    __factory.main_run_with_async()
+    print("+++++++++++++ Gevent part +++++++++++++")
+    __factory.main_run_with_gevent()

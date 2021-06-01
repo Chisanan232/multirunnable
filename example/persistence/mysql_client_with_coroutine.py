@@ -6,13 +6,14 @@ package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute(
 sys.path.append(package_pyocean_path)
 
 # pyocean package
-from pyocean.framework import BaseRunnableBuilder, RunnableStrategy, PersistenceRunnableTask
-from pyocean.coroutine import (GeventBuilder, GeventStrategy, GeventSimpleFactory, GeventPersistenceFactory,
-                               AsynchronousBuilder, AsynchronousStrategy, AsynchronousSimpleFactory, AsynchronousPersistenceFactory)
+from pyocean import GeventProcedure, AsynchronousProcedure
+from pyocean.framework import BaseRunnableProcedure, RunnableStrategy, PersistenceRunnableTask
+from pyocean.coroutine import (GeventStrategy, GeventSimpleFactory, GeventPersistenceFactory,
+                               AsynchronousStrategy, AsynchronousSimpleFactory, AsynchronousPersistenceFactory)
 from pyocean.persistence import OceanPersistence
 from pyocean.persistence.database import BaseDao
 from pyocean.persistence.database.configuration import DatabaseConfig, DatabaseDriver, HostEnvType
-from pyocean.logger import LogLevel, LoggingConfig, OceanLogger, KafkaHandler
+from pyocean.logger import ocean_logger
 
 # code component
 from connection_strategy import SingleTestConnectionStrategy, MultiTestConnectionStrategy
@@ -20,86 +21,49 @@ from dao import TestDao, AsyncTestDao
 from sql_query import SqlQuery
 
 from multiprocessing import cpu_count
-from logging import FileHandler, StreamHandler
 import time
-
-
-
-class TestGeventBuilder(GeventBuilder):
-
-    def __init__(self, running_strategy: RunnableStrategy, db_connection_number: int, logger: OceanLogger):
-        super().__init__(running_strategy=running_strategy)
-        self.__db_connection_number = db_connection_number
-        self.__logger = logger
 
 
 
 class TestGreenletFactory(GeventPersistenceFactory):
 
-    def __init__(self, workers_number: int, db_connection_number: int, logger):
+    def __init__(self, workers_number: int, db_connection_number: int):
         super().__init__(workers_number, db_connection_number)
-        self.__logger = logger
-
-
-    def running_builder(self, running_strategy: RunnableStrategy) -> BaseRunnableBuilder:
-        test_builder = TestGeventBuilder(running_strategy=running_strategy,
-                                         db_connection_number=self._db_connection_num,
-                                         logger=self.__logger)
-        return test_builder
+        self.__logger = ocean_logger
 
 
     def persistence_strategy(self) -> OceanPersistence:
         connection_strategy = MultiTestConnectionStrategy(
-            configuration=DatabaseConfig(database_driver=DatabaseDriver.MySQL, host_type=HostEnvType.Localhost),
-            logger=self.__logger)
+            configuration=DatabaseConfig(database_driver=DatabaseDriver.MySQL, host_type=HostEnvType.Localhost))
         # connection_strategy = SingleTestConnectionStrategy(
-        #     configuration=DatabaseConfig(database_driver=DatabaseDriver.MySQL, host_type=HostEnvType.Localhost),
-        #     logger=self.__logger)
+        #     configuration=DatabaseConfig(database_driver=DatabaseDriver.MySQL, host_type=HostEnvType.Localhost))
         return connection_strategy
 
 
     def dao(self, connection_strategy: OceanPersistence) -> BaseDao:
-        # sql_query_obj = DatabaseSqlQuery(strategy=connection_strategy, logger=self.__logger)
-        sql_query_obj = TestDao(connection_strategy=connection_strategy, logger=self.__logger)
+        # sql_query_obj = DatabaseSqlQuery(strategy=connection_strategy)
+        sql_query_obj = TestDao(connection_strategy=connection_strategy)
         return sql_query_obj
-
-
-
-class TestAsyncBuilder(AsynchronousBuilder):
-
-    def __init__(self, running_strategy: RunnableStrategy, db_connection_number: int, logger: OceanLogger):
-        super().__init__(running_strategy=running_strategy)
-        self.__db_connection_number = db_connection_number
-        self.__logger = logger
 
 
 
 class TestAsyncFactory(AsynchronousPersistenceFactory):
 
-    def __init__(self, workers_number: int, db_connection_number: int, logger):
+    def __init__(self, workers_number: int, db_connection_number: int):
         super().__init__(workers_number, db_connection_number)
-        self.__logger = logger
-
-
-    def running_builder(self, running_strategy: RunnableStrategy) -> BaseRunnableBuilder:
-        test_builder = TestAsyncBuilder(running_strategy=running_strategy,
-                                        db_connection_number=self._db_connection_num,
-                                        logger=self.__logger)
-        return test_builder
+        self.__logger = ocean_logger
 
 
     def persistence_strategy(self) -> OceanPersistence:
         connection_strategy = MultiTestConnectionStrategy(
-            configuration=DatabaseConfig(database_driver=DatabaseDriver.MySQL, host_type=HostEnvType.Localhost),
-            logger=self.__logger)
+            configuration=DatabaseConfig(database_driver=DatabaseDriver.MySQL, host_type=HostEnvType.Localhost))
         # connection_strategy = SingleTestConnectionStrategy(
-        #     configuration=DatabaseConfig(database_driver=DatabaseDriver.MySQL, host_type=HostEnvType.Localhost),
-        #     logger=self.__logger)
+        #     configuration=DatabaseConfig(database_driver=DatabaseDriver.MySQL, host_type=HostEnvType.Localhost))
         return connection_strategy
 
 
     def dao(self, connection_strategy: OceanPersistence) -> BaseDao:
-        sql_query_obj = AsyncTestDao(connection_strategy=connection_strategy, logger=self.__logger)
+        sql_query_obj = AsyncTestDao(connection_strategy=connection_strategy)
         return sql_query_obj
 
 
@@ -108,23 +72,10 @@ class TestCode:
 
     __Strategy: MultiTestConnectionStrategy = None
 
-    def __init__(self, process_num: int, db_connection_number: int, log_level: LogLevel = LogLevel.INFO):
+    def __init__(self, process_num: int, db_connection_number: int):
         self.__process_num: int = process_num
         self.__db_connection_number: int = db_connection_number
-
-        # # Initialize Logger configuration
-        __logging_config = LoggingConfig()
-        __logging_config.level = LogLevel.DEBUG
-        # # Initialize Logger handler
-        sys_stream_hdlr = StreamHandler()
-        file_io_hdlr = FileHandler(filename="/Users/bryantliu/Downloads/test_new.log")
-        __producer_config = {"bootstrap_servers": "localhost:9092"}
-        __sender_config = {"topic": "logging_test", "key": "test"}
-        # kafka_stream_hdlr = KafkaHandler(producer_configs=__producer_config, sender_configs=__sender_config)
-        # # Initialize Logger instance
-        self.__logger = OceanLogger(config=__logging_config, handlers=[sys_stream_hdlr])
-        self.__logger.debug(f"first init logging, level is {log_level}")
-        print("[DEBUG] new class TestCode (including  logging)")
+        self.__logger = ocean_logger
 
 
     def run(self):
@@ -136,13 +87,11 @@ class TestCode:
         """
         # Initial running factory
         # # Greenlet
-        test_factory = TestGreenletFactory(workers_number=self.__process_num,
-                                           db_connection_number=self.__db_connection_number,
-                                           logger=self.__logger)
+        # test_factory = TestGreenletFactory(workers_number=self.__process_num,
+        #                                    db_connection_number=self.__db_connection_number)
         # # Asynchronous
-        # test_factory = TestAsyncFactory(process_number=self.__process_num,
-        #                                 db_connection_number=self.__db_connection_number,
-        #                                 logger=self.__logger)
+        test_factory = TestAsyncFactory(workers_number=self.__process_num,
+                                        db_connection_number=self.__db_connection_number)
         # Initial running task object
         test_task = PersistenceRunnableTask(factory=test_factory)
         # Generate a running builder to start a multi-worker program
@@ -167,6 +116,5 @@ if __name__ == '__main__':
     __db_connection_thread_number = 5
     print(f"Process Number: {cpu_count()}")
     test_code = TestCode(process_num=__process_number,
-                         db_connection_number=__db_connection_thread_number,
-                         log_level=LogLevel.DEBUG)
+                         db_connection_number=__db_connection_thread_number)
     test_code.run()
