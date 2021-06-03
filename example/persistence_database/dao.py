@@ -17,7 +17,7 @@ class TestDao(BaseDao):
         self._logger = ocean_logger
 
 
-    def run(self, *args, **kwargs) -> object:
+    def get_test_data(self, *args, **kwargs) -> object:
         """
         Note (?) need to consider:
             How to abstractilize the logic or how to be more clear ?
@@ -25,13 +25,13 @@ class TestDao(BaseDao):
         """
         # Running directly
         if isinstance(self._Connection_Strategy, MultiConnections):
-            # self._logger.debug("Running all things with Bounded Semaphore.")
-            # data = RunnableBuilder.run_with_semaphore(function=self.sql_process_new)
+            self._logger.debug("Running all things with Bounded Semaphore.")
+            # data = MultiRunnableOperator.run_with_semaphore(function=self.sql_process_new)
             data = MultiRunnableOperator.run_with_bounded_semaphore(function=self.sql_process_new)
-            print("[DEBUG] at fun 'run': ", data)
+            self._logger.debug(f"at fun 'run': {data}")
             return data
         elif isinstance(self._Connection_Strategy, SingleConnection):
-            # self._logger.debug("Running all things with Lock.")
+            self._logger.debug("Running all things with Lock.")
             return MultiRunnableOperator.run_with_lock(function=self.sql_process_new)
         else:
             pass
@@ -39,11 +39,10 @@ class TestDao(BaseDao):
 
     def sql_process_new(self):
         sql_tasks = self.get_all_sql_tasks()
-        # self._logger.debug(f"SQL tasks: {sql_tasks}")
+        self._logger.debug(f"SQL tasks: {sql_tasks}")
         sql_query = sql_tasks.get()
-        # self._logger.debug(f"SQL tasks query: {sql_query}")
+        self._logger.debug(f"SQL tasks query: {sql_query}")
         data = self.running_sql_query_process(sql_query=sql_query)
-        # self._logger.debug(f"at fun 'sql_process_new': {data}")
         return data
 
 
@@ -78,7 +77,7 @@ class AsyncTestDao(BaseDao):
         self._logger = ocean_logger
 
 
-    def run(self, *args, **kwargs) -> object:
+    async def get_test_data(self, *args, **kwargs) -> object:
         """
         Note (?) need to consider:
             How to abstractilize the logic or how to be more clear ?
@@ -86,13 +85,13 @@ class AsyncTestDao(BaseDao):
         """
         # Running directly
         if isinstance(self._Connection_Strategy, MultiConnections):
-            # self._logger.debug("Running all things with Bounded Semaphore.")
-            # data = RunnableBuilder.run_with_semaphore(function=self.sql_process_new)
-            data = AsyncRunnableOperator.run_with_bounded_semaphore(function=self.sql_process_new)
-            print("[DEBUG] at fun 'run': ", data)
+            self._logger.debug("Running all things with Bounded Semaphore.")
+            # data = await AsyncRunnableOperator.run_with_semaphore(function=self.sql_process_new)
+            data = await AsyncRunnableOperator.run_with_bounded_semaphore(function=self.sql_process_new)
+            self._logger.debug(f"at fun 'run': {data}")
             return data
         elif isinstance(self._Connection_Strategy, SingleConnection):
-            # self._logger.debug("Running all things with Lock.")
+            self._logger.debug("Running all things with Lock.")
             return AsyncRunnableOperator.run_with_lock(function=self.sql_process_new)
         else:
             pass
@@ -100,11 +99,10 @@ class AsyncTestDao(BaseDao):
 
     async def sql_process_new(self):
         sql_tasks = self.get_all_sql_tasks()
-        # self._logger.debug(f"SQL tasks: {sql_tasks}")
+        self._logger.debug(f"SQL tasks: {sql_tasks}")
         sql_query = await sql_tasks.get()
-        # self._logger.debug(f"SQL tasks query: {sql_query}")
+        self._logger.debug(f"SQL tasks query: {sql_query}")
         data = self.running_sql_query_process(sql_query=sql_query)
-        # self._logger.debug(f"at fun 'sql_process_new': {data}")
         return data
 
 

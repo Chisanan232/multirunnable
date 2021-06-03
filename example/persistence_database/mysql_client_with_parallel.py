@@ -1,15 +1,14 @@
 # Import package pyocean
 import pathlib
 import sys
+import os
 
 package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute())
 sys.path.append(package_pyocean_path)
 
 # pyocean package
-from pyocean import GeventProcedure, AsynchronousProcedure
-from pyocean.framework import BaseRunnableProcedure, RunnableStrategy, PersistenceRunnableTask
-from pyocean.coroutine import (GeventStrategy, GeventSimpleFactory, GeventPersistenceFactory,
-                               AsynchronousStrategy, AsynchronousSimpleFactory, AsynchronousPersistenceFactory)
+from pyocean.framework import PersistenceRunnableTask
+from pyocean.parallel import ParallelPersistenceFactory
 from pyocean.persistence import OceanPersistence
 from pyocean.persistence.database import BaseDao
 from pyocean.persistence.database.configuration import DatabaseConfig, DatabaseDriver, HostEnvType
@@ -17,7 +16,7 @@ from pyocean.logger import ocean_logger
 
 # code component
 from connection_strategy import SingleTestConnectionStrategy, MultiTestConnectionStrategy
-from dao import TestDao, AsyncTestDao
+from dao import TestDao
 from sql_query import SqlQuery
 
 from multiprocessing import cpu_count
@@ -25,7 +24,8 @@ import time
 
 
 
-class TestGreenletFactory(GeventPersistenceFactory):
+
+class TestParallelFactory(ParallelPersistenceFactory):
 
     def __init__(self, workers_number: int, db_connection_number: int):
         super().__init__(workers_number, db_connection_number)
@@ -33,37 +33,18 @@ class TestGreenletFactory(GeventPersistenceFactory):
 
 
     def persistence_strategy(self) -> OceanPersistence:
+        print("[DEBUG] start init connection strategy. pid - ", os.getpid())
         connection_strategy = MultiTestConnectionStrategy(
             configuration=DatabaseConfig(database_driver=DatabaseDriver.MySQL, host_type=HostEnvType.Localhost))
         # connection_strategy = SingleTestConnectionStrategy(
         #     configuration=DatabaseConfig(database_driver=DatabaseDriver.MySQL, host_type=HostEnvType.Localhost))
+        print("[DEBUG] end init connection strategy. pid - ", os.getpid())
         return connection_strategy
 
 
     def dao(self, connection_strategy: OceanPersistence) -> BaseDao:
         # sql_query_obj = DatabaseSqlQuery(strategy=connection_strategy)
         sql_query_obj = TestDao(connection_strategy=connection_strategy)
-        return sql_query_obj
-
-
-
-class TestAsyncFactory(AsynchronousPersistenceFactory):
-
-    def __init__(self, workers_number: int, db_connection_number: int):
-        super().__init__(workers_number, db_connection_number)
-        self.__logger = ocean_logger
-
-
-    def persistence_strategy(self) -> OceanPersistence:
-        connection_strategy = MultiTestConnectionStrategy(
-            configuration=DatabaseConfig(database_driver=DatabaseDriver.MySQL, host_type=HostEnvType.Localhost))
-        # connection_strategy = SingleTestConnectionStrategy(
-        #     configuration=DatabaseConfig(database_driver=DatabaseDriver.MySQL, host_type=HostEnvType.Localhost))
-        return connection_strategy
-
-
-    def dao(self, connection_strategy: OceanPersistence) -> BaseDao:
-        sql_query_obj = AsyncTestDao(connection_strategy=connection_strategy)
         return sql_query_obj
 
 
@@ -75,6 +56,7 @@ class TestCode:
     def __init__(self, process_num: int, db_connection_number: int):
         self.__process_num: int = process_num
         self.__db_connection_number: int = db_connection_number
+
         self.__logger = ocean_logger
 
 
@@ -86,12 +68,8 @@ class TestCode:
         :return:
         """
         # Initial running factory
-        # # Greenlet
-        # test_factory = TestGreenletFactory(workers_number=self.__process_num,
-        #                                    db_connection_number=self.__db_connection_number)
-        # # Asynchronous
-        test_factory = TestAsyncFactory(workers_number=self.__process_num,
-                                        db_connection_number=self.__db_connection_number)
+        test_factory = TestParallelFactory(workers_number=self.__process_num,
+                                           db_connection_number=self.__db_connection_number)
         # Initial running task object
         test_task = PersistenceRunnableTask(factory=test_factory)
         # Generate a running builder to start a multi-worker program
@@ -100,8 +78,9 @@ class TestCode:
 
         # Initial target tasks
         sql_tasks = [SqlQuery.GET_STOCK_DATA.value for _ in range(20)]
-        test_dao = test_factory.dao(connection_strategy=test_task.running_persistence())
-        test_task_builder.run(function=test_dao.run, tasks=sql_tasks)
+        test_dao = TestDao(connection_strategy=test_task.running_persistence())
+        # test_dao = test_factory.dao(connection_strategy=test_task.running_persistence())
+        test_task_builder.run(function=test_dao.get_test_data, tasks=sql_tasks)
 
 
     def __done(self) -> None:
