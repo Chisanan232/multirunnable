@@ -101,3 +101,11 @@ class AsynchronousProcedure(BaseRunnableProcedure):
     def after_treatment(self, *args, **kwargs) -> Union[object, None]:
         pass
 
+
+    @property
+    def result(self) -> Union[Iterable, None]:
+        if isinstance(self._Running_Strategy, Resultable):
+            return self._Running_Strategy.get_multi_working_result()
+        else:
+            return None
+
