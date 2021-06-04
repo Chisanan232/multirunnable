@@ -72,12 +72,12 @@ class TestCode:
         test_task = PersistenceRunnableTask(factory=test_factory)
         # Generate a running builder to start a multi-worker program
         # (it may be a multiprocessing, multithreading or multi-greenlet, etc.)
-        test_task_builder = test_task.generate()
+        test_task_procedure = test_task.generate()
 
         # Initial target tasks
         sql_tasks = [SqlQuery.GET_STOCK_DATA.value for _ in range(20)]
         test_dao = test_factory.dao(connection_strategy=test_task.running_persistence())
-        test_task_builder.run(function=test_dao.get_test_data, tasks=sql_tasks)
+        test_task_procedure.run(function=test_dao.get_test_data, tasks=sql_tasks)
 
 
     def __done(self) -> None:
