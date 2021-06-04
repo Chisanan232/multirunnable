@@ -21,6 +21,7 @@ from dao import TestDao, AsyncTestDao
 from sql_query import SqlQuery
 
 from multiprocessing import cpu_count
+from typing import Union
 import time
 
 
@@ -96,13 +97,15 @@ class TestCode:
         test_task = PersistenceRunnableTask(factory=test_factory)
         # Generate a running builder to start a multi-worker program
         # (it may be a multiprocessing, multithreading or multi-greenlet, etc.)
-        test_task_builder = test_task.generate()
+        test_task_procedure: Union[GeventProcedure, AsynchronousProcedure] = test_task.generate()
 
         # Initial target tasks
         sql_tasks = [SqlQuery.GET_STOCK_DATA.value for _ in range(20)]
         test_dao = AsyncTestDao(connection_strategy=test_task.running_persistence())
         # test_dao = test_factory.dao(connection_strategy=test_task.running_persistence())
-        test_task_builder.run(function=test_dao.get_test_data, tasks=sql_tasks)
+        test_task_procedure.run(function=test_dao.get_test_data, tasks=sql_tasks)
+        data = test_task_procedure.result
+        self.__logger.info(f"Final data: {data}")
 
 
     def __done(self) -> None:
