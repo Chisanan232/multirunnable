@@ -13,9 +13,9 @@ class BaseFileSaver(OceanPersistence):
     _File_Formatter: BaseFileFormatter = None
     __File_Formatter_Supper: List[str] = ["json", "csv", "xlsx"]
 
-    __File_Path: str = ""
-    __File_Opening_Mode: str = "a+"
-    __File_Encoding: str = "UTF-8"
+    _File_Path: str = ""
+    _File_Opening_Mode: str = "a+"
+    _File_Encoding: str = "UTF-8"
 
     def __init__(self, file_path: str, file_format: BaseFileFormatter):
         if len(file_path) != 0:
@@ -32,7 +32,7 @@ class BaseFileSaver(OceanPersistence):
     def __chk_file_is_valid(self, file_path: str) -> None:
         file_type = self.__get_file_type(file_path)
         if self.__file_type_is_valid(file_type):
-            self.__File_Path = file_path
+            self._File_Path = file_path
         else:
             raise NotSupportHandlingFileType
 
@@ -51,32 +51,32 @@ class BaseFileSaver(OceanPersistence):
 
     @property
     def file_path(self) -> str:
-        return self.__File_Path
+        return self._File_Path
 
 
     @file_path.setter
     def file_path(self, path: str) -> None:
-        self.__File_Path = path
+        self._File_Path = path
 
 
     @property
     def file_open_mode(self) -> str:
-        return self.__File_Opening_Mode
+        return self._File_Opening_Mode
 
 
     @file_open_mode.setter
     def file_open_mode(self, mode: str) -> None:
-        self.__File_Opening_Mode = mode
+        self._File_Opening_Mode = mode
 
 
     @property
     def file_encoding(self) -> str:
-        return self.__File_Encoding
+        return self._File_Encoding
 
 
     @file_encoding.setter
     def file_encoding(self, encoding: str) -> None:
-        self.__File_Encoding = encoding
+        self._File_Encoding = encoding
 
 
     @abstractmethod
@@ -88,7 +88,7 @@ class BaseFileSaver(OceanPersistence):
 class SingleFileSaver(BaseFileSaver):
 
     def save(self, data: list) -> None:
-        self._File_Formatter.open(file_path=self.__File_Path, open_mode=self.__File_Opening_Mode, encoding=self.__File_Encoding)
+        self._File_Formatter.open(file_path=self._File_Path, open_mode=self._File_Opening_Mode, encoding=self._File_Encoding)
         fin_data = self._File_Formatter.data_handling(data=data)
         self._File_Formatter.write(data=fin_data)
         self._File_Formatter.done()
