@@ -38,10 +38,10 @@ class CSVFormatter(BaseFileFormatter):
         self._File_IO_Wrapper = open(file=file_path, mode=open_mode, newline='', encoding=encoding)
 
 
-    def data_handling(self, data: list) -> list:
+    def data_handling(self, data: List[list]) -> list:
         csv_data: List[list] = []
         for i, d in enumerate(data):
-            self.__save_headers(index=i, data_list=csv_data, data_content=d)
+            # self.__save_headers(index=i, data_list=csv_data, data_content=d)
             self.__save_data_content(data_list=csv_data, data_content=d)
         return csv_data
 
@@ -55,8 +55,8 @@ class CSVFormatter(BaseFileFormatter):
         return index == 0
 
 
-    def __save_data_content(self, data_list: List[list], data_content: dict) -> None:
-        data_list.append(list(data_content.values()))
+    def __save_data_content(self, data_list: List[list], data_content: List) -> None:
+        data_list.append(data_content)
 
 
     def write(self, data: list) -> None:
@@ -91,7 +91,7 @@ class ExcelFormatter(BaseFileFormatter):
     def data_handling(self, data: list) -> list:
         excel_data: List[list] = []
         for i, d in enumerate(data):
-            self.__save_headers(index=i, data_list=excel_data, data_content=d)
+            # self.__save_headers(index=i, data_list=excel_data, data_content=d)
             self.__save_data_content(data_list=excel_data, data_content=d)
         return excel_data
 
@@ -105,8 +105,8 @@ class ExcelFormatter(BaseFileFormatter):
         return index == 0
 
 
-    def __save_data_content(self, data_list: List[list], data_content: dict) -> None:
-        data_list.append(list(data_content.values()))
+    def __save_data_content(self, data_list: List[list], data_content: List) -> None:
+        data_list.append(data_content)
 
 
     def write(self, data: list) -> None:
