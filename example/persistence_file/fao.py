@@ -7,12 +7,9 @@ import logging
 
 class TestFao:
 
-    __JSON_File_Path = "/Users/bryantliu/DevelopProject/KobeDevelopProject/Crawler-PyFrameworok/" \
-                       "apache-pyocean/example/sample_data/test_json_saver.json"
-    __CSV_File_Path = "/Users/bryantliu/DevelopProject/KobeDevelopProject/Crawler-PyFrameworok/" \
-                      "apache-pyocean/example/sample_data/test_json_saver.csv"
-    __Excel_File_Path = "/Users/bryantliu/DevelopProject/KobeDevelopProject/Crawler-PyFrameworok/" \
-                        "apache-pyocean/example/sample_data/test_json_saver.xlsx"
+    __JSON_File_Path = "<.json type path>"
+    __CSV_File_Path = "<.csv type path>"
+    __Excel_File_Path = "<.xlsx type path>"
 
     @classmethod
     def save_data_as_json(cls, data: Iterable):
