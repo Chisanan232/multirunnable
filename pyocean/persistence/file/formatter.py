@@ -1,5 +1,7 @@
+from pyocean.persistence.file.exceptions import DataRowFormatIsInvalidError
+
 from abc import ABCMeta, abstractmethod
-from typing import List
+from typing import List, Tuple, Iterable, Union
 from openpyxl import Workbook
 import json
 import csv
@@ -17,8 +19,54 @@ class BaseFileFormatter(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def data_handling(self, data: list) -> list:
-        pass
+    def data_handling(self, data: List[list]) -> Union[List[list], str]:
+        self.chk_data_rows_format(data=data)
+        return data
+
+
+    def chk_data_rows_format(self, data: Iterable):
+        """
+        Description:
+            Check the data format of data row is valid or invalid.
+            It will raise DataRowFormatIsInvalidError if the data
+            format is invalid.
+        :param data:
+        :return:
+        """
+        __checksum = map(self.__is_data_row, data)
+        if False in list(__checksum):
+            raise DataRowFormatIsInvalidError
+        else:
+            return data
+
+
+    def __is_data_row(self, data_row: Iterable):
+        """
+        Description:
+            First step: Checking first level of data format tree.
+        :param data_row:
+        :return:
+        """
+        if isinstance(data_row, List) or isinstance(data_row, Tuple):
+            return self.__is_data_content(data_row=data_row)
+        else:
+            return False
+
+
+    def __is_data_content(self, data_row: Iterable):
+        """
+        Description:
+            First step: Checking second level of data format tree.
+        :param data_row:
+        :return:
+        """
+        chk_data_content = map(
+            lambda row: False if isinstance(row, List) or isinstance(row, Tuple) else True,
+            data_row)
+        if False in list(chk_data_content):
+            return False
+        else:
+            return True
 
 
     @abstractmethod
@@ -38,25 +86,10 @@ class CSVFormatter(BaseFileFormatter):
         self._File_IO_Wrapper = open(file=file_path, mode=open_mode, newline='', encoding=encoding)
 
 
-    def data_handling(self, data: List[list]) -> list:
-        csv_data: List[list] = []
-        for i, d in enumerate(data):
-            # self.__save_headers(index=i, data_list=csv_data, data_content=d)
-            self.__save_data_content(data_list=csv_data, data_content=d)
+    def data_handling(self, data: List[list]) -> Union[List[list], str]:
+        data = super(CSVFormatter, self).data_handling(data=data)
+        csv_data: List[list] = [d for d in data]
         return csv_data
-
-
-    def __save_headers(self, index: int, data_list: List[list], data_content: dict) -> None:
-        if self.__is_headers(index):
-            data_list.append(list(data_content.keys()))
-
-
-    def __is_headers(self, index: int) -> bool:
-        return index == 0
-
-
-    def __save_data_content(self, data_list: List[list], data_content: List) -> None:
-        data_list.append(data_content)
 
 
     def write(self, data: list) -> None:
@@ -88,25 +121,10 @@ class ExcelFormatter(BaseFileFormatter):
         self.__Work_Sheet_Page = self._File_IO_Wrapper.create_sheet(index=0, title=self.__Sheet_Page_Name)
 
 
-    def data_handling(self, data: list) -> list:
-        excel_data: List[list] = []
-        for i, d in enumerate(data):
-            # self.__save_headers(index=i, data_list=excel_data, data_content=d)
-            self.__save_data_content(data_list=excel_data, data_content=d)
-        return excel_data
-
-
-    def __save_headers(self, index: int, data_list: List[list], data_content: dict) -> None:
-        if self.__is_headers(index):
-            data_list.append(list(data_content.keys()))
-
-
-    def __is_headers(self, index: int) -> bool:
-        return index == 0
-
-
-    def __save_data_content(self, data_list: List[list], data_content: List) -> None:
-        data_list.append(data_content)
+    def data_handling(self, data: List[list]) -> Union[List[list], str]:
+        data = super(ExcelFormatter, self).data_handling(data=data)
+        csv_data: List[list] = [d for d in data]
+        return csv_data
 
 
     def write(self, data: list) -> None:
@@ -125,7 +143,8 @@ class JSONFormatter(BaseFileFormatter):
         self._File_IO_Wrapper = open(file=file_path, mode=open_mode, encoding=encoding)
 
 
-    def data_handling(self, data: list) -> list:
+    def data_handling(self, data: List[list]) -> Union[List[list], str]:
+        # data = super(JSONFormatter, self).data_handling(data=data)
         json_data = json.dumps(data, ensure_ascii=False)
         return json_data
 
