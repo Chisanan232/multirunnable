@@ -5,7 +5,7 @@ from pyocean.logger import ocean_logger
 
 from mysql.connector import Error
 from mysql.connector.cursor import MySQLCursor
-from typing import Dict, Callable, Union
+from typing import Dict, Tuple, Iterable, Callable, Union
 import datetime
 import decimal
 import os
@@ -68,22 +68,35 @@ class TestDao(BaseDao):
 
 
     def executing_result(self, running_state, data, exception_info) -> Dict[str, object]:
-        data = self.__data_type_handling(data=data)
-        return {"pid": os.getpid(), "state": running_state, "data": data, "exception_info": exception_info}
+        self._logger.debug(f"SQL result data: {data}")
+        __handled_data = data
+        if __handled_data is not None:
+            __handled_data = self.iterate_data_rows(data=data)
+        self._logger.debug(f"Handling finish and final data is: {__handled_data}")
+        return {
+            "pid": os.getpid(),
+            "state": running_state,
+            "data": __handled_data,
+            "exception_info": exception_info
+        }
 
 
-    def __data_type_handling(self, data):
-        __new_data = []
-        for one_data_row in data:
-            for d in one_data_row:
-                if isinstance(d, datetime.datetime):
-                    f = '%Y-%m-%d %H:%M:%S'
-                    new_d = datetime.datetime.strftime(d, f)
-                    __new_data.append(new_d)
-                if isinstance(d, decimal.Decimal):
-                    new_d = float(d)
-                    __new_data.append(new_d)
-        return __new_data
+    def iterate_data_rows(self, data: Tuple[Tuple]):
+        new_data = map(self.__data_type_handling, data)
+        return list(new_data)
+
+
+    def __data_type_handling(self, data: Iterable):
+        new_data = []
+        for d in data:
+            if isinstance(d, datetime.datetime):
+                f = '%Y-%m-%d %H:%M:%S'
+                new_d = datetime.datetime.strftime(d, f)
+                new_data.append(new_d)
+            if isinstance(d, decimal.Decimal):
+                new_d = float(d)
+                new_data.append(new_d)
+        return new_data
 
 
 
