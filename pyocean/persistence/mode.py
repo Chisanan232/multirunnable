@@ -1,9 +1,3 @@
-from .database.connection import BaseConnection
-from .database.single_connection import SingleConnection
-from .database.multi_connections import MultiConnections
-from .file.saver import SingleFileSaver, MultiFileSaver
-from .file.formatter import BaseFileFormatter, JSONFormatter, CSVFormatter, ExcelFormatter
-
 from enum import Enum
 
 
@@ -33,27 +27,9 @@ class PersistenceMode(Enum):
     DATABASE_MODE = "database"
     FILE_MODE = "file"
 
+    SINGLE_DATABASE_CONNECTION = ""
+    MULTI_DATABASE_CONNECTION = ""
 
-
-class DatabaseMode(Enum):
-
-    # By the class object
-    # SINGLE_CONNECTION = SingleConnection()
-    # MULTI_CONNECTIONS = MultiConnections()
-
-    # By the class object
-    SINGLE_CONNECTION = "SingleConnection"
-    MULTI_CONNECTIONS = "MultiConnections"
-
-
-
-class FileMode(Enum):
-
-    SINGLE_JSON_STRATEGY = SingleFileSaver(file_path="/Users/bryantliu/Downloads/test.json", file_format=JSONFormatter())
-    SINGLE_CSV_STRATEGY = SingleFileSaver(file_path="/Users/bryantliu/Downloads/test.csv", file_format=CSVFormatter())
-    SINGLE_EXCEL_STRATEGY = SingleFileSaver(file_path="/Users/bryantliu/Downloads/test.xlsx", file_format=ExcelFormatter())
-
-    MULTIPLE_JSON_STRATEGY = MultiFileSaver(file_path="/Users/bryantliu/Downloads/test.json", file_format=JSONFormatter())
-    MULTIPLE_CSV_STRATEGY = MultiFileSaver(file_path="/Users/bryantliu/Downloads/test.csv", file_format=CSVFormatter())
-    MULTIPLE_EXCEL_STRATEGY = MultiFileSaver(file_path="/Users/bryantliu/Downloads/test.xlsx", file_format=ExcelFormatter())
+    SINGLE_FILE_IO = ""
+    MULTI_FILE_IO = ""
 
