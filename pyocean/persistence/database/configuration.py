@@ -142,7 +142,10 @@ class PropertiesUtil:
         :return:
         """
         root_dir = pathlib.Path(__file__).parent.parent.parent.parent
-        file = os.path.join(root_dir, "sources", "database_configuration", f"{self.__Database_Driver}_config.properties")
+        # # deprecated path
+        # file = os.path.join(root_dir, "sources", "database_configuration", f"{self.__Database_Driver}_config.properties")
+        # # new
+        file = os.path.join(root_dir, "sources", "config", "database", f"{self.__Database_Driver}_config.properties")
         return file
         # file_path = __file__.split(sep="/")[:-1]
         # file_path.extend(["configuration", self.__Database_Driver + "_config.properties"])
