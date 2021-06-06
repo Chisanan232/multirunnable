@@ -1,8 +1,10 @@
 from pyocean.operator import MultiRunnableOperator, AsyncRunnableOperator
 from pyocean.persistence.interface import OceanPersistence, OceanDao
+from pyocean.persistence.mode import PersistenceMode
 from pyocean.persistence.database.connection import BaseConnection
+from pyocean.persistence.database.exceptions import PersistenceModeIsInvalid
 
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from typing import Dict, Union
 import os
 
@@ -141,4 +143,194 @@ class BaseDao(OceanDao):
         :return:
         """
         pass
+
+
+
+class AbstractedMultiWorkBaseDao(BaseDao):
+
+    @abstractmethod
+    def query_with_lock(self, sql_query: str):
+        pass
+
+
+    @abstractmethod
+    def query_with_rlock(self, sql_query: str):
+        pass
+
+
+    @abstractmethod
+    def query_with_semaphore(self, sql_query: str):
+        pass
+
+
+    @abstractmethod
+    def query_with_bounded_semaphore(self, sql_query: str):
+        pass
+
+
+
+class AbstractedAsyncBaseDao(BaseDao):
+
+    @abstractmethod
+    async def query_with_lock(self, sql_query: str):
+        pass
+
+
+    @abstractmethod
+    async def query_with_rlock(self, sql_query: str):
+        pass
+
+
+    @abstractmethod
+    async def query_with_semaphore(self, sql_query: str):
+        pass
+
+
+    @abstractmethod
+    async def query_with_bounded_semaphore(self, sql_query: str):
+        pass
+
+
+
+class MultiWorkBaseDao(AbstractedMultiWorkBaseDao, ABC):
+
+    def get_one_sql_task(self) -> object:
+        """
+        Description: (is it used ?)
+            Get one task from Queue.
+        :return:
+        """
+        return MultiRunnableOperator.get_one_value_of_queue()
+
+
+    def get_all_sql_tasks(self) -> object:
+        """
+        Description: (is it used ?)
+            Get all tasks (Queue).
+        :return:
+        """
+        return MultiRunnableOperator.get_queue()
+
+
+    def query_with_lock(self, sql_query: str):
+        data = MultiRunnableOperator.run_with_lock(
+            function=self.running_sql_query_process,
+            kwarg={"sql_query": sql_query}
+        )
+        return data
+
+
+    def query_with_rlock(self, sql_query: str):
+        data = MultiRunnableOperator.run_with_lock(
+            function=self.running_sql_query_process,
+            kwarg={"sql_query": sql_query}
+        )
+        return data
+
+
+    def query_with_semaphore(self, sql_query: str):
+        data = MultiRunnableOperator.run_with_semaphore(
+            function=self.running_sql_query_process,
+            kwarg={"sql_query": sql_query}
+        )
+        print(f"at fun 'run': {data}")
+        return data
+
+
+    def query_with_bounded_semaphore(self, sql_query: str):
+        data = MultiRunnableOperator.run_with_bounded_semaphore(
+            function=self.running_sql_query_process,
+            kwarg={"sql_query": sql_query}
+        )
+        print(f"at fun 'run': {data}")
+        return data
+
+
+    def run_with_mode(self, mode: PersistenceMode, sql_query: str):
+        if mode is PersistenceMode.SINGLE_DATABASE_CONNECTION:
+            data = MultiRunnableOperator.run_with_lock(
+                function=self.running_sql_query_process,
+                kwarg={"sql_query": sql_query}
+            )
+        elif mode is PersistenceMode.MULTI_DATABASE_CONNECTION:
+            data = MultiRunnableOperator.run_with_bounded_semaphore(
+                function=self.running_sql_query_process,
+                kwarg={"sql_query": sql_query}
+            )
+        else:
+            raise PersistenceModeIsInvalid
+
+        return data
+
+
+
+class AsyncBaseDao(AbstractedAsyncBaseDao, ABC):
+
+    async def get_one_sql_task(self) -> object:
+        """
+        Description: (is it used ?)
+            Get one task from Queue.
+        :return:
+        """
+        return await AsyncRunnableOperator.get_one_value_of_queue()
+
+
+    def get_all_sql_tasks(self) -> object:
+        """
+        Description: (is it used ?)
+            Get all tasks (Queue).
+        :return:
+        """
+        return AsyncRunnableOperator.get_queue()
+
+
+    async def query_with_lock(self, sql_query: str):
+        data = await AsyncRunnableOperator.run_with_lock(
+            function=self.running_sql_query_process,
+            kwarg={"sql_query": sql_query}
+        )
+        return data
+
+
+    async def query_with_rlock(self, sql_query: str):
+        data = await AsyncRunnableOperator.run_with_lock(
+            function=self.running_sql_query_process,
+            kwarg={"sql_query": sql_query}
+        )
+        return data
+
+
+    async def query_with_semaphore(self, sql_query: str):
+        data = await AsyncRunnableOperator.run_with_semaphore(
+            function=self.running_sql_query_process,
+            kwarg={"sql_query": sql_query}
+        )
+        print(f"at fun 'run': {data}")
+        return data
+
+
+    async def query_with_bounded_semaphore(self, sql_query: str):
+        data = await AsyncRunnableOperator.run_with_bounded_semaphore(
+            function=self.running_sql_query_process,
+            kwarg={"sql_query": sql_query}
+        )
+        print(f"at fun 'run': {data}")
+        return data
+
+
+    async def run_with_mode(self, mode: PersistenceMode, sql_query: str):
+        if mode is PersistenceMode.SINGLE_DATABASE_CONNECTION:
+            data = await AsyncRunnableOperator.run_with_lock(
+                function=self.running_sql_query_process,
+                kwarg={"sql_query": sql_query}
+            )
+        elif mode is PersistenceMode.MULTI_DATABASE_CONNECTION:
+            data = await AsyncRunnableOperator.run_with_bounded_semaphore(
+                function=self.running_sql_query_process,
+                kwarg={"sql_query": sql_query}
+            )
+        else:
+            raise PersistenceModeIsInvalid
+
+        return data
 
