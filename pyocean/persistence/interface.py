@@ -10,3 +10,8 @@ class OceanPersistence(metaclass=ABCMeta):
 class OceanDao(metaclass=ABCMeta):
     pass
 
+
+
+class OceanFao(metaclass=ABCMeta):
+    pass
+
