@@ -23,3 +23,10 @@ class DataRowFormatIsInvalidError(RuntimeError):
 
     def __str__(self):
         return "Data row format is invalid. Please check the final step which you got  the result data from process."
+
+
+class PersistenceModeIsInvalid(Exception):
+
+    def __str__(self):
+        return "Mode is incorrect. " \
+               "Please use pyocean.persistence.mode.PersistenceMode."
