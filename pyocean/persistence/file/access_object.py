@@ -1,8 +1,8 @@
 from pyocean.persistence.interface import OceanFao
 from pyocean.persistence.mode import PersistenceMode
-from pyocean.persistence.file.saver import BaseFileSaver
-from pyocean.persistence.file.formatter import BaseFileFormatter
 from pyocean.persistence.file.configuration import FileConfig
+from pyocean.persistence.file.saver import SingleFileSaver
+from pyocean.persistence.file.formatter import BaseFileFormatter
 from pyocean.persistence.file.exceptions import PersistenceModeIsInvalid
 
 from abc import ABCMeta, ABC, abstractmethod
@@ -19,12 +19,18 @@ class BaseFao(OceanFao):
         self._dir = FileConfig.saving_directory
 
 
-    def save(self, data: Union[List, Tuple]):
+    @property
+    @abstractmethod
+    def file_path(self) -> str:
+        pass
+
+
+    def save(self, data: Union[List, Tuple],  formatter: BaseFileFormatter):
         checksum = None
         error = None
         try:
             data = self.data_handling(data=data)
-            self.data_saving(data=data)
+            self.data_saving(data=data, formatter=formatter)
         except Exception as e:
             error = e
         else:
@@ -33,49 +39,57 @@ class BaseFao(OceanFao):
             return checksum, error
 
 
-    @abstractmethod
     def data_handling(self, data: Union[List, Tuple]) -> Union[List, Tuple]:
-        pass
+        return data
 
 
     @abstractmethod
-    def data_saving(self, data: Union[List, Tuple]) -> None:
+    def data_saving(self, data: Union[List, Tuple],  formatter: BaseFileFormatter) -> None:
         pass
 
 
-    def save_data_as_json(self, file_path: str, data: Union[List, Tuple]):
-        __saver = SingleFileSaver(file_path=file_path, file_format=JSONFormatter())
-        if isinstance(data, List):
-            __saver.save(data=data)
+    def data_saving_with_mode(self, mode: PersistenceMode) -> None:
+        if mode is PersistenceMode.SINGLE_FILE_IO:
+            pass
+        elif mode is PersistenceMode.MULTI_FILE_IO:
+            pass
         else:
-            logging.warning("The data structure is not perfectly mapping.")
-            __saver.save(data=data)
-
-
-    def save_data_as_csv(self, data: Union[List[Union[List, Tuple]], Tuple[Union[List, Tuple]]]):
-        __saver = SingleFileSaver(file_path=cls.__CSV_File_Path, file_format=CSVFormatter())
-        if isinstance(data, List):
-            __saver.save(data=data)
-        else:
-            logging.warning("The data structure is not perfectly mapping.")
-            __saver.save(data=data)
-
-
-    def save_data_as_excel(self, data: Union[List[Union[List, Tuple]], Tuple[Union[List, Tuple]]]):
-        __saver = SingleFileSaver(file_path=cls.__Excel_File_Path, file_format=ExcelFormatter())
-        if isinstance(data, List):
-            __saver.save(data=data)
-        else:
-            logging.warning("The data structure is not perfectly mapping.")
-            __saver.save(data=data)
+            raise PersistenceModeIsInvalid
 
 
 
 class SingleFao(BaseFao):
-    pass
+
+    @property
+    def file_path(self) -> str:
+        return self._dir + self._file_name + self._file_type
+
+
+    def data_saving(self, data: Union[List, Tuple],  formatter: BaseFileFormatter) -> None:
+        __saver = SingleFileSaver(file_path=self.file_path, file_format=formatter)
+        if isinstance(data, List):
+            __saver.save(data=data)
+        else:
+            logging.warning("The data structure is not perfectly mapping.")
+            __saver.save(data=data)
 
 
 
 class MultiFao(BaseFao):
-    pass
+
+    @property
+    def file_path(self) -> str:
+        # Need to check the zip directory and file  path.
+        pass
+
+
+    @property
+    @abstractmethod
+    def compression_path(self) -> str:
+        pass
+
+
+    @abstractmethod
+    def compress_process(self) -> None:
+        pass
 
