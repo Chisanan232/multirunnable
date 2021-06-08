@@ -1,5 +1,5 @@
 from pyocean.persistence.file.types import CompressObject
-from pyocean.persistence.file.formatter import BaseFileStream
+from pyocean.persistence.file.formatter import BaseDataFormatter
 from pyocean.persistence.file.configuration import FileConfig
 
 from abc import ABCMeta, abstractmethod
@@ -30,15 +30,15 @@ class BaseArchiver(metaclass=ABCMeta):
         self._Archiver_Mode = mode
 
 
-    def compress(self, file: Union[BaseFileStream, List[BaseFileStream]]):
+    def compress(self, data: Union[BaseDataFormatter, List[BaseDataFormatter]]):
         """
         Description:
             Compress file(s) which saving target data with specific file format.
-        :param file:
+        :param data:
         :return:
         """
         self._Archiver = self.init()
-        self.write(file=file)
+        self.write(data=data)
         self.close()
 
 
@@ -54,22 +54,22 @@ class BaseArchiver(metaclass=ABCMeta):
 
     @overload
     @abstractmethod
-    def write(self, files: List[BaseFileStream]) -> None:
+    def write(self, data: List[BaseDataFormatter]) -> None:
         """
         Description:
             Write data into target file in archiver.
-        :param files:
+        :param data:
         :return:
         """
         pass
 
 
     @abstractmethod
-    def write(self, file: BaseFileStream) -> None:
+    def write(self, data: BaseDataFormatter) -> None:
         """
         Description:
             Write data into target file in archiver.
-        :param file:
+        :param data:
         :return:
         """
         pass
@@ -98,13 +98,13 @@ class ZipArchiver(BaseArchiver):
 
 
     @overload
-    def write(self, files: List[BaseFileStream]) -> None:
-        for __file in files:
-            self.write(file=__file)
+    def write(self, data: List[BaseDataFormatter]) -> None:
+        for __data in data:
+            self.write(data=__data)
 
 
-    def write(self, file: BaseFileStream) -> None:
-        self._Archiver.writestr(zinfo_or_arcname=file.file_path, data=file.data)
+    def write(self, data: BaseDataFormatter) -> None:
+        self._Archiver.writestr(zinfo_or_arcname=data.file_path, data=data.data)
 
 
     def close(self) -> None:
