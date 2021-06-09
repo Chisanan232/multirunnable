@@ -60,6 +60,12 @@ class BaseFao(OceanFao):
 
 class SingleFao(BaseFao):
 
+    """
+    Single files saving strategy:
+    Saving final data which has been integrated and handled to
+    file(s) in Main Thread.
+    """
+
     @property
     def file_path(self) -> str:
         return self._dir + self._file_name + self._file_type
@@ -77,9 +83,18 @@ class SingleFao(BaseFao):
 
 class MultiFao(BaseFao):
 
+    """
+    Multiple files saving strategy:
+    Saving file(s) in each workers and compress all file(s) in Main Thread.
+    """
+
     @property
     def file_path(self) -> str:
-        # Need to check the zip directory and file  path.
+        pass
+
+
+    @property
+    def archiver_path(self) -> str:
         pass
 
 
