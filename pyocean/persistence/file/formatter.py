@@ -1,10 +1,12 @@
 from pyocean.persistence.file.exceptions import DataRowFormatIsInvalidError
+from pyocean.persistence.file.configuration import FileConfig, ArchiverConfig
 
 from abc import ABCMeta, abstractmethod
 from typing import List, Tuple, Iterable, Union
 from openpyxl import Workbook
 import json
 import csv
+import io
 
 
 
@@ -20,11 +22,11 @@ class BaseFileFormatter(metaclass=ABCMeta):
 
     @abstractmethod
     def data_handling(self, data: List[list]) -> Union[List[list], str]:
-        self.chk_data_rows_format(data=data)
-        return data
+        new_data = self.chk_data_rows_format(data=data)
+        return new_data
 
 
-    def chk_data_rows_format(self, data: Iterable):
+    def chk_data_rows_format(self, data: Iterable) -> List:
         """
         Description:
             Check the data format of data row is valid or invalid.
@@ -40,7 +42,7 @@ class BaseFileFormatter(metaclass=ABCMeta):
             return data
 
 
-    def __is_data_row(self, data_row: Iterable):
+    def __is_data_row(self, data_row: Iterable) -> bool:
         """
         Description:
             First step: Checking first level of data format tree.
@@ -53,7 +55,7 @@ class BaseFileFormatter(metaclass=ABCMeta):
             return False
 
 
-    def __is_data_content(self, data_row: Iterable):
+    def __is_data_content(self, data_row: Iterable) -> bool:
         """
         Description:
             First step: Checking second level of data format tree.
@@ -80,14 +82,14 @@ class BaseFileFormatter(metaclass=ABCMeta):
 
 
 
-class CSVFormatter(BaseFileFormatter):
+class CsvFileFormatter(BaseFileFormatter):
 
     def open(self, file_path: str, open_mode: str, encoding: str) -> None:
         self._File_IO_Wrapper = open(file=file_path, mode=open_mode, newline='', encoding=encoding)
 
 
     def data_handling(self, data: List[list]) -> Union[List[list], str]:
-        data = super(CSVFormatter, self).data_handling(data=data)
+        data = super(CsvFileFormatter, self).data_handling(data=data)
         csv_data: List[list] = [d for d in data]
         return csv_data
 
@@ -103,7 +105,7 @@ class CSVFormatter(BaseFileFormatter):
 
 
 
-class ExcelFormatter(BaseFileFormatter):
+class ExcelFileFormatter(BaseFileFormatter):
 
     # __Work_Book = None
     __Work_Sheet_Page = None
@@ -122,7 +124,7 @@ class ExcelFormatter(BaseFileFormatter):
 
 
     def data_handling(self, data: List[list]) -> Union[List[list], str]:
-        data = super(ExcelFormatter, self).data_handling(data=data)
+        data = super(ExcelFileFormatter, self).data_handling(data=data)
         csv_data: List[list] = [d for d in data]
         return csv_data
 
@@ -137,14 +139,13 @@ class ExcelFormatter(BaseFileFormatter):
 
 
 
-class JSONFormatter(BaseFileFormatter):
+class JsonFileFormatter(BaseFileFormatter):
 
     def open(self, file_path: str, open_mode: str, encoding: str) -> None:
         self._File_IO_Wrapper = open(file=file_path, mode=open_mode, encoding=encoding)
 
 
     def data_handling(self, data: List[list]) -> Union[List[list], str]:
-        # data = super(JSONFormatter, self).data_handling(data=data)
         json_data = json.dumps(data, ensure_ascii=False)
         return json_data
 
@@ -155,3 +156,79 @@ class JSONFormatter(BaseFileFormatter):
 
     def done(self) -> None:
         self._File_IO_Wrapper.close()
+
+
+
+class BaseDataFormatterString(metaclass=ABCMeta):
+
+    @property
+    @abstractmethod
+    def file_path(self) -> str:
+        return self.__chk_path()
+
+
+    def __chk_path(self) -> str:
+        """
+        Not finish yet.
+        :return:
+        """
+        file_save_dirs = FileConfig.saving_directory
+        file_names = FileConfig.file_name
+        archiver_paths = ArchiverConfig.compress_path
+        archiver_types = ArchiverConfig.compress_type
+
+        return ""
+
+
+    @file_path.setter
+    @abstractmethod
+    def file_path(self, path: str) -> None:
+        pass
+
+
+    @abstractmethod
+    def data_string(self, data: List[list]) -> Union[str, bytes]:
+        pass
+
+
+
+class CsvDataString(BaseDataFormatterString):
+
+    __File_Path = ""
+
+    @property
+    def file_path(self) -> str:
+        return ""
+
+
+    @file_path.setter
+    def file_path(self, path: str) -> None:
+        self.__File_Path = path
+
+
+    def data_string(self, data: List[list]) -> Union[str, bytes]:
+        string_io = io.StringIO()
+        csv_writer = csv.writer(string_io)
+        for __data_row in data:
+            csv_writer.writerow(__data_row)
+        return string_io.read()
+
+
+
+class JsonDataString(BaseDataFormatterString):
+
+    __File_Path = ""
+
+    @property
+    def file_path(self) -> str:
+        return ""
+
+
+    @file_path.setter
+    def file_path(self, path: str) -> None:
+        self.__File_Path = path
+
+
+    def data_string(self, data: List[list]) -> Union[str, bytes]:
+        json_data = json.dumps(data, ensure_ascii=False)
+        return json_data
