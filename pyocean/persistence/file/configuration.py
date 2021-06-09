@@ -1,6 +1,3 @@
-from pyocean.persistence.database.exceptions import InvalidDriverException, InvalidHostTypeException
-
-from abc import ABCMeta, abstractmethod
 from enum import Enum
 from typing import List
 import configparser
@@ -9,55 +6,21 @@ import os
 
 
 
-class BaseConfiguration(metaclass=ABCMeta):
+class ConfigType(Enum):
 
-    @property
-    @abstractmethod
-    def file_type(self) -> str:
-        """
-        Description:
-            Get username.
-        :return:
-        """
-        pass
-
-
-    @property
-    @abstractmethod
-    def file_name(self) -> str:
-        """
-        Description:
-            Get password.
-        :return:
-        """
-        pass
-
-
-    @property
-    @abstractmethod
-    def saving_directory(self) -> str:
-        """
-        Description:
-            Get host.
-        :return:
-        """
-        pass
+    FILE_GROUP = "file"
+    ARCHIVER_GROUP = "archiver"
 
 
 
-class BaseConfigurationKey(Enum):
+class DefaultConfig(Enum):
 
-    FILE_TYPE = "type"
-    FILE_NAME = "name"
-    SAVE_DIRECTORY = "path"
+    FILE_TYPE = "json,csv,xlsx"
+    FILE_NAME = "example_data"
+    FILE_SAVE_DIRECTORY = "/Users/bryantliu/Downloads"
 
-
-
-class BaseConfigDefaultValue(Enum):
-
-    FILE_TYPE = ""
-    FILE_NAME = ""
-    SAVE_DIRECTORY = ""
+    ARCHIVER_TYPE = "zip"
+    ARCHIVER_PATH = "/Users/bryantliu/Downloads/example_data"
 
 
 
@@ -66,8 +29,9 @@ class PropertiesUtil:
     _Config_Parser: configparser.RawConfigParser = None
     __Properties_Key = "pyocean"
 
-    def __init__(self):
+    def __init__(self, config_type: ConfigType):
         self.__Config_Parser = configparser.RawConfigParser()
+        self.__config_type = config_type
         config_file = self.__get_config_path()
         ## Method 1.
         # file = open(config_file, encoding="utf-8")
@@ -105,16 +69,17 @@ class PropertiesUtil:
         :return:
         """
         property_key = self.__Properties_Key
-        return f"{property_key}.file.local."
+        return f"{property_key}.{self.__config_type.value}.local."
 
 
 
-class FileConfig(BaseConfiguration):
+class FileConfig:
 
     __PropertiesOptUtil = None
+    __Config_Type = ConfigType.FILE_GROUP
 
     def __init__(self):
-        self.__PropertiesOptUtil = PropertiesUtil()
+        self.__PropertiesOptUtil = PropertiesUtil(config_type=self.__Config_Type)
         self.__property_key = self.__PropertiesOptUtil.property_key()
 
 
@@ -130,5 +95,26 @@ class FileConfig(BaseConfiguration):
 
     @property
     def saving_directory(self) -> List[str]:
+        return self.__PropertiesOptUtil.get_value_as_list(property_key=f"{self.__property_key}path")
+
+
+
+class ArchiverConfig:
+
+    __PropertiesOptUtil = None
+    __Config_Type = ConfigType.ARCHIVER_GROUP
+
+    def __init__(self):
+        self.__PropertiesOptUtil = PropertiesUtil(config_type=self.__Config_Type)
+        self.__property_key = self.__PropertiesOptUtil.property_key()
+
+
+    @property
+    def compress_type(self) -> List[str]:
+        return self.__PropertiesOptUtil.get_value_as_list(property_key=f"{self.__property_key}path")
+
+
+    @property
+    def compress_path(self) -> List[str]:
         return self.__PropertiesOptUtil.get_value_as_list(property_key=f"{self.__property_key}path")
 
