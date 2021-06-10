@@ -6,6 +6,14 @@ import os
 
 
 
+class SupportConfig:
+
+    File_Format: List[str] = ["json", "csv", "xlsx"]
+    Data_String_Format: List[str] = ["json", "csv"]
+    Archiver_Format: List[str] = ["zip"]
+
+
+
 class ConfigType(Enum):
 
     FILE_GROUP = "file"
@@ -89,13 +97,13 @@ class FileConfig:
 
 
     @property
-    def file_name(self) -> List[str]:
-        return self.__PropertiesOptUtil.get_value_as_list(property_key=f"{self.__property_key}name")
+    def file_name(self) -> str:
+        return self.__PropertiesOptUtil.get_value_as_str(property_key=f"{self.__property_key}name")
 
 
     @property
-    def saving_directory(self) -> List[str]:
-        return self.__PropertiesOptUtil.get_value_as_list(property_key=f"{self.__property_key}path")
+    def saving_directory(self) -> str:
+        return self.__PropertiesOptUtil.get_value_as_str(property_key=f"{self.__property_key}path")
 
 
 
@@ -112,6 +120,11 @@ class ArchiverConfig:
     @property
     def compress_type(self) -> List[str]:
         return self.__PropertiesOptUtil.get_value_as_list(property_key=f"{self.__property_key}path")
+
+
+    @property
+    def compress_name(self) -> str:
+        return self.__PropertiesOptUtil.get_value_as_str(property_key=f"{self.__property_key}name")
 
 
     @property
