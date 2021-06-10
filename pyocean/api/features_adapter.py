@@ -3,11 +3,10 @@ from pyocean.api.mode import RunningMode
 
 from importlib import import_module
 from typing import Dict, Callable
+import logging
 
 
 _Package: str = "pyocean"
-# _Parallel_Module: str = "..parallel.features"
-# _Concurrent_Module: str = "..concurrent.features"
 _Parallel_Module: str = ".parallel.features"
 _Concurrent_Module: str = ".concurrent.features"
 
@@ -29,11 +28,11 @@ class RunningStrategyAPI(BaseAPI):
         self.__module_info: str = __running_info.get("module")
         self.__class_info: str = __running_info.get("class")
         self.__package = import_module(name=self.__module_info, package=_Package)
-        print("package obj: ", self.__package)
+        logging.debug(f"package obj: {self.__package}")
         self.__class: Callable = getattr(self.__package, self.__class_info)
         self.__class_instance = self.__class()
-        print("__class: ", self.__class)
-        print("__class_instance: ", self.__class_instance)
+        logging.debug(f"__class: {self.__class}")
+        logging.debug(f"__class_instance: {self.__class_instance}")
 
 
     def lock(self):
