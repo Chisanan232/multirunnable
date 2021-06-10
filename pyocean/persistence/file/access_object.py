@@ -1,17 +1,23 @@
 from pyocean.persistence.interface import OceanFao
 from pyocean.persistence.mode import PersistenceMode
-from pyocean.persistence.file.configuration import FileConfig
-from pyocean.persistence.file.saver import SingleFileSaver
-from pyocean.persistence.file.formatter import BaseFileFormatter
+from pyocean.persistence.file.configuration import SupportConfig, FileConfig, ArchiverConfig
+from pyocean.persistence.file.saver import SingleFileSaver, MultiFileSaver, ArchiverSaver
+from pyocean.persistence.file.formatter import BaseFileFormatter, BaseDataFormatterString
+from pyocean.persistence.file.compress import BaseArchiver
 from pyocean.persistence.file.exceptions import PersistenceModeIsInvalid
 
 from abc import ABCMeta, ABC, abstractmethod
-from typing import List, Tuple, Iterable, Union
+from typing import List, Tuple, Iterable, Callable, Union
 import logging
+import os
 
 
 
 class BaseFao(OceanFao):
+
+    """
+    File Access Object (FAO).
+    """
 
     def __init__(self):
         self._file_name = FileConfig.file_name
@@ -67,8 +73,9 @@ class SingleFao(BaseFao):
     """
 
     @property
-    def file_path(self) -> str:
-        return self._dir + self._file_name + self._file_type
+    def file_path(self) -> List[str]:
+        file_types = self._file_type.split(sep=",")
+        return [os.path.join(self._dir, f"{self._file_name}.{__file_type}") for __file_type in file_types]
 
 
     def data_saving(self, data: Union[List, Tuple],  formatter: BaseFileFormatter) -> None:
@@ -88,20 +95,24 @@ class MultiFao(BaseFao):
     Saving file(s) in each workers and compress all file(s) in Main Thread.
     """
 
+    def __init__(self):
+        super().__init__()
+        self.__archiver_type = ArchiverConfig.compress_type
+        self.__archiver_name = ArchiverConfig.compress_name
+        self.__archiver_path = ArchiverConfig.compress_path
+
+
     @property
-    def file_path(self) -> str:
-        pass
+    def file_path(self) -> List[str]:
+        file_types = self._file_type.split(sep=",")
+        return [f"{self._file_name}.{__file_type}" for __file_type in file_types]
 
 
     @property
     def archiver_path(self) -> str:
-        pass
-
-
-    @property
-    @abstractmethod
-    def compression_path(self) -> str:
-        pass
+        archiver_file_name = f"{self.__archiver_name}.{self.__archiver_type}"
+        __path = os.path.join(self.__archiver_path, archiver_file_name)
+        return __path
 
 
     @abstractmethod
