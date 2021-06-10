@@ -1,5 +1,7 @@
 from pyocean.persistence.interface import OceanPersistence
-from pyocean.persistence.file.formatter import BaseFileFormatter
+from pyocean.persistence.file.formatter import BaseFileFormatter, BaseDataFormatterString
+from pyocean.persistence.file.compress import BaseArchiver
+from pyocean.persistence.file.utils import FileImportUtils
 from pyocean.persistence.file.exceptions import FilePathCannotBeEmpty, ClassNotInstanceOfBaseFileFormatter, NotSupportHandlingFileType
 
 from abc import ABCMeta, abstractmethod
@@ -105,8 +107,59 @@ class MultiFileSaver(BaseFileSaver):
         :param data:
         :return:
         """
+        self._File_Formatter.open(file_path=self._File_Path, open_mode=self._File_Opening_Mode, encoding=self._File_Encoding)
+        fin_data = self._File_Formatter.data_handling(data=data)
+        self._File_Formatter.write(data=fin_data)
+        self._File_Formatter.done()
+
+
+
+class BaseArchiverSaver(metaclass=ABCMeta):
+
+    def __init__(self, archiver: BaseArchiver):
+        self.__archiver = archiver
+
+
+    def save(self, file_path: List[str], data: List):
+        data_string = self.data_handling(file_path=file_path, data=data)
+        self.compress(data=data_string)
+
+
+    @abstractmethod
+    def data_handling(self, file_path: List[str], data: List) -> List[BaseDataFormatterString]:
         pass
 
 
-    def compress(self) -> None:
+    @abstractmethod
+    def compress(self, data: List[BaseDataFormatterString]) -> None:
+        """
+        Description:
+            Compress file(s) which saving target data with specific file format.
+        :param data:
+        :return:
+        """
         pass
+
+
+
+class ArchiverSaver(BaseArchiverSaver):
+
+    def data_handling(self, file_path: List[str], data: List) -> List[BaseDataFormatterString]:
+        _util = FileImportUtils()
+        __data_string = []
+
+        for __file_path in file_path:
+            __file_type = __file_path.split(sep="\.")[-1]
+            data_formatter: BaseDataFormatterString = _util.get_data_formatter_instance(file_type=__file_type)
+            data_formatter.file_path = file_path
+            data_formatter.data_string(data=data)
+            __data_string.append(data_formatter)
+
+        return __data_string
+
+
+    def compress(self, data: List[BaseDataFormatterString]) -> None:
+        self.__archiver.init()
+        self.__archiver.write(data=data)
+        self.__archiver.close()
+
