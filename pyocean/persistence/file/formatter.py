@@ -14,7 +14,6 @@ class BaseFileFormatter(metaclass=ABCMeta):
 
     _File_IO_Wrapper: object = None
 
-
     @abstractmethod
     def open(self, file_path: str, open_mode: str, encoding: str) -> None:
         pass
