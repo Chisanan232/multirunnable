@@ -1,4 +1,4 @@
-from pyocean.persistence.file.formatter import BaseFileFormatter, BaseDataFormatterString
+from pyocean.persistence.file.file import BaseFileFormatter, BaseDataFormatterString
 from pyocean.persistence.file.compress import BaseArchiver
 
 from typing import List, Tuple, Iterable, Callable, Union
