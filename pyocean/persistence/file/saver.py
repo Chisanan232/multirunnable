@@ -1,5 +1,5 @@
 from pyocean.persistence.interface import OceanPersistence
-from pyocean.persistence.file.formatter import BaseFileFormatter, BaseDataFormatterString
+from pyocean.persistence.file.file import BaseFileFormatter, BaseDataFormatterString
 from pyocean.persistence.file.compress import BaseArchiver
 from pyocean.persistence.file.utils import FileImportUtils
 from pyocean.persistence.file.exceptions import FilePathCannotBeEmpty, ClassNotInstanceOfBaseFileFormatter, NotSupportHandlingFileType
@@ -90,23 +90,6 @@ class BaseFileSaver(OceanPersistence):
 class SingleFileSaver(BaseFileSaver):
 
     def save(self, data: list) -> None:
-        self._File_Formatter.open(file_path=self._File_Path, open_mode=self._File_Opening_Mode, encoding=self._File_Encoding)
-        fin_data = self._File_Formatter.data_handling(data=data)
-        self._File_Formatter.write(data=fin_data)
-        self._File_Formatter.done()
-
-
-
-class MultiFileSaver(BaseFileSaver):
-
-    def save(self, data: list) -> None:
-        """
-        Note:
-            1. All processes or threads save data to their file.
-            2. Express the data into a file like zip, tar, etc. in Main thread.
-        :param data:
-        :return:
-        """
         self._File_Formatter.open(file_path=self._File_Path, open_mode=self._File_Opening_Mode, encoding=self._File_Encoding)
         fin_data = self._File_Formatter.data_handling(data=data)
         self._File_Formatter.write(data=fin_data)
