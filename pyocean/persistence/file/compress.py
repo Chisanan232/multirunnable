@@ -1,5 +1,5 @@
 from pyocean.persistence.file.types import CompressObject
-from pyocean.persistence.file.formatter import BaseDataFormatterString
+from pyocean.persistence.file.file import BaseDataFormatterString
 from pyocean.persistence.file.configuration import ArchiverConfig
 
 from abc import ABCMeta, abstractmethod
