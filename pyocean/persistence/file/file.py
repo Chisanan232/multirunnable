@@ -1,5 +1,5 @@
-from pyocean.persistence.file.exceptions import DataRowFormatIsInvalidError
 from pyocean.persistence.file.configuration import FileConfig, ArchiverConfig
+from pyocean.persistence.file.exceptions import DataRowFormatIsInvalidError
 
 from abc import ABCMeta, abstractmethod
 from typing import List, Tuple, Iterable, Union
