@@ -104,7 +104,7 @@ class CsvFileFormatter(BaseFileFormatter):
 
 
 
-class ExcelFileFormatter(BaseFileFormatter):
+class XlsxFileFormatter(BaseFileFormatter):
 
     # __Work_Book = None
     __Work_Sheet_Page = None
@@ -123,7 +123,7 @@ class ExcelFileFormatter(BaseFileFormatter):
 
 
     def data_handling(self, data: List[list]) -> Union[List[list], str]:
-        data = super(ExcelFileFormatter, self).data_handling(data=data)
+        data = super(XlsxFileFormatter, self).data_handling(data=data)
         csv_data: List[list] = [d for d in data]
         return csv_data
 
