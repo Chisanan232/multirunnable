@@ -1,15 +1,14 @@
 from pyocean.persistence.interface import OceanFao
-from pyocean.persistence.mode import PersistenceMode
-from pyocean.persistence.file.configuration import SupportConfig, FileConfig, ArchiverConfig
-from pyocean.persistence.file.saver import SingleFileSaver, MultiFileSaver, ArchiverSaver
-from pyocean.persistence.file.formatter import BaseFileFormatter, BaseDataFormatterString
-from pyocean.persistence.file.compress import BaseArchiver
-from pyocean.persistence.file.exceptions import PersistenceModeIsInvalid
+from pyocean.persistence.file.file import BaseFileFormatter, BaseDataFormatterString
+from pyocean.persistence.file.compress import BaseArchiver, ZipArchiver
+from pyocean.persistence.file.strategy import (
+    OneThreadOneFile,
+    AllThreadOneFile,
+    OneThreadOneFileAllInArchiver,
+    AllThreadOneFileInArchiver
+)
 
-from abc import ABCMeta, ABC, abstractmethod
 from typing import List, Tuple, Iterable, Callable, Union
-import logging
-import os
 
 
 
@@ -19,25 +18,24 @@ class BaseFao(OceanFao):
     File Access Object (FAO).
     """
 
-    def __init__(self):
-        self._file_name = FileConfig.file_name
-        self._file_type = FileConfig.file_type
-        self._dir = FileConfig.saving_directory
+    def __init__(self, config=None):
+        if config is None:
+            # Get data from properties file
+            self._config = config
+        else:
+            # Check and integrate the config value to use.
+            self._config = config
 
 
-    @property
-    @abstractmethod
-    def file_path(self) -> str:
-        pass
-
-
-    def save(self, data: Union[List, Tuple],  formatter: BaseFileFormatter):
+    def save(self, data: Union[List, Tuple],  saving_function: Callable, *args, **kwargs):
         checksum = None
         error = None
         try:
             data = self.data_handling(data=data)
-            self.data_saving(data=data, formatter=formatter)
+            kwargs["data"] = data
+            saving_function(*args, **kwargs)
         except Exception as e:
+            self.exception_handling(error=e)
             error = e
         else:
             checksum = True
@@ -49,22 +47,12 @@ class BaseFao(OceanFao):
         return data
 
 
-    @abstractmethod
-    def data_saving(self, data: Union[List, Tuple],  formatter: BaseFileFormatter) -> None:
+    def exception_handling(self, error: Exception) -> None:
         pass
 
 
-    def data_saving_with_mode(self, mode: PersistenceMode) -> None:
-        if mode is PersistenceMode.SINGLE_FILE_IO:
-            pass
-        elif mode is PersistenceMode.MULTI_FILE_IO:
-            pass
-        else:
-            raise PersistenceModeIsInvalid
 
-
-
-class SingleFao(BaseFao):
+class SimpleFileFao(BaseFao):
 
     """
     Single files saving strategy:
@@ -72,50 +60,89 @@ class SingleFao(BaseFao):
     file(s) in Main Thread.
     """
 
-    @property
-    def file_path(self) -> List[str]:
-        file_types = self._file_type.split(sep=",")
-        return [os.path.join(self._dir, f"{self._file_name}.{__file_type}") for __file_type in file_types]
+    __ID_Checksum = None
+
+    def one_thread_one_file(self, data: Union[List, Tuple],  formatter: BaseFileFormatter, **kwargs):
+        file_end = kwargs.get("file_end", "")
+        self.save(
+            data=data,
+            saving_function=self.__one_thread_one_file,
+            formatter=formatter,
+            file_end=file_end
+        )
 
 
-    def data_saving(self, data: Union[List, Tuple],  formatter: BaseFileFormatter) -> None:
-        __saver = SingleFileSaver(file_path=self.file_path, file_format=formatter)
-        if isinstance(data, List):
-            __saver.save(data=data)
+    def __one_thread_one_file(self, data: Union[List, Tuple],  formatter: BaseFileFormatter, **kwargs):
+        file_end = kwargs.get("file_end", "")
+        self.__chk_unique(file_end=file_end)
+        __strategy = OneThreadOneFile(config=self._config)
+        __strategy.save_into_file(data=data, formatter=formatter, file_end=file_end)
+
+
+    def __chk_unique(self, file_end: str):
+        if self.__ID_Checksum is None:
+            self.__ID_Checksum = file_end
         else:
-            logging.warning("The data structure is not perfectly mapping.")
-            __saver.save(data=data)
+            if self.__ID_Checksum == file_end:
+                raise Exception("The file end word should be unique.")
+            else:
+                self.__ID_Checksum = file_end
+
+
+    def all_thread_one_file(self, data: Union[List, Tuple],  formatter: BaseFileFormatter):
+        self.save(
+            data=data,
+            saving_function=self.__all_thread_one_file,
+            formatter=formatter
+        )
+
+
+    def __all_thread_one_file(self, data: Union[List, Tuple],  formatter: BaseFileFormatter):
+        __strategy = AllThreadOneFile(config=self._config)
+        __strategy.save_into_file(data=data, formatter=formatter)
 
 
 
-class MultiFao(BaseFao):
+class SimpleArchiverFao(BaseFao):
 
-    """
-    Multiple files saving strategy:
-    Saving file(s) in each workers and compress all file(s) in Main Thread.
-    """
+    __ID_Checksum = None
 
-    def __init__(self):
-        super().__init__()
-        self.__archiver_type = ArchiverConfig.compress_type
-        self.__archiver_name = ArchiverConfig.compress_name
-        self.__archiver_path = ArchiverConfig.compress_path
-
-
-    @property
-    def file_path(self) -> List[str]:
-        file_types = self._file_type.split(sep=",")
-        return [f"{self._file_name}.{__file_type}" for __file_type in file_types]
+    def one_thread_one_file_all_in_archiver(self, data: Union[List, Tuple], archiver: BaseArchiver, **kwargs):
+        file_end = kwargs.get("file_end", "")
+        self.save(
+            data=data,
+            saving_function=self.__one_thread_one_file_all_in_archiver,
+            archiver=archiver,
+            file_end=file_end
+        )
 
 
-    @property
-    def archiver_path(self) -> str:
-        archiver_file_name = f"{self.__archiver_name}.{self.__archiver_type}"
-        __path = os.path.join(self.__archiver_path, archiver_file_name)
-        return __path
+    def __one_thread_one_file_all_in_archiver(self, data: Union[List, Tuple], archiver: BaseArchiver, **kwargs):
+        file_end = kwargs.get("file_end", "")
+        self.__chk_unique(file_end=file_end)
+        __strategy = OneThreadOneFileAllInArchiver(config=self._config)
+        __strategy.save_and_compress(archiver=archiver, data=data, file_end=file_end)
 
 
-    @abstractmethod
-    def compress_process(self) -> None:
-        pass
+    def __chk_unique(self, file_end: str):
+        if self.__ID_Checksum is None:
+            self.__ID_Checksum = file_end
+        else:
+            if self.__ID_Checksum == file_end:
+                raise Exception("The file end word should be unique.")
+            else:
+                self.__ID_Checksum = file_end
+
+
+    def all_thread_one_file_in_archiver(self, data: Union[List, Tuple], archiver: BaseArchiver):
+        self.save(
+            data=data,
+            saving_function=self.__all_thread_one_file_in_archiver,
+            archiver=archiver
+        )
+
+
+    def __all_thread_one_file_in_archiver(self, data: Union[List, Tuple], archiver: BaseArchiver):
+        __strategy = AllThreadOneFileInArchiver(config=self._config)
+        __strategy.save_and_compress(archiver=archiver, data=data)
 
