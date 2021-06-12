@@ -163,20 +163,7 @@ class BaseDataFormatterString(metaclass=ABCMeta):
     @property
     @abstractmethod
     def file_path(self) -> str:
-        return self.__chk_path()
-
-
-    def __chk_path(self) -> str:
-        """
-        Not finish yet.
-        :return:
-        """
-        file_save_dirs = FileConfig.saving_directory
-        file_names = FileConfig.file_name
-        archiver_paths = ArchiverConfig.compress_path
-        archiver_types = ArchiverConfig.compress_type
-
-        return ""
+        pass
 
 
     @file_path.setter
@@ -197,7 +184,7 @@ class CsvDataString(BaseDataFormatterString):
 
     @property
     def file_path(self) -> str:
-        return ""
+        return self.__File_Path
 
 
     @file_path.setter
@@ -220,7 +207,7 @@ class JsonDataString(BaseDataFormatterString):
 
     @property
     def file_path(self) -> str:
-        return ""
+        return self.__File_Path
 
 
     @file_path.setter
