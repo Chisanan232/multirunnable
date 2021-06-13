@@ -1,6 +1,5 @@
 from pyocean.persistence.file.types import CompressObject
 from pyocean.persistence.file.file import BaseDataFormatterString
-from pyocean.persistence.file.configuration import ArchiverConfig
 
 from abc import ABCMeta, abstractmethod
 from typing import List, Tuple, Iterable, Union, overload
@@ -15,17 +14,23 @@ class BaseArchiver(metaclass=ABCMeta):
     _Archiver_Path = ""
     _Archiver_Mode = "a"
 
-    def __init__(self, path: str):
+    @property
+    def path(self) -> str:
+        return self._Archiver_Path
+
+
+    @path.setter
+    def path(self, path: str) -> None:
         self._Archiver_Path = path
 
 
     @property
-    def mode(self):
+    def mode(self) -> str:
         return self._Archiver_Mode
 
 
     @mode.setter
-    def mode(self, mode: str):
+    def mode(self, mode: str) -> None:
         self._Archiver_Mode = mode
 
 
