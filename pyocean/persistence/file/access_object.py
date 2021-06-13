@@ -1,6 +1,7 @@
 from pyocean.persistence.interface import OceanFao
-from pyocean.persistence.file.file import BaseFileFormatter, BaseDataFormatterString
-from pyocean.persistence.file.compress import BaseArchiver, ZipArchiver
+from pyocean.persistence.file.configuration import BaseFileConfig, FileConfig, ArchiverConfig
+from pyocean.persistence.file.file import BaseFileFormatter
+from pyocean.persistence.file.compress import BaseArchiver
 from pyocean.persistence.file.strategy import (
     OneThreadOneFile,
     AllThreadOneFile,
@@ -9,6 +10,8 @@ from pyocean.persistence.file.strategy import (
 )
 
 from typing import List, Tuple, Iterable, Callable, Union
+import os
+import re
 
 
 
@@ -17,15 +20,6 @@ class BaseFao(OceanFao):
     """
     File Access Object (FAO).
     """
-
-    def __init__(self, config=None):
-        if config is None:
-            # Get data from properties file
-            self._config = config
-        else:
-            # Check and integrate the config value to use.
-            self._config = config
-
 
     def save(self, data: Union[List, Tuple],  saving_function: Callable, *args, **kwargs):
         checksum = None
@@ -62,6 +56,31 @@ class SimpleFileFao(BaseFao):
 
     __ID_Checksum = None
 
+    def __init__(self, config: Union[FileConfig, str] = None):
+        if config is None:
+            # Get data from properties file
+            self._config = FileConfig()
+        else:
+            if type(config) is str:
+                # Check and initialize configuration by the file path.
+                is_file = os.path.isfile(path=config)
+                file_extension = config.split(sep="/.")[-1]
+                is_properties_extension = re.search(r"properties", file_extension)
+                if is_file and is_properties_extension:
+                    self._config = config
+                else:
+                    raise Exception("It's not a valid file path.")
+            else:
+                # Check and integrate the config value to use.
+                if config.file_type:
+                    raise Exception("File type value is empty.")
+                if config.file_name:
+                    raise Exception("File name value is empty.")
+                if config.saving_directory:
+                    raise Exception("Directory path value is empty.")
+                self._config = config
+
+
     def one_thread_one_file(self, data: Union[List, Tuple],  formatter: BaseFileFormatter, **kwargs):
         file_end = kwargs.get("file_end", "")
         self.save(
@@ -75,7 +94,7 @@ class SimpleFileFao(BaseFao):
     def __one_thread_one_file(self, data: Union[List, Tuple],  formatter: BaseFileFormatter, **kwargs):
         file_end = kwargs.get("file_end", "")
         self.__chk_unique(file_end=file_end)
-        __strategy = OneThreadOneFile(config=self._config)
+        __strategy = OneThreadOneFile(file_config=self._config)
         __strategy.save_into_file(data=data, formatter=formatter, file_end=file_end)
 
 
@@ -98,7 +117,7 @@ class SimpleFileFao(BaseFao):
 
 
     def __all_thread_one_file(self, data: Union[List, Tuple],  formatter: BaseFileFormatter):
-        __strategy = AllThreadOneFile(config=self._config)
+        __strategy = AllThreadOneFile(file_config=self._config)
         __strategy.save_into_file(data=data, formatter=formatter)
 
 
@@ -106,6 +125,41 @@ class SimpleFileFao(BaseFao):
 class SimpleArchiverFao(BaseFao):
 
     __ID_Checksum = None
+
+    def __init__(self, config: Union[Tuple[BaseFileConfig], str] = None):
+        if config is None:
+            # Get data from properties file
+            self._file_config = FileConfig()
+            self._archiver_config = ArchiverConfig()
+        else:
+            if type(config) is str:
+                # Check and initialize configuration by the file path.
+                is_file = os.path.isfile(path=config)
+                file_extension = config.split(sep="/.")[-1]
+                is_properties_extension = re.search(r"properties", file_extension)
+                if is_file and is_properties_extension:
+                    self._config = config
+                else:
+                    raise Exception("It's not a valid file path.")
+            else:
+                __file_config = filter(lambda c: isinstance(c, FileConfig), config)
+                __archiver_config = filter(lambda c: isinstance(c, ArchiverConfig), config)
+                self._file_config: FileConfig = list(__file_config)[0]
+                self._archiver_config: ArchiverConfig = list(__archiver_config)[0]
+                # Check and integrate the config value to use.
+                if self._file_config.file_type:
+                    raise Exception("File type value is empty.")
+                if self._file_config.file_name:
+                    raise Exception("File name value is empty.")
+                if self._file_config.saving_directory:
+                    raise Exception("Directory path value is empty.")
+                if self._archiver_config.compress_type:
+                    raise Exception("Archiver type value is empty.")
+                if self._archiver_config.compress_name:
+                    raise Exception("Archiver name value is empty.")
+                if self._archiver_config.compress_path:
+                    raise Exception("Archiver path value is empty.")
+
 
     def one_thread_one_file_all_in_archiver(self, data: Union[List, Tuple], archiver: BaseArchiver, **kwargs):
         file_end = kwargs.get("file_end", "")
@@ -120,7 +174,7 @@ class SimpleArchiverFao(BaseFao):
     def __one_thread_one_file_all_in_archiver(self, data: Union[List, Tuple], archiver: BaseArchiver, **kwargs):
         file_end = kwargs.get("file_end", "")
         self.__chk_unique(file_end=file_end)
-        __strategy = OneThreadOneFileAllInArchiver(config=self._config)
+        __strategy = OneThreadOneFileAllInArchiver(file_config=self._file_config, archiver_config=self._archiver_config)
         __strategy.save_and_compress(archiver=archiver, data=data, file_end=file_end)
 
 
@@ -143,6 +197,6 @@ class SimpleArchiverFao(BaseFao):
 
 
     def __all_thread_one_file_in_archiver(self, data: Union[List, Tuple], archiver: BaseArchiver):
-        __strategy = AllThreadOneFileInArchiver(config=self._config)
+        __strategy = AllThreadOneFileInArchiver(file_config=self._file_config, archiver_config=self._archiver_config)
         __strategy.save_and_compress(archiver=archiver, data=data)
 
