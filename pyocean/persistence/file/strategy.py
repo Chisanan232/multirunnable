@@ -2,6 +2,7 @@ from pyocean.persistence.file.configuration import SupportConfig, FileConfig, Ar
 from pyocean.persistence.file.saver import SingleFileSaver, ArchiverSaver
 from pyocean.persistence.file.file import BaseFileFormatter, BaseDataFormatterString
 from pyocean.persistence.file.compress import BaseArchiver
+from pyocean.persistence.file.utils import FileImportUtils
 
 from abc import ABCMeta, ABC, abstractmethod
 from typing import List, Tuple, Iterable, Callable, Union
@@ -34,12 +35,16 @@ class BaseFaoStrategy(metaclass=ABCMeta):
         else:
             # Do something configure setting (new feature)
             if type(file_config) is str:
+                print(f"file config init ...")
                 __config = FileConfig(config_path=file_config)
             else:
                 __config = file_config
             self._file_name = __config.file_name
             self._file_type = __config.file_type
             self._dir = __config.saving_directory
+            print(f"file name: {self._file_name}")
+            print(f"file type: {self._file_type}")
+            print(f"dir: {self._dir}")
 
 
     @abstractmethod
@@ -50,8 +55,18 @@ class BaseFaoStrategy(metaclass=ABCMeta):
 
 class BaseFaoWithFileStrategy(BaseFaoStrategy):
 
+    def file_formatter(self) -> List[BaseFileFormatter]:
+        __import_utils = FileImportUtils()
+        __formatters = []
+
+        for __file_type in self._file_type:
+            __file_formatter: BaseFileFormatter = __import_utils.get_file_formatter_instance(file_type=__file_type)
+            __formatters.append(__file_formatter)
+
+        return __formatters
+
     @abstractmethod
-    def save_into_file(self, data: List,  formatter: Union[BaseFileFormatter, BaseDataFormatterString], **kwargs) -> None:
+    def save_into_file(self, data: List, **kwargs) -> None:
         pass
 
 
@@ -96,10 +111,10 @@ class OneThreadOneFile(BaseFaoWithFileStrategy):
                 for __file_type in self._file_type]
 
 
-    def save_into_file(self, data: Union[List, Tuple],  formatter: BaseFileFormatter, **kwargs) -> None:
+    def save_into_file(self, data: Union[List, Tuple], **kwargs) -> None:
         file_end = kwargs.get("file_end", "")
-        for __file_path in self.file_path(file_end=file_end):
-            __saver = SingleFileSaver(file_path=f"{__file_path}", file_format=formatter)
+        for __file_path, __file_formatter in zip(self.file_path(file_end=file_end), self.file_formatter()):
+            __saver = SingleFileSaver(file_path=f"{__file_path}", file_format=__file_formatter)
             if isinstance(data, List):
                 __saver.save(data=data)
             else:
@@ -115,9 +130,12 @@ class AllThreadOneFile(BaseFaoWithFileStrategy):
         return [os.path.join(self._dir, f"{self._file_name}.{__file_type}") for __file_type in self._file_type]
 
 
-    def save_into_file(self, data: List,  formatter: BaseFileFormatter, **kwargs) -> None:
-        for __file_path in self.file_path():
-            __saver = SingleFileSaver(file_path=__file_path, file_format=formatter)
+    def save_into_file(self, data: List, **kwargs) -> None:
+        print(f"file path: {self.file_path()}")
+        print(f"file formatter: {self.file_formatter()}")
+        for __file_path, __file_formatter in zip(self.file_path(), self.file_formatter()):
+            print(f"File path: {__file_path}")
+            __saver = SingleFileSaver(file_path=__file_path, file_format=__file_formatter)
             if isinstance(data, List):
                 __saver.save(data=data)
             else:
