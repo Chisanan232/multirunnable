@@ -1,6 +1,5 @@
 from pyocean.persistence.interface import OceanFao
 from pyocean.persistence.file.configuration import BaseFileConfig, FileConfig, ArchiverConfig
-from pyocean.persistence.file.file import BaseFileFormatter
 from pyocean.persistence.file.compress import BaseArchiver
 from pyocean.persistence.file.strategy import (
     OneThreadOneFile,
@@ -81,21 +80,20 @@ class SimpleFileFao(BaseFao):
                 self._config = config
 
 
-    def one_thread_one_file(self, data: Union[List, Tuple],  formatter: BaseFileFormatter, **kwargs):
+    def one_thread_one_file(self, data: Union[List, Tuple], **kwargs):
         file_end = kwargs.get("file_end", "")
         self.save(
             data=data,
-            saving_function=self.__one_thread_one_file,
-            formatter=formatter,
+            saving_function=self._one_thread_one_file,
             file_end=file_end
         )
 
 
-    def __one_thread_one_file(self, data: Union[List, Tuple],  formatter: BaseFileFormatter, **kwargs):
+    def _one_thread_one_file(self, data: Union[List, Tuple], **kwargs):
         file_end = kwargs.get("file_end", "")
         self.__chk_unique(file_end=file_end)
         __strategy = OneThreadOneFile(file_config=self._config)
-        __strategy.save_into_file(data=data, formatter=formatter, file_end=file_end)
+        __strategy.save_into_file(data=data, file_end=file_end)
 
 
     def __chk_unique(self, file_end: str):
@@ -108,17 +106,19 @@ class SimpleFileFao(BaseFao):
                 self.__ID_Checksum = file_end
 
 
-    def all_thread_one_file(self, data: Union[List, Tuple],  formatter: BaseFileFormatter):
+    def all_thread_one_file(self, data: Union[List, Tuple]):
         self.save(
             data=data,
-            saving_function=self.__all_thread_one_file,
-            formatter=formatter
+            saving_function=self._all_thread_one_file
         )
 
 
-    def __all_thread_one_file(self, data: Union[List, Tuple],  formatter: BaseFileFormatter):
+    def _all_thread_one_file(self, data: Union[List, Tuple]):
+        print(f"Start saving process ....")
+        print(f"config: {self._config}")
         __strategy = AllThreadOneFile(file_config=self._config)
-        __strategy.save_into_file(data=data, formatter=formatter)
+        print(f"__strategy: {__strategy}")
+        __strategy.save_into_file(data=data)
 
 
 
@@ -165,13 +165,13 @@ class SimpleArchiverFao(BaseFao):
         file_end = kwargs.get("file_end", "")
         self.save(
             data=data,
-            saving_function=self.__one_thread_one_file_all_in_archiver,
+            saving_function=self._one_thread_one_file_all_in_archiver,
             archiver=archiver,
             file_end=file_end
         )
 
 
-    def __one_thread_one_file_all_in_archiver(self, data: Union[List, Tuple], archiver: BaseArchiver, **kwargs):
+    def _one_thread_one_file_all_in_archiver(self, data: Union[List, Tuple], archiver: BaseArchiver, **kwargs):
         file_end = kwargs.get("file_end", "")
         self.__chk_unique(file_end=file_end)
         __strategy = OneThreadOneFileAllInArchiver(file_config=self._file_config, archiver_config=self._archiver_config)
@@ -191,12 +191,12 @@ class SimpleArchiverFao(BaseFao):
     def all_thread_one_file_in_archiver(self, data: Union[List, Tuple], archiver: BaseArchiver):
         self.save(
             data=data,
-            saving_function=self.__all_thread_one_file_in_archiver,
+            saving_function=self._all_thread_one_file_in_archiver,
             archiver=archiver
         )
 
 
-    def __all_thread_one_file_in_archiver(self, data: Union[List, Tuple], archiver: BaseArchiver):
+    def _all_thread_one_file_in_archiver(self, data: Union[List, Tuple], archiver: BaseArchiver):
         __strategy = AllThreadOneFileInArchiver(file_config=self._file_config, archiver_config=self._archiver_config)
         __strategy.save_and_compress(archiver=archiver, data=data)
 
