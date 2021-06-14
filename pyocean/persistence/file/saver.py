@@ -100,7 +100,7 @@ class SingleFileSaver(BaseFileSaver):
 class BaseArchiverSaver(metaclass=ABCMeta):
 
     def __init__(self, archiver: BaseArchiver):
-        self.__archiver = archiver
+        self._archiver = archiver
 
 
     def save(self, file_path: List[str], data: List):
@@ -132,9 +132,9 @@ class ArchiverSaver(BaseArchiverSaver):
         __data_string = []
 
         for __file_path in file_path:
-            __file_type = __file_path.split(sep="\.")[-1]
+            __file_type = __file_path.split(sep=".")[-1]
             data_formatter: BaseDataFormatterString = _util.get_data_formatter_instance(file_type=__file_type)
-            data_formatter.file_path = file_path
+            data_formatter.file_path = __file_path
             data_formatter.data_string(data=data)
             __data_string.append(data_formatter)
 
@@ -142,7 +142,7 @@ class ArchiverSaver(BaseArchiverSaver):
 
 
     def compress(self, data: List[BaseDataFormatterString]) -> None:
-        self.__archiver.init()
-        self.__archiver.write(data=data)
-        self.__archiver.close()
+        self._archiver.init()
+        self._archiver.write(data=data)
+        self._archiver.close()
 
