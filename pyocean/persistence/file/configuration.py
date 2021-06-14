@@ -35,12 +35,18 @@ class DefaultConfig(Enum):
 
 class PropertiesUtil:
 
+    __Properties_Utils_Instance = None
     _Config_Parser: configparser.RawConfigParser = None
     __Properties_Key = "pyocean"
 
-    def __init__(self, config_type: ConfigType, config_path: str = None):
+    def __new__(cls, *args, **kwargs):
+        if cls.__Properties_Utils_Instance is None:
+            return super(PropertiesUtil, cls).__new__(cls)
+        return cls.__Properties_Utils_Instance
+
+
+    def __init__(self, config_path: str = None):
         self.__Config_Parser = configparser.RawConfigParser()
-        self.__config_type = config_type.value
         if config_path is None:
             __config_file_path = self.__get_config_path()
         else:
@@ -69,13 +75,13 @@ class PropertiesUtil:
         # return "/".join(file_path)
 
 
-    def get_value_as_str(self, property_key: str) -> str:
-        __group = self.__get_properties_group(group=self.__config_type)
+    def get_value_as_str(self, property_key: str, group: str = "") -> str:
+        __group = self.__get_properties_group(group=group)
         return self.__Config_Parser.get(__group, property_key)
 
 
-    def get_value_as_list(self, property_key: str, separate: str = ",") -> List:
-        __group = self.__get_properties_group(group=self.__config_type)
+    def get_value_as_list(self, property_key: str, group: str = "", separate: str = ",") -> List:
+        __group = self.__get_properties_group(group=group)
         return self.__Config_Parser.get(__group, property_key).split(separate)
 
 
@@ -83,14 +89,14 @@ class PropertiesUtil:
         return group[0].upper() + group[1:]
 
 
-    def property_key(self) -> str:
+    def property_key(self, group: str) -> str:
         """
         Description:
             Get the configuration properties key.
         :return:
         """
         property_key = self.__Properties_Key
-        return f"{property_key}.{self.__config_type.value}.local."
+        return f"{property_key}.{group}.local."
 
 
 
@@ -103,23 +109,23 @@ class BaseFileConfig(metaclass=ABCMeta):
 class FileConfig(BaseFileConfig):
 
     __PropertiesOptUtil = None
-    __Config_Type = ConfigType.FILE_GROUP
+    __Config_Type = ConfigType.FILE_GROUP.value
 
     __File_Type = None
     __File_Name = None
     __File_Save_Dir = None
 
     def __init__(self, config_path: str = None):
-        self.__PropertiesOptUtil = PropertiesUtil(
-            config_type=self.__Config_Type,
-            config_path=config_path
-        )
-        self.__property_key = self.__PropertiesOptUtil.property_key()
+        self.__PropertiesOptUtil = PropertiesUtil(config_path=config_path)
+        self.__property_key = self.__PropertiesOptUtil.property_key(group=self.__Config_Type)
 
 
     @property
     def file_type(self) -> List[str]:
-        return self.__PropertiesOptUtil.get_value_as_list(property_key=f"{self.__property_key}type")
+        return self.__PropertiesOptUtil.get_value_as_list(
+            group=self.__Config_Type,
+            property_key=f"{self.__property_key}type"
+        )
 
 
     @file_type.setter
@@ -129,7 +135,10 @@ class FileConfig(BaseFileConfig):
 
     @property
     def file_name(self) -> str:
-        return self.__PropertiesOptUtil.get_value_as_str(property_key=f"{self.__property_key}name")
+        return self.__PropertiesOptUtil.get_value_as_str(
+            group=self.__Config_Type,
+            property_key=f"{self.__property_key}name"
+        )
 
 
     @file_name.setter
@@ -139,7 +148,10 @@ class FileConfig(BaseFileConfig):
 
     @property
     def saving_directory(self) -> str:
-        return self.__PropertiesOptUtil.get_value_as_str(property_key=f"{self.__property_key}path")
+        return self.__PropertiesOptUtil.get_value_as_str(
+            group=self.__Config_Type,
+            property_key=f"{self.__property_key}path"
+        )
 
 
     @saving_directory.setter
@@ -151,23 +163,23 @@ class FileConfig(BaseFileConfig):
 class ArchiverConfig(BaseFileConfig):
 
     __PropertiesOptUtil = None
-    __Config_Type = ConfigType.ARCHIVER_GROUP
+    __Config_Type = ConfigType.ARCHIVER_GROUP.value
 
     __Archiver_Type = None
     __Archiver_Name = None
     __Archiver_Path = None
 
     def __init__(self, config_path: str = None):
-        self.__PropertiesOptUtil = PropertiesUtil(
-            config_type=self.__Config_Type,
-            config_path=config_path
-        )
-        self.__property_key = self.__PropertiesOptUtil.property_key()
+        self.__PropertiesOptUtil = PropertiesUtil(config_path=config_path)
+        self.__property_key = self.__PropertiesOptUtil.property_key(group=self.__Config_Type)
 
 
     @property
     def compress_type(self) -> List[str]:
-        return self.__PropertiesOptUtil.get_value_as_list(property_key=f"{self.__property_key}path")
+        return self.__PropertiesOptUtil.get_value_as_list(
+            group=self.__Config_Type,
+            property_key=f"{self.__property_key}type"
+        )
 
 
     @compress_type.setter
@@ -177,7 +189,10 @@ class ArchiverConfig(BaseFileConfig):
 
     @property
     def compress_name(self) -> str:
-        return self.__PropertiesOptUtil.get_value_as_str(property_key=f"{self.__property_key}name")
+        return self.__PropertiesOptUtil.get_value_as_str(
+            group=self.__Config_Type,
+            property_key=f"{self.__property_key}name"
+        )
 
 
     @compress_name.setter
@@ -187,7 +202,10 @@ class ArchiverConfig(BaseFileConfig):
 
     @property
     def compress_path(self) -> str:
-        return self.__PropertiesOptUtil.get_value_as_str(property_key=f"{self.__property_key}path")
+        return self.__PropertiesOptUtil.get_value_as_str(
+            group=self.__Config_Type,
+            property_key=f"{self.__property_key}path"
+        )
 
 
     @compress_path.setter
