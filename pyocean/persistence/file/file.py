@@ -1,4 +1,3 @@
-from pyocean.persistence.file.configuration import FileConfig, ArchiverConfig
 from pyocean.persistence.file.exceptions import DataRowFormatIsInvalidError
 
 from abc import ABCMeta, abstractmethod
@@ -172,6 +171,18 @@ class BaseDataFormatterString(metaclass=ABCMeta):
         pass
 
 
+    @property
+    @abstractmethod
+    def data(self) -> str:
+        pass
+
+
+    @data.setter
+    @abstractmethod
+    def data(self, data: str) -> None:
+        pass
+
+
     @abstractmethod
     def data_string(self, data: List[list]) -> Union[str, bytes]:
         pass
@@ -180,7 +191,8 @@ class BaseDataFormatterString(metaclass=ABCMeta):
 
 class CsvDataString(BaseDataFormatterString):
 
-    __File_Path = ""
+    __File_Path: str = ""
+    __Data: Union[str, bytes] = ""
 
     @property
     def file_path(self) -> str:
@@ -192,18 +204,30 @@ class CsvDataString(BaseDataFormatterString):
         self.__File_Path = path
 
 
-    def data_string(self, data: List[list]) -> Union[str, bytes]:
+    @property
+    def data(self) -> str:
+        return self.__Data
+
+
+    @data.setter
+    def data(self, data: str) -> None:
+        self.__Data = data
+
+
+    def data_string(self, data: List[list]) -> None:
         string_io = io.StringIO()
         csv_writer = csv.writer(string_io)
         for __data_row in data:
             csv_writer.writerow(__data_row)
-        return string_io.read()
+        string_io.seek(0)
+        self.data = string_io.read()
 
 
 
 class JsonDataString(BaseDataFormatterString):
 
-    __File_Path = ""
+    __File_Path: str = ""
+    __Data: Union[str, bytes] = ""
 
     @property
     def file_path(self) -> str:
@@ -215,6 +239,16 @@ class JsonDataString(BaseDataFormatterString):
         self.__File_Path = path
 
 
-    def data_string(self, data: List[list]) -> Union[str, bytes]:
+    @property
+    def data(self) -> str:
+        return self.__Data
+
+
+    @data.setter
+    def data(self, data: str) -> None:
+        self.__Data = data
+
+
+    def data_string(self, data: List[list]) -> None:
         json_data = json.dumps(data, ensure_ascii=False)
-        return json_data
+        self.data = json_data
