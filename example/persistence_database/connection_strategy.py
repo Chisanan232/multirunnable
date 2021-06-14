@@ -96,4 +96,4 @@ class MultiTestConnectionStrategy(MultiConnections):
 
 
     def close_pool(self) -> None:
-        pass
+        self.database_connection_pool.close()
