@@ -99,7 +99,7 @@ class BaseFaoWithArchiverStrategy(BaseFaoStrategy):
 
 
     @abstractmethod
-    def archiver_path(self) -> str:
+    def archiver_path(self) -> List[str]:
         pass
 
 
@@ -158,10 +158,13 @@ class OneThreadOneFileAllInArchiver(BaseFaoWithArchiverStrategy):
         return [f"{self._file_name}_{file_end}.{__file_type}" for __file_type in self._file_type]
 
 
-    def archiver_path(self) -> str:
-        archiver_file_name = f"{self._archiver_name}.{self._archiver_type}"
-        __path = os.path.join(self._archiver_path, archiver_file_name)
-        return __path
+    def archiver_path(self) -> List[str]:
+        __archiver_list = []
+        for __archiver_type in self._archiver_type:
+            archiver_file_name = f"{self._archiver_name}.{__archiver_type}"
+            __path = os.path.join(self._archiver_path, archiver_file_name)
+            __archiver_list.append(__path)
+        return __archiver_list
 
 
     def save_and_compress(self, data: List, **kwargs):
