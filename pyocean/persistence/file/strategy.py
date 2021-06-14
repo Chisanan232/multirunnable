@@ -35,16 +35,12 @@ class BaseFaoStrategy(metaclass=ABCMeta):
         else:
             # Do something configure setting (new feature)
             if type(file_config) is str:
-                print(f"file config init ...")
                 __config = FileConfig(config_path=file_config)
             else:
                 __config = file_config
             self._file_name = __config.file_name
             self._file_type = __config.file_type
             self._dir = __config.saving_directory
-            print(f"file name: {self._file_name}")
-            print(f"file type: {self._file_type}")
-            print(f"dir: {self._dir}")
 
 
     @abstractmethod
@@ -91,13 +87,24 @@ class BaseFaoWithArchiverStrategy(BaseFaoStrategy):
             self._archiver_path = __config.compress_path
 
 
+    def archivers(self) -> List[BaseArchiver]:
+        __import_utils = FileImportUtils()
+        __archivers = []
+
+        for __archiver_type in self._archiver_type:
+            __archiver: BaseArchiver = __import_utils.get_archiver_instance(archiver_type=__archiver_type)
+            __archivers.append(__archiver)
+
+        return __archivers
+
+
     @abstractmethod
     def archiver_path(self) -> str:
         pass
 
 
     @abstractmethod
-    def save_and_compress(self, archiver: BaseArchiver, data: List, **kwargs):
+    def save_and_compress(self, data: List, **kwargs):
         pass
 
 
@@ -131,10 +138,7 @@ class AllThreadOneFile(BaseFaoWithFileStrategy):
 
 
     def save_into_file(self, data: List, **kwargs) -> None:
-        print(f"file path: {self.file_path()}")
-        print(f"file formatter: {self.file_formatter()}")
         for __file_path, __file_formatter in zip(self.file_path(), self.file_formatter()):
-            print(f"File path: {__file_path}")
             __saver = SingleFileSaver(file_path=__file_path, file_format=__file_formatter)
             if isinstance(data, List):
                 __saver.save(data=data)
@@ -160,11 +164,12 @@ class OneThreadOneFileAllInArchiver(BaseFaoWithArchiverStrategy):
         return __path
 
 
-    def save_and_compress(self, archiver: BaseArchiver, data: List, **kwargs):
+    def save_and_compress(self, data: List, **kwargs):
         file_end = kwargs.get("file_end", "")
-        archiver.path = self.archiver_path()
-        __archiver = ArchiverSaver(archiver=archiver)
-        __archiver.save(file_path=self.file_path(file_end=file_end), data=data)
+        for __archiver, __archiver_path in zip(self.archivers(), self.archiver_path()):
+            __archiver.path = self.archiver_path()
+            __archiver_saver = ArchiverSaver(archiver=__archiver)
+            __archiver_saver.save(file_path=self.file_path(file_end=file_end), data=data)
 
 
 
@@ -177,13 +182,17 @@ class AllThreadOneFileInArchiver(BaseFaoWithArchiverStrategy):
         return [f"{self._file_name}.{__file_type}" for __file_type in self._file_type]
 
 
-    def archiver_path(self) -> str:
-        archiver_file_name = f"{self._archiver_name}.{self._archiver_type}"
-        __path = os.path.join(self._archiver_path, archiver_file_name)
-        return __path
+    def archiver_path(self) -> List[str]:
+        __archiver_list = []
+        for __archiver_type in self._archiver_type:
+            archiver_file_name = f"{self._archiver_name}.{__archiver_type}"
+            __path = os.path.join(self._archiver_path, archiver_file_name)
+            __archiver_list.append(__path)
+        return __archiver_list
 
 
-    def save_and_compress(self, archiver: BaseArchiver, data: List, **kwargs):
-        archiver.path = self.archiver_path()
-        __archiver = ArchiverSaver(archiver=archiver)
-        __archiver.save(file_path=self.file_path(), data=data)
+    def save_and_compress(self, data: List, **kwargs):
+        for __archiver, __archiver_path in zip(self.archivers(), self.archiver_path()):
+            __archiver.path = __archiver_path
+            __archiver_saver = ArchiverSaver(archiver=__archiver)
+            __archiver_saver.save(file_path=self.file_path(), data=data)
