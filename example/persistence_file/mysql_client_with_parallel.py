@@ -17,11 +17,9 @@ from pyocean.logger import ocean_logger
 # code component
 from connection_strategy import SingleTestConnectionStrategy, MultiTestConnectionStrategy
 from dao import TestDao
-from sql_query import SqlQuery
-from fao import TestSingleFao, TestAsyncFao
+from fao import ExampleFao
 
 import time
-
 
 
 
@@ -77,19 +75,21 @@ class TestCode:
         test_task_procedure: ParallelProcedure = test_task.generate()
 
         # Initial target tasks
-        sql_tasks = [SqlQuery.GET_STOCK_DATA.value for _ in range(20)]
+        # sql_query = "select * from limited_company limit 3;"
+        sql_query = "select * from stock_data_2330 limit 3;"
+        sql_tasks = [sql_query for _ in range(20)]
         test_dao = TestDao(connection_strategy=test_task.running_persistence())
         test_task_procedure.run(function=test_dao.get_test_data, tasks=sql_tasks)
+        test_dao.close_pool()
         data = test_task_procedure.result
         self.__logger.info(f"Final data: {data}")
-        self.__logger.debug(f"Start to save data as .json file ....")
-        TestSingleFao.save_data_as_json(data=list(data))
-        self.__logger.debug(f"Format data ....")
+
+        __fao = ExampleFao()
+        self.__logger.debug(f"Start to save data to file ....")
         format_data = self.__only_data(data=data)
-        self.__logger.debug(f"Start to save data as .csv file ....")
-        TestSingleFao.save_data_as_csv(data=format_data)
-        self.__logger.debug(f"Start to save data as .xlsx file ....")
-        TestSingleFao.save_data_as_excel(data=format_data)
+        # __fao.all_thread_one_file(data=format_data)
+        __fao.all_thread_one_file_in_archiver(data=format_data)
+        self.__logger.debug(f"Saving successfully!")
 
 
     def __only_data(self, data):
@@ -109,8 +109,8 @@ class TestCode:
 if __name__ == '__main__':
 
     start_time = time.time()
-    __process_number = 5
-    __db_connection_thread_number = 5
+    __process_number = 1
+    __db_connection_thread_number = 1
     test_code = TestCode(process_num=__process_number,
                          db_connection_number=__db_connection_thread_number)
     test_code.run()

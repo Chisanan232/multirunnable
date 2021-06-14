@@ -18,9 +18,10 @@ from pyocean.logger import ocean_logger
 # code component
 from connection_strategy import SingleTestConnectionStrategy, MultiTestConnectionStrategy
 from dao import TestDao, AsyncTestDao
-from sql_query import SqlQuery
+from fao import ExampleFao
 
 from multiprocessing import cpu_count
+from typing import Union
 import time
 
 
@@ -87,22 +88,57 @@ class TestCode:
         """
         # Initial running factory
         # # Greenlet
-        # test_factory = TestGreenletFactory(workers_number=self.__process_num,
-        #                                    db_connection_number=self.__db_connection_number)
+        test_factory = TestGreenletFactory(workers_number=self.__process_num,
+                                           db_connection_number=self.__db_connection_number)
         # # Asynchronous
-        test_factory = TestAsyncFactory(workers_number=self.__process_num,
-                                        db_connection_number=self.__db_connection_number)
+        # test_factory = TestAsyncFactory(workers_number=self.__process_num,
+        #                                 db_connection_number=self.__db_connection_number)
         # Initial running task object
         test_task = PersistenceRunnableTask(factory=test_factory)
         # Generate a running builder to start a multi-worker program
         # (it may be a multiprocessing, multithreading or multi-greenlet, etc.)
-        test_task_builder = test_task.generate()
+        test_task_procedure: Union[GeventProcedure, AsynchronousProcedure] = test_task.generate()
 
         # Initial target tasks
-        sql_tasks = [SqlQuery.GET_STOCK_DATA.value for _ in range(20)]
-        test_dao = AsyncTestDao(connection_strategy=test_task.running_persistence())
-        # test_dao = test_factory.dao(connection_strategy=test_task.running_persistence())
-        test_task_builder.run(function=test_dao.get_test_data, tasks=sql_tasks)
+        # sql_query = "select * from limited_company limit 3;"
+        sql_query = "select * from stock_data_2330 limit 3;"
+        sql_tasks = [sql_query for _ in range(20)]
+        # # Greenlet
+        test_dao = TestDao(connection_strategy=test_task.running_persistence())
+        # # Asynchronous
+        # test_dao = AsyncTestDao(connection_strategy=test_task.running_persistence())
+        test_task_procedure.run(function=test_dao.get_test_data, tasks=sql_tasks)
+        test_dao.close_pool()
+        data = test_task_procedure.result
+        self.__logger.info(f"Final data: {data}")
+
+        __fao = ExampleFao()
+        self.__logger.debug(f"Start to save data to file ....")
+        # # Greenlet
+        format_data = self.__only_data(data=data)
+        # # Asynchronous
+        # format_data = self.__async_only_data(data=data)
+        # __fao.all_thread_one_file(data=format_data)
+        __fao.all_thread_one_file_in_archiver(data=format_data)
+        self.__logger.debug(f"Saving successfully!")
+
+
+    def __only_data(self, data):
+        new_data = []
+        for d in data:
+            data_rows = d["data"]
+            for data_row in data_rows:
+                new_data.append(data_row)
+        return new_data
+
+
+    def __async_only_data(self, data):
+        new_data = []
+        for d in data:
+            data_rows = d["result_data"]["data"]
+            for data_row in data_rows:
+                new_data.append(data_row)
+        return new_data
 
 
     def __done(self) -> None:
@@ -113,8 +149,8 @@ class TestCode:
 if __name__ == '__main__':
 
     start_time = time.time()
-    __process_number = 5
-    __db_connection_thread_number = 5
+    __process_number = 1
+    __db_connection_thread_number = 1
     print(f"Process Number: {cpu_count()}")
     test_code = TestCode(process_num=__process_number,
                          db_connection_number=__db_connection_thread_number)
