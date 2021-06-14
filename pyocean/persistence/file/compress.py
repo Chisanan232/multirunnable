@@ -44,20 +44,8 @@ class BaseArchiver(metaclass=ABCMeta):
         pass
 
 
-    @overload
     @abstractmethod
     def write(self, data: List[BaseDataFormatterString]) -> None:
-        """
-        Description:
-            Write data into target file in archiver.
-        :param data:
-        :return:
-        """
-        pass
-
-
-    @abstractmethod
-    def write(self, data: BaseDataFormatterString) -> None:
         """
         Description:
             Write data into target file in archiver.
@@ -89,14 +77,14 @@ class ZipArchiver(BaseArchiver):
         )
 
 
-    @overload
     def write(self, data: List[BaseDataFormatterString]) -> None:
         for __data in data:
-            self.write(data=__data)
-
-
-    def write(self, data: BaseDataFormatterString) -> None:
-        self._Archiver.writestr(zinfo_or_arcname=data.file_path, data=data.data)
+            __file = __data.file_path
+            __data_string = __data.data
+            self._Archiver.writestr(
+                zinfo_or_arcname=__file,
+                data=__data_string
+            )
 
 
     def close(self) -> None:
