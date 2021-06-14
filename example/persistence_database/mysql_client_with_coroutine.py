@@ -18,7 +18,6 @@ from pyocean.logger import ocean_logger
 # code component
 from connection_strategy import SingleTestConnectionStrategy, MultiTestConnectionStrategy
 from dao import TestDao, AsyncTestDao
-from sql_query import SqlQuery
 
 from multiprocessing import cpu_count
 from typing import Union
@@ -100,7 +99,9 @@ class TestCode:
         test_task_procedure: Union[GeventProcedure, AsynchronousProcedure] = test_task.generate()
 
         # Initial target tasks
-        sql_tasks = [SqlQuery.GET_STOCK_DATA.value for _ in range(20)]
+        # sql_query = "select * from limited_company limit 3;"
+        sql_query = "select * from stock_data_2330 limit 3;"
+        sql_tasks = [sql_query for _ in range(20)]
         test_dao = AsyncTestDao(connection_strategy=test_task.running_persistence())
         # test_dao = test_factory.dao(connection_strategy=test_task.running_persistence())
         test_task_procedure.run(function=test_dao.get_test_data, tasks=sql_tasks)
