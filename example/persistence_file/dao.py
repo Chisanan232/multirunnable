@@ -99,6 +99,11 @@ class TestDao(BaseDao):
         return new_data
 
 
+    def close_pool(self):
+        self._Connection_Strategy.close_pool()
+        self._logger.debug("Close the MySQL connection Pool.")
+
+
 
 class AsyncTestDao(BaseDao):
 
@@ -156,5 +161,39 @@ class AsyncTestDao(BaseDao):
 
 
     def executing_result(self, running_state, data, exception_info) -> Dict[str, object]:
-        return {"pid": os.getpid(), "state": running_state, "data": data, "exception_info": exception_info}
+        self._logger.debug(f"SQL result data: {data}")
+        __handled_data = data
+        if __handled_data is not None:
+            __handled_data = self.iterate_data_rows(data=data)
+        self._logger.debug(f"Handling finish and final data is: {__handled_data}")
+        return {
+            "pid": os.getpid(),
+            "state": running_state,
+            "data": __handled_data,
+            "exception_info": exception_info
+        }
+        # return {"pid": os.getpid(), "state": running_state, "data": data, "exception_info": exception_info}
+
+
+    def iterate_data_rows(self, data: Tuple[Tuple]):
+        new_data = map(self.__data_type_handling, data)
+        return list(new_data)
+
+
+    def __data_type_handling(self, data: Iterable):
+        new_data = []
+        for d in data:
+            if isinstance(d, datetime.datetime):
+                f = '%Y-%m-%d %H:%M:%S'
+                new_d = datetime.datetime.strftime(d, f)
+                new_data.append(new_d)
+            if isinstance(d, decimal.Decimal):
+                new_d = float(d)
+                new_data.append(new_d)
+        return new_data
+
+
+    def close_pool(self):
+        self._Connection_Strategy.close_pool()
+        self._logger.debug("Close the MySQL connection Pool.")
 
