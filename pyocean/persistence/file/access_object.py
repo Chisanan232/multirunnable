@@ -1,6 +1,5 @@
 from pyocean.persistence.interface import OceanFao
 from pyocean.persistence.file.configuration import BaseFileConfig, FileConfig, ArchiverConfig
-from pyocean.persistence.file.compress import BaseArchiver
 from pyocean.persistence.file.strategy import (
     OneThreadOneFile,
     AllThreadOneFile,
@@ -63,7 +62,7 @@ class SimpleFileFao(BaseFao):
             if type(config) is str:
                 # Check and initialize configuration by the file path.
                 is_file = os.path.isfile(path=config)
-                file_extension = config.split(sep="/.")[-1]
+                file_extension = config.split(sep=".")[-1]
                 is_properties_extension = re.search(r"properties", file_extension)
                 if is_file and is_properties_extension:
                     self._config = config
@@ -114,10 +113,7 @@ class SimpleFileFao(BaseFao):
 
 
     def _all_thread_one_file(self, data: Union[List, Tuple]):
-        print(f"Start saving process ....")
-        print(f"config: {self._config}")
         __strategy = AllThreadOneFile(file_config=self._config)
-        print(f"__strategy: {__strategy}")
         __strategy.save_into_file(data=data)
 
 
@@ -135,10 +131,12 @@ class SimpleArchiverFao(BaseFao):
             if type(config) is str:
                 # Check and initialize configuration by the file path.
                 is_file = os.path.isfile(path=config)
-                file_extension = config.split(sep="/.")[-1]
+                file_extension = config.split(sep=".")[-1]
                 is_properties_extension = re.search(r"properties", file_extension)
                 if is_file and is_properties_extension:
-                    self._config = config
+                    # self._config = config
+                    self._file_config = FileConfig(config_path=config)
+                    self._archiver_config = ArchiverConfig(config_path=config)
                 else:
                     raise Exception("It's not a valid file path.")
             else:
@@ -161,21 +159,20 @@ class SimpleArchiverFao(BaseFao):
                     raise Exception("Archiver path value is empty.")
 
 
-    def one_thread_one_file_all_in_archiver(self, data: Union[List, Tuple], archiver: BaseArchiver, **kwargs):
+    def one_thread_one_file_all_in_archiver(self, data: Union[List, Tuple], **kwargs):
         file_end = kwargs.get("file_end", "")
         self.save(
             data=data,
             saving_function=self._one_thread_one_file_all_in_archiver,
-            archiver=archiver,
             file_end=file_end
         )
 
 
-    def _one_thread_one_file_all_in_archiver(self, data: Union[List, Tuple], archiver: BaseArchiver, **kwargs):
+    def _one_thread_one_file_all_in_archiver(self, data: Union[List, Tuple], **kwargs):
         file_end = kwargs.get("file_end", "")
         self.__chk_unique(file_end=file_end)
         __strategy = OneThreadOneFileAllInArchiver(file_config=self._file_config, archiver_config=self._archiver_config)
-        __strategy.save_and_compress(archiver=archiver, data=data, file_end=file_end)
+        __strategy.save_and_compress(data=data, file_end=file_end)
 
 
     def __chk_unique(self, file_end: str):
@@ -188,15 +185,14 @@ class SimpleArchiverFao(BaseFao):
                 self.__ID_Checksum = file_end
 
 
-    def all_thread_one_file_in_archiver(self, data: Union[List, Tuple], archiver: BaseArchiver):
+    def all_thread_one_file_in_archiver(self, data: Union[List, Tuple]):
         self.save(
             data=data,
-            saving_function=self._all_thread_one_file_in_archiver,
-            archiver=archiver
+            saving_function=self._all_thread_one_file_in_archiver
         )
 
 
-    def _all_thread_one_file_in_archiver(self, data: Union[List, Tuple], archiver: BaseArchiver):
+    def _all_thread_one_file_in_archiver(self, data: Union[List, Tuple]):
         __strategy = AllThreadOneFileInArchiver(file_config=self._file_config, archiver_config=self._archiver_config)
-        __strategy.save_and_compress(archiver=archiver, data=data)
+        __strategy.save_and_compress(data=data)
 
