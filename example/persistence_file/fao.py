@@ -28,7 +28,6 @@ class ExampleFao:
 
     def one_thread_one_file_all_in_archiver(self, data: List, file_end: str):
         self.__archiver_fao.one_thread_one_file_all_in_archiver(
-            archiver=self.__archiver,
             data=data,
             file_end=file_end
         )
