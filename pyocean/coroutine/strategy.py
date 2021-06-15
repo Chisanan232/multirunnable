@@ -53,7 +53,7 @@ class GeventStrategy(GreenletStrategy, Resultable):
         # # Greenlet framework -- Gevent
         greenlets_list = gevent.joinall(workers_list)
         for one_greenlet in greenlets_list:
-            self._Gevent_Running_Result.append({getcurrent(): one_greenlet.value})
+            self._Gevent_Running_Result.append(one_greenlet.value)
 
 
     def end_multi_working(self) -> None:
