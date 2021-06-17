@@ -61,6 +61,7 @@ class BaseFaoWithFileStrategy(BaseFaoStrategy):
 
         return __formatters
 
+
     @abstractmethod
     def save_into_file(self, data: List, **kwargs) -> None:
         pass
