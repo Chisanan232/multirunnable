@@ -1,4 +1,9 @@
 from pyocean.framework.exceptions import ParameterCannotBeEmpty
+from pyocean.api.types import (
+    OceanLock, OceanRLock,
+    OceanEvent, OceanCondition,
+    OceanSemaphore, OceanBoundedSemaphore,
+    OceanQueue)
 
 from abc import ABCMeta, abstractmethod
 from enum import Enum
@@ -14,7 +19,7 @@ class BaseQueueType(Enum):
 class BaseAPI(metaclass=ABCMeta):
 
     @abstractmethod
-    def lock(self):
+    def lock(self) -> OceanLock:
         """
         Description:
             Get Lock object.
@@ -24,7 +29,7 @@ class BaseAPI(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def event(self, **kwargs):
+    def event(self, **kwargs) -> OceanRLock:
         """
         Description:
             Get Event object.
@@ -35,7 +40,7 @@ class BaseAPI(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def condition(self, **kwargs):
+    def condition(self, **kwargs) -> OceanCondition:
         """
         Description:
             Get Condition object.
@@ -46,7 +51,7 @@ class BaseAPI(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def semaphore(self, value: int):
+    def semaphore(self, value: int) -> OceanSemaphore:
         """
         Description:
             Get Semaphore object.
@@ -57,7 +62,7 @@ class BaseAPI(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def bounded_semaphore(self, value: int):
+    def bounded_semaphore(self, value: int) -> OceanBoundedSemaphore:
         """
         Description:
             Get Bounded Semaphore object.
@@ -68,11 +73,121 @@ class BaseAPI(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def queue(self, qtype: BaseQueueType):
+    def queue(self, qtype: BaseQueueType) -> OceanQueue:
         """
         Description:
             Get Queue object.
         :param qtype:
+        :return:
+        """
+        pass
+
+
+
+class PosixThreadFeature(metaclass=ABCMeta):
+
+    """
+    POSIX (Portable Operating System Interface) Thread Specification
+
+    POSIX.1  IEEE Std 1003.1 - 1988
+        Process
+        Signal: (IPC)
+            Floating Point Exception
+            Segmentation / Memory Violations
+            Illegal Instructions
+            Bus Errors
+            Timers
+        File and Directory Operations
+        Pipes
+        C library
+        I/O Port Interface and Control
+        Process Triggers
+
+    POSIX.1b  IEEE Std 1003.1b - 1993
+        Priority Scheduling
+        Real-Time Signals
+        Clocks and Timers
+        Semaphores
+        Message Passing
+        Shared Memory
+        Asynchronous and synchronous I/O
+        Memory Locking Interface
+
+    POSIX.1c  IEEE Std 1003.1c - 1995
+        Thread Creation, Control, and Cleanup
+        Thread Scheduling
+        Thread Synchronization
+        Signal Handling
+
+    POSIX.2  IEEE Std 1003.2 - 1992
+        Command Interface
+        Utility Programs
+
+
+    Refer:
+    1. https://en.wikipedia.org/wiki/POSIX
+
+    """
+
+    @abstractmethod
+    def lock(self) -> OceanLock:
+        """
+        Description:
+            Get Lock object.
+        :return:
+        """
+        pass
+
+
+    @abstractmethod
+    def rlock(self) -> OceanRLock:
+        """
+        Description:
+            Get RLock object.
+        :return:
+        """
+        pass
+
+
+    @abstractmethod
+    def event(self, **kwargs) -> OceanEvent:
+        """
+        Description:
+            Get Event object.
+        :param kwargs:
+        :return:
+        """
+        pass
+
+
+    @abstractmethod
+    def condition(self, **kwargs) -> OceanCondition:
+        """
+        Description:
+            Get Condition object.
+        :param kwargs:
+        :return:
+        """
+        pass
+
+
+    @abstractmethod
+    def semaphore(self, value: int) -> OceanSemaphore:
+        """
+        Description:
+            Get Semaphore object.
+        :param value:
+        :return:
+        """
+        pass
+
+
+    @abstractmethod
+    def bounded_semaphore(self, value: int) -> OceanBoundedSemaphore:
+        """
+        Description:
+            Get Bounded Semaphore object.
+        :param value:
         :return:
         """
         pass
