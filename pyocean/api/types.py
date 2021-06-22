@@ -48,6 +48,7 @@ from threading import (Thread,
                        BoundedSemaphore as ThreadingBoundedSemaphore,
                        Event as ThreadingEvent,
                        Condition as ThreadingCondition)
+
 from multiprocessing.pool import AsyncResult, ApplyResult
 from multiprocessing import (Queue as MultiProcessingQueue,
                              Lock as MultiProcessingLock,
@@ -56,10 +57,15 @@ from multiprocessing import (Queue as MultiProcessingQueue,
                              Semaphore as MultiProcessingSemaphore,
                              Event as MultiProcessingEvent,
                              Condition as MultiProcessingCondition)
+
 from gevent.greenlet import Greenlet
 from gevent.queue import Queue as GeventQueue
-from gevent.lock import RLock as GeventRLock, Semaphore as GeventSemaphore, BoundedSemaphore as GeventBoundedSemaphore
+from gevent.lock import (RLock as GeventRLock,
+                         Semaphore as GeventSemaphore,
+                         BoundedSemaphore as GeventBoundedSemaphore,
+                         DummySemaphore as GeventDummySemaphore)
 from gevent.event import Event as GeventEvent
+
 from asyncio.tasks import Task
 from asyncio.queues import Queue as AsyncIOQueue
 from asyncio.locks import (Lock as AsyncIOLock,
@@ -67,6 +73,7 @@ from asyncio.locks import (Lock as AsyncIOLock,
                            BoundedSemaphore as AsyncIOBoundedSemaphore,
                            Event as AsyncIOEvent,
                            Condition as AsyncIOCondition)
+
 from typing import Union
 
 
