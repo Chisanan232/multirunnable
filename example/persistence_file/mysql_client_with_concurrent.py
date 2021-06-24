@@ -78,7 +78,7 @@ class TestCode:
         # sql_query = "select * from limited_company limit 3;"
         sql_query = "select * from stock_data_2330 limit 3;"
         sql_tasks = [sql_query for _ in range(20)]
-        test_dao = test_factory.dao(connection_strategy=test_task.running_persistence())
+        test_dao = TestDao(connection_strategy=test_task.running_persistence())
         test_task_procedure.run(function=test_dao.get_test_data, tasks=sql_tasks)
         test_dao.close_pool()
         data = test_task_procedure.result
