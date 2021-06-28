@@ -18,6 +18,11 @@ class BaseQueueType(Enum):
 
 class BaseAPI(metaclass=ABCMeta):
 
+    """
+    The class is the first version.
+    It will deprecated in the future because of the annotations isn't clear.
+    """
+
     @abstractmethod
     def lock(self) -> OceanLock:
         """
@@ -84,7 +89,7 @@ class BaseAPI(metaclass=ABCMeta):
 
 
 
-class PosixThreadFeature(metaclass=ABCMeta):
+class PosixThread(metaclass=ABCMeta):
 
     """
     POSIX (Portable Operating System Interface) Thread Specification
@@ -130,7 +135,7 @@ class PosixThreadFeature(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def lock(self) -> OceanLock:
+    def get_lock(self) -> OceanLock:
         """
         Description:
             Get Lock object.
@@ -140,7 +145,7 @@ class PosixThreadFeature(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def rlock(self) -> OceanRLock:
+    def get_rlock(self) -> OceanRLock:
         """
         Description:
             Get RLock object.
@@ -150,7 +155,7 @@ class PosixThreadFeature(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def event(self, **kwargs) -> OceanEvent:
+    def get_event(self, *args, **kwargs) -> OceanEvent:
         """
         Description:
             Get Event object.
@@ -161,7 +166,7 @@ class PosixThreadFeature(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def condition(self, **kwargs) -> OceanCondition:
+    def get_condition(self, *args, **kwargs) -> OceanCondition:
         """
         Description:
             Get Condition object.
@@ -172,7 +177,7 @@ class PosixThreadFeature(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def semaphore(self, value: int) -> OceanSemaphore:
+    def get_semaphore(self, value: int) -> OceanSemaphore:
         """
         Description:
             Get Semaphore object.
@@ -183,7 +188,7 @@ class PosixThreadFeature(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def bounded_semaphore(self, value: int) -> OceanBoundedSemaphore:
+    def get_bounded_semaphore(self, value: int) -> OceanBoundedSemaphore:
         """
         Description:
             Get Bounded Semaphore object.
