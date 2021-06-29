@@ -16,6 +16,14 @@ class BaseQueueType(Enum):
 
 
 
+class BaseQueue(metaclass=ABCMeta):
+
+    @abstractmethod
+    def get_queue(self, qtype: BaseQueueType):
+        pass
+
+
+
 class BaseAPI(metaclass=ABCMeta):
 
     """
@@ -133,6 +141,11 @@ class PosixThread(metaclass=ABCMeta):
     1. https://en.wikipedia.org/wiki/POSIX
 
     """
+    pass
+
+
+
+class PosixThreadLock(PosixThread):
 
     @abstractmethod
     def get_lock(self) -> OceanLock:
@@ -155,28 +168,6 @@ class PosixThread(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def get_event(self, *args, **kwargs) -> OceanEvent:
-        """
-        Description:
-            Get Event object.
-        :param kwargs:
-        :return:
-        """
-        pass
-
-
-    @abstractmethod
-    def get_condition(self, *args, **kwargs) -> OceanCondition:
-        """
-        Description:
-            Get Condition object.
-        :param kwargs:
-        :return:
-        """
-        pass
-
-
-    @abstractmethod
     def get_semaphore(self, value: int) -> OceanSemaphore:
         """
         Description:
@@ -193,6 +184,31 @@ class PosixThread(metaclass=ABCMeta):
         Description:
             Get Bounded Semaphore object.
         :param value:
+        :return:
+        """
+        pass
+
+
+
+class PosixThreadCommunication(PosixThread):
+
+    @abstractmethod
+    def get_event(self, *args, **kwargs) -> OceanEvent:
+        """
+        Description:
+            Get Event object.
+        :param kwargs:
+        :return:
+        """
+        pass
+
+
+    @abstractmethod
+    def get_condition(self, *args, **kwargs) -> OceanCondition:
+        """
+        Description:
+            Get Condition object.
+        :param kwargs:
         :return:
         """
         pass
