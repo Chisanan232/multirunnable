@@ -8,6 +8,8 @@ from queue import (
     PriorityQueue as Thread_PriorityQueue)
 from typing import Union
 
+from deprecated.sphinx import deprecated
+
 
 
 ThreadQueueDataType = Union[Thread_Queue, Thread_SimpleQueue, Thread_LifoQueue, Thread_PriorityQueue]
@@ -29,6 +31,7 @@ class ThreadQueue(BaseQueue):
 
 
 
+@deprecated(version="0.7", reason="Classify the lock, event and queue to be different class.")
 class MultiThreading(BaseAPI):
 
     def lock(self):
