@@ -29,6 +29,7 @@ class ProcessQueue(BaseQueue):
 
 
 
+@deprecated(version="0.7", reason="Classify the lock, event and queue to be different class.")
 class MultiProcessing(BaseAPI):
 
     def lock(self):
