@@ -1,6 +1,8 @@
 from enum import Enum
 from typing import Dict
 
+from deprecation import deprecated
+
 
 _Package: str = "pyocean"
 _Parallel_Module: str = ".parallel.features"
@@ -18,6 +20,11 @@ _Communication: str = "Communication"
 
 
 
+@deprecated(
+    deprecated_in="0.7.3",
+    removed_in="0.8.1",
+    current_version="0.7.3",
+    details="Classify the lock, event and queue to be different class.")
 class RunningMode(Enum):
 
     MultiProcessing: Dict[str, str] = {"module": _Parallel_Module, "class": "MultiProcessing"}
