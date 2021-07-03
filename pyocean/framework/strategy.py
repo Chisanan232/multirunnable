@@ -1,10 +1,11 @@
 from pyocean.framework.features import BaseQueueType, BaseGlobalizeAPI
-from pyocean.api import RunningMode, RunningStrategyAPI
-from pyocean.api.types import (OceanTasks,
-                               OceanQueue,
-                               OceanLock, OceanRLock,
-                               OceanSemaphore, OceanBoundedSemaphore,
-                               OceanEvent, OceanCondition)
+from pyocean.api.features_adapter import NewRunningMode, QueueAdapter
+from pyocean.types import (
+    OceanTasks,
+    OceanQueue,
+    OceanLock, OceanRLock,
+    OceanSemaphore, OceanBoundedSemaphore,
+    OceanEvent, OceanCondition)
 from pyocean.persistence.interface import OceanPersistence
 from pyocean.exceptions import GlobalizeObjectError
 
@@ -31,7 +32,7 @@ class InitializeUtils:
     running strategy.
     """
 
-    def __init__(self, running_mode: RunningMode, persistence: OceanPersistence = None):
+    def __init__(self, running_mode: NewRunningMode, persistence: OceanPersistence = None):
         self.__running_mode = running_mode
         self.__persistence_strategy = persistence
 
@@ -80,8 +81,8 @@ class InitializeUtils:
         :param qtype:
         :return:
         """
-        __running_api = RunningStrategyAPI(mode=self.__running_mode)
-        __queue = __running_api.queue(qtype=qtype)
+        __queue_api = QueueAdapter(mode=self.__running_mode)
+        __queue = __queue_api.get_queue(qtype=qtype)
         return __queue
 
 
