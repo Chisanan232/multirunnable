@@ -1,6 +1,7 @@
-from pyocean.api.features_adapter import RunningMode
+from pyocean.api.features_adapter import NewRunningMode
 from pyocean.persistence.interface import OceanPersistence
-from pyocean.persistence.database.configuration import BaseConfiguration, BaseConfigurationKey, BaseConfigDefaultValue
+from pyocean.persistence.configuration import BaseDatabaseConfiguration
+from pyocean.persistence.database.configuration import BaseConfigurationKey, BaseConfigDefaultValue
 
 from abc import abstractmethod
 from typing import Dict
@@ -17,7 +18,7 @@ class BaseConnection(OceanPersistence):
         "database": ""
     }
 
-    def __init__(self, configuration: BaseConfiguration = None):
+    def __init__(self, configuration: BaseDatabaseConfiguration = None):
         if configuration is not None:
             __username_val = configuration.username
             __password_val = configuration.password
@@ -49,7 +50,7 @@ class BaseConnection(OceanPersistence):
 
 
     @abstractmethod
-    def initialize(self, mode: RunningMode, **kwargs) -> None:
+    def initialize(self, mode: NewRunningMode, **kwargs) -> None:
         """
         Description:
             Initialize something which be needed before operate something with database.

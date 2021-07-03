@@ -1,5 +1,5 @@
 from pyocean.framework.strategy import Globalize as RunningGlobalize
-from pyocean.api.features_adapter import RunningMode, RunningStrategyAPI
+from pyocean.api.features_adapter import NewRunningMode, LockAdapter
 from pyocean.persistence.database.connection import BaseConnection
 from pyocean.exceptions import GlobalizeObjectError
 
@@ -15,11 +15,11 @@ class MultiConnections(BaseConnection):
     __Connection_Pool_Name: str = "stock_crawler"
 
 
-    def initialize(self, mode: RunningMode, **kwargs) -> None:
+    def initialize(self, mode: NewRunningMode, **kwargs) -> None:
         """
         Description:
-            Target to initialize Process Semaphore and Database connection pool object, and globalize them to let
-            processes to use.
+            Target to initialize Process Semaphore and Database connection
+            pool object, and globalize them to let processes to use.
         Note:
             RLock mostly like Semaphore, so doesn't do anything with RLock currently.
         :param mode:
@@ -30,9 +30,9 @@ class MultiConnections(BaseConnection):
         __db_connection_instances_number = cast(int, kwargs["db_conn_instances_num"])
         __pool_name = kwargs.get("pool_name", self.__Connection_Pool_Name)
 
-        __running_feature_api = RunningStrategyAPI(mode=mode)
+        __running_feature_api = LockAdapter(mode=mode)
         # # Semaphore part (Limitation)
-        __bounded_semaphore = __running_feature_api.bounded_semaphore(value=__db_connection_instances_number)
+        __bounded_semaphore = __running_feature_api.get_bounded_semaphore(value=__db_connection_instances_number)
         RunningGlobalize.bounded_semaphore(bsmp=__bounded_semaphore)
 
         # # Database Connections Pool part
