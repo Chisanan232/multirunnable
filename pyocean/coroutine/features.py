@@ -1,4 +1,4 @@
-from pyocean.api.types import OceanBoundedSemaphore, OceanSemaphore, OceanRLock, OceanLock, OceanCondition, OceanEvent
+from pyocean.types import OceanCondition, OceanEvent
 from pyocean.framework.features import PosixThreadLock, PosixThreadCommunication, BaseQueue, BaseAPI, BaseQueueType, FeatureUtils
 from gevent.queue import (
     Queue as _Greenlet_Queue,
