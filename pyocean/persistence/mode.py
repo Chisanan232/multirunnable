@@ -9,27 +9,28 @@ class PersistenceMode(Enum):
         Appointed the persistence method and saving-process strategy.
         It has some strategy below:
           1. Database
-             1-1. Single connection
-             1-2. Multiple connections (Connection Pool)
 
           2. File
-             2-1. Builder
-                2-1-1.  SingleFileSaver
-                2-1-2.  MultiFileSaver
-
-             2-2. File Format
-                2-2-1. JSON
-                2-2-2. CSV
-                2-2-3. Excel
-                2-2-4. YAML
+             2-1. General file like .csv, .json or something else.
+             2-2. Archiver like .zip, .tar or something else.
     """
 
-    DATABASE_MODE = "database"
-    FILE_MODE = "file"
+    DATABASE = {
+        "properties_key": "database"
+    }
 
-    SINGLE_DATABASE_CONNECTION = ""
-    MULTI_DATABASE_CONNECTION = ""
+    FILE = {
+        "properties_key": "file"
+    }
 
-    SINGLE_FILE_IO = ""
-    MULTI_FILE_IO = ""
+    ARCHIVER = {
+        "properties_key": "archiver"
+    }
 
+
+
+class DatabaseDriver(Enum):
+
+    MySQL = {
+        "properties_key": "mysql"
+    }
