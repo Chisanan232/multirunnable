@@ -1,5 +1,5 @@
 from pyocean.framework.operator import RunnableOperator
-from pyocean.api.types import OceanQueue
+from pyocean.types import OceanQueue
 
 from typing import Tuple, Dict, Callable
 
