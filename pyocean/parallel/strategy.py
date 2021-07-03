@@ -1,7 +1,7 @@
 from pyocean.framework.strategy import InitializeUtils, RunnableStrategy, Resultable
 from pyocean.framework.features import BaseQueueType
-from pyocean.api import RunningMode
-from pyocean.api.types import OceanTasks
+from pyocean.api import NewRunningMode
+from pyocean.types import OceanTasks
 from pyocean.parallel.features import MultiProcessingQueueType
 from pyocean.persistence import OceanPersistence
 
@@ -18,7 +18,7 @@ from deprecated.sphinx import deprecated
 
 class ParallelStrategy(RunnableStrategy):
 
-    _Running_Mode: RunningMode = RunningMode.MultiProcessing
+    _Running_Mode: NewRunningMode = NewRunningMode.MultiProcessing
     _Manager: Manager = None
     _Namespace_Object: Namespace = None
     _Processors_Pool: Pool = None

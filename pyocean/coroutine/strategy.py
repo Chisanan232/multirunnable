@@ -1,6 +1,6 @@
 from pyocean.framework.strategy import InitializeUtils, RunnableStrategy, AsyncRunnableStrategy, Resultable
 from pyocean.framework.features import BaseQueueType
-from pyocean.api.mode import RunningMode
+from pyocean.api.mode import NewRunningMode
 from pyocean.coroutine.features import GeventQueueType, AsynchronousQueueType
 
 from abc import ABCMeta, ABC, abstractmethod
@@ -21,7 +21,7 @@ class CoroutineStrategy(metaclass=ABCMeta):
 
 class GreenletStrategy(CoroutineStrategy, RunnableStrategy, ABC):
 
-    _Running_Mode: RunningMode = RunningMode.MultiGreenlet
+    _Running_Mode: NewRunningMode = NewRunningMode.MultiGreenlet
     _Gevent_List: List[Greenlet] = None
     _Gevent_Running_Result: List = []
 
@@ -68,7 +68,7 @@ class GeventStrategy(GreenletStrategy, Resultable):
 
 class AsyncStrategy(CoroutineStrategy, AsyncRunnableStrategy, ABC):
 
-    _Running_Mode: RunningMode = RunningMode.Asynchronous
+    _Running_Mode: NewRunningMode = NewRunningMode.Asynchronous
     _Async_Event_Loop = None
     _Async_Task_List: List[Task] = None
     _Async_Running_Result: List = []
