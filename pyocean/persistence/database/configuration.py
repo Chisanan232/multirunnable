@@ -1,3 +1,5 @@
+from pyocean.persistence.mode import PersistenceMode, DatabaseDriver
+from pyocean.persistence.configuration import PropertiesUtil, BaseDatabaseConfiguration
 from pyocean.persistence.database.exceptions import InvalidDriverException, InvalidHostTypeException
 
 from abc import ABCMeta, abstractmethod
@@ -7,8 +9,15 @@ import configparser
 import pathlib
 import os
 
+from deprecation import deprecated
 
 
+
+@deprecated(
+    deprecated_in="0.7.3",
+    removed_in="0.8.1",
+    current_version="0.7.3",
+    details="Classify the lock, event and queue to be different class.")
 class BaseConfiguration(metaclass=ABCMeta):
 
     @property
@@ -89,7 +98,12 @@ class BaseConfigDefaultValue(Enum):
 
 
 
-class DatabaseDriver(Enum):
+@deprecated(
+    deprecated_in="0.7.3",
+    removed_in="0.8.1",
+    current_version="0.7.3",
+    details="Classify the lock, event and queue to be different class.")
+class OldDatabaseDriver(Enum):
 
     MySQL = "mysql"
     PostgreSQL = "postgresql"
@@ -100,6 +114,11 @@ class DatabaseDriver(Enum):
 
 
 
+@deprecated(
+    deprecated_in="0.7.3",
+    removed_in="0.8.1",
+    current_version="0.7.3",
+    details="Classify the lock, event and queue to be different class.")
 class HostEnvType(Enum):
 
     Localhost = "localhost"
@@ -108,7 +127,12 @@ class HostEnvType(Enum):
 
 
 
-class PropertiesUtil:
+@deprecated(
+    deprecated_in="0.7.3",
+    removed_in="0.8.1",
+    current_version="0.7.3",
+    details="Classify the lock, event and queue to be different class.")
+class OldPropertiesUtil:
 
     _Config_Parser: configparser.RawConfigParser = None
     __Properties_Key = "pyocean"
@@ -173,37 +197,52 @@ class PropertiesUtil:
 
 
 
-class DatabaseConfig(BaseConfiguration):
+class DatabaseConfig(BaseDatabaseConfiguration):
 
     __PropertiesOptUtil = None
+    __Mode = PersistenceMode.DATABASE
 
-    def __init__(self, database_driver: DatabaseDriver, host_type: HostEnvType):
-        self.__PropertiesOptUtil = PropertiesUtil(database_driver=database_driver, host_type=host_type)
+    def __init__(self, config_path: str, database_driver: DatabaseDriver):
+        # self.__PropertiesOptUtil = PropertiesUtil(database_driver=database_driver, host_type=host_type)
+        self.__PropertiesOptUtil = PropertiesUtil(
+            mode=self.__Mode,
+            config_path=config_path,
+            database_driver=database_driver)
+        self.__database_driver = database_driver.value.get("properties_key", "")
         self.__property_key = self.__PropertiesOptUtil.property_key()
 
 
     @property
     def username(self) -> str:
-        return self.__PropertiesOptUtil.get_value_as_str(property_key=f"{self.__property_key}username")
+        return self.__PropertiesOptUtil.get_value_as_str(
+            group=self.__database_driver,
+            property_key=".".join([self.__property_key, "username"]))
 
 
     @property
     def password(self) -> str:
-        return self.__PropertiesOptUtil.get_value_as_str(property_key=f"{self.__property_key}password")
+        return self.__PropertiesOptUtil.get_value_as_str(
+            group=self.__database_driver,
+            property_key=".".join([self.__property_key, "password"]))
 
 
     @property
     def host(self) -> str:
-        return self.__PropertiesOptUtil.get_value_as_str(property_key=f"{self.__property_key}host")
+        return self.__PropertiesOptUtil.get_value_as_str(
+            group=self.__database_driver,
+            property_key=".".join([self.__property_key, "host"]))
 
 
     @property
     def port(self) -> str:
-        return self.__PropertiesOptUtil.get_value_as_str(property_key=f"{self.__property_key}port")
+        return self.__PropertiesOptUtil.get_value_as_str(
+            group=self.__database_driver,
+            property_key=".".join([self.__property_key, "port"]))
 
 
     @property
     def database(self) -> str:
-        return self.__PropertiesOptUtil.get_value_as_str(property_key=f"{self.__property_key}database")
-
+        return self.__PropertiesOptUtil.get_value_as_str(
+            group=self.__database_driver,
+            property_key=".".join([self.__property_key, "database"]))
 

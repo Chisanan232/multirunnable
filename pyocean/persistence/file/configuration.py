@@ -1,9 +1,14 @@
+from pyocean.persistence.mode import PersistenceMode
+from pyocean.persistence.configuration import PropertiesUtil, BaseFileConfiguration, BaseArchiverConfiguration
+
 from abc import ABCMeta
 from typing import List
 from enum import Enum
 import configparser
 import pathlib
 import os
+
+from deprecation import deprecated
 
 
 
@@ -33,7 +38,12 @@ class DefaultConfig(Enum):
 
 
 
-class PropertiesUtil:
+@deprecated(
+    deprecated_in="0.7.3",
+    removed_in="0.8.1",
+    current_version="0.7.3",
+    details="Moving the object and annotation to template object.")
+class OldPropertiesUtil:
 
     __Properties_Utils_Instance = None
     _Config_Parser: configparser.RawConfigParser = None
@@ -41,7 +51,7 @@ class PropertiesUtil:
 
     def __new__(cls, *args, **kwargs):
         if cls.__Properties_Utils_Instance is None:
-            return super(PropertiesUtil, cls).__new__(cls)
+            return super(OldPropertiesUtil, cls).__new__(cls)
         return cls.__Properties_Utils_Instance
 
 
@@ -100,24 +110,30 @@ class PropertiesUtil:
 
 
 
+@deprecated(
+    deprecated_in="0.7.3",
+    removed_in="0.8.1",
+    current_version="0.7.3",
+    details="Moving the object and annotation to template object.")
 class BaseFileConfig(metaclass=ABCMeta):
 
     pass
 
 
 
-class FileConfig(BaseFileConfig):
+class FileConfig(BaseFileConfiguration):
 
     __PropertiesOptUtil = None
     __Config_Type = ConfigType.FILE_GROUP.value
+    __Mode = PersistenceMode.FILE
 
     __File_Type = None
     __File_Name = None
     __File_Save_Dir = None
 
     def __init__(self, config_path: str = None):
-        self.__PropertiesOptUtil = PropertiesUtil(config_path=config_path)
-        self.__property_key = self.__PropertiesOptUtil.property_key(group=self.__Config_Type)
+        self.__PropertiesOptUtil = PropertiesUtil(mode=self.__Mode, config_path=config_path)
+        self.__property_key = self.__PropertiesOptUtil.property_key()
 
 
     @property
@@ -160,18 +176,19 @@ class FileConfig(BaseFileConfig):
 
 
 
-class ArchiverConfig(BaseFileConfig):
+class ArchiverConfig(BaseArchiverConfiguration):
 
     __PropertiesOptUtil = None
     __Config_Type = ConfigType.ARCHIVER_GROUP.value
+    __Mode = PersistenceMode.ARCHIVER
 
     __Archiver_Type = None
     __Archiver_Name = None
     __Archiver_Path = None
 
     def __init__(self, config_path: str = None):
-        self.__PropertiesOptUtil = PropertiesUtil(config_path=config_path)
-        self.__property_key = self.__PropertiesOptUtil.property_key(group=self.__Config_Type)
+        self.__PropertiesOptUtil = PropertiesUtil(mode=self.__Mode, config_path=config_path)
+        self.__property_key = self.__PropertiesOptUtil.property_key()
 
 
     @property
