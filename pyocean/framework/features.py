@@ -1,8 +1,8 @@
 from pyocean.framework.exceptions import ParameterCannotBeEmpty
-from pyocean.api.types import (
+from pyocean.types import (
     OceanLock, OceanRLock,
-    OceanEvent, OceanCondition,
     OceanSemaphore, OceanBoundedSemaphore,
+    OceanEvent, OceanCondition,
     OceanQueue)
 
 from abc import ABCMeta, abstractmethod
