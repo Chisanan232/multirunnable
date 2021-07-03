@@ -1,10 +1,15 @@
-from pyocean.api.types import OceanBoundedSemaphore, OceanSemaphore, OceanRLock, OceanLock, OceanCondition, OceanEvent
-from pyocean.framework.features import PosixThreadLock, PosixThreadCommunication, BaseQueue, BaseAPI, BaseQueueType
+from pyocean.framework.features import (
+    PosixThreadLock, PosixThreadCommunication,
+    BaseQueue, BaseAPI, BaseQueueType)
 from pyocean.api.mode import RunningMode, NewRunningMode
+from pyocean.types import (
+    OceanLock, OceanRLock,
+    OceanSemaphore, OceanBoundedSemaphore,
+    OceanEvent, OceanCondition)
 from pyocean._import_utils import ImportPyocean
 
 from importlib import import_module
-from typing import Dict, Callable, Union
+from typing import Dict, Callable
 import logging
 
 from deprecation import deprecated
