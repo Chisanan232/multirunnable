@@ -28,6 +28,11 @@ import time
 
 class TestGreenletFactory(GeventPersistenceFactory):
 
+    __Database_Config_Path = "/Users/bryantliu/DevelopProject/" \
+                             "KobeDevelopProject/Crawler-PyFrameworok/" \
+                             "apache-pyocean/sources/config/database/" \
+                             "mysql_config.properties"
+
     def __init__(self, workers_number: int, db_connection_number: int):
         super().__init__(workers_number, db_connection_number)
         self.__logger = ocean_logger
@@ -35,9 +40,9 @@ class TestGreenletFactory(GeventPersistenceFactory):
 
     def persistence_strategy(self) -> OceanPersistence:
         connection_strategy = MultiTestConnectionStrategy(
-            configuration=DatabaseConfig(database_driver=DatabaseDriver.MySQL, host_type=HostEnvType.Localhost))
+            configuration=DatabaseConfig(config_path=self.__Database_Config_Path, database_driver=DatabaseDriver.MySQL))
         # connection_strategy = SingleTestConnectionStrategy(
-        #     configuration=DatabaseConfig(database_driver=DatabaseDriver.MySQL, host_type=HostEnvType.Localhost))
+        #     configuration=DatabaseConfig(config_path=self.__Database_Config_Path, database_driver=DatabaseDriver.MySQL))
         return connection_strategy
 
 
@@ -50,6 +55,11 @@ class TestGreenletFactory(GeventPersistenceFactory):
 
 class TestAsyncFactory(AsynchronousPersistenceFactory):
 
+    __Database_Config_Path = "/Users/bryantliu/DevelopProject/" \
+                             "KobeDevelopProject/Crawler-PyFrameworok/" \
+                             "apache-pyocean/sources/config/database/" \
+                             "mysql_config.properties"
+
     def __init__(self, workers_number: int, db_connection_number: int):
         super().__init__(workers_number, db_connection_number)
         self.__logger = ocean_logger
@@ -57,9 +67,9 @@ class TestAsyncFactory(AsynchronousPersistenceFactory):
 
     def persistence_strategy(self) -> OceanPersistence:
         connection_strategy = MultiTestConnectionStrategy(
-            configuration=DatabaseConfig(database_driver=DatabaseDriver.MySQL, host_type=HostEnvType.Localhost))
+            configuration=DatabaseConfig(config_path=self.__Database_Config_Path, database_driver=DatabaseDriver.MySQL))
         # connection_strategy = SingleTestConnectionStrategy(
-        #     configuration=DatabaseConfig(database_driver=DatabaseDriver.MySQL, host_type=HostEnvType.Localhost))
+        #     configuration=DatabaseConfig(config_path=self.__Database_Config_Path, database_driver=DatabaseDriver.MySQL))
         return connection_strategy
 
 
@@ -88,11 +98,11 @@ class TestCode:
         """
         # Initial running factory
         # # Greenlet
-        test_factory = TestGreenletFactory(workers_number=self.__process_num,
-                                           db_connection_number=self.__db_connection_number)
+        # test_factory = TestGreenletFactory(workers_number=self.__process_num,
+        #                                    db_connection_number=self.__db_connection_number)
         # # Asynchronous
-        # test_factory = TestAsyncFactory(workers_number=self.__process_num,
-        #                                 db_connection_number=self.__db_connection_number)
+        test_factory = TestAsyncFactory(workers_number=self.__process_num,
+                                        db_connection_number=self.__db_connection_number)
         # Initial running task object
         test_task = PersistenceRunnableTask(factory=test_factory)
         # Generate a running builder to start a multi-worker program
@@ -104,20 +114,20 @@ class TestCode:
         sql_query = "select * from stock_data_2330 limit 3;"
         sql_tasks = [sql_query for _ in range(20)]
         # # Greenlet
-        test_dao = TestDao(connection_strategy=test_task.running_persistence())
+        # test_dao = TestDao(connection_strategy=test_task.running_persistence())
         # # Asynchronous
-        # test_dao = AsyncTestDao(connection_strategy=test_task.running_persistence())
+        test_dao = AsyncTestDao(connection_strategy=test_task.running_persistence())
         test_task_procedure.run(function=test_dao.get_test_data, tasks=sql_tasks)
-        test_dao.close_pool()
+        # test_dao.close_pool()
         data = test_task_procedure.result
         self.__logger.info(f"Final data: {data}")
 
         __fao = ExampleFao()
         self.__logger.debug(f"Start to save data to file ....")
         # # Greenlet
-        format_data = self.__only_data(data=data)
+        # format_data = self.__only_data(data=data)
         # # Asynchronous
-        # format_data = self.__async_only_data(data=data)
+        format_data = self.__async_only_data(data=data)
         # __fao.all_thread_one_file(data=format_data)
         __fao.all_thread_one_file_in_archiver(data=format_data)
         self.__logger.debug(f"Saving successfully!")
