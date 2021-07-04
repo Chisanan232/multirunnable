@@ -140,8 +140,7 @@ class FileConfig(BaseFileConfiguration):
     def file_type(self) -> List[str]:
         return self.__PropertiesOptUtil.get_value_as_list(
             group=self.__Config_Type,
-            property_key=f"{self.__property_key}type"
-        )
+            property_key=".".join([self.__property_key, "type"]))
 
 
     @file_type.setter
@@ -153,8 +152,7 @@ class FileConfig(BaseFileConfiguration):
     def file_name(self) -> str:
         return self.__PropertiesOptUtil.get_value_as_str(
             group=self.__Config_Type,
-            property_key=f"{self.__property_key}name"
-        )
+            property_key=".".join([self.__property_key, "name"]))
 
 
     @file_name.setter
@@ -166,8 +164,7 @@ class FileConfig(BaseFileConfiguration):
     def saving_directory(self) -> str:
         return self.__PropertiesOptUtil.get_value_as_str(
             group=self.__Config_Type,
-            property_key=f"{self.__property_key}path"
-        )
+            property_key=".".join([self.__property_key, "path"]))
 
 
     @saving_directory.setter
@@ -195,8 +192,7 @@ class ArchiverConfig(BaseArchiverConfiguration):
     def compress_type(self) -> List[str]:
         return self.__PropertiesOptUtil.get_value_as_list(
             group=self.__Config_Type,
-            property_key=f"{self.__property_key}type"
-        )
+            property_key=".".join([self.__property_key, "type"]))
 
 
     @compress_type.setter
@@ -208,8 +204,7 @@ class ArchiverConfig(BaseArchiverConfiguration):
     def compress_name(self) -> str:
         return self.__PropertiesOptUtil.get_value_as_str(
             group=self.__Config_Type,
-            property_key=f"{self.__property_key}name"
-        )
+            property_key=".".join([self.__property_key, "name"]))
 
 
     @compress_name.setter
@@ -221,8 +216,7 @@ class ArchiverConfig(BaseArchiverConfiguration):
     def compress_path(self) -> str:
         return self.__PropertiesOptUtil.get_value_as_str(
             group=self.__Config_Type,
-            property_key=f"{self.__property_key}path"
-        )
+            property_key=".".join([self.__property_key, "path"]))
 
 
     @compress_path.setter
