@@ -7,16 +7,16 @@ sys.path.append(package_pyocean_path)
 
 # pyocean package
 from pyocean import GeventProcedure, AsynchronousProcedure
-from pyocean.framework import PersistenceRunnableTask
-from pyocean.coroutine import GeventPersistenceFactory
+from pyocean.framework import BaseRunnableProcedure, RunnableStrategy, PersistenceRunnableTask
+from pyocean.coroutine import AsynchronousPersistenceFactory
 from pyocean.persistence import OceanPersistence
 from pyocean.persistence.database import BaseDao
-from pyocean.persistence.database.configuration import DatabaseConfig, DatabaseDriver
+from pyocean.persistence.database.configuration import DatabaseConfig, DatabaseDriver, HostEnvType
 from pyocean.logger import ocean_logger
 
 # code component
 from connection_strategy import SingleTestConnectionStrategy, MultiTestConnectionStrategy
-from dao import TestDao
+from dao import TestDao, AsyncTestDao
 from fao import ExampleFao
 
 from multiprocessing import cpu_count
@@ -25,7 +25,7 @@ import time
 
 
 
-class TestGreenletFactory(GeventPersistenceFactory):
+class TestAsyncFactory(AsynchronousPersistenceFactory):
 
     __Database_Config_Path = "Your properties file path"
 
@@ -43,8 +43,7 @@ class TestGreenletFactory(GeventPersistenceFactory):
 
 
     def dao(self, connection_strategy: OceanPersistence) -> BaseDao:
-        # sql_query_obj = DatabaseSqlQuery(strategy=connection_strategy)
-        sql_query_obj = TestDao(connection_strategy=connection_strategy)
+        sql_query_obj = AsyncTestDao(connection_strategy=connection_strategy)
         return sql_query_obj
 
 
@@ -67,9 +66,8 @@ class TestCode:
         :return:
         """
         # Initial running factory
-        # # Greenlet
-        test_factory = TestGreenletFactory(workers_number=self.__process_num,
-                                           db_connection_number=self.__db_connection_number)
+        test_factory = TestAsyncFactory(workers_number=self.__process_num,
+                                        db_connection_number=self.__db_connection_number)
         # Initial running task object
         test_task = PersistenceRunnableTask(factory=test_factory)
         # Generate a running builder to start a multi-worker program
@@ -80,8 +78,7 @@ class TestCode:
         # sql_query = "select * from limited_company limit 3;"
         sql_query = "select * from stock_data_2330 limit 3;"
         sql_tasks = [sql_query for _ in range(20)]
-        # # Greenlet
-        test_dao = TestDao(connection_strategy=test_task.running_persistence())
+        test_dao = AsyncTestDao(connection_strategy=test_task.running_persistence())
         test_task_procedure.run(function=test_dao.get_test_data, tasks=sql_tasks)
         # test_dao.close_pool()
         data = test_task_procedure.result
@@ -89,17 +86,16 @@ class TestCode:
 
         __fao = ExampleFao()
         self.__logger.debug(f"Start to save data to file ....")
-        # # Greenlet
-        format_data = self.__only_data(data=data)
+        format_data = self.__async_only_data(data=data)
         # __fao.all_thread_one_file(data=format_data)
         __fao.all_thread_one_file_in_archiver(data=format_data)
         self.__logger.debug(f"Saving successfully!")
 
 
-    def __only_data(self, data):
+    def __async_only_data(self, data):
         new_data = []
         for d in data:
-            data_rows = d["data"]
+            data_rows = d["result_data"]["data"]
             for data_row in data_rows:
                 new_data.append(data_row)
         return new_data
