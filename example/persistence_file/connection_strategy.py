@@ -1,5 +1,5 @@
+from pyocean.persistence.configuration import BaseDatabaseConfiguration
 from pyocean.persistence.database import SingleConnection, MultiConnections
-from pyocean.persistence.database.configuration import BaseConfiguration
 from pyocean.logger import ocean_logger
 
 from mysql.connector.connection import MySQLConnection
@@ -14,7 +14,7 @@ import os
 
 class SingleTestConnectionStrategy(SingleConnection):
 
-    def __init__(self, configuration: BaseConfiguration):
+    def __init__(self, configuration: BaseDatabaseConfiguration):
         super().__init__(configuration)
         self._logger = ocean_logger
 
@@ -45,7 +45,7 @@ class SingleTestConnectionStrategy(SingleConnection):
 
 class MultiTestConnectionStrategy(MultiConnections):
 
-    def __init__(self, configuration: BaseConfiguration = None):
+    def __init__(self, configuration: BaseDatabaseConfiguration = None):
         super().__init__(configuration=configuration)
         self._logger = ocean_logger
         self._logger.debug("Class MultiTestConnectionStrategy be newed (including logging) ...")
