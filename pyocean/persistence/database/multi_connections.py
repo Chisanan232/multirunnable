@@ -1,5 +1,5 @@
 from pyocean.framework.strategy import Globalize as RunningGlobalize
-from pyocean.api.features_adapter import NewRunningMode, LockAdapter
+from pyocean.api.features_adapter import FeatureMode, LockAdapter
 from pyocean.persistence.database.connection import BaseConnection
 from pyocean.exceptions import GlobalizeObjectError
 
@@ -15,7 +15,7 @@ class MultiConnections(BaseConnection):
     __Connection_Pool_Name: str = "stock_crawler"
 
 
-    def initialize(self, mode: NewRunningMode, **kwargs) -> None:
+    def initialize(self, mode: FeatureMode, **kwargs) -> None:
         """
         Description:
             Target to initialize Process Semaphore and Database connection

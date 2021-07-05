@@ -1,5 +1,5 @@
 from pyocean.framework.strategy import Globalize as RunningGlobalize
-from pyocean.api.features_adapter import NewRunningMode, LockAdapter
+from pyocean.api.features_adapter import FeatureMode, LockAdapter
 from pyocean.persistence.database.connection import BaseConnection
 
 from abc import ABC
@@ -8,7 +8,7 @@ from abc import ABC
 
 class SingleConnection(BaseConnection, ABC):
 
-    def initialize(self, mode: NewRunningMode, **kwargs) -> None:
+    def initialize(self, mode: FeatureMode, **kwargs) -> None:
         """
         Note:
             Deprecated the method about multiprocessing saving with one connection and change to use multiprocessing
