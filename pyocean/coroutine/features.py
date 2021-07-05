@@ -1,5 +1,5 @@
 from pyocean.types import OceanCondition, OceanEvent
-from pyocean.framework.features import PosixThreadLock, PosixThreadCommunication, BaseQueue, BaseAPI, BaseQueueType, FeatureUtils
+from pyocean.framework.features import PosixThreadLock, PosixThreadCommunication, BaseQueue, BaseQueueType
 from gevent.queue import (
     Queue as _Greenlet_Queue,
     SimpleQueue as _Greenlet_SimpleQueue,
@@ -26,8 +26,6 @@ from asyncio.events import AbstractEventLoop
 
 from typing import Union
 
-from deprecated.sphinx import deprecated
-
 
 
 class GeventQueueType(BaseQueueType):
@@ -43,38 +41,6 @@ class GeventQueueType(BaseQueueType):
 class GreenletQueue(BaseQueue):
 
     def get_queue(self, qtype: GeventQueueType):
-        return qtype.value
-
-
-
-@deprecated(version="0.7", reason="Classify the lock, event and queue to be different class.")
-class GeventAPI(BaseAPI):
-
-    def lock(self):
-        return _Greenlet_Lock()
-
-
-    def rlock(self):
-        return _Greenlet_RLock()
-
-
-    def event(self, **kwargs):
-        return _Greenlet_Event()
-
-
-    def condition(self, **kwargs):
-        raise Exception("Coroutine running strategy doesn't have method 'condition'. Please change to use 'event'.")
-
-
-    def semaphore(self, value: int):
-        return _Greenlet_Semaphore(value=value)
-
-
-    def bounded_semaphore(self, value: int):
-        return _Greenlet_BoundedSemaphore(value=value)
-
-
-    def queue(self, qtype: GeventQueueType):
         return qtype.value
 
 
@@ -127,56 +93,6 @@ class AsynchronousQueueType(BaseQueueType):
 class AsyncQueue(BaseQueue):
 
     def get_queue(self, qtype: AsynchronousQueueType):
-        return qtype.value
-
-
-
-@deprecated(version="0.7", reason="Classify the lock, event and queue to be different class.")
-class AsynchronousAPI(BaseAPI):
-
-    def lock(self):
-        return _Async_Lock()
-
-
-    def event(self, **kwargs):
-        __loop = FeatureUtils.chk_obj(param="loop", **kwargs)
-        # __loop = self.__chk_loop_obj(**kwargs)
-        return _Async_Event(loop=__loop)
-
-
-    def condition(self, **kwargs):
-        __lock = FeatureUtils.chk_obj(param="lock", **kwargs)
-        __loop = FeatureUtils.chk_obj(param="loop", **kwargs)
-        # __lock = self.__chk_lock_obj(**kwargs)
-        # __loop = self.__chk_loop_obj(**kwargs)
-        return _Async_Condition(lock=__lock, loop=__loop)
-
-
-    @deprecated(version="0.6", reason="Move the method into class 'FeatureUtils'")
-    def __chk_lock_obj(self, **kwargs):
-        __lock = kwargs.get("lock")
-        if __lock is None:
-            raise Exception("")
-        return __lock
-
-
-    @deprecated(version="0.6", reason="Move the method into class 'FeatureUtils'")
-    def __chk_loop_obj(self, **kwargs):
-        __loop = kwargs.get("loop")
-        if __loop is None:
-            raise Exception("")
-        return __loop
-
-
-    def semaphore(self, value: int):
-        return _Async_Semaphore(value=value)
-
-
-    def bounded_semaphore(self, value: int):
-        return _Async_BoundedSemaphore(value=value)
-
-
-    def queue(self, qtype: AsynchronousQueueType):
         return qtype.value
 
 

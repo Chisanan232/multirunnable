@@ -36,4 +36,4 @@ from pyocean.framework.operator import RunnableOperator, BaseRunnableProcedure
 from pyocean.framework.strategy import RunnableStrategy, Resultable
 from pyocean.framework.factory import SimpleTaskFactory, PersistenceTaskFactory
 from pyocean.framework.tasks import SimpleRunnableTask, PersistenceRunnableTask
-from pyocean.framework.features import BaseQueueType, BaseAPI, BaseGlobalizeAPI
+from pyocean.framework.features import BaseQueueType, BaseGlobalizeAPI
