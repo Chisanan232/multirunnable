@@ -23,11 +23,11 @@ from pyocean.parallel import (
 from pyocean.concurrent import (
     ConcurrentProcedure,
     MultiThreadingStrategy,
-    MultiThreadsSimpleFactory,
-    MultiThreadsPersistenceFactory)
+    ConcurrentSimpleFactory,
+    ConcurrentPersistenceFactory)
 from pyocean.coroutine import (
     GeventProcedure,
-    GeventStrategy,
+    MultiGreenletStrategy,
     GeventSimpleFactory,
     GeventPersistenceFactory,
     AsynchronousProcedure,
