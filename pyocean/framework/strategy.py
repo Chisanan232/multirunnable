@@ -1,5 +1,5 @@
 from pyocean.framework.features import BaseQueueType, BaseGlobalizeAPI
-from pyocean.api.features_adapter import NewRunningMode, QueueAdapter
+from pyocean.api.features_adapter import FeatureMode, QueueAdapter
 from pyocean.types import (
     OceanTasks,
     OceanQueue,
@@ -32,7 +32,7 @@ class InitializeUtils:
     running strategy.
     """
 
-    def __init__(self, running_mode: NewRunningMode, persistence: OceanPersistence = None):
+    def __init__(self, running_mode: FeatureMode, persistence: OceanPersistence = None):
         self.__running_mode = running_mode
         self.__persistence_strategy = persistence
 
