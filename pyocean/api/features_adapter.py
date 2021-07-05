@@ -1,81 +1,23 @@
 from pyocean.framework.features import (
     PosixThreadLock, PosixThreadCommunication,
-    BaseQueue, BaseAPI, BaseQueueType)
-from pyocean.api.mode import RunningMode, NewRunningMode
+    BaseQueue, BaseQueueType)
+from pyocean.api.mode import FeatureMode
 from pyocean.types import (
     OceanLock, OceanRLock,
     OceanSemaphore, OceanBoundedSemaphore,
     OceanEvent, OceanCondition)
 from pyocean._import_utils import ImportPyocean
 
-from importlib import import_module
 from typing import Dict, Callable
 import logging
-
-from deprecation import deprecated
 
 
 _Package: str = "pyocean"
 
 
-@deprecated(
-    deprecated_in="0.7.3",
-    removed_in="0.8.1",
-    current_version="0.7.3",
-    details="Classify the lock, event and queue to be different class.")
-class RunningStrategyAPI(BaseAPI):
-
-    def __init__(self, mode: RunningMode):
-        """
-        Description:
-            It will import the target module and instancing the target class to be the instance object.
-            In the other words, it will
-              1. If it's parallel strategy, import pyocean.parallel.features.MultiProcessing.
-              2. If it's concurrent strategy, import pyocean.concurrent.features.{MultiThreading, Coroutine or Asynchronous}.
-        :param mode:
-        """
-
-        __running_info: Dict[str, str] = mode.value
-        self.__module_info: str = __running_info.get("module")
-        self.__class_info: str = __running_info.get("class")
-        self.__package = import_module(name=self.__module_info, package=_Package)
-        logging.debug(f"package obj: {self.__package}")
-        self.__class: Callable = getattr(self.__package, self.__class_info)
-        self.__class_instance = self.__class()
-        logging.debug(f"__class: {self.__class}")
-        logging.debug(f"__class_instance: {self.__class_instance}")
-
-
-    def lock(self):
-        return self.__class_instance.lock()
-
-
-    def event(self, **kwargs):
-        return self.__class_instance.event(**kwargs)
-
-
-    def condition(self, **kwargs):
-        return self.__class_instance.condition(**kwargs)
-
-
-    def semaphore(self, value: int):
-        return self.__class_instance.semaphore(value=value)
-
-
-    def bounded_semaphore(self, value: int):
-        return self.__class_instance.bounded_semaphore(value=value)
-
-
-    def queue(self, qtype: BaseQueueType):
-        if not isinstance(qtype, BaseQueueType):
-            raise TypeError("Parameter 'qtype' should be one value of object 'BaseQueueType'.")
-        return self.__class_instance.queue(qtype=qtype)
-
-
-
 class BaseAdapter:
 
-    def __init__(self, mode: NewRunningMode):
+    def __init__(self, mode: FeatureMode):
         """
         Description:
             It will import the target module and instancing the target class to be the instance object.
@@ -92,7 +34,7 @@ class BaseAdapter:
 
 class QueueAdapter(BaseAdapter, BaseQueue):
 
-    def __init__(self, mode: NewRunningMode):
+    def __init__(self, mode: FeatureMode):
         super().__init__(mode=mode)
         self.__queue_cls_name: str = self._running_info.get("queue")
         self.queue_cls = ImportPyocean.get_class(pkg_path=self._module, cls_name=self.__queue_cls_name)
@@ -106,7 +48,7 @@ class QueueAdapter(BaseAdapter, BaseQueue):
 
 class LockAdapter(BaseAdapter, PosixThreadLock):
 
-    def __init__(self, mode: NewRunningMode):
+    def __init__(self, mode: FeatureMode):
         super().__init__(mode=mode)
         self.__lock_cls_name: str = self._running_info.get("lock")
         self.lock_cls = ImportPyocean.get_class(pkg_path=self._module, cls_name=self.__lock_cls_name)
@@ -132,7 +74,7 @@ class LockAdapter(BaseAdapter, PosixThreadLock):
 
 class CommunicationAdapter(BaseAdapter, PosixThreadCommunication):
 
-    def __init__(self, mode: NewRunningMode):
+    def __init__(self, mode: FeatureMode):
         super().__init__(mode=mode)
         self.__communication_cls_name: str = self._running_info.get("communication")
         self.communication_cls = ImportPyocean.get_class(pkg_path=self._module, cls_name=self.__communication_cls_name)
