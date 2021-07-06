@@ -7,10 +7,10 @@ sys.path.append(package_pyocean_path)
 
 # pyocean package
 from pyocean.framework import PersistenceRunnableTask
-from pyocean.concurrent import MultiThreadsSimpleFactory, MultiThreadsPersistenceFactory
+from pyocean.concurrent import ConcurrentSimpleFactory, ConcurrentPersistenceFactory
 from pyocean.persistence import OceanPersistence
 from pyocean.persistence.database import BaseDao
-from pyocean.persistence.database.configuration import DatabaseConfig, DatabaseDriver, HostEnvType
+from pyocean.persistence.database.configuration import DatabaseConfig, DatabaseDriver
 from pyocean.logger import ocean_logger
 
 # code component
@@ -22,7 +22,9 @@ import time
 
 
 
-class TestMultiThreadFactory(MultiThreadsPersistenceFactory):
+class TestMultiThreadFactory(ConcurrentPersistenceFactory):
+
+    __Database_Config_Path = "Your properties file path"
 
     def __init__(self, workers_number: int, db_connection_number: int):
         super().__init__(workers_number, db_connection_number)
@@ -31,10 +33,10 @@ class TestMultiThreadFactory(MultiThreadsPersistenceFactory):
 
     def persistence_strategy(self) -> OceanPersistence:
         connection_strategy = MultiTestConnectionStrategy(
-            configuration=DatabaseConfig(database_driver=DatabaseDriver.MySQL, host_type=HostEnvType.Localhost)
+            configuration=DatabaseConfig(config_path=self.__Database_Config_Path, database_driver=DatabaseDriver.MySQL)
         )
         # connection_strategy = SingleTestConnectionStrategy(
-        #     configuration=DatabaseConfig(database_driver=DatabaseDriver.MySQL, host_type=HostEnvType.Localhost),
+        #     configuration=DatabaseConfig(config_path=self.__Database_Config_Path, database_driver=DatabaseDriver.MySQL),
         # )
         return connection_strategy
 

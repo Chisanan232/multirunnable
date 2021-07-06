@@ -11,7 +11,7 @@ from pyocean.framework import PersistenceRunnableTask
 from pyocean.parallel import ParallelProcedure, ParallelPersistenceFactory
 from pyocean.persistence import OceanPersistence
 from pyocean.persistence.database import BaseDao
-from pyocean.persistence.database.configuration import DatabaseConfig, DatabaseDriver, HostEnvType
+from pyocean.persistence.database.configuration import DatabaseConfig, DatabaseDriver
 from pyocean.logger import ocean_logger
 
 # code component
@@ -26,6 +26,8 @@ import time
 
 class TestParallelFactory(ParallelPersistenceFactory):
 
+    __Database_Config_Path = "Your properties file path"
+
     def __init__(self, workers_number: int, db_connection_number: int):
         super().__init__(workers_number, db_connection_number)
         self.__logger = ocean_logger
@@ -34,9 +36,9 @@ class TestParallelFactory(ParallelPersistenceFactory):
     def persistence_strategy(self) -> OceanPersistence:
         print("[DEBUG] start init connection strategy. pid - ", os.getpid())
         connection_strategy = MultiTestConnectionStrategy(
-            configuration=DatabaseConfig(database_driver=DatabaseDriver.MySQL, host_type=HostEnvType.Localhost))
+            configuration=DatabaseConfig(config_path=self.__Database_Config_Path, database_driver=DatabaseDriver.MySQL))
         # connection_strategy = SingleTestConnectionStrategy(
-        #     configuration=DatabaseConfig(database_driver=DatabaseDriver.MySQL, host_type=HostEnvType.Localhost))
+        #     configuration=DatabaseConfig(config_path=self.__Database_Config_Path, database_driver=DatabaseDriver.MySQL))
         print("[DEBUG] end init connection strategy. pid - ", os.getpid())
         return connection_strategy
 
