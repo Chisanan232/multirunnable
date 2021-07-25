@@ -11,6 +11,7 @@ from pyocean.exceptions import GlobalizeObjectError
 
 from abc import ABCMeta, ABC, abstractmethod
 from typing import List, Iterable, Callable
+import logging
 
 
 Running_Lock: OceanLock = None
@@ -130,7 +131,7 @@ class RunnableStrategy(metaclass=ABCMeta):
     def __init__(self, workers_num: int, persistence_strategy: OceanPersistence = None, **kwargs):
         self.__workers_num = workers_num
         self._persistence_strategy = persistence_strategy
-        self.__db_conn_instance_num = kwargs.get("db_connection_pool_size", None)
+        self.__db_conn_num = kwargs.get("db_connection_pool_size", None)
 
 
     @property
@@ -144,7 +145,7 @@ class RunnableStrategy(metaclass=ABCMeta):
 
 
     @property
-    def db_connection_instances_number(self) -> int:
+    def db_connection_number(self) -> int:
         """
         Description:
             The number of the connection instances which target to do something operators with database.
@@ -154,25 +155,24 @@ class RunnableStrategy(metaclass=ABCMeta):
         """
         from multiprocessing import cpu_count
 
-        if self.__db_conn_instance_num is None:
+        if self.__db_conn_num is None:
             if self.__workers_num < cpu_count():
                 return self.__workers_num
             else:
                 return cpu_count()
         else:
-            if self.__db_conn_instance_num > cpu_count():
-                print("Warning about suggestion is the best configuration of database connection instance should be "
-                      "less than CPU amounts.")
-            return self.__db_conn_instance_num
+            if self.__db_conn_num > cpu_count():
+                logging.warning("Warning about suggestion is the best "
+                                "configuration of database connection instance "
+                                "should be less than CPU amounts.")
+            return self.__db_conn_num
 
 
-    def init_multi_working(self, tasks: Iterable, queue_type: BaseQueueType, *args, **kwargs) -> None:
+    def initialization(self, *args, **kwargs) -> None:
         """
         Description:
             Initialize something configurations or something which be needed to be already before run multiple
             threads or processes.
-        :param tasks:
-        :param queue_type:
         :param args:
         :param kwargs:
         :return:
@@ -181,7 +181,7 @@ class RunnableStrategy(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def build_multi_workers(self, function: Callable, *args, **kwargs) -> List[OceanTasks]:
+    def build_workers(self, function: Callable, *args, **kwargs) -> List[OceanTasks]:
         """
         Description:
             Assign tasks into each different threads or processes.
@@ -194,7 +194,7 @@ class RunnableStrategy(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def activate_multi_workers(self, workers_list: List[OceanTasks]) -> None:
+    def activate_workers(self, workers_list: List[OceanTasks]) -> None:
         """
         Description:
             Activate multiple threads or processes to run target task(s).
@@ -205,10 +205,10 @@ class RunnableStrategy(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def end_multi_working(self) -> None:
+    def close(self) -> None:
         """
         Description:
-            The final in procedure which the progeram should be run.
+            The final in procedure which the program should be run.
         :return:
         """
         pass
@@ -217,12 +217,12 @@ class RunnableStrategy(metaclass=ABCMeta):
 
 class AsyncRunnableStrategy(RunnableStrategy, ABC):
 
-    async def init_multi_working(self, tasks: Iterable, *args, **kwargs) -> None:
+    async def initialization(self, tasks: Iterable, *args, **kwargs) -> None:
         pass
 
 
     @abstractmethod
-    async def build_multi_workers(self, function: Callable, *args, **kwargs) -> List[OceanTasks]:
+    async def build_workers(self, function: Callable, *args, **kwargs) -> List[OceanTasks]:
         """
         Description:
             Assign tasks into each different threads or processes.
@@ -235,7 +235,7 @@ class AsyncRunnableStrategy(RunnableStrategy, ABC):
 
 
     @abstractmethod
-    async def activate_multi_workers(self, workers_list: List[OceanTasks]) -> None:
+    async def activate_workers(self, workers_list: List[OceanTasks]) -> None:
         """
         Description:
             Activate multiple threads or processes to run target task(s).
@@ -246,7 +246,7 @@ class AsyncRunnableStrategy(RunnableStrategy, ABC):
 
 
     @abstractmethod
-    async def end_multi_working(self) -> None:
+    async def close(self) -> None:
         """
         Description:
             The final in procedure which the progeram should be run.
@@ -259,7 +259,7 @@ class AsyncRunnableStrategy(RunnableStrategy, ABC):
 class Resultable(metaclass=ABCMeta):
 
     @abstractmethod
-    def get_multi_working_result(self) -> Iterable[object]:
+    def get_result(self) -> Iterable[object]:
         """
         Description:
             Return the result of every tasks done.
