@@ -1,11 +1,14 @@
 from enum import Enum
-from typing import Dict
 
 
 _Package: str = "pyocean"
-_Parallel_Module: str = ".parallel.features"
-_Concurrent_Module: str = ".concurrent.features"
-_Coroutine_Module: str = ".coroutine.features"
+_Parallel_Module: str = ".parallel."
+_Concurrent_Module: str = ".concurrent."
+_Coroutine_Module: str = ".coroutine."
+_Feature_Module: str = "features"
+_Factory_Module: str = "factory"
+_Strategy_Module: str = "strategy"
+_Operator_Module: str = "operator"
 
 
 # # Feature class
@@ -37,29 +40,29 @@ _Strategy_Class: str = "Strategy"
 
 class FeatureMode(Enum):
 
-    MultiProcessing: Dict[str, str] = {
-        "module": _Parallel_Module,
+    MultiProcessing = {
+        "module": _Parallel_Module + _Feature_Module,
         "queue": _Parallel_Feature_Class + _Queue_Class,
         "lock": _Parallel_Feature_Class + _Lock_Class,
         "communication": _Parallel_Feature_Class + _Communication_Class
     }
 
-    MultiThreading: Dict[str, str] = {
-        "module": _Concurrent_Module,
+    MultiThreading = {
+        "module": _Concurrent_Module + _Feature_Module,
         "queue": _Concurrent_Feature_Class + _Queue_Class,
         "lock": _Concurrent_Feature_Class + _Lock_Class,
         "communication": _Concurrent_Feature_Class + _Communication_Class
     }
 
-    MultiGreenlet: Dict[str, str] = {
-        "module": _Coroutine_Module,
+    MultiGreenlet = {
+        "module": _Coroutine_Module + _Feature_Module,
         "queue": _Greenlet_Feature_Class + _Queue_Class,
         "lock": _Greenlet_Feature_Class + _Lock_Class,
         "communication": _Greenlet_Feature_Class + _Communication_Class
     }
 
-    Asynchronous: Dict[str, str] = {
-        "module": _Coroutine_Module,
+    Asynchronous = {
+        "module": _Coroutine_Module + _Feature_Module,
         "queue": _Async_Feature_Class + _Queue_Class,
         "lock": _Async_Feature_Class + _Lock_Class,
         "communication": _Async_Feature_Class + _Communication_Class
@@ -67,69 +70,49 @@ class FeatureMode(Enum):
 
 
 
-class FactoryMode(Enum):
+class RunningMode(Enum):
 
-    Parallel: Dict[str, str] = {
+    Parallel = {
+        "factory_module": _Parallel_Module + _Factory_Module,
         "simple_factory": _Parallel_Common_Class + _Simple_Factory_Class,
         "persistence_database_factory": _Parallel_Common_Class + _Persistence_Database_Factory_Class,
-        "persistence_file_factory": _Parallel_Common_Class + _Persistence_File_Factory_Class
-    }
-
-    Concurrent: Dict[str, str] = {
-        "simple_factory": _Concurrent_Common_Class + _Simple_Factory_Class,
-        "persistence_database_factory": _Concurrent_Common_Class + _Persistence_Database_Factory_Class,
-        "persistence_file_factory": _Concurrent_Common_Class + _Persistence_File_Factory_Class
-    }
-
-    Greenlet: Dict[str, str] = {
-        "simple_factory": _Greenlet_Common_Class + _Simple_Factory_Class,
-        "persistence_database_factory": _Greenlet_Common_Class + _Persistence_Database_Factory_Class,
-        "persistence_file_factory": _Greenlet_Common_Class + _Persistence_File_Factory_Class
-    }
-
-    Asynchronous: Dict[str, str] = {
-        "simple_factory": _Async_Common_Class + _Simple_Factory_Class,
-        "persistence_database_factory": _Async_Common_Class + _Persistence_Database_Factory_Class,
-        "persistence_file_factory": _Async_Common_Class + _Persistence_File_Factory_Class
-    }
-
-
-
-class ProcedureMode(Enum):
-
-    Parallel: Dict[str, str] = {
-        "procedure": _Parallel_Common_Class + _Procedure_Class
-    }
-
-    Concurrent: Dict[str, str] = {
-        "procedure": _Concurrent_Common_Class + _Procedure_Class
-    }
-
-    Greenlet: Dict[str, str] = {
-        "procedure": _Greenlet_Common_Class + _Procedure_Class
-    }
-
-    Asynchronous: Dict[str, str] = {
-        "procedure": _Async_Common_Class + _Procedure_Class
-    }
-
-
-
-class StrategyMode(Enum):
-
-    Parallel: Dict[str, str] = {
+        "persistence_file_factory": _Parallel_Common_Class + _Persistence_File_Factory_Class,
+        "operator_module": _Parallel_Module + _Operator_Module,
+        "procedure": _Parallel_Common_Class + _Procedure_Class,
+        "strategy_module": _Parallel_Module + _Strategy_Module,
         "strategy": _Parallel_Common_Class + _Strategy_Class
     }
 
-    Concurrent: Dict[str, str] = {
+    Concurrent = {
+        "factory_module": _Concurrent_Module + _Factory_Module,
+        "simple_factory": _Concurrent_Common_Class + _Simple_Factory_Class,
+        "persistence_database_factory": _Concurrent_Common_Class + _Persistence_Database_Factory_Class,
+        "persistence_file_factory": _Concurrent_Common_Class + _Persistence_File_Factory_Class,
+        "operator_module": _Concurrent_Module + _Operator_Module,
+        "procedure": _Concurrent_Common_Class + _Procedure_Class,
+        "strategy_module": _Concurrent_Module + _Strategy_Module,
         "strategy": _Concurrent_Common_Class + _Strategy_Class
     }
 
-    Greenlet: Dict[str, str] = {
+    Greenlet = {
+        "factory_module": _Coroutine_Module + _Factory_Module,
+        "simple_factory": _Greenlet_Common_Class + _Simple_Factory_Class,
+        "persistence_database_factory": _Greenlet_Common_Class + _Persistence_Database_Factory_Class,
+        "persistence_file_factory": _Greenlet_Common_Class + _Persistence_File_Factory_Class,
+        "operator_module": _Coroutine_Module + _Operator_Module,
+        "procedure": _Greenlet_Common_Class + _Procedure_Class,
+        "strategy_module": _Coroutine_Module + _Strategy_Module,
         "strategy": _Greenlet_Common_Class + _Strategy_Class
     }
 
-    Asynchronous: Dict[str, str] = {
+    Asynchronous = {
+        "factory_module": _Coroutine_Module + _Factory_Module,
+        "simple_factory": _Async_Common_Class + _Simple_Factory_Class,
+        "persistence_database_factory": _Async_Common_Class + _Persistence_Database_Factory_Class,
+        "persistence_file_factory": _Async_Common_Class + _Persistence_File_Factory_Class,
+        "operator_module": _Coroutine_Module + _Operator_Module,
+        "procedure": _Async_Common_Class + _Procedure_Class,
+        "strategy_module": _Coroutine_Module + _Strategy_Module,
         "strategy": _Async_Common_Class + _Strategy_Class
     }
 
