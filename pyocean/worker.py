@@ -1,7 +1,7 @@
 from pyocean.framework.worker import BaseTask, BaseWorker, BaseAsyncWorker, BaseSystem
 from pyocean.framework.strategy import Resultable
 from pyocean.framework.result import OceanResult
-from pyocean.api.decorator import ReTryDecorator
+from pyocean.api.decorator import ReTryMechanism
 from pyocean.api.mode import RunningMode, FeatureMode
 from pyocean.api.features_adapter import QueueAdapter, LockAdapter, CommunicationAdapter
 from pyocean.api.strategy_adapter import StrategyAdapter
@@ -186,7 +186,7 @@ class OceanWorker(BaseWorker):
         self._Running_Strategy.activate_workers(workers_list=__worker_list)
 
 
-    @ReTryDecorator.task_retry_mechanism
+    @ReTryMechanism.task
     def run(self, task: BaseTask) -> List[OceanResult]:
         result = task.function(*task.func_args, **task.func_kwargs)
         return result
@@ -296,7 +296,7 @@ class OceanAsyncWorker(BaseAsyncWorker):
         await self._Running_Strategy.activate_workers(workers_list=__worker_list)
 
 
-    @ReTryDecorator.async_task_retry_mechanism
+    @ReTryMechanism.async_task
     async def run(self, task: BaseTask) -> List[OceanResult]:
         result = await self.run_task(task=task)
         # result = task.function(*task.func_args, **task.func_kwargs)

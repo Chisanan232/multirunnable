@@ -5,11 +5,11 @@ from typing import List, Callable, Any, Union
 
 
 
-class ReTryDecorator:
+class ReTryMechanism:
 
     Running_Timeout = 1
 
-    def retry_mechanism(function: Callable):
+    def function(function: Callable):
         """
         Description:
             A decorator which would add re-try mechanism around the
@@ -22,13 +22,13 @@ class ReTryDecorator:
 
             __fun_run_time = 0
 
-            while __fun_run_time < ReTryDecorator.Running_Timeout:
+            while __fun_run_time < ReTryMechanism.Running_Timeout:
                 try:
                     result = function(*args, **kwargs)
                 except Exception as e:
-                    result = ReTryDecorator._error_handling(e=e)
+                    result = ReTryMechanism._error_handling(e=e)
                 else:
-                    result = ReTryDecorator._done_handling(result=result)
+                    result = ReTryMechanism._done_handling(result=result)
                     return result
                 finally:
                     __fun_run_time += 1
@@ -38,7 +38,7 @@ class ReTryDecorator:
         return retry
 
 
-    def task_retry_mechanism(function: Callable):
+    def task(function: Callable):
         """
         Description:
             A decorator which would add re-try mechanism around the
@@ -68,7 +68,7 @@ class ReTryDecorator:
         return task_retry
 
 
-    def async_task_retry_mechanism(function: Callable):
+    def async_task(function: Callable):
         """
         Description:
             A decorator which would add re-try mechanism around the
