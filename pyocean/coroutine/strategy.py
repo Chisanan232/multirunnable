@@ -106,7 +106,7 @@ class AsynchronousStrategy(BaseAsyncStrategy, Resultable):
             self._Async_Running_Result.append(
                 {"async_id": id,
                  "event_loop": finish.get_loop(),
-                 "done_flag": finish.close(),
+                 # "done_flag": finish.close(),
                  "result_data": finish.result(),
                  "exceptions": finish.exception()}
             )

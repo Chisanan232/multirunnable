@@ -1,12 +1,13 @@
 from pyocean.framework.strategy import InitializeUtils, RunnableStrategy, Resultable
 # from pyocean.framework.features import BaseQueueType
+from pyocean.worker import OceanTask
 from pyocean.api import FeatureMode
 from pyocean.types import OceanTasks
 # from pyocean.parallel.features import MultiProcessingQueueType
 from pyocean.persistence import OceanPersistence
 
 from abc import abstractmethod
-from multiprocessing import Pool, Manager
+from multiprocessing import Pool, Manager, Value
 from multiprocessing.managers import Namespace
 from multiprocessing.pool import Pool, AsyncResult, ApplyResult
 from typing import List, Tuple, Dict, Iterable, Union, Callable, cast
@@ -32,7 +33,7 @@ class ParallelStrategy(RunnableStrategy):
         super().__init__(workers_num, persistence_strategy, **kwargs)
         self.__init_namespace_obj()
         if persistence_strategy is not None:
-            namespace_persistence_strategy = cast(OceanPersistence, self.__namespacing_instance(instance=persistence_strategy))
+            namespace_persistence_strategy = cast(OceanPersistence, self.namespacing_obj(obj=persistence_strategy))
             super().__init__(persistence_strategy=namespace_persistence_strategy,
                              workers_num=workers_num,
                              db_connection_pool_size=self.db_connection_number)
@@ -65,9 +66,9 @@ class ParallelStrategy(RunnableStrategy):
         pass
 
 
-    def __namespacing_instance(self, instance: object) -> object:
-        setattr(self._Namespace_Object, repr(instance), instance)
-        return getattr(self._Namespace_Object, repr(instance))
+    def namespacing_obj(self, obj: object) -> object:
+        setattr(self._Namespace_Object, repr(obj), obj)
+        return getattr(self._Namespace_Object, repr(obj))
 
 
 
@@ -90,19 +91,15 @@ class MultiProcessingStrategy(ParallelStrategy, Resultable):
 
     def build_workers(self,
                       function: Callable,
-                      args: Tuple = (),
-                      kwargs: Dict = {},
                       callback: Callable = None,
-                      error_callback: Callable = None) -> List[Union[AsyncResult, ApplyResult]]:
+                      error_callback: Callable = None,
+                      *args, **kwargs) -> List[Union[AsyncResult, ApplyResult]]:
         return [self._Processors_Pool.apply_async(func=function,
                                                   args=args,
                                                   kwds=kwargs,
                                                   callback=callback,
                                                   error_callback=error_callback)
                 for _ in range(self.workers_number)]
-        # elif kwargs:
-        #     return [self._Processors_Pool.apply_async(func=function, kwds=kwargs, callback=callaback, error_callback=error_callback)
-        #             for _ in range(self.threads_number)]
 
 
     def activate_worker(self, worker: Union[AsyncResult, ApplyResult]) -> None:
