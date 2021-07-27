@@ -136,9 +136,9 @@ class OceanWorker(BaseWorker):
         elif self._mode is RunningMode.Asynchronous:
             __feature_mode = FeatureMode.Asynchronous
 
-        # self._Queue = QueueAdapter(mode=__feature_mode)
-        # self._Lock = LockAdapter(mode=__feature_mode)
-        # self._Communication = CommunicationAdapter(mode=__feature_mode)
+        self._Queue = QueueAdapter(mode=__feature_mode)
+        self._Lock = LockAdapter(mode=__feature_mode)
+        self._Communication = CommunicationAdapter(mode=__feature_mode)
 
 
     @property
@@ -161,7 +161,7 @@ class OceanWorker(BaseWorker):
                 self.activate(task=task)
             except Exception as e:
                 self.pre_stop(e=e)
-                __worker_run_finish = True
+                __worker_run_finish = False
             else:
                 self.post_done()
                 __worker_run_finish = True
@@ -181,7 +181,6 @@ class OceanWorker(BaseWorker):
 
 
     def activate(self, task: BaseTask) -> None:
-        kwargs = {"task": task}
         # __worker_list = self._Running_Strategy.build_workers(function=self.run, **kwargs)
         __worker_list = self._Running_Strategy.build_workers(function=task.function, **task.func_kwargs)
         self._Running_Strategy.activate_workers(workers_list=__worker_list)
@@ -189,8 +188,7 @@ class OceanWorker(BaseWorker):
 
     @ReTryDecorator.task_retry_mechanism
     def run(self, task: BaseTask) -> List[OceanResult]:
-        result = self.run_task(task=task)
-        # result = task.function(*task.func_args, **task.func_kwargs)
+        result = task.function(*task.func_args, **task.func_kwargs)
         return result
 
 
@@ -275,7 +273,7 @@ class OceanAsyncWorker(BaseAsyncWorker):
                 await self.activate(task=task)
             except Exception as e:
                 await self.pre_stop(e=e)
-                __worker_run_finish = True
+                __worker_run_finish = False
             else:
                 self.post_done()
                 __worker_run_finish = True
