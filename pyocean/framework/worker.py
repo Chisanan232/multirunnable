@@ -6,21 +6,83 @@ from typing import List, Tuple, Dict, Callable, Union
 
 
 
+class BaseTaskFunction:
+
+    @classmethod
+    def function(cls, *args, **kwargs) -> List[OceanResult]:
+        pass
+
+
+    @classmethod
+    def initialization(cls, *args, **kwargs) -> None:
+        pass
+
+
+    @classmethod
+    def done_handler(cls, result: List[OceanResult]) -> List[OceanResult]:
+        return result
+
+
+    @classmethod
+    def error_handler(cls, e: Exception) -> Union[List[OceanResult], Exception]:
+        return e
+
+
+
+class BaseTaskAsyncFunction:
+
+    @classmethod
+    async def function(cls, *args, **kwargs) -> List[OceanResult]:
+        pass
+
+
+    @classmethod
+    async def initialization(cls, *args, **kwargs) -> None:
+        pass
+
+
+    @classmethod
+    async def done_handler(cls, result: List[OceanResult]) -> List[OceanResult]:
+        return result
+
+
+    @classmethod
+    async def error_handler(cls, e: Exception) -> Union[List[OceanResult], Exception]:
+        return e
+
+
+
 class BaseTask(metaclass=ABCMeta):
 
     _Group = None
     _Function = None
-    _Fun_Args = None
-    _Fun_Kwargs = None
+    _Fun_Args = ()
+    _Fun_Kwargs = {}
     _Initialization = None
-    _Init_Args = None
-    _Init_Kwargs = None
+    _Init_Args = ()
+    _Init_Kwargs = {}
     _Done_Handler = None
     _Error_Handler = None
-    _Running_Timeout = None
+    _Running_Timeout = 0
 
-    def __init__(self):
-        pass
+    def __init__(self, mode: RunningMode):
+        if mode is RunningMode.Parallel:
+            from multiprocessing import Manager
+            __manager = Manager()
+            self._Fun_Kwargs = __manager.dict()
+            self._Init_Kwargs = __manager.dict()
+
+        if mode is RunningMode.Asynchronous:
+            self._Function = BaseTaskAsyncFunction.function
+            self._Initialization = BaseTaskAsyncFunction.initialization
+            self._Done_Handler = BaseTaskAsyncFunction.done_handler
+            self._Error_Handler = BaseTaskAsyncFunction.error_handler
+        else:
+            self._Function = BaseTaskFunction.function
+            self._Initialization = BaseTaskFunction.initialization
+            self._Done_Handler = BaseTaskFunction.done_handler
+            self._Error_Handler = BaseTaskFunction.error_handler
+
 
     @property
     @abstractmethod
@@ -150,32 +212,75 @@ class BaseWorker(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def start(self, task: BaseTask):
+    def start(self, task: BaseTask) -> None:
         pass
 
 
     @abstractmethod
-    def pre_start(self):
+    def pre_activate(self) -> None:
         pass
 
 
     @abstractmethod
-    def pre_stop(self, e: Exception):
+    def activate(self, task: BaseTask) -> None:
         pass
 
 
     @abstractmethod
-    def post_stop(self):
+    def run(self, task: BaseTask) -> List[OceanResult]:
         pass
 
 
     @abstractmethod
-    def post_done(self):
+    def run_task(self, task: BaseTask) -> List[OceanResult]:
+        pass
+
+
+    @abstractmethod
+    def pre_stop(self, e: Exception) -> None:
+        pass
+
+
+    @abstractmethod
+    def post_stop(self) -> None:
+        pass
+
+
+    @abstractmethod
+    def post_done(self) -> None:
         pass
 
 
     @abstractmethod
     def get_result(self) -> List[OceanResult]:
+        pass
+
+
+
+class BaseAsyncWorker(BaseWorker):
+
+    @abstractmethod
+    async def start(self, task: BaseTask) -> None:
+        pass
+
+
+    @abstractmethod
+    async def pre_activate(self) -> None:
+        pass
+
+
+    @abstractmethod
+    async def activate(self, task: BaseTask) -> None:
+        pass
+
+
+    @abstractmethod
+    async def run(self, task: BaseTask) -> List[OceanResult]:
+        pass
+
+
+    @abstractmethod
+    async def run_task(self, task: BaseTask) -> List[OceanResult]:
         pass
 
 
