@@ -1,6 +1,7 @@
 from pyocean.framework.worker import BaseTask
 from pyocean.framework.result import OceanResult
 
+from functools import wraps
 from typing import List, Callable, Any, Union
 
 
@@ -17,6 +18,7 @@ class ReTryMechanism:
         :return:
         """
 
+        @wraps(function)
         def retry(*args, **kwargs) -> Union[List[OceanResult], Exception]:
             result = None
 
@@ -24,11 +26,43 @@ class ReTryMechanism:
 
             while __fun_run_time < ReTryMechanism.Running_Timeout:
                 try:
+                    ReTryMechanism._initialization(*args, **kwargs)
                     result = function(*args, **kwargs)
                 except Exception as e:
                     result = ReTryMechanism._error_handling(e=e)
                 else:
                     result = ReTryMechanism._done_handling(result=result)
+                    return result
+                finally:
+                    __fun_run_time += 1
+            else:
+                return result
+
+        return retry
+
+
+    def async_function(function: Callable):
+        """
+        Description:
+            A decorator which would add re-try mechanism around the
+            target function for fixed time.
+        :return:
+        """
+
+        @wraps(function)
+        async def retry(*args, **kwargs) -> Union[List[OceanResult], Exception]:
+            result = None
+
+            __fun_run_time = 0
+
+            while __fun_run_time < ReTryMechanism.Running_Timeout:
+                try:
+                    await ReTryMechanism._async_initialization(*args, **kwargs)
+                    result = await function(*args, **kwargs)
+                except Exception as e:
+                    result = await ReTryMechanism._async_error_handling(e=e)
+                else:
+                    result = await ReTryMechanism._async_done_handling(result=result)
                     return result
                 finally:
                     __fun_run_time += 1
@@ -46,6 +80,7 @@ class ReTryMechanism:
         :return:
         """
 
+        @wraps(function)
         def task_retry(self, task: BaseTask) -> Union[List[OceanResult], Exception]:
             result = None
 
@@ -54,9 +89,10 @@ class ReTryMechanism:
             while __fun_run_time < task.running_timeout + 1:
                 try:
                     task.initialization(*task.init_args, **task.init_kwargs)
-                    result = function(self, task)
+                    result = task.function(*task.func_args, **task.func_kwargs)
                 except Exception as e:
                     result = task.error_handler(e=e)
+                    raise e
                 else:
                     result = task.done_handler(result=result)
                     return result
@@ -76,6 +112,7 @@ class ReTryMechanism:
         :return:
         """
 
+        @wraps(function)
         async def task_retry(self, task: BaseTask) -> Union[List[OceanResult], Exception]:
             result = None
 
@@ -84,7 +121,7 @@ class ReTryMechanism:
             while __fun_run_time < task.running_timeout + 1:
                 try:
                     await task.initialization(*task.init_args, **task.init_kwargs)
-                    result = await function(self, task)
+                    result = await function(task)
                 except Exception as e:
                     result = await task.error_handler(e=e)
                 else:
@@ -96,6 +133,18 @@ class ReTryMechanism:
                 return result
 
         return task_retry
+
+
+    @classmethod
+    def _initialization(cls, *args, **kwargs) -> None:
+        """
+        Description:
+            Initial something before run main logic.
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        pass
 
 
     @classmethod
@@ -120,6 +169,40 @@ class ReTryMechanism:
         return e
 
 
+    @classmethod
+    async def _async_initialization(cls, *args, **kwargs) -> None:
+        """
+        Description:
+            Initial something before run main logic.
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        pass
+
+
+    @classmethod
+    async def _async_done_handling(cls, result: List[OceanResult]) -> List[OceanResult]:
+        """
+        Description:
+            Handling the result data after target function running done.
+        :param result:
+        :return:
+        """
+        return result
+
+
+    @classmethod
+    async def _async_error_handling(cls, e: Exception) -> Union[List[OceanResult], Exception]:
+        """
+        Description:
+            Handling all the error when occur any unexpected error in target function running.
+        :param e:
+        :return:
+        """
+        return e
+
+
 
 class LockDecorator:
 
@@ -131,6 +214,7 @@ class LockDecorator:
         :return:
         """
 
+        @wraps(function)
         def lock(*args, **kwargs) -> List[OceanResult]:
             from pyocean.framework.strategy import Running_Lock
 
@@ -149,6 +233,7 @@ class LockDecorator:
         :return:
         """
 
+        @wraps(function)
         def semaphore(*args, **kwargs) -> List[OceanResult]:
             from pyocean.framework.strategy import Running_Semaphore
 
@@ -167,6 +252,7 @@ class LockDecorator:
         :return:
         """
 
+        @wraps(function)
         def bounded_semaphore(*args, **kwargs) -> List[OceanResult]:
             from pyocean.framework.strategy import Running_Bounded_Semaphore
 
