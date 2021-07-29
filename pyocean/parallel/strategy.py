@@ -1,16 +1,16 @@
 from pyocean.framework.strategy import InitializeUtils, RunnableStrategy, Resultable
 # from pyocean.framework.features import BaseQueueType
-from pyocean.worker import OceanTask
+# from pyocean.worker import OceanTask
 from pyocean.api import FeatureMode
-from pyocean.types import OceanTasks
+# from pyocean.types import OceanTasks
 # from pyocean.parallel.features import MultiProcessingQueueType
 from pyocean.persistence import OceanPersistence
 
 from abc import abstractmethod
-from multiprocessing import Pool, Manager, Value
+from multiprocessing import Pool, Manager
 from multiprocessing.managers import Namespace
 from multiprocessing.pool import Pool, AsyncResult, ApplyResult
-from typing import List, Tuple, Dict, Iterable, Union, Callable, cast
+from typing import List, Dict, Iterable, Union, Callable, cast
 
 
 
@@ -45,7 +45,7 @@ class ParallelStrategy(RunnableStrategy):
         self._Namespace_Object = self._Manager.Namespace()
 
 
-    def activate_workers(self, workers_list: List[OceanTasks]) -> None:
+    def activate_workers(self, workers_list: List[Union[ApplyResult, AsyncResult]]) -> None:
         # # Method 1.
         for worker in workers_list:
             self.activate_worker(worker=worker)
@@ -56,7 +56,7 @@ class ParallelStrategy(RunnableStrategy):
 
 
     @abstractmethod
-    def activate_worker(self, worker: OceanTasks) -> None:
+    def activate_worker(self, worker: Union[ApplyResult, AsyncResult]) -> None:
         """
         Description:
             Each one thread or process running task implementation.
