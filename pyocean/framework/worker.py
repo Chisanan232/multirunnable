@@ -25,7 +25,7 @@ class BaseTaskFunction:
 
     @classmethod
     def error_handler(cls, e: Exception) -> Union[List[OceanResult], Exception]:
-        return e
+        raise e
 
 
 
@@ -48,7 +48,7 @@ class BaseTaskAsyncFunction:
 
     @classmethod
     async def error_handler(cls, e: Exception) -> Union[List[OceanResult], Exception]:
-        return e
+        raise e
 
 
 
@@ -66,11 +66,11 @@ class BaseTask(metaclass=ABCMeta):
     _Running_Timeout = 0
 
     def __init__(self, mode: RunningMode):
-        if mode is RunningMode.Parallel:
-            from multiprocessing import Manager
-            __manager = Manager()
-            self._Fun_Kwargs = __manager.dict()
-            self._Init_Kwargs = __manager.dict()
+        # if mode is RunningMode.Parallel:
+        #     from multiprocessing import Manager
+        #     __manager = Manager()
+        #     self._Fun_Kwargs = __manager.dict()
+        #     self._Init_Kwargs = __manager.dict()
 
         if mode is RunningMode.Asynchronous:
             self._Function = BaseTaskAsyncFunction.function
@@ -197,7 +197,7 @@ class BaseTask(metaclass=ABCMeta):
 
 class BaseWorker(metaclass=ABCMeta):
 
-    _Running_Timeout = 3
+    _Worker_Timeout = 3
 
     @property
     @abstractmethod
@@ -208,6 +208,11 @@ class BaseWorker(metaclass=ABCMeta):
     @running_timeout.setter
     @abstractmethod
     def running_timeout(self, timeout: int) -> None:
+        pass
+
+
+    @abstractmethod
+    def _initial_running_strategy(self) -> None:
         pass
 
 
@@ -223,11 +228,6 @@ class BaseWorker(metaclass=ABCMeta):
 
     @abstractmethod
     def activate(self, task: BaseTask) -> None:
-        pass
-
-
-    @abstractmethod
-    def run(self, task: BaseTask) -> List[OceanResult]:
         pass
 
 
@@ -271,11 +271,6 @@ class BaseAsyncWorker(BaseWorker):
 
     @abstractmethod
     async def activate(self, task: BaseTask) -> None:
-        pass
-
-
-    @abstractmethod
-    async def run(self, task: BaseTask) -> List[OceanResult]:
         pass
 
 
