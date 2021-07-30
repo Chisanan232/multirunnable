@@ -66,12 +66,6 @@ class BaseTask(metaclass=ABCMeta):
     _Running_Timeout = 0
 
     def __init__(self, mode: RunningMode):
-        # if mode is RunningMode.Parallel:
-        #     from multiprocessing import Manager
-        #     __manager = Manager()
-        #     self._Fun_Kwargs = __manager.dict()
-        #     self._Init_Kwargs = __manager.dict()
-
         if mode is RunningMode.Asynchronous:
             self._Function = BaseTaskAsyncFunction.function
             self._Initialization = BaseTaskAsyncFunction.initialization
