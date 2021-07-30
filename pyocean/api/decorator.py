@@ -92,7 +92,6 @@ class ReTryMechanism:
                     result = task.function(*task.func_args, **task.func_kwargs)
                 except Exception as e:
                     result = task.error_handler(e=e)
-                    raise e
                 else:
                     result = task.done_handler(result=result)
                     return result
@@ -121,7 +120,7 @@ class ReTryMechanism:
             while __fun_run_time < task.running_timeout + 1:
                 try:
                     await task.initialization(*task.init_args, **task.init_kwargs)
-                    result = await function(task)
+                    result = await task.function(*task.func_args, **task.func_kwargs)
                 except Exception as e:
                     result = await task.error_handler(e=e)
                 else:
