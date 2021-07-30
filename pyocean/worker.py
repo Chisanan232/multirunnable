@@ -6,6 +6,7 @@ from pyocean.api.decorator import ReTryMechanism
 from pyocean.api.features_adapter import QueueAdapter, LockAdapter, CommunicationAdapter
 from pyocean.api.strategy_adapter import StrategyAdapter
 
+from abc import ABC
 from typing import List, Tuple, Dict, Callable, Union
 
 
@@ -117,7 +118,7 @@ class OceanTask(BaseTask):
 Running_Strategy: Union[RunnableStrategy, AsyncRunnableStrategy] = None
 
 
-class OceanWorker(BaseWorker):
+class OceanWorker(ABC, BaseWorker):
 
     _Queue = None
     _Lock = None
