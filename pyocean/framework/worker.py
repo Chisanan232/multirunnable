@@ -216,12 +216,12 @@ class BaseWorker(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def pre_activate(self) -> None:
+    def pre_activate(self, *args, **kwargs) -> None:
         pass
 
 
     @abstractmethod
-    def activate(self, task: BaseTask) -> None:
+    def activate(self, task: BaseTask, saving_mode: bool = False) -> None:
         pass
 
 
