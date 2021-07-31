@@ -1,8 +1,9 @@
 from pyocean.framework.strategy import InitializeUtils, RunnableStrategy, Resultable
 # from pyocean.framework.features import BaseQueueType
 # from pyocean.worker import OceanTask
+from pyocean.framework.result import ResultState
 from pyocean.api import FeatureMode
-from pyocean.parallel.result import ResultState, ParallelResult
+from pyocean.parallel.result import ParallelResult
 # from pyocean.types import OceanTasks
 # from pyocean.parallel.features import MultiProcessingQueueType
 from pyocean.persistence import OceanPersistence
