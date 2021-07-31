@@ -2,6 +2,7 @@ from pyocean.framework.strategy import InitializeUtils, RunnableStrategy, AsyncR
 # from pyocean.framework.features import BaseQueueType
 from pyocean.api.mode import FeatureMode
 # from pyocean.coroutine.features import GeventQueueType, AsynchronousQueueType
+from pyocean.coroutine.result import CoroutineResult, AsynchronousResult
 
 from abc import ABCMeta, ABC, abstractmethod
 from typing import List, Iterable, Callable
@@ -62,7 +63,18 @@ class MultiGreenletStrategy(BaseGreenletStrategy, Resultable):
 
 
     def get_result(self) -> Iterable[object]:
-        return self._Gevent_Running_Result
+        __coroutine_results = self._result_handling()
+        return __coroutine_results
+
+
+    def _result_handling(self) -> List[CoroutineResult]:
+        __coroutine_results = []
+        for __result in self._Gevent_Running_Result:
+            __coroutine_result = CoroutineResult()
+            __coroutine_result.data = __result
+            __coroutine_results.append(__coroutine_result)
+
+        return __coroutine_results
 
 
 
@@ -117,5 +129,21 @@ class AsynchronousStrategy(BaseAsyncStrategy, Resultable):
 
 
     def get_result(self) -> Iterable[object]:
-        return self._Async_Running_Result
+        __async_results = self._result_handling()
+        return __async_results
+
+
+    def _result_handling(self) -> List[AsynchronousResult]:
+        __async_results = []
+        for __result in self._Async_Running_Result:
+            __async_result = AsynchronousResult()
+
+            __async_result.worker_id = __result.get("async_id")
+            __async_result.event_loop = __result.get("event_loop")
+            __async_result.data = __result.get("result_data")
+            __async_result.exception = __result.get("exceptions")
+
+            __async_results.append(__async_result)
+
+        return __async_results
 
