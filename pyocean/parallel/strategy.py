@@ -2,6 +2,7 @@ from pyocean.framework.strategy import InitializeUtils, RunnableStrategy, Result
 # from pyocean.framework.features import BaseQueueType
 # from pyocean.worker import OceanTask
 from pyocean.api import FeatureMode
+from pyocean.parallel.result import ResultState, ParallelResult
 # from pyocean.types import OceanTasks
 # from pyocean.parallel.features import MultiProcessingQueueType
 from pyocean.persistence import OceanPersistence
@@ -117,6 +118,26 @@ class MultiProcessingStrategy(ParallelStrategy, Resultable):
         self._Processors_Pool.join()
 
 
-    def get_result(self) -> Iterable[object]:
-        return self._Processors_Running_Result
+    def get_result(self) -> List[ParallelResult]:
+        __parallel_result = self._result_handling()
+        return __parallel_result
+
+
+    def _result_handling(self) -> List[ParallelResult]:
+        __parallel_results = []
+        for __result in self._Processors_Running_Result:
+            __parallel_result = ParallelResult()
+
+            __process_successful = __result.get("successful")
+            if __process_successful is True:
+                __parallel_result.state = ResultState.SUCCESS.value
+            else:
+                __parallel_result.state = ResultState.FAIL.value
+
+            __process_result = __result.get("result")
+            __parallel_result.data = __process_result
+
+            __parallel_results.append(__parallel_result)
+
+        return __parallel_results
 
