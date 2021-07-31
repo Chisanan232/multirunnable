@@ -5,6 +5,7 @@ from pyocean.api.mode import RunningMode, FeatureMode
 from pyocean.api.decorator import ReTryMechanism
 from pyocean.api.features_adapter import QueueAdapter, LockAdapter, CommunicationAdapter
 from pyocean.api.strategy_adapter import StrategyAdapter
+from pyocean.persistence.interface import OceanPersistence
 
 from abc import ABC
 from typing import List, Tuple, Dict, Callable, Union
@@ -388,20 +389,23 @@ class OceanPersistenceAsyncWorker(OceanAsyncWorker):
 
 class OceanSystem(BaseSystem):
 
-    def run(self, task: BaseTask, saving_mode: bool = False, timeout: int = 0):
+    def run(self, task: BaseTask, saving_mode: bool = False, timeout: int = 0) -> List[OceanResult]:
         if self._mode is RunningMode.Asynchronous:
             __ocean_worker = OceanSimpleAsyncWorker(
                 mode=self._mode, worker_num=self._worker_num)
             __ocean_worker.running_timeout = timeout
             __ocean_worker.start(task=task, saving_mode=saving_mode)
+            return __ocean_worker.get_result()
         else:
             __ocean_worker = OceanSimpleWorker(
                 mode=self._mode, worker_num=self._worker_num)
             __ocean_worker.running_timeout = timeout
             __ocean_worker.start(task=task, saving_mode=saving_mode)
+            return __ocean_worker.get_result()
 
 
-    def run_and_save(self, task: BaseTask, persistence_strategy, db_connection_num, saving_mode: bool = False, timeout: int = 0):
+    def run_and_save(self, task: BaseTask, persistence_strategy: OceanPersistence,
+                     db_connection_num: int, saving_mode: bool = False, timeout: int = 0) -> List[OceanResult]:
         if self._mode is RunningMode.Asynchronous:
             __ocean_worker = OceanPersistenceAsyncWorker(
                 mode=self._mode, worker_num=self._worker_num,
@@ -409,6 +413,7 @@ class OceanSystem(BaseSystem):
                 db_connection_num=db_connection_num)
             __ocean_worker.running_timeout = timeout
             __ocean_worker.start(task=task, saving_mode=saving_mode)
+            return __ocean_worker.get_result()
         else:
             __ocean_worker = OceanPersistenceWorker(
                 mode=self._mode, worker_num=self._worker_num,
@@ -416,6 +421,7 @@ class OceanSystem(BaseSystem):
                 db_connection_num=db_connection_num)
             __ocean_worker.running_timeout = timeout
             __ocean_worker.start(task=task, saving_mode=saving_mode)
+            return __ocean_worker.get_result()
 
 
     def dispatcher(self):
