@@ -354,12 +354,20 @@ class OceanSimpleWorker(OceanWorker):
 
 class OceanPersistenceWorker(OceanWorker):
 
-    def __init__(self, mode: RunningMode, worker_num: int, persistence_strategy, db_connection_num):
-        super().__init__(mode, worker_num)
+    def __init__(self, mode: RunningMode, worker_num: int,
+                 persistence_strategy: OceanPersistence, db_connection_num: int):
+        self.persistence_strategy = persistence_strategy
+        self.db_connection_num = db_connection_num
+        super().__init__(mode=mode, worker_num=worker_num)
 
-        __running_strategy_adapter = StrategyAdapter(mode=self._mode, worker_num=worker_num)
-        self._Running_Strategy = __running_strategy_adapter.get_persistence_strategy(
-            persistence_strategy=persistence_strategy, db_connection_num=db_connection_num)
+
+    def _initial_running_strategy(self) -> None:
+        __running_strategy_adapter = StrategyAdapter(mode=self._mode, worker_num=self.worker_num)
+        global Running_Strategy
+        Running_Strategy = __running_strategy_adapter.get_persistence_strategy(
+            persistence_strategy=self.persistence_strategy,
+            db_connection_num=self.db_connection_num
+        )
 
 
 
@@ -378,12 +386,20 @@ class OceanSimpleAsyncWorker(OceanAsyncWorker):
 
 class OceanPersistenceAsyncWorker(OceanAsyncWorker):
 
-    def __init__(self, mode: RunningMode, worker_num: int, persistence_strategy, db_connection_num):
-        super().__init__(mode, worker_num)
+    def __init__(self, mode: RunningMode, worker_num: int,
+                 persistence_strategy: OceanPersistence, db_connection_num: int):
+        self.persistence_strategy = persistence_strategy
+        self.db_connection_num = db_connection_num
+        super().__init__(mode=mode, worker_num=worker_num)
 
-        __running_strategy_adapter = StrategyAdapter(mode=self._mode, worker_num=worker_num)
-        self._Running_Strategy = __running_strategy_adapter.get_persistence_strategy(
-            persistence_strategy=persistence_strategy, db_connection_num=db_connection_num)
+
+    def _initial_running_strategy(self) -> None:
+        __running_strategy_adapter = StrategyAdapter(mode=self._mode, worker_num=self.worker_num)
+        global Running_Strategy
+        Running_Strategy = __running_strategy_adapter.get_persistence_strategy(
+            persistence_strategy=self.persistence_strategy,
+            db_connection_num=self.db_connection_num
+        )
 
 
 
