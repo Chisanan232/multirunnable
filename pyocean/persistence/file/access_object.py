@@ -1,5 +1,5 @@
 from pyocean.persistence.interface import OceanFao
-from pyocean.persistence.file.configuration import BaseFileConfig, FileConfig, ArchiverConfig
+from pyocean.persistence.file.configuration import FileConfig, ArchiverConfig
 from pyocean.persistence.file.strategy import (
     OneThreadOneFile,
     AllThreadOneFile,
@@ -119,7 +119,7 @@ class SimpleArchiverFao(BaseFao):
 
     __ID_Checksum = None
 
-    def __init__(self, config: Union[Tuple[BaseFileConfig], str]):
+    def __init__(self, config: Union[Tuple[Union[FileConfig, ArchiverConfig]], str]):
         if type(config) is str:
             # Check and initialize configuration by the file path.
             is_file = os.path.isfile(path=config)
