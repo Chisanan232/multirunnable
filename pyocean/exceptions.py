@@ -14,3 +14,11 @@ class GlobalObjectIsNoneError(RuntimeError):
 
     def __str__(self):
         return f"Globalized object doesn't be initialized."
+
+
+
+class FunctionSignatureConflictError(RuntimeError):
+
+    def __str__(self):
+        return "The signature of 'build_workers' and target function " \
+               "occur conflict, please don't use 'task' naming in sugnature of target function."
