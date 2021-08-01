@@ -5,14 +5,12 @@ from pyocean.api.mode import FeatureMode
 from pyocean.types import (
     OceanLock, OceanRLock,
     OceanSemaphore, OceanBoundedSemaphore,
-    OceanEvent, OceanCondition)
+    OceanEvent, OceanCondition,
+    OceanQueue)
 from pyocean._import_utils import ImportPyocean
 
-from typing import Dict, Callable
-import logging
+from typing import Dict, Iterable, Any
 
-
-_Package: str = "pyocean"
 
 
 class BaseAdapter:
@@ -41,9 +39,22 @@ class QueueAdapter(BaseAdapter, BaseQueue):
         self.queue_instance: BaseQueue = self.queue_cls()
 
 
-    def get_queue(self, qtype: BaseQueueType):
+    def get_queue(self, qtype: BaseQueueType) -> OceanQueue:
         return self.queue_instance.get_queue(qtype=qtype)
 
+
+    def init_queue_with_values(self, qtype: BaseQueueType, values: Iterable[Any]) -> OceanQueue:
+        __queue = self.get_queue(qtype=qtype)
+        for value in values:
+            __queue.put(value)
+        return __queue
+
+
+    async def async_init_queue_with_values(self, qtype: BaseQueueType, values: Iterable[Any]) -> OceanQueue:
+        __queue = self.get_queue(qtype=qtype)
+        for value in values:
+            await __queue.put(value)
+        return __queue
 
 
 class LockAdapter(BaseAdapter, PosixThreadLock):
