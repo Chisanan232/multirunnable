@@ -57,11 +57,6 @@ class MultiThreadingStrategy(ConcurrentStrategy, Resultable):
             __init_utils.initialize_persistence(db_conn_instances_num=self.db_connection_number)
 
 
-    def build_workers_og(self, function: Callable, *args, **kwargs) -> List[Thread]:
-        self._Threads_List = [Thread(target=function, args=args, kwargs=kwargs) for _ in range(self.workers_number)]
-        return self._Threads_List
-
-
     def build_workers(self, function: Callable, *args, **kwargs) -> List[Thread]:
 
         def __general_task() -> OceanTask:
