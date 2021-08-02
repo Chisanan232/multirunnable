@@ -1,5 +1,6 @@
 from pyocean.framework.features import BaseQueueType, BaseGlobalizeAPI
-from pyocean.api.features_adapter import FeatureMode, QueueAdapter
+# from pyocean.api.mode import FeatureMode
+# from pyocean.api.features_adapter import QueueAdapter
 from pyocean.types import (
     OceanTasks,
     OceanQueue,
@@ -25,104 +26,104 @@ Running_Queue: OceanQueue
 Database_Connection_Instance_Number = 1
 
 
-class InitializeUtils:
-
-    """
-    Sometimes it needs do something pre-process like initialize object or something configuration, etc. before start to
-    run multi-work simultaneously (or be close to). This class focus handling the initialize processes for each different
-    running strategy.
-    """
-
-    def __init__(self, running_mode: FeatureMode, persistence: OceanPersistence = None):
-        self.__running_mode = running_mode
-        self.__persistence_strategy = persistence
-
-
-    def initialize_queue(self, tasks: Iterable, qtype: BaseQueueType) -> None:
-        """
-        Description:
-            Initialize Queue object with the queue type. It should use the queue type which be annotated by each running
-        strategy.
-        Example:
-            from pyocean.concurrent.feature import MultiThreadingQueueType
-
-            queue = MultiThreadingQueueType.Queue
-            queue.put("This is your task content.")
-        :param tasks:
-        :param qtype:
-        :return:
-        """
-        __queue = self._init_tasks_queue(qtype=qtype)
-        __tasks_queue = self._add_task_to_queue(queue=__queue, task=tasks)
-        Globalize.queue(queue=__tasks_queue)
-
-
-    async def async_initialize_queue(self, tasks: Iterable, qtype: BaseQueueType) -> None:
-        """
-        Description:
-            Asynchronously initialize Queue object with the queue type. Here Queue type only for Asynchronous strategy queue.
-        Example:
-            from pyocean.coroutine.feature import AsynchronousQueueType
-
-            queue = AsynchronousQueueType.Queue
-            queue.put("This is your async task content.")
-        :param tasks:
-        :param qtype:
-        :return:
-        """
-        __queue = self._init_tasks_queue(qtype=qtype)
-        __tasks_queue = await self._async_add_task_to_queue(queue=__queue, task=tasks)
-        Globalize.queue(queue=__tasks_queue)
-
-
-    def _init_tasks_queue(self, qtype: BaseQueueType) -> OceanQueue:
-        """
-        Description:
-            Annotating Queue object with queue type.
-        :param qtype:
-        :return:
-        """
-        __queue_api = QueueAdapter(mode=self.__running_mode)
-        __queue = __queue_api.get_queue(qtype=qtype)
-        return __queue
-
-
-    def _add_task_to_queue(self, queue: OceanQueue, task: Iterable) -> OceanQueue:
-        """
-        Description:
-            Adding target tasks into queue object.
-        :param queue:
-        :param task:
-        :return:
-        """
-        for t in task:
-            queue.put(t)
-        return queue
-
-
-    async def _async_add_task_to_queue(self, queue: OceanQueue, task: Iterable) -> OceanQueue:
-        """
-        Description:
-            Adding target tasks into queue object asynchronously.
-        :param queue:
-        :param task:
-        :return:
-        """
-        for t in task:
-            await queue.put(t)
-        return queue
-
-
-    def initialize_persistence(self, **kwargs) -> None:
-        """
-        Description:
-            Initialize persistence strategy needed conditions.
-        :param kwargs:
-        :return:
-        """
-        if self.__persistence_strategy is None:
-            raise Exception
-        self.__persistence_strategy.initialize(mode=self.__running_mode, **kwargs)
+# class InitializeUtils:
+#
+#     """
+#     Sometimes it needs do something pre-process like initialize object or something configuration, etc. before start to
+#     run multi-work simultaneously (or be close to). This class focus handling the initialize processes for each different
+#     running strategy.
+#     """
+#
+#     def __init__(self, running_mode: FeatureMode, persistence: OceanPersistence = None):
+#         self.__running_mode = running_mode
+#         self.__persistence_strategy = persistence
+#
+#
+#     def initialize_queue(self, tasks: Iterable, qtype: BaseQueueType) -> None:
+#         """
+#         Description:
+#             Initialize Queue object with the queue type. It should use the queue type which be annotated by each running
+#         strategy.
+#         Example:
+#             from pyocean.concurrent.feature import MultiThreadingQueueType
+#
+#             queue = MultiThreadingQueueType.Queue
+#             queue.put("This is your task content.")
+#         :param tasks:
+#         :param qtype:
+#         :return:
+#         """
+#         __queue = self._init_tasks_queue(qtype=qtype)
+#         __tasks_queue = self._add_task_to_queue(queue=__queue, task=tasks)
+#         Globalize.queue(queue=__tasks_queue)
+#
+#
+#     async def async_initialize_queue(self, tasks: Iterable, qtype: BaseQueueType) -> None:
+#         """
+#         Description:
+#             Asynchronously initialize Queue object with the queue type. Here Queue type only for Asynchronous strategy queue.
+#         Example:
+#             from pyocean.coroutine.feature import AsynchronousQueueType
+#
+#             queue = AsynchronousQueueType.Queue
+#             queue.put("This is your async task content.")
+#         :param tasks:
+#         :param qtype:
+#         :return:
+#         """
+#         __queue = self._init_tasks_queue(qtype=qtype)
+#         __tasks_queue = await self._async_add_task_to_queue(queue=__queue, task=tasks)
+#         Globalize.queue(queue=__tasks_queue)
+#
+#
+#     def _init_tasks_queue(self, qtype: BaseQueueType) -> OceanQueue:
+#         """
+#         Description:
+#             Annotating Queue object with queue type.
+#         :param qtype:
+#         :return:
+#         """
+#         __queue_api = QueueAdapter(mode=self.__running_mode)
+#         __queue = __queue_api.get_queue(qtype=qtype)
+#         return __queue
+#
+#
+#     def _add_task_to_queue(self, queue: OceanQueue, task: Iterable) -> OceanQueue:
+#         """
+#         Description:
+#             Adding target tasks into queue object.
+#         :param queue:
+#         :param task:
+#         :return:
+#         """
+#         for t in task:
+#             queue.put(t)
+#         return queue
+#
+#
+#     async def _async_add_task_to_queue(self, queue: OceanQueue, task: Iterable) -> OceanQueue:
+#         """
+#         Description:
+#             Adding target tasks into queue object asynchronously.
+#         :param queue:
+#         :param task:
+#         :return:
+#         """
+#         for t in task:
+#             await queue.put(t)
+#         return queue
+#
+#
+#     def initialize_persistence(self, **kwargs) -> None:
+#         """
+#         Description:
+#             Initialize persistence strategy needed conditions.
+#         :param kwargs:
+#         :return:
+#         """
+#         if self.__persistence_strategy is None:
+#             raise Exception
+#         self.__persistence_strategy.initialize(mode=self.__running_mode, **kwargs)
 
 
 
