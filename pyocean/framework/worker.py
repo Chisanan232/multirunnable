@@ -264,7 +264,7 @@ class BaseAsyncWorker(BaseWorker):
 
 
     @abstractmethod
-    async def activate(self, task: BaseTask) -> None:
+    async def activate(self, task: BaseTask, saving_mode: bool = False) -> None:
         pass
 
 
