@@ -1,4 +1,4 @@
-from pyocean.framework.strategy import InitializeUtils, RunnableStrategy, AsyncRunnableStrategy, Resultable
+from pyocean.framework.strategy import RunnableStrategy, AsyncRunnableStrategy, Resultable
 # from pyocean.framework.features import BaseQueueType
 from pyocean.api.mode import FeatureMode
 # from pyocean.coroutine.features import GeventQueueType, AsynchronousQueueType
@@ -31,13 +31,17 @@ class BaseGreenletStrategy(CoroutineStrategy, RunnableStrategy, ABC):
 class MultiGreenletStrategy(BaseGreenletStrategy, Resultable):
 
     def initialization(self, *args, **kwargs) -> None:
-        __init_utils = InitializeUtils(running_mode=self._Running_Mode, persistence=self._persistence_strategy)
-        # # Initialize and assign task queue object.
-        # if tasks:
-        #     __init_utils.initialize_queue(tasks=tasks, qtype=queue_type)
-        # Initialize persistence object.
+        # __init_utils = InitializeUtils(running_mode=self._Running_Mode, persistence=self._persistence_strategy)
+        # # # Initialize and assign task queue object.
+        # # if tasks:
+        # #     __init_utils.initialize_queue(tasks=tasks, qtype=queue_type)
+        # # Initialize persistence object.
+        # if self._persistence_strategy is not None:
+        #     __init_utils.initialize_persistence(db_conn_instances_num=self.db_connection_number)
         if self._persistence_strategy is not None:
-            __init_utils.initialize_persistence(db_conn_instances_num=self.db_connection_number)
+            self._persistence_strategy.initialize(
+                mode=self._Running_Mode,
+                db_conn_instances_num=self.db_connection_number)
 
 
     def build_workers(self, function: Callable, *args, **kwargs) -> List[Greenlet]:
@@ -98,13 +102,17 @@ class AsynchronousStrategy(BaseAsyncStrategy, Resultable):
 
 
     async def initialization(self, *args, **kwargs) -> None:
-        __init_utils = InitializeUtils(running_mode=self._Running_Mode, persistence=self._persistence_strategy)
-        # # # Initialize and assign task queue object.
-        # if tasks:
-        #     await __init_utils.async_initialize_queue(tasks=tasks, qtype=queue_type)
-        # Initialize persistence object.
+        # __init_utils = InitializeUtils(running_mode=self._Running_Mode, persistence=self._persistence_strategy)
+        # # # # Initialize and assign task queue object.
+        # # if tasks:
+        # #     await __init_utils.async_initialize_queue(tasks=tasks, qtype=queue_type)
+        # # Initialize persistence object.
+        # if self._persistence_strategy is not None:
+        #     __init_utils.initialize_persistence(db_conn_instances_num=self.db_connection_number)
         if self._persistence_strategy is not None:
-            __init_utils.initialize_persistence(db_conn_instances_num=self.db_connection_number)
+            self._persistence_strategy.initialize(
+                mode=self._Running_Mode,
+                db_conn_instances_num=self.db_connection_number)
 
 
     def build_workers(self, function: Callable, *args, **kwargs) -> List[Task]:
