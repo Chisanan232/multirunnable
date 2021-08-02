@@ -32,8 +32,7 @@ class StrategyAdapter(BaseStrategyAdapter):
         return __strategy_instance
 
 
-    def get_persistence_strategy(self, persistence_strategy, db_connection_num: int)\
-            -> Union[RunnableStrategy, AsyncRunnableStrategy]:
+    def get_persistence_strategy(self, persistence_strategy, db_connection_num: int) -> Union[RunnableStrategy, AsyncRunnableStrategy]:
         __strategy_cls = ImportPyocean.get_class(pkg_path=self._module, cls_name=self.__strategy_cls_name)
         __strategy_instance = __strategy_cls(
             workers_num=self._process_num,
