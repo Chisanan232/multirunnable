@@ -165,7 +165,7 @@ class ReTryMechanism:
         :param e:
         :return:
         """
-        return e
+        raise e
 
 
     @classmethod
@@ -199,7 +199,7 @@ class ReTryMechanism:
         :param e:
         :return:
         """
-        return e
+        raise e
 
 
 
@@ -257,6 +257,63 @@ class LockDecorator:
 
             with Running_Bounded_Semaphore:
                 result = function(*args, **kwargs)
+            return result
+
+        return bounded_semaphore
+
+
+    @staticmethod
+    def async_run_with_lock(function: Callable):
+        """
+        Description:
+            Asynchronous version of run_with_lock.
+        :return:
+        """
+
+        @wraps(function)
+        async def lock(*args, **kwargs) -> List[OceanResult]:
+            from pyocean.framework.strategy import Running_Lock
+
+            async with Running_Lock:
+                result = await function(*args, **kwargs)
+            return result
+
+        return lock
+
+
+    @staticmethod
+    def async_run_with_semaphore(function: Callable):
+        """
+        Description:
+            Asynchronous version of run_with_semaphore.
+        :return:
+        """
+
+        @wraps(function)
+        async def semaphore(*args, **kwargs) -> List[OceanResult]:
+            from pyocean.framework.strategy import Running_Semaphore
+
+            async with Running_Semaphore:
+                result = await function(*args, **kwargs)
+            return result
+
+        return semaphore
+
+
+    @staticmethod
+    def async_run_with_bounded_semaphore(function: Callable):
+        """
+        Description:
+             Asynchronous version of run_with_bounded_semaphore.
+       :return:
+        """
+
+        @wraps(function)
+        async def bounded_semaphore(*args, **kwargs) -> List[OceanResult]:
+            from pyocean.framework.strategy import Running_Bounded_Semaphore
+
+            async with Running_Bounded_Semaphore:
+                result = await function(*args, **kwargs)
             return result
 
         return bounded_semaphore
