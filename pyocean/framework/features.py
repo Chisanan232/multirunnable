@@ -75,7 +75,7 @@ class PosixThread(metaclass=ABCMeta):
 class PosixThreadLock(PosixThread):
 
     @abstractmethod
-    def get_lock(self) -> OceanLock:
+    def get_lock(self, **kwargs) -> OceanLock:
         """
         Description:
             Get Lock object.
@@ -85,7 +85,7 @@ class PosixThreadLock(PosixThread):
 
 
     @abstractmethod
-    def get_rlock(self) -> OceanRLock:
+    def get_rlock(self, **kwargs) -> OceanRLock:
         """
         Description:
             Get RLock object.
@@ -95,7 +95,7 @@ class PosixThreadLock(PosixThread):
 
 
     @abstractmethod
-    def get_semaphore(self, value: int) -> OceanSemaphore:
+    def get_semaphore(self, value: int, **kwargs) -> OceanSemaphore:
         """
         Description:
             Get Semaphore object.
@@ -106,7 +106,7 @@ class PosixThreadLock(PosixThread):
 
 
     @abstractmethod
-    def get_bounded_semaphore(self, value: int) -> OceanBoundedSemaphore:
+    def get_bounded_semaphore(self, value: int, **kwargs) -> OceanBoundedSemaphore:
         """
         Description:
             Get Bounded Semaphore object.
