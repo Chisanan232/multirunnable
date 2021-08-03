@@ -25,6 +25,7 @@ class BaseAdapter:
         :param mode:
         """
 
+        self._mode = mode
         self._running_info: Dict[str, str] = mode.value
         self._module: str = self._running_info.get("module")
 
@@ -59,43 +60,71 @@ class QueueAdapter(BaseAdapter, BaseQueue):
 
 class LockAdapter(BaseAdapter, PosixThreadLock):
 
-    def __init__(self, mode: FeatureMode):
+    def __init__(self, mode: FeatureMode, **kwargs):
         super().__init__(mode=mode)
         self.__lock_cls_name: str = self._running_info.get("lock")
         self.lock_cls = ImportPyocean.get_class(pkg_path=self._module, cls_name=self.__lock_cls_name)
         self.lock_instance: PosixThreadLock = self.lock_cls()
 
+        if mode is FeatureMode.Asynchronous:
+            self.__event_loop = kwargs.get("event_loop", None)
+            if self.__event_loop is None:
+                raise Exception("Async Event Loop object cannot be empty.")
+
 
     def get_lock(self) -> OceanLock:
-        return self.lock_instance.get_lock()
+        if self._mode is FeatureMode.Asynchronous:
+            return self.lock_instance.get_lock(loop=self.__event_loop)
+        else:
+            return self.lock_instance.get_lock()
 
 
     def get_rlock(self) -> OceanRLock:
-        return self.lock_instance.get_rlock()
+        if self._mode is FeatureMode.Asynchronous:
+            return self.lock_instance.get_rlock(loop=self.__event_loop)
+        else:
+            return self.lock_instance.get_rlock()
 
 
-    def get_semaphore(self, value: int) -> OceanSemaphore:
-        return self.lock_instance.get_semaphore(value=value)
+    def get_semaphore(self, value: int, **kwargs) -> OceanSemaphore:
+        if self._mode is FeatureMode.Asynchronous:
+            return self.lock_instance.get_semaphore(value=value, loop=self.__event_loop)
+        else:
+            return self.lock_instance.get_semaphore(value=value)
 
 
-    def get_bounded_semaphore(self, value: int) -> OceanBoundedSemaphore:
-        return self.lock_instance.get_bounded_semaphore(value=value)
+    def get_bounded_semaphore(self, value: int, **kwargs) -> OceanBoundedSemaphore:
+        if self._mode is FeatureMode.Asynchronous:
+            return self.lock_instance.get_bounded_semaphore(value=value, loop=self.__event_loop)
+        else:
+            return self.lock_instance.get_bounded_semaphore(value=value)
 
 
 
 class CommunicationAdapter(BaseAdapter, PosixThreadCommunication):
 
-    def __init__(self, mode: FeatureMode):
+    def __init__(self, mode: FeatureMode, **kwargs):
         super().__init__(mode=mode)
         self.__communication_cls_name: str = self._running_info.get("communication")
         self.communication_cls = ImportPyocean.get_class(pkg_path=self._module, cls_name=self.__communication_cls_name)
         self.communication_instance: PosixThreadCommunication = self.communication_cls()
 
+        if mode is FeatureMode.Asynchronous:
+            self.__event_loop = kwargs.get("event_loop", None)
+            if self.__event_loop is None:
+                raise Exception("Async Event Loop object cannot be empty.")
+
 
     def get_event(self, *args, **kwargs) -> OceanEvent:
+        if self._mode is FeatureMode.Asynchronous:
+            kwargs["loop"] = self.__event_loop
         return self.communication_instance.get_event(*args, **kwargs)
 
 
     def get_condition(self, *args, **kwargs) -> OceanCondition:
+        if self._mode is FeatureMode.Asynchronous:
+            if kwargs.get("lock", None):
+                raise Exception("Async Lock object cannot be empty.")
+            kwargs["loop"] = self.__event_loop
         return self.communication_instance.get_condition(*args, **kwargs)
 
