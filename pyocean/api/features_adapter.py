@@ -9,7 +9,19 @@ from pyocean.types import (
     OceanQueue)
 from pyocean._import_utils import ImportPyocean
 
+from enum import Enum
 from typing import Dict, Iterable, Any
+
+
+
+class Feature(Enum):
+
+    Lock = "lock"
+    RLock = "rlock"
+    Semaphore = "semaphore"
+    Bounded_Semaphore = "bounded_semaphore"
+    Event = "event"
+    Condition = "condition"
 
 
 
@@ -56,6 +68,7 @@ class QueueAdapter(BaseAdapter, BaseQueue):
         for value in values:
             await __queue.put(value)
         return __queue
+
 
 
 class LockAdapter(BaseAdapter, PosixThreadLock):
