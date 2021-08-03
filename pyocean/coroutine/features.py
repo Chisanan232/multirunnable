@@ -22,9 +22,8 @@ from asyncio.locks import (
     Semaphore as _Async_Semaphore,
     BoundedSemaphore as _Async_BoundedSemaphore)
 from asyncio import Event as _Async_Event, Condition as _Async_Condition
-from asyncio.events import AbstractEventLoop
 
-from typing import Union
+from typing import Optional, Union
 
 
 
@@ -137,19 +136,27 @@ class AsyncCommunication(PosixThreadCommunication):
 class _AsyncUtils:
 
     @classmethod
-    def chk_lock(cls, **kwargs) -> Union[None, _Async_Lock]:
+    def chk_lock(cls, **kwargs) -> Optional[_Async_Lock]:
         __lock = kwargs.get("lock", None)
         if __lock is not None and isinstance(__lock, _Async_Lock):
             raise TypeError("Lock type is incorrect.")
+        elif __lock is None:
+            raise Exception("Async Lock object cannot be empty.")
         else:
             return __lock
 
 
     @classmethod
-    def chk_loop(cls, **kwargs) -> Union[None, AbstractEventLoop]:
+    def chk_loop(cls, **kwargs):
         __loop = kwargs.get("loop", None)
-        if __loop is not None and isinstance(__loop, AbstractEventLoop):
-            raise TypeError("Event loop type is incorrect.")
-        else:
+        # if __loop is not None and isinstance(__loop, SelectorEventLoop):
+        #     raise TypeError("Event loop type is incorrect.")
+        # elif __loop is None:
+        #     raise Exception("Async Event Loop object cannot be empty.")
+        # else:
+        #     return __loop
+        if __loop is not None:
             return __loop
+        else:
+            raise Exception("Async Event Loop object cannot be empty.")
 
