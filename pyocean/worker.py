@@ -1,4 +1,5 @@
-from pyocean.framework.worker import BaseTask, BaseWorker, BaseAsyncWorker, BaseSystem
+from pyocean.framework.task import BaseTask
+from pyocean.framework.worker import BaseWorker, BaseAsyncWorker, BaseSystem
 from pyocean.framework.strategy import RunnableStrategy, AsyncRunnableStrategy, Resultable
 from pyocean.framework.result import OceanResult
 from pyocean.api.mode import RunningMode, FeatureMode
@@ -8,112 +9,7 @@ from pyocean.api.strategy_adapter import StrategyAdapter
 from pyocean.persistence.interface import OceanPersistence
 
 from abc import ABC
-from typing import List, Tuple, Dict, Callable, Union
-
-
-
-class OceanTask(BaseTask):
-
-    @property
-    def function(self) -> Callable:
-        return self._Function
-
-
-    def set_function(self, function: Callable) -> BaseTask:
-        self._Function = function
-        return self
-
-
-    @property
-    def func_args(self) -> Tuple:
-        return self._Fun_Args
-
-
-    def set_func_args(self, args: Tuple) -> BaseTask:
-        self._Fun_Args = args
-        return self
-
-
-    @property
-    def func_kwargs(self) -> Dict:
-        return self._Fun_Kwargs
-
-
-    def set_func_kwargs(self, kwargs: Dict) -> BaseTask:
-        for key, value in kwargs.items():
-            self._Fun_Kwargs[key] = value
-        return self
-
-
-    @property
-    def initialization(self) -> Callable:
-        return self._Initialization
-
-
-    def set_initialization(self, init: Callable) -> BaseTask:
-        self._Initialization = init
-        return self
-
-
-    @property
-    def init_args(self) -> Tuple:
-        return self._Init_Args
-
-
-    def set_init_args(self, args: Tuple) -> BaseTask:
-        self._Init_Args = args
-        return self
-
-
-    @property
-    def init_kwargs(self) -> Dict:
-        return self._Init_Kwargs
-
-
-    def set_init_kwargs(self, kwargs: Dict) -> BaseTask:
-        for key, value in kwargs.items():
-            self._Init_Kwargs[key] = value
-        return self
-
-
-    @property
-    def group(self) -> str:
-        return self._Group
-
-
-    def set_group(self, group: str) -> BaseTask:
-        self._Group = group
-        return self
-
-
-    @property
-    def done_handler(self) -> Callable:
-        return self._Done_Handler
-
-
-    def set_done_handler(self, hdlr: Callable) -> BaseTask:
-        self._Done_Handler = hdlr
-        return self
-
-
-    @property
-    def error_handler(self) -> Callable:
-        return self._Error_Handler
-
-
-    def set_error_handler(self, hdlr: Callable) -> BaseTask:
-        self._Error_Handler = hdlr
-        return self
-
-
-    @property
-    def running_timeout(self) -> int:
-        return self._Running_Timeout
-
-
-    def set_running_timeout(self, timeout: int) -> BaseTask:
-        self._Running_Timeout = timeout
-        return self
+from typing import List, Tuple, Dict, Union
 
 
 Running_Strategy: Union[RunnableStrategy, AsyncRunnableStrategy] = None
@@ -157,7 +53,7 @@ class OceanWorker(ABC, BaseWorker):
 
 
     def start(self, task: BaseTask, saving_mode: bool = False,
-              init_args: Tuple = (), init_kwargs: Dict = {}) -> List[OceanResult]:
+              init_args: Tuple = (), init_kwargs: Dict = {}, features: List = []) -> List[OceanResult]:
         __worker_run_time = 0
         __worker_run_finish = None
 
@@ -247,8 +143,8 @@ class OceanAsyncWorker(BaseAsyncWorker):
             __feature_mode = FeatureMode.Asynchronous
 
         self._Queue = QueueAdapter(mode=__feature_mode)
-        self._Lock = LockAdapter(mode=__feature_mode)
-        self._Communication = CommunicationAdapter(mode=__feature_mode)
+        # self._Lock = LockAdapter(mode=__feature_mode)
+        # self._Communication = CommunicationAdapter(mode=__feature_mode)
 
 
     def _initial_running_strategy(self) -> None:
@@ -266,8 +162,9 @@ class OceanAsyncWorker(BaseAsyncWorker):
 
 
     def start(self, task: BaseTask, saving_mode: bool = False,
-              init_args: Tuple = (), init_kwargs: Dict = {}) -> None:
+              init_args: Tuple = (), init_kwargs: Dict = {}, features: List = []) -> None:
         __event_loop = Running_Strategy.get_event_loop()
+        init_kwargs["event_loop"] = __event_loop
         __event_loop.run_until_complete(
             future=self.async_process(
                 task=task, saving_mode=saving_mode,
@@ -320,7 +217,7 @@ class OceanAsyncWorker(BaseAsyncWorker):
 
 
     async def pre_stop(self, e: Exception) -> None:
-        pass
+        raise e
 
 
     def post_stop(self) -> None:
