@@ -215,7 +215,7 @@ class LockDecorator:
 
         @wraps(function)
         def lock(*args, **kwargs) -> List[OceanResult]:
-            from pyocean.framework.strategy import Running_Lock
+            from pyocean.api.manager import Running_Lock
 
             with Running_Lock:
                 result = function(*args, **kwargs)
@@ -234,7 +234,7 @@ class LockDecorator:
 
         @wraps(function)
         def semaphore(*args, **kwargs) -> List[OceanResult]:
-            from pyocean.framework.strategy import Running_Semaphore
+            from pyocean.api.manager import Running_Semaphore
 
             with Running_Semaphore:
                 result = function(*args, **kwargs)
@@ -253,7 +253,7 @@ class LockDecorator:
 
         @wraps(function)
         def bounded_semaphore(*args, **kwargs) -> List[OceanResult]:
-            from pyocean.framework.strategy import Running_Bounded_Semaphore
+            from pyocean.api.manager import Running_Bounded_Semaphore
 
             with Running_Bounded_Semaphore:
                 result = function(*args, **kwargs)
@@ -272,7 +272,7 @@ class LockDecorator:
 
         @wraps(function)
         async def lock(*args, **kwargs) -> List[OceanResult]:
-            from pyocean.framework.strategy import Running_Lock
+            from pyocean.api.manager import Running_Lock
 
             async with Running_Lock:
                 result = await function(*args, **kwargs)
@@ -291,7 +291,7 @@ class LockDecorator:
 
         @wraps(function)
         async def semaphore(*args, **kwargs) -> List[OceanResult]:
-            from pyocean.framework.strategy import Running_Semaphore
+            from pyocean.api.manager import Running_Semaphore
 
             async with Running_Semaphore:
                 result = await function(*args, **kwargs)
@@ -310,7 +310,7 @@ class LockDecorator:
 
         @wraps(function)
         async def bounded_semaphore(*args, **kwargs) -> List[OceanResult]:
-            from pyocean.framework.strategy import Running_Bounded_Semaphore
+            from pyocean.api.manager import Running_Bounded_Semaphore
 
             async with Running_Bounded_Semaphore:
                 result = await function(*args, **kwargs)
