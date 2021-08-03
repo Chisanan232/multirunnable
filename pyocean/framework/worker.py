@@ -211,7 +211,8 @@ class BaseWorker(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def start(self, task: BaseTask) -> None:
+    def start(self, task: BaseTask, saving_mode: bool = False,
+              init_args: Tuple = (), init_kwargs: Dict = {}, features: List = []) -> None:
         pass
 
 
@@ -254,12 +255,13 @@ class BaseWorker(metaclass=ABCMeta):
 class BaseAsyncWorker(BaseWorker):
 
     @abstractmethod
-    async def start(self, task: BaseTask) -> None:
+    async def start(self, task: BaseTask, saving_mode: bool = False,
+                    init_args: Tuple = (), init_kwargs: Dict = {}, features: List = []) -> None:
         pass
 
 
     @abstractmethod
-    async def pre_activate(self) -> None:
+    async def pre_activate(self, *args, **kwargs) -> None:
         pass
 
 
