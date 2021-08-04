@@ -1,6 +1,6 @@
-from pyocean.operator import MultiRunnableOperator, AsyncRunnableOperator
+from pyocean.api import LockDecorator, QueueOperator
 from pyocean.persistence import OceanPersistence
-from pyocean.persistence.database import BaseDao, BaseConnection, SingleConnection, MultiConnections
+from pyocean.persistence.database import BaseDao, SingleConnection, MultiConnections
 from pyocean.logger import ocean_logger
 
 from mysql.connector import Error
@@ -19,7 +19,7 @@ class TestDao(BaseDao):
         self._logger = ocean_logger
 
 
-    def get_test_data(self, *args, **kwargs) -> object:
+    def get_test_data(self) -> object:
         """
         Note (?) need to consider:
             How to abstractilize the logic or how to be more clear ?
@@ -29,22 +29,43 @@ class TestDao(BaseDao):
         if isinstance(self._Connection_Strategy, MultiConnections):
             self._logger.debug("Running all things with Bounded Semaphore.")
             # data = MultiRunnableOperator.run_with_semaphore(function=self.sql_process_new)
-            data = MultiRunnableOperator.run_with_bounded_semaphore(function=self.sql_process_new)
+            # data = MultiRunnableOperator.run_with_bounded_semaphore(function=self.sql_process_new)
+            data = self.sql_process_many()
             self._logger.debug(f"at fun 'run': {data}")
             return data
         elif isinstance(self._Connection_Strategy, SingleConnection):
             self._logger.debug("Running all things with Lock.")
-            return MultiRunnableOperator.run_with_lock(function=self.sql_process_new)
+            # return MultiRunnableOperator.run_with_lock(function=self.sql_process_new)
+            data = self.sql_process_one()
+            self._logger.debug(f"at fun 'run': {data}")
+            return data
         else:
-            pass
+            raise Exception("ConnectionStrategy is invalid...")
 
 
-    def sql_process_new(self):
-        sql_tasks = self.get_all_sql_tasks()
+    @LockDecorator.run_with_lock
+    def sql_process_one(self):
+        # sql_tasks = self.get_all_sql_tasks()
+        sql_tasks = QueueOperator.get_queue_with_name(name="test_sql_task")
         self._logger.debug(f"SQL tasks: {sql_tasks}")
-        sql_query = sql_tasks.get()
-        self._logger.debug(f"SQL tasks query: {sql_query}")
-        data = self.running_sql_query_process(sql_query=sql_query)
+        # from pyocean.framework.strategy import Running_Queue
+        # one_sql_query = Running_Queue.get()
+        one_sql_query = sql_tasks.get()
+        self._logger.debug(f"SQL tasks query: {one_sql_query}")
+        data = self.running_sql_query_process(sql_query=one_sql_query)
+        return data
+
+
+    @LockDecorator.run_with_bounded_semaphore
+    def sql_process_many(self):
+        # sql_tasks = self.get_all_sql_tasks()
+        sql_tasks = QueueOperator.get_queue_with_name(name="test_sql_task")
+        self._logger.debug(f"SQL tasks: {sql_tasks}")
+        # from pyocean.framework.strategy import Running_Queue
+        # one_sql_query = Running_Queue.get()
+        one_sql_query = sql_tasks.get()
+        self._logger.debug(f"SQL tasks query: {one_sql_query}")
+        data = self.running_sql_query_process(sql_query=one_sql_query)
         return data
 
 
@@ -112,7 +133,7 @@ class AsyncTestDao(BaseDao):
         self._logger = ocean_logger
 
 
-    async def get_test_data(self, *args, **kwargs) -> object:
+    async def get_test_data(self) -> object:
         """
         Note (?) need to consider:
             How to abstractilize the logic or how to be more clear ?
@@ -122,18 +143,33 @@ class AsyncTestDao(BaseDao):
         if isinstance(self._Connection_Strategy, MultiConnections):
             self._logger.debug("Running all things with Bounded Semaphore.")
             # data = await AsyncRunnableOperator.run_with_semaphore(function=self.sql_process_new)
-            data = await AsyncRunnableOperator.run_with_bounded_semaphore(function=self.sql_process_new)
+            # data = await AsyncRunnableOperator.run_with_bounded_semaphore(function=self.sql_process_new)
+            data = await self.sql_process_many()
             self._logger.debug(f"at fun 'run': {data}")
             return data
         elif isinstance(self._Connection_Strategy, SingleConnection):
             self._logger.debug("Running all things with Lock.")
-            return AsyncRunnableOperator.run_with_lock(function=self.sql_process_new)
+            # return AsyncRunnableOperator.run_with_lock(function=self.sql_process_new)
+            return self.sql_process_one()
         else:
             pass
 
 
-    async def sql_process_new(self):
-        sql_tasks = self.get_all_sql_tasks()
+    @LockDecorator.async_run_with_lock
+    async def sql_process_one(self):
+        # sql_tasks = self.get_all_sql_tasks()
+        sql_tasks = QueueOperator.get_queue_with_name(name="test_sql_task")
+        self._logger.debug(f"SQL tasks: {sql_tasks}")
+        sql_query = await sql_tasks.get()
+        self._logger.debug(f"SQL tasks query: {sql_query}")
+        data = self.running_sql_query_process(sql_query=sql_query)
+        return data
+
+
+    @LockDecorator.async_run_with_bounded_semaphore
+    async def sql_process_many(self):
+        # sql_tasks = self.get_all_sql_tasks()
+        sql_tasks = QueueOperator.get_queue_with_name(name="test_sql_task")
         self._logger.debug(f"SQL tasks: {sql_tasks}")
         sql_query = await sql_tasks.get()
         self._logger.debug(f"SQL tasks query: {sql_query}")
