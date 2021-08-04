@@ -1,16 +1,15 @@
+from pyocean.framework.task import BaseQueueTask
 from pyocean.framework.strategy import RunnableStrategy, Resultable
 from pyocean.framework.worker import BaseTask
-from pyocean.worker import OceanTask
-# from pyocean.framework.features import BaseQueueType
-from pyocean.api import FeatureMode
-from pyocean.api.mode import RunningMode
-# from pyocean.concurrent.features import MultiThreadingQueueType
+from pyocean.task import OceanTask
+from pyocean.api.mode import RunningMode, FeatureMode
+from pyocean.api.features_adapter import Feature
 from pyocean.concurrent.result import ConcurrentResult
-from pyocean.exceptions import FunctionSignatureConflictError
 from pyocean.concurrent.exceptions import ThreadsListIsEmptyError
+from pyocean.exceptions import FunctionSignatureConflictError
 
 from abc import abstractmethod, ABC
-from typing import List, Dict, Union, Callable
+from typing import List, Dict, Callable, Optional, Union
 from threading import Thread
 from functools import wraps
 
@@ -18,7 +17,7 @@ from functools import wraps
 
 class ConcurrentStrategy(RunnableStrategy, ABC):
 
-    _Running_Mode: FeatureMode = FeatureMode.MultiThreading
+    _Running_Feature_Mode: FeatureMode = FeatureMode.MultiThreading
     _Threads_List: List[Thread] = []
     _Threads_Running_Result: Dict[str, Dict[str, Union[object, bool]]] = {}
     _Threading_Running_Result: List = []
@@ -47,18 +46,13 @@ class ConcurrentStrategy(RunnableStrategy, ABC):
 
 class MultiThreadingStrategy(ConcurrentStrategy, Resultable):
 
-    def initialization(self, *args, **kwargs) -> None:
-        # __init_utils = InitializeUtils(running_mode=self._Running_Mode, persistence=self._persistence_strategy)
-        # # # Initialize and assign task queue object.
-        # # if tasks:
-        # #     __init_utils.initialize_queue(tasks=tasks, qtype=queue_type)
-        # # Initialize parameter and object with different scenario.
-        # if self._persistence_strategy is not None:
-        #     __init_utils.initialize_persistence(db_conn_instances_num=self.db_connection_number)
+    def initialization(self, queue_tasks: Optional[List[BaseQueueTask]] = None,
+                       features: Optional[List[Feature]] = None, *args, **kwargs) -> None:
+        super(MultiThreadingStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
+
+        # # Persistence
         if self._persistence_strategy is not None:
-            self._persistence_strategy.initialize(
-                mode=self._Running_Mode,
-                db_conn_instances_num=self.db_connection_number)
+            self._persistence_strategy.initialize(mode=self._Running_Mode, db_conn_num=self.db_connection_number)
 
 
     def build_workers(self, function: Callable, *args, **kwargs) -> List[Thread]:
