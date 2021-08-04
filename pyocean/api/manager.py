@@ -9,7 +9,7 @@ from pyocean.exceptions import GlobalizeObjectError
 from typing import Dict, Optional
 
 
-Running_Queue: Optional[Dict[str, OceanQueue]] = None
+Running_Queue: Optional[Dict[str, OceanQueue]] = {}
 Running_Lock: Optional[OceanLock] = None
 Running_RLock: Optional[OceanRLock] = None
 Running_Semaphore: Optional[OceanSemaphore] = None
