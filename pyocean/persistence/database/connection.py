@@ -1,4 +1,3 @@
-from pyocean.api.features_adapter import FeatureMode
 from pyocean.persistence.interface import OceanPersistence
 from pyocean.persistence.configuration import BaseDatabaseConfiguration
 from pyocean.persistence.database.configuration import BaseConfigurationKey, BaseConfigDefaultValue
@@ -50,11 +49,10 @@ class BaseConnection(OceanPersistence):
 
 
     @abstractmethod
-    def initialize(self, mode: FeatureMode, **kwargs) -> None:
+    def initialize(self, **kwargs) -> None:
         """
         Description:
             Initialize something which be needed before operate something with database.
-        :param mode:
         :param kwargs:
         :return:
         """
