@@ -1,12 +1,12 @@
+from pyocean.framework.task import BaseQueueTask
 from pyocean.framework.strategy import RunnableStrategy, AsyncRunnableStrategy, Resultable
-# from pyocean.framework.features import BaseQueueType
 from pyocean.api.mode import FeatureMode
-# from pyocean.coroutine.features import GeventQueueType, AsynchronousQueueType
+from pyocean.api.manager import Globalize as RunningGlobalize
+from pyocean.api.features_adapter import Feature, QueueAdapter, LockAdapter, CommunicationAdapter
 from pyocean.coroutine.result import CoroutineResult, AsynchronousResult
 
 from abc import ABCMeta, ABC, abstractmethod
-from typing import List, Iterable, Callable
-# from greenlet import greenlet, getcurrent
+from typing import List, Iterable, Callable, Optional
 from gevent.greenlet import Greenlet
 from asyncio.tasks import Task
 import asyncio
@@ -22,7 +22,7 @@ class CoroutineStrategy(metaclass=ABCMeta):
 
 class BaseGreenletStrategy(CoroutineStrategy, RunnableStrategy, ABC):
 
-    _Running_Mode: FeatureMode = FeatureMode.MultiGreenlet
+    _Running_Feature_Mode: FeatureMode = FeatureMode.MultiGreenlet
     _Gevent_List: List[Greenlet] = None
     _Gevent_Running_Result: List = []
 
@@ -30,18 +30,13 @@ class BaseGreenletStrategy(CoroutineStrategy, RunnableStrategy, ABC):
 
 class MultiGreenletStrategy(BaseGreenletStrategy, Resultable):
 
-    def initialization(self, *args, **kwargs) -> None:
-        # __init_utils = InitializeUtils(running_mode=self._Running_Mode, persistence=self._persistence_strategy)
-        # # # Initialize and assign task queue object.
-        # # if tasks:
-        # #     __init_utils.initialize_queue(tasks=tasks, qtype=queue_type)
-        # # Initialize persistence object.
-        # if self._persistence_strategy is not None:
-        #     __init_utils.initialize_persistence(db_conn_instances_num=self.db_connection_number)
+    def initialization(self, queue_tasks: Optional[List[BaseQueueTask]] = None,
+                       features: Optional[List[Feature]] = None, *args, **kwargs) -> None:
+        super(MultiGreenletStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
+
+        # # Persistence
         if self._persistence_strategy is not None:
-            self._persistence_strategy.initialize(
-                mode=self._Running_Mode,
-                db_conn_instances_num=self.db_connection_number)
+            self._persistence_strategy.initialize(mode=self._Running_Mode, db_conn_num=self.db_connection_number)
 
 
     def build_workers(self, function: Callable, *args, **kwargs) -> List[Greenlet]:
@@ -84,7 +79,7 @@ class MultiGreenletStrategy(BaseGreenletStrategy, Resultable):
 
 class BaseAsyncStrategy(CoroutineStrategy, AsyncRunnableStrategy, ABC):
 
-    _Running_Mode: FeatureMode = FeatureMode.Asynchronous
+    _Running_Feature_Mode: FeatureMode = FeatureMode.Asynchronous
     _Async_Event_Loop = None
     _Async_Task_List: List[Task] = None
     _Async_Running_Result: List = []
@@ -101,18 +96,49 @@ class AsynchronousStrategy(BaseAsyncStrategy, Resultable):
         return self._Async_Event_Loop
 
 
-    async def initialization(self, *args, **kwargs) -> None:
-        # __init_utils = InitializeUtils(running_mode=self._Running_Mode, persistence=self._persistence_strategy)
-        # # # # Initialize and assign task queue object.
-        # # if tasks:
-        # #     await __init_utils.async_initialize_queue(tasks=tasks, qtype=queue_type)
-        # # Initialize persistence object.
-        # if self._persistence_strategy is not None:
-        #     __init_utils.initialize_persistence(db_conn_instances_num=self.db_connection_number)
+    async def initialization(self, queue_tasks: Optional[List[BaseQueueTask]] = None,
+                             features: Optional[List[Feature]] = None, *args, **kwargs) -> None:
+        # # Queue initialization
+        if queue_tasks is not None:
+            await self._init_queue_process(tasks=queue_tasks)
+
+        # # Filter mechanism
+        __lock_features = filter(lambda __feature: __feature not in [Feature.Event, Feature.Condition], features)
+        __communication_features = filter(lambda __feature: __feature in [Feature.Event, Feature.Condition], features)
+
+        __async_kwgs = {}
+        __event_loop = kwargs.get("event_loop", None)
+        if __event_loop is None:
+            raise Exception("Async Event Loop object cannot be empty.")
+        __async_kwgs["event_loop"] = __event_loop
+
+        # # Lock initialization
+        if __lock_features:
+            super()._init_lock_process(features=features, **__async_kwgs)
+
+        # # Communication initialization
+        if __communication_features:
+            super()._init_communication_process(features=features, **__async_kwgs)
+
+        # # Persistence
         if self._persistence_strategy is not None:
             self._persistence_strategy.initialize(
                 mode=self._Running_Mode,
-                db_conn_instances_num=self.db_connection_number)
+                db_conn_num=self.db_connection_number,
+                event_loop=kwargs.get("event_loop"))
+
+
+    async def _init_queue_process(self, tasks: List[BaseQueueTask]) -> None:
+        """
+        Initialize Queue object which be needed to handle in Queue-Task-List.
+        :param tasks:
+        :return:
+        """
+
+        __queue_adapter = QueueAdapter(mode=self._Running_Mode)
+        for task in tasks:
+            __queue = await __queue_adapter.async_init_queue_with_values(qtype=task.queue_type, values=task.value)
+            RunningGlobalize.queue(name=task.name, queue=__queue)
 
 
     def build_workers(self, function: Callable, *args, **kwargs) -> List[Task]:
