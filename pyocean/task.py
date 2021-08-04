@@ -113,6 +113,16 @@ class OceanTask(BaseTask):
 class QueueTask(BaseQueueTask):
 
     @property
+    def name(self) -> str:
+        return self._Name
+
+
+    @name.setter
+    def name(self, name: str) -> None:
+        self._Name = name
+
+
+    @property
     def queue_type(self) -> BaseQueueType:
         return self._Queue_Type
 
