@@ -1,20 +1,19 @@
 # Import package pyocean
+from typing import List
 import pathlib
+import gevent
+import random
+import time
 import sys
 
 package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute())
 sys.path.append(package_pyocean_path)
 
 # pyocean package
-from pyocean import GeventProcedure
-from pyocean.worker import OceanSystem, OceanTask
-from pyocean.api.mode import RunningMode
 from pyocean.framework import SimpleRunnableTask
-from pyocean.coroutine import GeventProcedure, MultiGreenletStrategy, GeventSimpleFactory
-
-import gevent
-import random
-import time
+from pyocean import OceanSystem, OceanTask
+from pyocean.api import RunningMode
+from pyocean.coroutine import GeventProcedure, MultiGreenletStrategy, GeventSimpleFactory, CoroutineResult
 
 
 
@@ -27,7 +26,7 @@ class ExampleCoroutineClient:
         # time.sleep(sleep_time)
         gevent.sleep(sleep_time)
         print("This function wake up.")
-        # return "Return Value"
+        return "Coroutine Return Value"
 
 
     async def async_target_function(self, index):
@@ -74,7 +73,16 @@ class ExampleOceanSystem:
             .set_func_kwargs(kwargs={"index": f"test_{random.randrange(10,20)}"})
 
         __system = OceanSystem(mode=RunningMode.Greenlet, worker_num=cls.__Greenlet_Number)
-        __system.run(task=__task)
+        result: List[CoroutineResult] = __system.run(task=__task)
+        print("Coroutine result: ", result)
+        for r in result:
+            print(f"+============ {r.worker_id} =============+")
+            print("Result.pid: ", r.pid)
+            print("Result.worker_id: ", r.worker_id)
+            print("Result.state: ", r.state)
+            print("Result.data: ", r.data)
+            print("Result.exception: ", r.exception)
+            print("+====================================+\n")
 
 
 

@@ -1,18 +1,18 @@
 # Import package pyocean
+from typing import List
 import pathlib
+import random
+import time
 import sys
 
 package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute())
 sys.path.append(package_pyocean_path)
 
 # pyocean package
-from pyocean.worker import OceanTask, OceanWorker, OceanSystem
-from pyocean.api.mode import RunningMode
 from pyocean.framework import SimpleRunnableTask
-from pyocean.concurrent import ConcurrentProcedure, MultiThreadingStrategy, ConcurrentSimpleFactory
-
-import random
-import time
+from pyocean import OceanTask, OceanSystem
+from pyocean.api import RunningMode
+from pyocean.concurrent import ConcurrentProcedure, MultiThreadingStrategy, ConcurrentSimpleFactory, ConcurrentResult
 
 
 
@@ -59,12 +59,22 @@ class ExampleOceanSystem:
     def main_run(cls):
         # Initialize task object
         __task = OceanTask(mode=RunningMode.Concurrent)
-        __task.set_function(function=cls.__example.target_function)\
-            .set_func_kwargs(kwargs={"index": f"test_{random.randrange(10,20)}"})
+        __task.set_function(function=cls.__example.target_function)
+        __task.set_func_kwargs(kwargs={"index": f"test_{random.randrange(10,20)}"})
 
         # Initialize ocean-system and assign task
         __system = OceanSystem(mode=RunningMode.Concurrent, worker_num=cls.__Thread_Number)
-        __system.run(task=__task)
+        result: List[ConcurrentResult] = __system.run(task=__task, saving_mode=True)
+        # result: List[ConcurrentResult] = __system.run(task=__task)
+        print("Concurrent result: ", result)
+        for r in result:
+            print(f"+============ {r.worker_id} =============+")
+            print("Result.pid: ", r.pid)
+            print("Result.worker_id: ", r.worker_id)
+            print("Result.state: ", r.state)
+            print("Result.data: ", r.data)
+            print("Result.exception: ", r.exception)
+            print("+====================================+\n")
 
 
 

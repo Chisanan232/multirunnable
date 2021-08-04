@@ -1,21 +1,18 @@
 # Import package pyocean
+from typing import List
 import pathlib
+import asyncio
+import random
 import sys
 
 package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute())
 sys.path.append(package_pyocean_path)
 
 # pyocean package
-from pyocean import AsynchronousProcedure
-from pyocean.worker import OceanSystem, OceanTask
-from pyocean.api.mode import RunningMode
-from pyocean.framework import BaseRunnableProcedure, RunnableStrategy, SimpleRunnableTask
-from pyocean.coroutine import AsynchronousStrategy, AsynchronousSimpleFactory
-from pyocean.coroutine.strategy import CoroutineStrategy
-
-import asyncio
-import random
-import time
+from pyocean.framework import SimpleRunnableTask
+from pyocean import AsynchronousProcedure, OceanSystem, OceanTask
+from pyocean.api import RunningMode
+from pyocean.coroutine import AsynchronousStrategy, AsynchronousSimpleFactory, AsynchronousResult
 
 
 
@@ -28,7 +25,7 @@ class ExampleCoroutineClient:
         # time.sleep(sleep_time)
         await asyncio.sleep(sleep_time)
         print("This function wake up.")
-        # return "Return Value"
+        return "Return Async Value"
 
 
 
@@ -62,11 +59,21 @@ class ExampleOceanSystem:
     @classmethod
     def main_run(cls):
         __task = OceanTask(mode=RunningMode.Asynchronous)
-        __task.set_function(function=cls.__example.async_target_function)\
-            .set_func_kwargs(kwargs={"index": f"test_{random.randrange(10,20)}"})
+        __task.set_function(function=cls.__example.async_target_function)
+        __task.set_func_kwargs(kwargs={"index": f"test_{random.randrange(10,20)}"})
 
         __system = OceanSystem(mode=RunningMode.Asynchronous, worker_num=cls.__Async_Number)
-        __system.run(task=__task)
+        result: List[AsynchronousResult] = __system.run(task=__task, saving_mode=True)
+        print("Async result: ", result)
+        for r in result:
+            print(f"+============ {r.worker_id} =============+")
+            print("Result.pid: ", r.pid)
+            print("Result.worker_id: ", r.worker_id)
+            print("Result.state: ", r.state)
+            print("Result.event_loop: ", r.event_loop)
+            print("Result.data: ", r.data)
+            print("Result.exception: ", r.exception)
+            print("+====================================+\n")
 
 
 
