@@ -1,9 +1,10 @@
 from pyocean.framework.task import BaseTask
 from pyocean.framework.result import OceanResult
 from pyocean.api.mode import RunningMode
+from pyocean.api.features_adapter import Feature
 
 from abc import ABCMeta, abstractmethod
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Optional
 
 
 
@@ -23,8 +24,12 @@ class BaseWorker(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def start(self, task: BaseTask, saving_mode: bool = False,
-              init_args: Tuple = (), init_kwargs: Dict = {}, features: List = []) -> None:
+    def start(self,
+              task: BaseTask,
+              queue_tasks: Optional[List[BaseTask]] = None,
+              features: Optional[List[Feature]] = None,
+              saving_mode: bool = False,
+              init_args: Tuple = (), init_kwargs: Dict = {}) -> None:
         pass
 
 
@@ -67,8 +72,12 @@ class BaseWorker(metaclass=ABCMeta):
 class BaseAsyncWorker(BaseWorker):
 
     @abstractmethod
-    async def start(self, task: BaseTask, saving_mode: bool = False,
-                    init_args: Tuple = (), init_kwargs: Dict = {}, features: List = []) -> None:
+    async def start(self,
+                    task: BaseTask,
+                    queue_tasks: Optional[List[BaseTask]] = None,
+                    features: Optional[List[Feature]] = None,
+                    saving_mode: bool = False,
+                    init_args: Tuple = (), init_kwargs: Dict = {}) -> None:
         pass
 
 
