@@ -1,133 +1,19 @@
-from pyocean.framework.features import BaseQueueType, BaseGlobalizeAPI
-# from pyocean.api.mode import FeatureMode
-# from pyocean.api.features_adapter import QueueAdapter
-from pyocean.types import (
-    OceanTasks,
-    OceanQueue,
-    OceanLock, OceanRLock,
-    OceanSemaphore, OceanBoundedSemaphore,
-    OceanEvent, OceanCondition)
+from pyocean.types import OceanTasks
+from pyocean.framework.task import BaseQueueTask
+from pyocean.api.mode import FeatureMode
+from pyocean.api.features_adapter import Feature, QueueAdapter, LockAdapter, CommunicationAdapter
+from pyocean.api.manager import Globalize as RunningGlobalize
 from pyocean.persistence.interface import OceanPersistence
-from pyocean.exceptions import GlobalizeObjectError
 
 from abc import ABCMeta, ABC, abstractmethod
-from typing import List, Iterable, Callable
+from typing import List, Iterable, Callable, Optional
 import logging
-
-
-Running_Lock: OceanLock = None
-Running_RLock: OceanRLock = None
-Running_Event: OceanEvent = None
-Running_Condition: OceanCondition = None
-Running_Semaphore: OceanSemaphore = None
-Running_Bounded_Semaphore: OceanBoundedSemaphore = None
-Running_Queue: OceanQueue
-
-Database_Connection_Instance_Number = 1
-
-
-# class InitializeUtils:
-#
-#     """
-#     Sometimes it needs do something pre-process like initialize object or something configuration, etc. before start to
-#     run multi-work simultaneously (or be close to). This class focus handling the initialize processes for each different
-#     running strategy.
-#     """
-#
-#     def __init__(self, running_mode: FeatureMode, persistence: OceanPersistence = None):
-#         self.__running_mode = running_mode
-#         self.__persistence_strategy = persistence
-#
-#
-#     def initialize_queue(self, tasks: Iterable, qtype: BaseQueueType) -> None:
-#         """
-#         Description:
-#             Initialize Queue object with the queue type. It should use the queue type which be annotated by each running
-#         strategy.
-#         Example:
-#             from pyocean.concurrent.feature import MultiThreadingQueueType
-#
-#             queue = MultiThreadingQueueType.Queue
-#             queue.put("This is your task content.")
-#         :param tasks:
-#         :param qtype:
-#         :return:
-#         """
-#         __queue = self._init_tasks_queue(qtype=qtype)
-#         __tasks_queue = self._add_task_to_queue(queue=__queue, task=tasks)
-#         Globalize.queue(queue=__tasks_queue)
-#
-#
-#     async def async_initialize_queue(self, tasks: Iterable, qtype: BaseQueueType) -> None:
-#         """
-#         Description:
-#             Asynchronously initialize Queue object with the queue type. Here Queue type only for Asynchronous strategy queue.
-#         Example:
-#             from pyocean.coroutine.feature import AsynchronousQueueType
-#
-#             queue = AsynchronousQueueType.Queue
-#             queue.put("This is your async task content.")
-#         :param tasks:
-#         :param qtype:
-#         :return:
-#         """
-#         __queue = self._init_tasks_queue(qtype=qtype)
-#         __tasks_queue = await self._async_add_task_to_queue(queue=__queue, task=tasks)
-#         Globalize.queue(queue=__tasks_queue)
-#
-#
-#     def _init_tasks_queue(self, qtype: BaseQueueType) -> OceanQueue:
-#         """
-#         Description:
-#             Annotating Queue object with queue type.
-#         :param qtype:
-#         :return:
-#         """
-#         __queue_api = QueueAdapter(mode=self.__running_mode)
-#         __queue = __queue_api.get_queue(qtype=qtype)
-#         return __queue
-#
-#
-#     def _add_task_to_queue(self, queue: OceanQueue, task: Iterable) -> OceanQueue:
-#         """
-#         Description:
-#             Adding target tasks into queue object.
-#         :param queue:
-#         :param task:
-#         :return:
-#         """
-#         for t in task:
-#             queue.put(t)
-#         return queue
-#
-#
-#     async def _async_add_task_to_queue(self, queue: OceanQueue, task: Iterable) -> OceanQueue:
-#         """
-#         Description:
-#             Adding target tasks into queue object asynchronously.
-#         :param queue:
-#         :param task:
-#         :return:
-#         """
-#         for t in task:
-#             await queue.put(t)
-#         return queue
-#
-#
-#     def initialize_persistence(self, **kwargs) -> None:
-#         """
-#         Description:
-#             Initialize persistence strategy needed conditions.
-#         :param kwargs:
-#         :return:
-#         """
-#         if self.__persistence_strategy is None:
-#             raise Exception
-#         self.__persistence_strategy.initialize(mode=self.__running_mode, **kwargs)
 
 
 
 class RunnableStrategy(metaclass=ABCMeta):
+
+    _Running_Feature_Mode: Optional[FeatureMode] = None
 
     def __init__(self, workers_num: int, persistence_strategy: OceanPersistence = None, **kwargs):
         self.__workers_num = workers_num
@@ -169,16 +55,92 @@ class RunnableStrategy(metaclass=ABCMeta):
             return self.__db_conn_num
 
 
-    def initialization(self, *args, **kwargs) -> None:
+    def initialization(self, queue_tasks: Optional[List[BaseQueueTask]] = None,
+                       features: Optional[List[Feature]] = None, *args, **kwargs) -> None:
         """
         Description:
             Initialize something configurations or something which be needed to be already before run multiple
             threads or processes.
+        :param queue_tasks:
+        :param features:
         :param args:
         :param kwargs:
         :return:
         """
-        pass
+
+        # # Semaphore part (Limitation)
+        # # # # Think about how to design the initialization like lock, semaphore or queue
+        # # # # beside design, needs to more think about how to use it? how to extend it? how to maintain it?
+        # # Queue initialization
+        if queue_tasks is not None:
+            self._init_queue_process(tasks=queue_tasks)
+
+        # # Filter mechanism
+        __lock_features = filter(lambda __feature: __feature not in [Feature.Event, Feature.Condition], features)
+        __communication_features = filter(lambda __feature: __feature in [Feature.Event, Feature.Condition], features)
+
+        # # Lock initialization
+        if __lock_features:
+            self._init_lock_process(features=__lock_features)
+
+        # # Communication initialization
+        if __communication_features:
+            self._init_communication_process(features=__communication_features)
+
+
+    def _init_queue_process(self, tasks: List[BaseQueueTask]) -> None:
+        """
+        Initialize Queue object which be needed to handle in Queue-Task-List.
+        :param tasks:
+        :return:
+        """
+
+        __queue_adapter = QueueAdapter(mode=self._Running_Feature_Mode)
+        for task in tasks:
+            __queue = __queue_adapter.init_queue_with_values(qtype=task.queue_type, values=task.value)
+            RunningGlobalize.queue(name=task.name, queue=__queue)
+
+
+    def _init_lock_process(self, features: Iterable[Feature], **adapter_kwargs) -> None:
+        """
+        Initialize Lock object (Lock, RLock, Semaphore, Bounded Semaphore)
+        which be needed to handle in Feature-List.
+        :param features:
+        :return:
+        """
+
+        __lock_adapter = LockAdapter(mode=self._Running_Feature_Mode, **adapter_kwargs)
+        for feature in features:
+            if feature == Feature.Lock:
+                __lock = __lock_adapter.get_lock()
+                RunningGlobalize.lock(lock=__lock)
+            if feature == Feature.RLock:
+                __rlock = __lock_adapter.get_rlock()
+                RunningGlobalize.rlock(rlock=__rlock)
+            if feature == Feature.Semaphore:
+                __semaphore = __lock_adapter.get_semaphore(value=self.db_connection_number)
+                RunningGlobalize.semaphore(smp=__semaphore)
+            if feature == Feature.Bounded_Semaphore:
+                __bounded_semaphore = __lock_adapter.get_bounded_semaphore(value=self.db_connection_number)
+                RunningGlobalize.bounded_semaphore(bsmp=__bounded_semaphore)
+
+
+    def _init_communication_process(self, features: Iterable[Feature], **adapter_kwargs) -> None:
+        """
+        Initialize Lock object (Event, Condition) which be needed to
+        handle in Feature-List.
+        :param features:
+        :return:
+        """
+
+        __communication_adapter = CommunicationAdapter(mode=self._Running_Feature_Mode, **adapter_kwargs)
+        for feature in features:
+            if feature.Event:
+                __event = __communication_adapter.get_event()
+                RunningGlobalize.event(event=__event)
+            if feature.Condition:
+                __condition = __communication_adapter.get_event()
+                RunningGlobalize.condition(condition=__condition)
 
 
     @abstractmethod
@@ -218,7 +180,8 @@ class RunnableStrategy(metaclass=ABCMeta):
 
 class AsyncRunnableStrategy(RunnableStrategy, ABC):
 
-    async def initialization(self, tasks: Iterable, *args, **kwargs) -> None:
+    async def initialization(self, queue_tasks: Optional[List[BaseQueueTask]] = None,
+                             features: Optional[List[Feature]] = None, *args, **kwargs) -> None:
         pass
 
 
@@ -268,97 +231,4 @@ class Resultable(metaclass=ABCMeta):
         """
         pass
 
-
-
-class Globalize(BaseGlobalizeAPI):
-
-    @staticmethod
-    def lock(lock: OceanLock) -> None:
-        """
-        Description:
-            Globalize Lock so that it could run between each different threads or processes.
-        :param lock:
-        :return:
-        """
-
-        if lock is not None:
-            global Running_Lock
-            Running_Lock = lock
-        else:
-            raise GlobalizeObjectError
-
-
-    @staticmethod
-    def rlock(rlock: OceanRLock) -> None:
-        """
-        Description:
-            Globalize Lock so that it could run between each different threads or processes.
-        :param rlock:
-        :return:
-        """
-
-        if rlock is not None:
-            global Running_RLock
-            Running_RLock = rlock
-        else:
-            raise GlobalizeObjectError
-
-
-    @staticmethod
-    def event(event: OceanEvent) -> None:
-        if event is not None:
-            global Running_Event
-            Running_Event = event
-        else:
-            raise GlobalizeObjectError
-
-
-    @staticmethod
-    def condition(condition: OceanCondition) -> None:
-        if condition is not None:
-            global Running_Condition
-            Running_Condition = condition
-        else:
-            raise GlobalizeObjectError
-
-
-    @staticmethod
-    def semaphore(smp: OceanSemaphore) -> None:
-        """
-        Description:
-            Globalize Semaphore so that it could run between each different threads or processes.
-        :param smp:
-        :return:
-        """
-
-        if smp is not None:
-            global Running_Semaphore
-            Running_Semaphore = smp
-        else:
-            raise GlobalizeObjectError
-
-
-    @staticmethod
-    def bounded_semaphore(bsmp: OceanBoundedSemaphore) -> None:
-        """
-        Description:
-            Globalize Semaphore so that it could run between each different threads or processes.
-        :param bsmp:
-        :return:
-        """
-
-        if bsmp is not None:
-            global Running_Bounded_Semaphore
-            Running_Bounded_Semaphore = bsmp
-        else:
-            raise GlobalizeObjectError
-
-
-    @staticmethod
-    def queue(queue: OceanQueue) -> None:
-        if queue is not None:
-            global Running_Queue
-            Running_Queue = queue
-        else:
-            raise GlobalizeObjectError
 
