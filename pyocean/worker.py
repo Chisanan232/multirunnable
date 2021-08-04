@@ -1,25 +1,21 @@
-from pyocean.framework.task import BaseTask
+from pyocean.framework.task import BaseTask, BaseQueueTask
 from pyocean.framework.worker import BaseWorker, BaseAsyncWorker, BaseSystem
 from pyocean.framework.strategy import RunnableStrategy, AsyncRunnableStrategy, Resultable
 from pyocean.framework.result import OceanResult
 from pyocean.api.mode import RunningMode, FeatureMode
 from pyocean.api.decorator import ReTryMechanism
-from pyocean.api.features_adapter import QueueAdapter, LockAdapter, CommunicationAdapter
+from pyocean.api.features_adapter import Feature
 from pyocean.api.strategy_adapter import StrategyAdapter
 from pyocean.persistence.interface import OceanPersistence
 
 from abc import ABC
-from typing import List, Tuple, Dict, Union
+from typing import List, Tuple, Dict, Optional, Union
 
 
 Running_Strategy: Union[RunnableStrategy, AsyncRunnableStrategy] = None
 
 
 class OceanWorker(ABC, BaseWorker):
-
-    _Queue = None
-    _Lock = None
-    _Communication = None
 
     def __init__(self, mode: RunningMode, worker_num: int):
         self._mode = mode
@@ -37,10 +33,6 @@ class OceanWorker(ABC, BaseWorker):
         elif self._mode is RunningMode.Asynchronous:
             __feature_mode = FeatureMode.Asynchronous
 
-        self._Queue = QueueAdapter(mode=__feature_mode)
-        self._Lock = LockAdapter(mode=__feature_mode)
-        self._Communication = CommunicationAdapter(mode=__feature_mode)
-
 
     @property
     def running_timeout(self) -> int:
@@ -52,14 +44,19 @@ class OceanWorker(ABC, BaseWorker):
         self._Worker_Timeout = timeout
 
 
-    def start(self, task: BaseTask, saving_mode: bool = False,
-              init_args: Tuple = (), init_kwargs: Dict = {}, features: List = []) -> List[OceanResult]:
+    def start(self,
+              task: BaseTask,
+              queue_tasks: Optional[List[BaseQueueTask]] = None,
+              features: Optional[List[Feature]] = None,
+              saving_mode: bool = False,
+              init_args: Tuple = (), init_kwargs: Dict = {}) -> List[OceanResult]:
+
         __worker_run_time = 0
         __worker_run_finish = None
 
         while __worker_run_time < self.running_timeout + 1:
             try:
-                self.pre_activate(*init_args, **init_kwargs)
+                self.pre_activate(queue_tasks=queue_tasks, features=features, *init_args, **init_kwargs)
                 self.activate(task=task, saving_mode=saving_mode)
             except Exception as e:
                 self.pre_stop(e=e)
@@ -78,8 +75,9 @@ class OceanWorker(ABC, BaseWorker):
             return self.get_result()
 
 
-    def pre_activate(self, *args, **kwargs) -> None:
-        Running_Strategy.initialization(*args, **kwargs)
+    def pre_activate(self, queue_tasks: Optional[List[BaseQueueTask]] = None,
+                     features: Optional[List[Feature]] = None, *args, **kwargs) -> None:
+        Running_Strategy.initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
 
 
     def activate(self, task: BaseTask, saving_mode: bool = False) -> None:
@@ -122,10 +120,6 @@ class OceanAsyncWorker(BaseAsyncWorker):
     _Initial_Object = None
     _Target_Function = None
 
-    _Queue = None
-    _Lock = None
-    _Communication = None
-
     def __init__(self, mode: RunningMode, worker_num: int):
         self._mode = mode
         self.worker_num = worker_num
@@ -142,10 +136,6 @@ class OceanAsyncWorker(BaseAsyncWorker):
         elif self._mode is RunningMode.Asynchronous:
             __feature_mode = FeatureMode.Asynchronous
 
-        self._Queue = QueueAdapter(mode=__feature_mode)
-        # self._Lock = LockAdapter(mode=__feature_mode)
-        # self._Communication = CommunicationAdapter(mode=__feature_mode)
-
 
     def _initial_running_strategy(self) -> None:
         pass
@@ -161,26 +151,39 @@ class OceanAsyncWorker(BaseAsyncWorker):
         self._Worker_Timeout = timeout
 
 
-    def start(self, task: BaseTask, saving_mode: bool = False,
-              init_args: Tuple = (), init_kwargs: Dict = {}, features: List = []) -> None:
+    def start(self,
+              task: BaseTask,
+              queue_tasks: Optional[List[BaseQueueTask]] = None,
+              features: Optional[List[Feature]] = None,
+              saving_mode: bool = False,
+              init_args: Tuple = (), init_kwargs: Dict = {}) -> None:
+
         __event_loop = Running_Strategy.get_event_loop()
         init_kwargs["event_loop"] = __event_loop
         __event_loop.run_until_complete(
             future=self.async_process(
-                task=task, saving_mode=saving_mode,
-                init_args=init_args, init_kwargs=init_kwargs)
-        )
+                task=task,
+                queue_tasks=queue_tasks,
+                features=features,
+                saving_mode=saving_mode,
+                init_args=init_args, init_kwargs=init_kwargs
+            ))
         self.post_stop()
 
 
-    async def async_process(self, task: BaseTask, saving_mode: bool = False,
+    async def async_process(self,
+                            task: BaseTask,
+                            queue_tasks: Optional[List[BaseQueueTask]] = None,
+                            features: Optional[List[Feature]] = None,
+                            saving_mode: bool = False,
                             init_args: Tuple = (), init_kwargs: Dict = {}) -> List[OceanResult]:
+
         __worker_run_time = 0
         __worker_run_finish = None
 
         while __worker_run_time < self.running_timeout + 1:
             try:
-                await self.pre_activate(*init_args, **init_kwargs)
+                await self.pre_activate(queue_tasks=queue_tasks, features=features, *init_args, **init_kwargs)
                 await self.activate(task=task, saving_mode=saving_mode)
             except Exception as e:
                 await self.pre_stop(e=e)
@@ -197,8 +200,10 @@ class OceanAsyncWorker(BaseAsyncWorker):
             return self.get_result()
 
 
-    async def pre_activate(self, *args, **kwargs) -> None:
-        await Running_Strategy.initialization(*args, **kwargs)
+    async def pre_activate(self,
+                           queue_tasks: Optional[List[BaseQueueTask]] = None,
+                           features: Optional[List[Feature]] = None, *args, **kwargs) -> None:
+        await Running_Strategy.initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
 
 
     async def activate(self, task: BaseTask, saving_mode: bool = False) -> None:
@@ -302,38 +307,53 @@ class OceanPersistenceAsyncWorker(OceanAsyncWorker):
 
 class OceanSystem(BaseSystem):
 
-    def run(self, task: BaseTask, saving_mode: bool = False, timeout: int = 0) -> List[OceanResult]:
+    def run(self,
+            task: BaseTask,
+            queue_tasks: Optional[List[BaseQueueTask]] = None,
+            features: Optional[List[Feature]] = None,
+            saving_mode: bool = False,
+            timeout: int = 0) -> List[OceanResult]:
+
         if self._mode is RunningMode.Asynchronous:
-            __ocean_worker = OceanSimpleAsyncWorker(
-                mode=self._mode, worker_num=self._worker_num)
+            __ocean_worker = OceanSimpleAsyncWorker(mode=self._mode, worker_num=self._worker_num)
             __ocean_worker.running_timeout = timeout
-            __ocean_worker.start(task=task, saving_mode=saving_mode)
+            __ocean_worker.start(task=task, queue_tasks=queue_tasks, features=features, saving_mode=saving_mode)
             return __ocean_worker.get_result()
         else:
-            __ocean_worker = OceanSimpleWorker(
-                mode=self._mode, worker_num=self._worker_num)
+            __ocean_worker = OceanSimpleWorker(mode=self._mode, worker_num=self._worker_num)
             __ocean_worker.running_timeout = timeout
-            __ocean_worker.start(task=task, saving_mode=saving_mode)
+            __ocean_worker.start(task=task, queue_tasks=queue_tasks, features=features, saving_mode=saving_mode)
             return __ocean_worker.get_result()
 
 
-    def run_and_save(self, task: BaseTask, persistence_strategy: OceanPersistence,
-                     db_connection_num: int, saving_mode: bool = False, timeout: int = 0) -> List[OceanResult]:
+    def run_and_save(self,
+                     task: BaseTask,
+                     persistence_strategy: OceanPersistence,
+                     db_connection_num: int,
+                     queue_tasks: Optional[List[BaseQueueTask]] = None,
+                     features: Optional[List[Feature]] = None,
+                     saving_mode: bool = False,
+                     timeout: int = 0) -> List[OceanResult]:
+
         if self._mode is RunningMode.Asynchronous:
             __ocean_worker = OceanPersistenceAsyncWorker(
-                mode=self._mode, worker_num=self._worker_num,
+                mode=self._mode,
+                worker_num=self._worker_num,
                 persistence_strategy=persistence_strategy,
                 db_connection_num=db_connection_num)
+
             __ocean_worker.running_timeout = timeout
-            __ocean_worker.start(task=task, saving_mode=saving_mode)
+            __ocean_worker.start(task=task, queue_tasks=queue_tasks, features=features, saving_mode=saving_mode)
             return __ocean_worker.get_result()
         else:
             __ocean_worker = OceanPersistenceWorker(
-                mode=self._mode, worker_num=self._worker_num,
+                mode=self._mode,
+                worker_num=self._worker_num,
                 persistence_strategy=persistence_strategy,
                 db_connection_num=db_connection_num)
+
             __ocean_worker.running_timeout = timeout
-            __ocean_worker.start(task=task, saving_mode=saving_mode)
+            __ocean_worker.start(task=task, queue_tasks=queue_tasks, features=features, saving_mode=saving_mode)
             return __ocean_worker.get_result()
 
 
