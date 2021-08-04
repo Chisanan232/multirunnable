@@ -1,4 +1,6 @@
-from pyocean.concurrent.operator import ConcurrentProcedure
 from pyocean.concurrent.strategy import MultiThreadingStrategy
-from pyocean.concurrent.factory import ConcurrentSimpleFactory, ConcurrentPersistenceFactory
 from pyocean.concurrent.features import MultiThreadingQueueType
+from pyocean.concurrent.result import ConcurrentResult
+
+from pyocean.concurrent.operator import ConcurrentProcedure
+from pyocean.concurrent.factory import ConcurrentSimpleFactory, ConcurrentPersistenceFactory

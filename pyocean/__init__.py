@@ -15,22 +15,39 @@ sys.path.append(__package_pyocean_path)
 __user = getpass.getuser()
 PYOCEAN_LOGGER = getLogger(__user)
 
+
+from pyocean.api import RunningMode, FeatureMode, Feature
+from pyocean.task import OceanTask, QueueTask
+from pyocean.worker import (
+    OceanSystem,
+    OceanSimpleWorker, OceanPersistenceWorker,
+    OceanAsyncWorker, OceanPersistenceAsyncWorker)
 from pyocean.parallel import (
     ParallelProcedure,
     ParallelStrategy,
+    MultiProcessingStrategy,
+    MultiProcessingQueueType,
+    ParallelResult,
     ParallelSimpleFactory,
     ParallelPersistenceFactory)
 from pyocean.concurrent import (
     ConcurrentProcedure,
     MultiThreadingStrategy,
+    MultiThreadingQueueType,
+    ConcurrentResult,
     ConcurrentSimpleFactory,
     ConcurrentPersistenceFactory)
 from pyocean.coroutine import (
     GeventProcedure,
     MultiGreenletStrategy,
+    GeventQueueType,
+    CoroutineResult,
     GeventSimpleFactory,
     GeventPersistenceFactory,
     AsynchronousProcedure,
     AsynchronousStrategy,
+    AsynchronousQueueType,
+    AsynchronousResult,
     AsynchronousSimpleFactory,
     AsynchronousPersistenceFactory)
+
