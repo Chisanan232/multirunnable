@@ -19,7 +19,7 @@ class BaseQueueType(Enum):
 class BaseQueue(metaclass=ABCMeta):
 
     @abstractmethod
-    def get_queue(self, qtype: BaseQueueType):
+    def get_queue(self, qtype: BaseQueueType) -> OceanQueue:
         pass
 
 
@@ -223,10 +223,11 @@ class BaseGlobalizeAPI(metaclass=ABCMeta):
 
     @staticmethod
     @abstractmethod
-    def queue(queue) -> None:
+    def queue(name, queue) -> None:
         """
         Description:
             Globalize Queue object.
+        :param name:
         :param queue:
         :return:
         """
