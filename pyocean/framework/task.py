@@ -192,8 +192,15 @@ class BaseTask(metaclass=ABCMeta):
 
 class BaseQueueTask(metaclass=ABCMeta):
 
+    _Name: str = ""
     _Queue_Type: BaseQueueType = None
     _Value: Iterable = None
+
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        pass
+
 
     @property
     @abstractmethod
