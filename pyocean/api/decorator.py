@@ -1,8 +1,11 @@
 from pyocean.framework.worker import BaseTask
 from pyocean.framework.result import OceanResult
+from pyocean.types import OceanQueue
+from pyocean.api.exceptions import QueueNotExistWithName
+from pyocean.exceptions import GlobalObjectIsNoneError
 
 from functools import wraps
-from typing import List, Callable, Any, Union
+from typing import List, Dict, Callable, Optional, Union
 
 
 
@@ -317,4 +320,43 @@ class LockDecorator:
             return result
 
         return bounded_semaphore
+
+
+
+class QueueOperator:
+
+    @classmethod
+    def _checking_init(cls, target_obj: object) -> bool:
+        if target_obj is None:
+            raise GlobalObjectIsNoneError
+        return True
+
+
+    @classmethod
+    def has_queue(cls, name: str):
+        from pyocean.api.manager import Running_Queue
+
+        if name in Running_Queue.keys():
+            return True
+        else:
+            return False
+
+
+    @classmethod
+    def get_queue(cls) -> Optional[Dict[str, OceanQueue]]:
+        from pyocean.api.manager import Running_Queue
+
+        cls._checking_init(target_obj=Running_Queue)
+        return Running_Queue
+
+
+    @classmethod
+    def get_queue_with_name(cls, name: str) -> OceanQueue:
+        from pyocean.api.manager import Running_Queue
+
+        cls._checking_init(target_obj=Running_Queue)
+        if cls.has_queue(name=name):
+            return Running_Queue[name]
+        else:
+            raise QueueNotExistWithName
 
