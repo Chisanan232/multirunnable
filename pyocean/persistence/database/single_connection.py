@@ -1,5 +1,3 @@
-from pyocean.framework.strategy import Globalize as RunningGlobalize
-from pyocean.api.features_adapter import FeatureMode, LockAdapter
 from pyocean.persistence.database.connection import BaseConnection
 
 from abc import ABC
@@ -8,7 +6,7 @@ from abc import ABC
 
 class SingleConnection(BaseConnection, ABC):
 
-    def initialize(self, mode: FeatureMode, **kwargs) -> None:
+    def initialize(self, **kwargs) -> None:
         """
         Note:
             Deprecated the method about multiprocessing saving with one connection and change to use multiprocessing
@@ -21,14 +19,10 @@ class SingleConnection(BaseConnection, ABC):
 
             Because only one connection instance, the every process take turns to using it to saving data. In other words,
             here doesn't need to initial anything about database connection.
-        :param mode:
         :param kwargs:
         :return:
         """
-        __running_feature_api = LockAdapter(mode=mode)
-        # # Lock part (Limitation)
-        __lock = __running_feature_api.get_lock()
-        RunningGlobalize.lock(lock=__lock)
+        pass
 
 
     def get_one_connection(self) -> object:
