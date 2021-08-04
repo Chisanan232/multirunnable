@@ -6,17 +6,28 @@ from pyocean.types import (
     OceanEvent, OceanCondition)
 from pyocean.exceptions import GlobalizeObjectError
 
+from typing import Dict, Optional
 
-Running_Lock: OceanLock = None
-Running_RLock: OceanRLock = None
-Running_Event: OceanEvent = None
-Running_Condition: OceanCondition = None
-Running_Semaphore: OceanSemaphore = None
-Running_Bounded_Semaphore: OceanBoundedSemaphore = None
-Running_Queue: OceanQueue
+
+Running_Queue: Optional[Dict[str, OceanQueue]] = None
+Running_Lock: Optional[OceanLock] = None
+Running_RLock: Optional[OceanRLock] = None
+Running_Semaphore: Optional[OceanSemaphore] = None
+Running_Bounded_Semaphore: Optional[OceanBoundedSemaphore] = None
+Running_Event: Optional[OceanEvent] = None
+Running_Condition: Optional[OceanCondition] = None
 
 
 class Globalize(BaseGlobalizeAPI):
+
+    @staticmethod
+    def queue(name: str, queue: OceanQueue) -> None:
+        if queue is not None:
+            global Running_Queue
+            Running_Queue[name] = queue
+        else:
+            raise GlobalizeObjectError
+
 
     @staticmethod
     def lock(lock: OceanLock) -> None:
@@ -46,24 +57,6 @@ class Globalize(BaseGlobalizeAPI):
         if rlock is not None:
             global Running_RLock
             Running_RLock = rlock
-        else:
-            raise GlobalizeObjectError
-
-
-    @staticmethod
-    def event(event: OceanEvent) -> None:
-        if event is not None:
-            global Running_Event
-            Running_Event = event
-        else:
-            raise GlobalizeObjectError
-
-
-    @staticmethod
-    def condition(condition: OceanCondition) -> None:
-        if condition is not None:
-            global Running_Condition
-            Running_Condition = condition
         else:
             raise GlobalizeObjectError
 
@@ -101,9 +94,19 @@ class Globalize(BaseGlobalizeAPI):
 
 
     @staticmethod
-    def queue(queue: OceanQueue) -> None:
-        if queue is not None:
-            global Running_Queue
-            Running_Queue = queue
+    def event(event: OceanEvent) -> None:
+        if event is not None:
+            global Running_Event
+            Running_Event = event
         else:
             raise GlobalizeObjectError
+
+
+    @staticmethod
+    def condition(condition: OceanCondition) -> None:
+        if condition is not None:
+            global Running_Condition
+            Running_Condition = condition
+        else:
+            raise GlobalizeObjectError
+
