@@ -23,31 +23,31 @@ from pyocean.worker import (
     OceanSimpleWorker, OceanPersistenceWorker,
     OceanAsyncWorker, OceanPersistenceAsyncWorker)
 from pyocean.parallel import (
-    ParallelProcedure,
-    ParallelStrategy,
+    # ParallelProcedure,
+    # ParallelStrategy,
     MultiProcessingStrategy,
     MultiProcessingQueueType,
-    ParallelResult,
-    ParallelSimpleFactory,
-    ParallelPersistenceFactory)
+    ParallelResult)
+    # ParallelSimpleFactory,
+    # ParallelPersistenceFactory)
 from pyocean.concurrent import (
-    ConcurrentProcedure,
+    # ConcurrentProcedure,
     MultiThreadingStrategy,
     MultiThreadingQueueType,
-    ConcurrentResult,
-    ConcurrentSimpleFactory,
-    ConcurrentPersistenceFactory)
+    ConcurrentResult)
+    # ConcurrentSimpleFactory,
+    # ConcurrentPersistenceFactory)
 from pyocean.coroutine import (
-    GeventProcedure,
+    # GeventProcedure,
     MultiGreenletStrategy,
     GeventQueueType,
     CoroutineResult,
-    GeventSimpleFactory,
-    GeventPersistenceFactory,
-    AsynchronousProcedure,
+    # GeventSimpleFactory,
+    # GeventPersistenceFactory,
+    # AsynchronousProcedure,
     AsynchronousStrategy,
     AsynchronousQueueType,
-    AsynchronousResult,
-    AsynchronousSimpleFactory,
-    AsynchronousPersistenceFactory)
+    AsynchronousResult)
+    # AsynchronousSimpleFactory,
+    # AsynchronousPersistenceFactory)
 

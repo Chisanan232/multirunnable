@@ -35,9 +35,9 @@ The framework section code:
 from pyocean.framework.worker import BaseWorker, BaseAsyncWorker
 from pyocean.framework.task import BaseTask, BaseQueueTask
 from pyocean.framework.result import OceanResult
-from pyocean.framework.strategy import RunnableStrategy, Resultable
+# from pyocean.framework.strategy import RunnableStrategy, Resultable
 from pyocean.framework.features import BaseQueueType, BaseGlobalizeAPI
 
-from pyocean.framework.operator import RunnableOperator, BaseRunnableProcedure
-from pyocean.framework.factory import SimpleTaskFactory, PersistenceTaskFactory
-from pyocean.framework.tasks import SimpleRunnableTask, PersistenceRunnableTask
+# from pyocean.framework.operator import RunnableOperator, BaseRunnableProcedure
+# from pyocean.framework.factory import SimpleTaskFactory, PersistenceTaskFactory
+# from pyocean.framework.tasks import SimpleRunnableTask, PersistenceRunnableTask
