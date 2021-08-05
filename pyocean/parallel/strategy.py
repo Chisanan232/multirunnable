@@ -1,8 +1,9 @@
 from pyocean.framework.task import BaseQueueTask
 from pyocean.framework.strategy import RunnableStrategy, Resultable
+from pyocean.framework.features import BaseFeatureAdapterFactory
 from pyocean.framework.result import ResultState
 from pyocean.api.mode import FeatureMode
-from pyocean.api.features_adapter import Feature
+from pyocean.api.tool import Feature
 from pyocean.parallel.result import ParallelResult
 from pyocean.persistence.interface import OceanPersistence
 
@@ -22,7 +23,9 @@ class ParallelStrategy(RunnableStrategy):
     _Processors_Pool: Pool = None
     _Processors_Running_Result: List[Dict[str, Union[AsyncResult, bool]]] = {}
 
-    def __init__(self, workers_num: int, persistence_strategy: OceanPersistence = None, **kwargs):
+    def __init__(self, workers_num: int,
+                 features_factory: BaseFeatureAdapterFactory = None,
+                 persistence_strategy: OceanPersistence = None, **kwargs):
         """
         Description:
             Converting the object to multiprocessing.manager.Namespace type object at initial state.
@@ -30,13 +33,15 @@ class ParallelStrategy(RunnableStrategy):
         :param db_connection_pool_size:
         :param persistence_strategy:
         """
-        super().__init__(workers_num, persistence_strategy, **kwargs)
+        super().__init__(workers_num=workers_num, features_factory=features_factory, persistence_strategy=persistence_strategy, **kwargs)
         self.__init_namespace_obj()
         if persistence_strategy is not None:
             namespace_persistence_strategy = cast(OceanPersistence, self.namespacing_obj(obj=persistence_strategy))
-            super().__init__(persistence_strategy=namespace_persistence_strategy,
-                             workers_num=workers_num,
-                             db_connection_pool_size=self.db_connection_number)
+            super().__init__(
+                workers_num=workers_num,
+                features_factory=features_factory,
+                db_connection_pool_size=self.db_connection_number,
+                persistence_strategy=namespace_persistence_strategy)
         self._Processors_Running_Result = self._Manager.list()
 
 
@@ -80,7 +85,7 @@ class MultiProcessingStrategy(ParallelStrategy, Resultable):
 
         # # Persistence
         if self._persistence_strategy is not None:
-            self._persistence_strategy.initialize(mode=self._Running_Mode, db_conn_num=self.db_connection_number)
+            self._persistence_strategy.initialize(mode=self._Running_Feature_Mode, db_conn_num=self.db_connection_number)
 
         # Initialize and build the Processes Pool.
         __pool_initializer: Callable = kwargs.get("pool_initializer", None)
