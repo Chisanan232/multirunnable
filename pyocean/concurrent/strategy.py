@@ -3,7 +3,7 @@ from pyocean.framework.strategy import RunnableStrategy, Resultable
 from pyocean.framework.worker import BaseTask
 from pyocean.task import OceanTask
 from pyocean.api.mode import RunningMode, FeatureMode
-from pyocean.api.features_adapter import Feature
+from pyocean.api.tool import Feature
 from pyocean.concurrent.result import ConcurrentResult
 from pyocean.concurrent.exceptions import ThreadsListIsEmptyError
 from pyocean.exceptions import FunctionSignatureConflictError
@@ -52,7 +52,7 @@ class MultiThreadingStrategy(ConcurrentStrategy, Resultable):
 
         # # Persistence
         if self._persistence_strategy is not None:
-            self._persistence_strategy.initialize(mode=self._Running_Mode, db_conn_num=self.db_connection_number)
+            self._persistence_strategy.initialize(mode=self._Running_Feature_Mode, db_conn_num=self.db_connection_number)
 
 
     def build_workers(self, function: Callable, *args, **kwargs) -> List[Thread]:

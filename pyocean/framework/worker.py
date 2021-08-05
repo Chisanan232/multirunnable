@@ -1,7 +1,7 @@
 from pyocean.framework.task import BaseTask
 from pyocean.framework.result import OceanResult
 from pyocean.api.mode import RunningMode
-from pyocean.api.features_adapter import Feature
+from pyocean.api.tool import Feature
 
 from abc import ABCMeta, abstractmethod
 from typing import List, Tuple, Dict, Optional
