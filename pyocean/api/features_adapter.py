@@ -1,6 +1,7 @@
 from pyocean.framework.features import (
     PosixThreadLock, PosixThreadCommunication,
-    BaseQueue, BaseQueueType)
+    BaseQueue, BaseQueueType,
+    BaseFeatureAdapterFactory)
 from pyocean.api.mode import FeatureMode
 from pyocean.types import (
     OceanLock, OceanRLock,
@@ -9,19 +10,22 @@ from pyocean.types import (
     OceanQueue)
 from pyocean._import_utils import ImportPyocean
 
-from enum import Enum
 from typing import Dict, Iterable, Any
 
 
 
-class Feature(Enum):
+class FeatureAdapterFactory(BaseFeatureAdapterFactory):
 
-    Lock = "lock"
-    RLock = "rlock"
-    Semaphore = "semaphore"
-    Bounded_Semaphore = "bounded_semaphore"
-    Event = "event"
-    Condition = "condition"
+    def get_queue_adapter(self) -> BaseQueue:
+        return QueueAdapter(mode=self._mode)
+
+
+    def get_lock_adapter(self, **kwargs) -> PosixThreadLock:
+        return LockAdapter(mode=self._mode, **kwargs)
+
+
+    def get_communication_adapter(self, **kwargs) -> PosixThreadCommunication:
+        return CommunicationAdapter(mode=self._mode, **kwargs)
 
 
 
