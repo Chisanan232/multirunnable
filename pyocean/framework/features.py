@@ -4,6 +4,7 @@ from pyocean.types import (
     OceanSemaphore, OceanBoundedSemaphore,
     OceanEvent, OceanCondition,
     OceanQueue)
+from pyocean.api.mode import FeatureMode
 
 from abc import ABCMeta, abstractmethod
 from enum import Enum
@@ -251,3 +252,27 @@ class FeatureUtils:
         if __obj is None:
             raise ParameterCannotBeEmpty(param=param)
         return __obj
+
+
+
+class BaseFeatureAdapterFactory(metaclass=ABCMeta):
+
+    def __init__(self, mode: FeatureMode):
+        self._mode = mode
+        # # # # Should use lazy initialization design here.
+
+
+    @abstractmethod
+    def get_queue_adapter(self) -> BaseQueue:
+        pass
+
+
+    @abstractmethod
+    def get_lock_adapter(self, **kwargs) -> PosixThreadLock:
+        pass
+
+
+    @abstractmethod
+    def get_communication_adapter(self, **kwargs) -> PosixThreadCommunication:
+        pass
+
