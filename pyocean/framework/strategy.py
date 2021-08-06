@@ -1,10 +1,9 @@
-from pyocean.types import OceanTasks
 from pyocean.framework.task import BaseQueueTask
 from pyocean.framework.features import BaseFeatureAdapterFactory
 from pyocean.framework.exceptions import FeatureFactoryCannotBeEmpty
-from pyocean.api.mode import FeatureMode
-from pyocean.api.tool import Feature
-from pyocean.api.manager import Globalize as RunningGlobalize
+from pyocean.types import OceanTasks
+from pyocean.mode import FeatureMode
+from pyocean.tool import Feature
 from pyocean.persistence.interface import OceanPersistence
 
 from abc import ABCMeta, ABC, abstractmethod
@@ -189,10 +188,10 @@ class RunnableStrategy(BaseRunnableStrategy, ABC):
         """
 
         __queue_adapter = self._features_factory.get_queue_adapter()
-        # __queue_adapter = QueueAdapter(mode=self._Running_Feature_Mode)
+        __globalize = self._features_factory.get_globalization()
         for task in tasks:
             __queue = __queue_adapter.init_queue_with_values(qtype=task.queue_type, values=task.value)
-            RunningGlobalize.queue(name=task.name, queue=__queue)
+            __globalize.queue(name=task.name, queue=__queue)
 
 
     def _init_lock_process(self, features: Iterable[Feature], **adapter_kwargs) -> None:
@@ -204,20 +203,20 @@ class RunnableStrategy(BaseRunnableStrategy, ABC):
         """
 
         __lock_adapter = self._features_factory.get_lock_adapter(**adapter_kwargs)
-        # __lock_adapter = LockAdapter(mode=self._Running_Feature_Mode, **adapter_kwargs)
+        __globalize = self._features_factory.get_globalization()
         for feature in features:
             if feature == Feature.Lock:
                 __lock = __lock_adapter.get_lock()
-                RunningGlobalize.lock(lock=__lock)
+                __globalize.lock(lock=__lock)
             if feature == Feature.RLock:
                 __rlock = __lock_adapter.get_rlock()
-                RunningGlobalize.rlock(rlock=__rlock)
+                __globalize.rlock(rlock=__rlock)
             if feature == Feature.Semaphore:
                 __semaphore = __lock_adapter.get_semaphore(value=self.db_connection_number)
-                RunningGlobalize.semaphore(smp=__semaphore)
+                __globalize.semaphore(smp=__semaphore)
             if feature == Feature.Bounded_Semaphore:
                 __bounded_semaphore = __lock_adapter.get_bounded_semaphore(value=self.db_connection_number)
-                RunningGlobalize.bounded_semaphore(bsmp=__bounded_semaphore)
+                __globalize.bounded_semaphore(bsmp=__bounded_semaphore)
 
 
     def _init_communication_process(self, features: Iterable[Feature], **adapter_kwargs) -> None:
@@ -229,14 +228,14 @@ class RunnableStrategy(BaseRunnableStrategy, ABC):
         """
 
         __communication_adapter = self._features_factory.get_communication_adapter(**adapter_kwargs)
-        # __communication_adapter = CommunicationAdapter(mode=self._Running_Feature_Mode, **adapter_kwargs)
+        __globalize = self._features_factory.get_globalization()
         for feature in features:
             if feature == feature.Event:
                 __event = __communication_adapter.get_event()
-                RunningGlobalize.event(event=__event)
+                __globalize.event(event=__event)
             if feature == feature.Condition:
                 __condition = __communication_adapter.get_condition()
-                RunningGlobalize.condition(condition=__condition)
+                __globalize.condition(condition=__condition)
 
 
 
@@ -289,10 +288,10 @@ class AsyncRunnableStrategy(RunnableStrategy, ABC):
         """
 
         __queue_adapter = self._features_factory.get_queue_adapter()
-        # __queue_adapter = QueueAdapter(mode=self._Running_Feature_Mode)
+        __globalize = self._features_factory.get_globalization()
         for task in tasks:
             __queue = await __queue_adapter.async_init_queue_with_values(qtype=task.queue_type, values=task.value)
-            RunningGlobalize.queue(name=task.name, queue=__queue)
+            __globalize.queue(name=task.name, queue=__queue)
 
 
     @abstractmethod
