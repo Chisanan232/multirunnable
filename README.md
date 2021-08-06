@@ -52,7 +52,8 @@ if __name__ == '__main__':
 But it could implement concurrent feature more easier with pyocean:
 
 ```python
-from pyocean.concurrent import ConcurrentProcedure, MultiThreadingStrategy
+from pyocean import OceanTask, OceanSystem
+from pyocean.api import RunningMode
 import random
 
 
@@ -64,8 +65,14 @@ def function(index):
 
 if __name__ == '__main__':
 
-    _builder = ConcurrentProcedure(running_strategy=MultiThreadingStrategy(workers_num=Thread_Number))
-    _builder.run(function=function, fun_kwargs={"index": f"test_{random.randrange(1, 10)}"})
+        # Initialize task object
+        __task = OceanTask(mode=RunningMode.Concurrent)
+        __task.set_function(function=function)
+        __task.set_func_kwargs(kwargs={"index": f"test_{random.randrange(10,20)}"})
+
+        # Initialize ocean-system and assign task
+        __system = OceanSystem(mode=RunningMode.Concurrent, worker_num=Thread_Number)
+        __system.run(task=__task)
 ```
 
 Obviously, it just only 2 lines code to implement easy concurrent feature.
