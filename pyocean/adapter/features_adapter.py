@@ -1,8 +1,10 @@
 from pyocean.framework.features import (
     PosixThreadLock, PosixThreadCommunication,
     BaseQueue, BaseQueueType,
+    BaseGlobalizeAPI,
     BaseFeatureAdapterFactory)
 from pyocean.api.mode import FeatureMode
+from pyocean.api.manager import Globalize
 from pyocean.types import (
     OceanLock, OceanRLock,
     OceanSemaphore, OceanBoundedSemaphore,
@@ -10,7 +12,7 @@ from pyocean.types import (
     OceanQueue)
 from pyocean._import_utils import ImportPyocean
 
-from typing import Dict, Iterable, Any
+from typing import Dict, Iterable, Any, Type
 
 
 
@@ -26,6 +28,10 @@ class FeatureAdapterFactory(BaseFeatureAdapterFactory):
 
     def get_communication_adapter(self, **kwargs) -> PosixThreadCommunication:
         return CommunicationAdapter(mode=self._mode, **kwargs)
+
+
+    def get_globalization(self) -> Type[BaseGlobalizeAPI]:
+        return Globalize
 
 
 
