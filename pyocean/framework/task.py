@@ -1,6 +1,6 @@
 from pyocean.framework.features import BaseQueueType
 from pyocean.framework.result import OceanResult
-from pyocean.api.mode import RunningMode
+from pyocean.mode import RunningMode
 
 from abc import ABCMeta, abstractmethod
 from typing import List, Tuple, Dict, Iterable, Callable, Union
