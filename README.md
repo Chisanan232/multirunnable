@@ -52,8 +52,7 @@ if __name__ == '__main__':
 But it could implement concurrent feature more easier with pyocean:
 
 ```python
-from pyocean import OceanTask, OceanSystem
-from pyocean.api import RunningMode
+from pyocean import OceanTask, OceanSystem, RunningMode
 import random
 
 
