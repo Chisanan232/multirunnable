@@ -2,11 +2,11 @@ from pyocean.framework.task import BaseTask, BaseQueueTask
 from pyocean.framework.worker import BaseWorker, BaseAsyncWorker, BaseSystem
 from pyocean.framework.strategy import RunnableStrategy, AsyncRunnableStrategy, Resultable
 from pyocean.framework.result import OceanResult
-from pyocean.api.mode import RunningMode, FeatureMode
+from pyocean.mode import RunningMode, FeatureMode
+from pyocean.tool import Feature
 from pyocean.api.decorator import ReTryMechanism
-from pyocean.api.tool import Feature
-from pyocean.api.features_adapter import FeatureAdapterFactory
-from pyocean.api.strategy_adapter import StrategyAdapter
+from pyocean.adapter.features_adapter import FeatureAdapterFactory
+from pyocean.adapter.strategy_adapter import StrategyAdapter
 from pyocean.persistence.interface import OceanPersistence
 
 from abc import ABC
@@ -51,7 +51,7 @@ class OceanWorker(ABC, BaseWorker):
               queue_tasks: Optional[List[BaseQueueTask]] = None,
               features: Optional[List[Feature]] = None,
               saving_mode: bool = False,
-              init_args: Tuple = (), init_kwargs: Dict = {}) -> List[OceanResult]:
+              init_args: Tuple = (), init_kwargs: Dict = {}) -> [OceanResult]:
 
         __worker_run_time = 0
         __worker_run_finish = None
@@ -92,7 +92,7 @@ class OceanWorker(ABC, BaseWorker):
 
 
     @ReTryMechanism.task
-    def run_task(self, task: BaseTask) -> List[OceanResult]:
+    def run_task(self, task: BaseTask) -> [OceanResult]:
         result = task.function(*task.func_args, **task.func_kwargs)
         return result
 
@@ -109,7 +109,7 @@ class OceanWorker(ABC, BaseWorker):
         pass
 
 
-    def get_result(self) -> List[OceanResult]:
+    def get_result(self) -> [OceanResult]:
         if isinstance(Running_Strategy, Resultable):
             return Running_Strategy.get_result()
         else:
@@ -179,7 +179,7 @@ class OceanAsyncWorker(BaseAsyncWorker):
                             queue_tasks: Optional[List[BaseQueueTask]] = None,
                             features: Optional[List[Feature]] = None,
                             saving_mode: bool = False,
-                            init_args: Tuple = (), init_kwargs: Dict = {}) -> List[OceanResult]:
+                            init_args: Tuple = (), init_kwargs: Dict = {}) -> [OceanResult]:
 
         __worker_run_time = 0
         __worker_run_finish = None
@@ -219,7 +219,7 @@ class OceanAsyncWorker(BaseAsyncWorker):
 
 
     @ReTryMechanism.async_task
-    async def run_task(self, task: BaseTask) -> List[OceanResult]:
+    async def run_task(self, task: BaseTask) -> [OceanResult]:
         result = await task.function(*task.func_args, **task.func_kwargs)
         return result
 
@@ -236,7 +236,7 @@ class OceanAsyncWorker(BaseAsyncWorker):
         pass
 
 
-    def get_result(self) -> List[OceanResult]:
+    def get_result(self) -> [OceanResult]:
         if isinstance(Running_Strategy, Resultable):
             return Running_Strategy.get_result()
         else:
@@ -329,7 +329,7 @@ class OceanSystem(BaseSystem):
             queue_tasks: Optional[List[BaseQueueTask]] = None,
             features: Optional[List[Feature]] = None,
             saving_mode: bool = False,
-            timeout: int = 0) -> List[OceanResult]:
+            timeout: int = 0) -> [OceanResult]:
 
         if self._mode is RunningMode.Asynchronous:
             __ocean_worker = OceanSimpleAsyncWorker(mode=self._mode, worker_num=self._worker_num)
@@ -350,7 +350,7 @@ class OceanSystem(BaseSystem):
                      queue_tasks: Optional[List[BaseQueueTask]] = None,
                      features: Optional[List[Feature]] = None,
                      saving_mode: bool = False,
-                     timeout: int = 0) -> List[OceanResult]:
+                     timeout: int = 0) -> [OceanResult]:
 
         if self._mode is RunningMode.Asynchronous:
             __ocean_worker = OceanPersistenceAsyncWorker(
