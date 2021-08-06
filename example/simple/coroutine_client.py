@@ -10,10 +10,9 @@ package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute(
 sys.path.append(package_pyocean_path)
 
 # pyocean package
-from pyocean.framework import SimpleRunnableTask
 from pyocean import OceanSystem, OceanTask
 from pyocean.api import RunningMode
-from pyocean.coroutine import GeventProcedure, MultiGreenletStrategy, GeventSimpleFactory, CoroutineResult
+from pyocean.coroutine import CoroutineResult
 
 
 
@@ -36,27 +35,6 @@ class ExampleCoroutineClient:
         time.sleep(sleep_time)
         print("This function wake up.")
         # return "Return Value"
-
-
-
-class ExampleBuilderClient(ExampleCoroutineClient):
-
-    def main_run_with_gevent(self):
-        _builder = GeventProcedure(running_strategy=MultiGreenletStrategy(workers_num=1))
-        _builder.run(function=self.target_function, fun_kwargs={"index": f"test_{random.randrange(10,20)}"})
-        # result = _builder.result
-        # print(f"This is final result: {result}")
-
-
-
-class ExampleFactoryClient(ExampleCoroutineClient):
-
-    def main_run_with_gevent(self):
-        __example_factory = GeventSimpleFactory(workers_number=3)
-        __task = SimpleRunnableTask(factory=__example_factory)
-        __directory = __task.generate()
-        result = __directory.run(function=self.target_function, fun_kwargs={"index": f"test_{random.randrange(10,20)}"})
-        print(f"This is final result: {result}")
 
 
 
@@ -87,15 +65,6 @@ class ExampleOceanSystem:
 
 
 if __name__ == '__main__':
-
-    # print("This is builder client: ")
-    # __builder = ExampleBuilderClient()
-    # __builder.main_run_with_gevent()
-
-    # print("This is factory client: ")
-    # __factory = ExampleFactoryClient()
-    # print("+++++++++++++ Gevent part +++++++++++++")
-    # __factory.main_run_with_gevent()
 
     print("This is system client: ")
     system = ExampleOceanSystem()

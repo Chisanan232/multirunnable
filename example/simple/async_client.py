@@ -9,10 +9,9 @@ package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute(
 sys.path.append(package_pyocean_path)
 
 # pyocean package
-from pyocean.framework import SimpleRunnableTask
-from pyocean import AsynchronousProcedure, OceanSystem, OceanTask
+from pyocean import OceanSystem, OceanTask
 from pyocean.api import RunningMode
-from pyocean.coroutine import AsynchronousStrategy, AsynchronousSimpleFactory, AsynchronousResult
+from pyocean.coroutine import AsynchronousResult
 
 
 
@@ -26,27 +25,6 @@ class ExampleCoroutineClient:
         await asyncio.sleep(sleep_time)
         print("This function wake up.")
         return "Return Async Value"
-
-
-
-class ExampleBuilderClient(ExampleCoroutineClient):
-
-    def main_run_with_async(self):
-        _builder = AsynchronousProcedure(running_strategy=AsynchronousStrategy(workers_num=3))
-        _builder.run(function=self.async_target_function, fun_kwargs={"index": f"test_{random.randrange(10,20)}"})
-        # result = _builder.result
-        # print(f"This is final result: {result}")
-
-
-
-class ExampleFactoryClient(ExampleCoroutineClient):
-
-    def main_run_with_async(self):
-        __example_factory = AsynchronousSimpleFactory(workers_number=3)
-        __task = SimpleRunnableTask(factory=__example_factory)
-        __directory = __task.generate()
-        result = __directory.run(function=self.async_target_function, fun_kwargs={"index": f"test_{random.randrange(10,20)}"})
-        print(f"This is final result: {result}")
 
 
 
@@ -78,14 +56,6 @@ class ExampleOceanSystem:
 
 
 if __name__ == '__main__':
-
-    # print("This is builder client: ")
-    # __builder = ExampleBuilderClient()
-    # __builder.main_run_with_async()
-
-    # print("This is factory client: ")
-    # __factory = ExampleFactoryClient()
-    # __factory.main_run_with_async()
 
     print("This is system client: ")
     system = ExampleOceanSystem()

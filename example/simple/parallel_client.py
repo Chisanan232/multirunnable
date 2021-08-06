@@ -9,10 +9,9 @@ package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute(
 sys.path.append(package_pyocean_path)
 
 # pyocean package
-from pyocean.framework import SimpleRunnableTask
-from pyocean import ParallelProcedure, OceanSystem, OceanTask
+from pyocean import OceanSystem, OceanTask
 from pyocean.api import RunningMode, ReTryMechanism
-from pyocean.parallel import MultiProcessingStrategy, ParallelSimpleFactory, ParallelResult
+from pyocean.parallel import MultiProcessingStrategy, ParallelResult
 
 
 
@@ -48,32 +47,9 @@ class ExampleParallelClient:
 
 
 
-class ExampleBuilderClient(ExampleParallelClient):
-
-    def main_run(self):
-        _builder = ParallelProcedure(running_strategy=MultiProcessingStrategy(workers_num=1))
-        _builder.run(function=self.target_function, fun_kwargs={"index": f"test_{random.randrange(10,20)}"})
-        result = _builder.result
-        print(f"This is final result: {result}")
-
-
-
-class ExampleFactoryClient(ExampleParallelClient):
-
-    def main_run(self):
-        __example_factory = ParallelSimpleFactory(workers_number=1)
-        __task = SimpleRunnableTask(factory=__example_factory)
-        __directory = __task.generate()
-        result = __directory.run(function=self.target_function, fun_kwargs={"index": f"test_{random.randrange(10,20)}"})
-        print(f"This is final result: {result}")
-
-
-
 class WishWorker:
 
     def __init__(self, worker_num: int):
-        from multiprocessing import Manager
-
         self.worker_num = worker_num
 
         # # # Original
@@ -261,14 +237,6 @@ class ExampleOceanSystem:
 
 
 if __name__ == '__main__':
-
-    # print("This is builder client: ")
-    # __builder = ExampleBuilderClient()
-    # __builder.main_run()
-
-    # print("This is factory client: ")
-    # __factory = ExampleFactoryClient()
-    # __factory.main_run()
 
     print("This is system client: ")
     system = ExampleOceanSystem()
