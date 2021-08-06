@@ -5,7 +5,7 @@ from pyocean.api.exceptions import QueueNotExistWithName
 from pyocean.exceptions import GlobalObjectIsNoneError
 
 from functools import wraps
-from typing import List, Dict, Callable, Optional, Union
+from typing import List, Dict, Callable, Optional, Type, Any, Union
 
 
 
@@ -13,7 +13,8 @@ class ReTryMechanism:
 
     Running_Timeout = 1
 
-    def function(function: Callable):
+    @staticmethod
+    def function(function: Callable[[Any, Any], Union[List[Type[OceanResult]], Exception]]):
         """
         Description:
             A decorator which would add re-try mechanism around the
@@ -22,7 +23,7 @@ class ReTryMechanism:
         """
 
         @wraps(function)
-        def retry(*args, **kwargs) -> Union[List[OceanResult], Exception]:
+        def retry(*args, **kwargs) -> Union[List[Type[OceanResult]], Exception]:
             result = None
 
             __fun_run_time = 0
@@ -44,6 +45,7 @@ class ReTryMechanism:
         return retry
 
 
+    @staticmethod
     def async_function(function: Callable):
         """
         Description:
@@ -53,7 +55,7 @@ class ReTryMechanism:
         """
 
         @wraps(function)
-        async def retry(*args, **kwargs) -> Union[List[OceanResult], Exception]:
+        async def retry(*args, **kwargs) -> Union[List[Type[OceanResult]], Exception]:
             result = None
 
             __fun_run_time = 0
@@ -75,7 +77,8 @@ class ReTryMechanism:
         return retry
 
 
-    def task(function: Callable):
+    @staticmethod
+    def task(function: Callable[[BaseTask], Union[List[Type[OceanResult]], Exception]]):
         """
         Description:
             A decorator which would add re-try mechanism around the
@@ -84,7 +87,7 @@ class ReTryMechanism:
         """
 
         @wraps(function)
-        def task_retry(self, task: BaseTask) -> Union[List[OceanResult], Exception]:
+        def task_retry(self, task: BaseTask) -> Union[List[Type[OceanResult]], Exception]:
             result = None
 
             __fun_run_time = 0
@@ -106,7 +109,8 @@ class ReTryMechanism:
         return task_retry
 
 
-    def async_task(function: Callable):
+    @staticmethod
+    def async_task(function: Callable[[BaseTask], Union[List[Type[OceanResult]], Exception]]):
         """
         Description:
             A decorator which would add re-try mechanism around the
@@ -115,7 +119,7 @@ class ReTryMechanism:
         """
 
         @wraps(function)
-        async def task_retry(self, task: BaseTask) -> Union[List[OceanResult], Exception]:
+        async def task_retry(self, task: BaseTask) -> Union[List[Type[OceanResult]], Exception]:
             result = None
 
             __fun_run_time = 0
@@ -150,7 +154,7 @@ class ReTryMechanism:
 
 
     @classmethod
-    def _done_handling(cls, result: List[OceanResult]) -> List[OceanResult]:
+    def _done_handling(cls, result: List[Type[OceanResult]]) -> List[Type[OceanResult]]:
         """
         Description:
             Handling the result data after target function running done.
@@ -161,7 +165,7 @@ class ReTryMechanism:
 
 
     @classmethod
-    def _error_handling(cls, e: Exception) -> Union[List[OceanResult], Exception]:
+    def _error_handling(cls, e: Exception) -> Union[List[Type[OceanResult]], Exception]:
         """
         Description:
             Handling all the error when occur any unexpected error in target function running.
@@ -184,7 +188,7 @@ class ReTryMechanism:
 
 
     @classmethod
-    async def _async_done_handling(cls, result: List[OceanResult]) -> List[OceanResult]:
+    async def _async_done_handling(cls, result: List[Type[OceanResult]]) -> List[Type[OceanResult]]:
         """
         Description:
             Handling the result data after target function running done.
@@ -195,7 +199,7 @@ class ReTryMechanism:
 
 
     @classmethod
-    async def _async_error_handling(cls, e: Exception) -> Union[List[OceanResult], Exception]:
+    async def _async_error_handling(cls, e: Exception) -> Union[List[Type[OceanResult]], Exception]:
         """
         Description:
             Handling all the error when occur any unexpected error in target function running.
@@ -208,7 +212,8 @@ class ReTryMechanism:
 
 class LockDecorator:
 
-    def run_with_lock(function: Callable):
+    @staticmethod
+    def run_with_lock(function: Callable[[Any, Any], List[Type[OceanResult]]]):
         """
         Description:
             A decorator which would add lock mechanism around the target
@@ -217,7 +222,7 @@ class LockDecorator:
         """
 
         @wraps(function)
-        def lock(*args, **kwargs) -> List[OceanResult]:
+        def lock(*args, **kwargs) -> List[Type[OceanResult]]:
             from pyocean.api.manager import Running_Lock
 
             with Running_Lock:
@@ -227,7 +232,8 @@ class LockDecorator:
         return lock
 
 
-    def run_with_semaphore(function: Callable):
+    @staticmethod
+    def run_with_semaphore(function: Callable[[Any, Any], List[Type[OceanResult]]]):
         """
         Description:
             A decorator which would add semaphore mechanism around the
@@ -236,7 +242,7 @@ class LockDecorator:
         """
 
         @wraps(function)
-        def semaphore(*args, **kwargs) -> List[OceanResult]:
+        def semaphore(*args, **kwargs) -> List[Type[OceanResult]]:
             from pyocean.api.manager import Running_Semaphore
 
             with Running_Semaphore:
@@ -246,7 +252,8 @@ class LockDecorator:
         return semaphore
 
 
-    def run_with_bounded_semaphore(function: Callable):
+    @staticmethod
+    def run_with_bounded_semaphore(function: Callable[[Any, Any], List[Type[OceanResult]]]):
         """
         Description:
             A decorator which would add bounded semaphore mechanism
@@ -255,7 +262,7 @@ class LockDecorator:
         """
 
         @wraps(function)
-        def bounded_semaphore(*args, **kwargs) -> List[OceanResult]:
+        def bounded_semaphore(*args, **kwargs) -> List[Type[OceanResult]]:
             from pyocean.api.manager import Running_Bounded_Semaphore
 
             with Running_Bounded_Semaphore:
@@ -274,7 +281,7 @@ class LockDecorator:
         """
 
         @wraps(function)
-        async def lock(*args, **kwargs) -> List[OceanResult]:
+        async def lock(*args, **kwargs) -> List[Type[OceanResult]]:
             from pyocean.api.manager import Running_Lock
 
             async with Running_Lock:
@@ -293,7 +300,7 @@ class LockDecorator:
         """
 
         @wraps(function)
-        async def semaphore(*args, **kwargs) -> List[OceanResult]:
+        async def semaphore(*args, **kwargs) -> List[Type[OceanResult]]:
             from pyocean.api.manager import Running_Semaphore
 
             async with Running_Semaphore:
@@ -312,7 +319,7 @@ class LockDecorator:
         """
 
         @wraps(function)
-        async def bounded_semaphore(*args, **kwargs) -> List[OceanResult]:
+        async def bounded_semaphore(*args, **kwargs) -> List[Type[OceanResult]]:
             from pyocean.api.manager import Running_Bounded_Semaphore
 
             async with Running_Bounded_Semaphore:
