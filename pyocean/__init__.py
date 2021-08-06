@@ -16,7 +16,8 @@ __user = getpass.getuser()
 PYOCEAN_LOGGER = getLogger(__user)
 
 
-from pyocean.api import RunningMode, FeatureMode, Feature
+from pyocean.mode import RunningMode, FeatureMode
+from pyocean.tool import Feature
 from pyocean.task import OceanTask, QueueTask
 from pyocean.worker import (
     OceanSystem,
