@@ -2,7 +2,7 @@ from pyocean.framework.strategy import (
     RunnableStrategy,
     AsyncRunnableStrategy)
 from pyocean.framework.features import BaseFeatureAdapterFactory
-from pyocean.api.mode import RunningMode
+from pyocean.mode import RunningMode
 from pyocean._import_utils import ImportPyocean
 
 from abc import ABCMeta, abstractmethod

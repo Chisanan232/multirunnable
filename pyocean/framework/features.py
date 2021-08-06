@@ -4,7 +4,7 @@ from pyocean.types import (
     OceanSemaphore, OceanBoundedSemaphore,
     OceanEvent, OceanCondition,
     OceanQueue)
-from pyocean.api.mode import FeatureMode
+from pyocean.mode import FeatureMode
 
 from abc import ABCMeta, abstractmethod
 from enum import Enum
@@ -274,5 +274,10 @@ class BaseFeatureAdapterFactory(metaclass=ABCMeta):
 
     @abstractmethod
     def get_communication_adapter(self, **kwargs) -> PosixThreadCommunication:
+        pass
+
+
+    @abstractmethod
+    def get_globalization(self) -> BaseGlobalizeAPI:
         pass
 

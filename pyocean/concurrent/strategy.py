@@ -2,8 +2,8 @@ from pyocean.framework.task import BaseQueueTask
 from pyocean.framework.strategy import RunnableStrategy, Resultable
 from pyocean.framework.worker import BaseTask
 from pyocean.task import OceanTask
-from pyocean.api.mode import RunningMode, FeatureMode
-from pyocean.api.tool import Feature
+from pyocean.mode import RunningMode, FeatureMode
+from pyocean.tool import Feature
 from pyocean.concurrent.result import ConcurrentResult
 from pyocean.concurrent.exceptions import ThreadsListIsEmptyError
 from pyocean.exceptions import FunctionSignatureConflictError

@@ -1,7 +1,7 @@
 from pyocean.framework.task import BaseQueueTask
 from pyocean.framework.strategy import RunnableStrategy, AsyncRunnableStrategy, Resultable
-from pyocean.api.mode import FeatureMode
-from pyocean.api.tool import Feature
+from pyocean.mode import FeatureMode
+from pyocean.tool import Feature
 from pyocean.coroutine.result import CoroutineResult, AsynchronousResult
 
 from abc import ABCMeta, ABC, abstractmethod

@@ -2,8 +2,8 @@ from pyocean.framework.task import BaseQueueTask
 from pyocean.framework.strategy import RunnableStrategy, Resultable
 from pyocean.framework.features import BaseFeatureAdapterFactory
 from pyocean.framework.result import ResultState
-from pyocean.api.mode import FeatureMode
-from pyocean.api.tool import Feature
+from pyocean.mode import FeatureMode
+from pyocean.tool import Feature
 from pyocean.parallel.result import ParallelResult
 from pyocean.persistence.interface import OceanPersistence
 

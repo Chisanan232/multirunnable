@@ -3,7 +3,7 @@ from pyocean.framework.features import (
     BaseQueue, BaseQueueType,
     BaseGlobalizeAPI,
     BaseFeatureAdapterFactory)
-from pyocean.api.mode import FeatureMode
+from pyocean.mode import FeatureMode
 from pyocean.api.manager import Globalize
 from pyocean.types import (
     OceanLock, OceanRLock,
