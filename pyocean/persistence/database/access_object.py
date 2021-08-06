@@ -1,4 +1,4 @@
-from pyocean.operator import MultiRunnableOperator, AsyncRunnableOperator
+from pyocean.api.decorator import QueueOperator
 from pyocean.persistence.interface import OceanPersistence, OceanDao
 from pyocean.persistence.mode import PersistenceMode
 from pyocean.persistence.database.connection import BaseConnection
@@ -54,7 +54,7 @@ class BaseDao(OceanDao):
             Get one task from Queue.
         :return:
         """
-        return MultiRunnableOperator.get_one_value_of_queue()
+        return QueueOperator.get_one_value_of_queue()
 
 
     def get_all_sql_tasks(self) -> object:
@@ -63,7 +63,7 @@ class BaseDao(OceanDao):
             Get all tasks (Queue).
         :return:
         """
-        return MultiRunnableOperator.get_queue()
+        return QueueOperator.get_queue()
 
 
     def running_sql_query_process(self, sql_query: str) -> Dict[str, object]:
