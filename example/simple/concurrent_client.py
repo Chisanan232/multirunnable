@@ -9,8 +9,7 @@ package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute(
 sys.path.append(package_pyocean_path)
 
 # pyocean package
-from pyocean import OceanTask, OceanSystem
-from pyocean.api import RunningMode
+from pyocean import OceanTask, OceanSystem, RunningMode
 from pyocean.concurrent import ConcurrentResult
 
 

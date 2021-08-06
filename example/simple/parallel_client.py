@@ -9,8 +9,8 @@ package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute(
 sys.path.append(package_pyocean_path)
 
 # pyocean package
-from pyocean import OceanSystem, OceanTask
-from pyocean.api import RunningMode, ReTryMechanism
+from pyocean import OceanSystem, OceanTask, RunningMode
+from pyocean.api import ReTryMechanism
 from pyocean.parallel import MultiProcessingStrategy, ParallelResult
 
 

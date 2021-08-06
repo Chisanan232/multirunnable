@@ -8,9 +8,8 @@ package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute(
 sys.path.append(package_pyocean_path)
 
 # pyocean package
-from pyocean import OceanSystem, OceanTask, QueueTask
+from pyocean import OceanSystem, OceanTask, QueueTask, RunningMode, Feature
 from pyocean.concurrent import MultiThreadingQueueType, ConcurrentResult
-from pyocean.api import RunningMode, Feature
 from pyocean.persistence import OceanPersistence, DatabaseDriver
 from pyocean.persistence.database import DatabaseConfig
 from pyocean.logger import ocean_logger
