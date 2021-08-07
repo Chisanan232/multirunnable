@@ -57,7 +57,7 @@ You need to change to use parallel or coroutine but business logic has been done
 It's not a problem if it has full-fledged testing code (TDD); if not, it must be an ordeal.
 
 Package 'pyocean' is a framework to build a program with different running strategy by mode option. 
-Currently, it has 4 options could use, and they are Parallel, Concurrent, Greenlet and Asynchronous.
+Currently, it has 4 options could use: Parallel, Concurrent, Greenlet and Asynchronous.
 
 Here's an example to do the same thing with pyocean:
 
@@ -83,8 +83,8 @@ if __name__ == '__main__':
     system.run(task=task)
 ```
 
-First, it must initialize an OceanTask to let it know target function and its arguments if it needs.
-Second, choose one strategy mode you need, for example above, we use Concurrent.
+First, it must initialize an OceanTask to let it know target function and its arguments if it needs. </br>
+Second, choose one strategy mode you need, for example above, we use Concurrent. </br>
 Finally, run it.
 
 How about Parallel? I want to let it be more fast. 
