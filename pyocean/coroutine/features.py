@@ -54,11 +54,11 @@ class GreenletLock(PosixThreadLock):
         return _Greenlet_RLock()
 
 
-    def get_semaphore(self, value: int) -> _Greenlet_Semaphore:
+    def get_semaphore(self, value: int, **kwargs) -> _Greenlet_Semaphore:
         return _Greenlet_Semaphore(value=value)
 
 
-    def get_bounded_semaphore(self, value: int) -> _Greenlet_BoundedSemaphore:
+    def get_bounded_semaphore(self, value: int, **kwargs) -> _Greenlet_BoundedSemaphore:
         return _Greenlet_BoundedSemaphore(value=value)
 
 

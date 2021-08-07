@@ -36,11 +36,11 @@ class ProcessLock(PosixThreadLock):
         return RLock()
 
 
-    def get_semaphore(self, value: int) -> Semaphore:
+    def get_semaphore(self, value: int, **kwargs) -> Semaphore:
         return Semaphore(value=value)
 
 
-    def get_bounded_semaphore(self, value: int) -> BoundedSemaphore:
+    def get_bounded_semaphore(self, value: int, **kwargs) -> BoundedSemaphore:
         return BoundedSemaphore(value=value)
 
 
