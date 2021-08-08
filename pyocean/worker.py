@@ -65,9 +65,9 @@ class OceanWorker(ABC, BaseWorker):
                 __worker_run_finish = False
             else:
                 self.post_done()
+                self.post_stop()
                 __worker_run_finish = True
             finally:
-                self.post_stop()
                 if __worker_run_finish is True:
                     return self.get_result()
                 __worker_run_time += 1
