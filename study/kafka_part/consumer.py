@@ -35,4 +35,4 @@ if __name__ == '__main__':
     # Multithreading
     # EnterPoint.run(running_strategy=Strategy.Processing, kafka_strategy=TestConsumer(), worker_number=10)
     # Multi-Greenlet
-    EnterPoint.run(running_strategy=Strategy.Greenlet, kafka_strategy=TestConsumer(), worker_number=10)
+    EnterPoint.get_data(running_strategy=Strategy.Greenlet, kafka_strategy=TestConsumer(), worker_number=10)

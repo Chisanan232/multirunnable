@@ -99,7 +99,7 @@ class AsyncWorker(MultiWorker):
         for finish in finished:
             event_loop = finish.get_loop()
             exception = finish.exception()
-            done_flag = finish.done()
+            done_flag = finish.close()
             result_flag = finish.result()
             # if result_flag == "Greenlet-8":
             #     finish.set_result(result={"test": "test_1"})
