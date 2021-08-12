@@ -9,6 +9,7 @@ from pyocean.persistence.interface import OceanPersistence
 from abc import ABCMeta, ABC, abstractmethod
 from typing import List, Iterable, Callable, Optional
 import logging
+import re
 
 
 
@@ -23,6 +24,48 @@ class BaseRunnableStrategy(metaclass=ABCMeta):
         self._features_factory = features_factory
         self._persistence_strategy = persistence_strategy
         self._db_conn_num = kwargs.get("db_connection_pool_size", None)
+
+
+    def __str__(self):
+        """
+        Description:
+            Just a clear and pointed info about this "instance".
+
+        Example:
+            BaseRunnableStrategy(workers_num=X, features_factory=Y, persistence_strategy=Z)
+        :return:
+        """
+
+        __instance_brief = None
+        # # self.__class__ value: <class '__main__.ACls'>
+        __cls_str = str(self.__class__)
+        __cls_name_search_result = re.search(r"<class '__main__\..[0-32]'>", re.escape(__cls_str))
+        if __cls_name_search_result is not None:
+            cls_name = __cls_name_search_result.group(0)
+            __instance_brief = f"{cls_name}(" \
+                               f"workers_num={self._workers_num}, " \
+                               f"features_factory={self._features_factory}, " \
+                               f"persistence_strategy={self._persistence_strategy}, " \
+                               f"db_connection_pool_size={self._db_conn_num})"
+        else:
+            logging.warning(f"Cannot parse strategy class naming and return __class__.")
+            __instance_brief = __cls_str
+
+        return __instance_brief
+
+
+    def __repr__(self):
+        """
+        Description:
+            More information (like brief, not detail) about class.
+        :return:
+        """
+
+        __cls_str = str(self.__class__)
+        __cls_name_search_result = re.search(r"<class '__main__\..[0-32]'>", re.escape(__cls_str))
+        if __cls_name_search_result is not None:
+            cls_name = __cls_name_search_result.group(0)
+        return f"<Strategy {id(self)}>"
 
 
     @property

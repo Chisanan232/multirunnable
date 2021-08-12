@@ -4,6 +4,7 @@ from pyocean.persistence.database.configuration import BaseConfigurationKey, Bas
 
 from abc import abstractmethod
 from typing import Dict
+import re
 
 
 
@@ -36,6 +37,26 @@ class BaseConnection(OceanPersistence):
         self._Database_Config[BaseConfigurationKey.HOST.value] = __host_val
         self._Database_Config[BaseConfigurationKey.PORT.value] = __port_val
         self._Database_Config[BaseConfigurationKey.DATABASE.value] = __database_val
+
+
+    def __str__(self):
+        __instance_brief = None
+        # # self.__class__ value: <class '__main__.ACls'>
+        __cls_str = str(self.__class__)
+        __cls_name_search_result = re.search(r"<class '__main__\..[0-32]'>", re.escape(__cls_str))
+        if __cls_name_search_result is not None:
+            cls_name = __cls_name_search_result.group(0)
+            __instance_brief = f"{cls_name}(" \
+                               f"configuration={self._Database_Config})"
+        else:
+            # logging.warning(f"Cannot parse strategy class naming and return __class__.")
+            __instance_brief = __cls_str
+
+        return __instance_brief
+
+
+    def __repr__(self):
+        pass
 
 
     @property

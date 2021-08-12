@@ -8,6 +8,7 @@ from pyocean.mode import FeatureMode
 
 from abc import ABCMeta, abstractmethod
 from enum import Enum
+import re
 
 
 
@@ -69,7 +70,24 @@ class PosixThread(metaclass=ABCMeta):
     1. https://en.wikipedia.org/wiki/POSIX
 
     """
-    pass
+
+    def __str__(self):
+        __instance_brief = None
+        # # self.__class__ value: <class '__main__.ACls'>
+        __cls_str = str(self.__class__)
+        __cls_name_search_result = re.search(r"<class '__main__\..[0-32]'>", re.escape(__cls_str))
+        if __cls_name_search_result is not None:
+            cls_name = __cls_name_search_result.group(0)
+            __instance_brief = f"{cls_name}"
+        else:
+            # logging.warning(f"Cannot parse strategy class naming and return __class__.")
+            __instance_brief = __cls_str
+
+        return __instance_brief
+
+
+    def __repr__(self):
+        pass
 
 
 
@@ -260,6 +278,26 @@ class BaseFeatureAdapterFactory(metaclass=ABCMeta):
     def __init__(self, mode: FeatureMode):
         self._mode = mode
         # # # # Should use lazy initialization design here.
+
+
+    def __str__(self):
+        __instance_brief = None
+        # # self.__class__ value: <class '__main__.ACls'>
+        __cls_str = str(self.__class__)
+        __cls_name_search_result = re.search(r"<class '__main__\..[0-32]'>", re.escape(__cls_str))
+        if __cls_name_search_result is not None:
+            cls_name = __cls_name_search_result.group(0)
+            __instance_brief = f"{cls_name}(" \
+                               f"mode={self._mode})"
+        else:
+            # logging.warning(f"Cannot parse strategy class naming and return __class__.")
+            __instance_brief = __cls_str
+
+        return __instance_brief
+
+
+    def __repr__(self):
+        pass
 
 
     @abstractmethod
