@@ -19,8 +19,7 @@ Running_Strategy: Union[RunnableStrategy, AsyncRunnableStrategy] = None
 class OceanWorker(ABC, BaseWorker):
 
     def __init__(self, mode: RunningMode, worker_num: int):
-        self._mode = mode
-        self.worker_num = worker_num
+        super(OceanWorker, self).__init__(mode=mode, worker_num=worker_num)
 
         __feature_mode = None
         if self._mode is RunningMode.Parallel:
@@ -123,8 +122,7 @@ class OceanAsyncWorker(BaseAsyncWorker):
     _Target_Function = None
 
     def __init__(self, mode: RunningMode, worker_num: int):
-        self._mode = mode
-        self.worker_num = worker_num
+        super(OceanAsyncWorker, self).__init__(mode=mode, worker_num=worker_num)
 
         __feature_mode = None
         if self._mode is RunningMode.Parallel:

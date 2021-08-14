@@ -1,6 +1,7 @@
 from pyocean.framework.features import BaseQueueType
 from pyocean.framework.result import OceanResult
 from pyocean.mode import RunningMode
+import pyocean._utils as _utils
 
 from abc import ABCMeta, abstractmethod
 from typing import List, Tuple, Dict, Iterable, Callable, Union
@@ -67,16 +68,56 @@ class BaseTask(metaclass=ABCMeta):
     _Running_Timeout = 0
 
     def __init__(self, mode: RunningMode):
+        self._mode = mode
+        __base_task_function_obj = None
         if mode is RunningMode.Asynchronous:
-            self._Function = BaseTaskAsyncFunction.function
-            self._Initialization = BaseTaskAsyncFunction.initialization
-            self._Done_Handler = BaseTaskAsyncFunction.done_handler
-            self._Error_Handler = BaseTaskAsyncFunction.error_handler
+            __base_task_function_obj = BaseTaskAsyncFunction
+            # self._Function = BaseTaskAsyncFunction.function
+            # self._Initialization = BaseTaskAsyncFunction.initialization
+            # self._Done_Handler = BaseTaskAsyncFunction.done_handler
+            # self._Error_Handler = BaseTaskAsyncFunction.error_handler
         else:
-            self._Function = BaseTaskFunction.function
-            self._Initialization = BaseTaskFunction.initialization
-            self._Done_Handler = BaseTaskFunction.done_handler
-            self._Error_Handler = BaseTaskFunction.error_handler
+            __base_task_function_obj = BaseTaskFunction
+            # self._Function = BaseTaskFunction.function
+            # self._Initialization = BaseTaskFunction.initialization
+            # self._Done_Handler = BaseTaskFunction.done_handler
+            # self._Error_Handler = BaseTaskFunction.error_handler
+        self._Function = __base_task_function_obj.function
+        self._Initialization = __base_task_function_obj.initialization
+        self._Done_Handler = __base_task_function_obj.done_handler
+        self._Error_Handler = __base_task_function_obj.error_handler
+
+
+    def __str__(self):
+        __instance_brief = None
+        # # self.__class__ value: <class '__main__.ACls'>
+        __cls_str = str(self.__class__)
+        __cls_name = _utils.get_cls_name(cls_str=__cls_str)
+        if __cls_name != "":
+            __instance_brief = f"{__cls_name}(mode={self._mode})"
+        else:
+            __instance_brief = __cls_str
+        return __instance_brief
+
+
+    def __repr__(self):
+        __cls_str = str(self.__class__)
+        __cls_name = _utils.get_cls_name(cls_str=__cls_str)
+        if __cls_name != "":
+            __instance_info = f"{__cls_name}(mode={self._mode}) with " \
+                              f"group={self.group}, " \
+                              f"function={self.function}, " \
+                              f"fun_args={self.func_args}, " \
+                              f"fun_kwargs={self.func_kwargs}, " \
+                              f"initialization={self.initialization}, " \
+                              f"init_args={self.init_args}, " \
+                              f"init_kwargs={self.init_kwargs}, " \
+                              f"done_handler={self.done_handler}, " \
+                              f"error_handler={self.error_handler}, " \
+                              f"running_timeout={self.running_timeout}"
+        else:
+            __instance_info = __cls_str
+        return __instance_info
 
 
     @property
@@ -195,6 +236,31 @@ class BaseQueueTask(metaclass=ABCMeta):
     _Name: str = ""
     _Queue_Type: BaseQueueType = None
     _Value: Iterable = None
+
+    def __str__(self):
+        __instance_brief = None
+        # # self.__class__ value: <class '__main__.ACls'>
+        __cls_str = str(self.__class__)
+        __cls_name = _utils.get_cls_name(cls_str=__cls_str)
+        if __cls_name != "":
+            __instance_brief = f"{__cls_name}()"
+        else:
+            __instance_brief = __cls_str
+        return __instance_brief
+
+
+    def __repr__(self):
+        __cls_str = str(self.__class__)
+        __cls_name = _utils.get_cls_name(cls_str=__cls_str)
+        if __cls_name != "":
+            __instance_info = f"{__cls_name} with " \
+                              f"name={self.name}, " \
+                              f"queue_type={self.queue_type}, " \
+                              f"value={self.value}"
+        else:
+            __instance_info = __cls_str
+        return __instance_info
+
 
     @property
     @abstractmethod
