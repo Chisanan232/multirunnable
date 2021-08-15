@@ -6,10 +6,10 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="pyocean",
-    version="0.1.0",
+    version="0.10.0",
     author="Liu, Bryant",
     author_email="chi10211201@cycu.org.tw",
-    description="A Python framework integrate multi-work simultaneously with different strategy.",
+    description="A Python framework integrate running multi-work simultaneously with different strategy.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(),
@@ -23,6 +23,7 @@ setuptools.setup(
         "gevent==1.4.0",
         "colorama==0.4.1",
         "kafka-python==2.0.2",
+        "openpyxl==2.6.1",
         "deprecated==1.2.11"
     ]
 )
