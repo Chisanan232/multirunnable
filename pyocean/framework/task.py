@@ -72,16 +72,8 @@ class BaseTask(metaclass=ABCMeta):
         __base_task_function_obj = None
         if mode is RunningMode.Asynchronous:
             __base_task_function_obj = BaseTaskAsyncFunction
-            # self._Function = BaseTaskAsyncFunction.function
-            # self._Initialization = BaseTaskAsyncFunction.initialization
-            # self._Done_Handler = BaseTaskAsyncFunction.done_handler
-            # self._Error_Handler = BaseTaskAsyncFunction.error_handler
         else:
             __base_task_function_obj = BaseTaskFunction
-            # self._Function = BaseTaskFunction.function
-            # self._Initialization = BaseTaskFunction.initialization
-            # self._Done_Handler = BaseTaskFunction.done_handler
-            # self._Error_Handler = BaseTaskFunction.error_handler
         self._Function = __base_task_function_obj.function
         self._Initialization = __base_task_function_obj.initialization
         self._Done_Handler = __base_task_function_obj.done_handler
@@ -90,7 +82,6 @@ class BaseTask(metaclass=ABCMeta):
 
     def __str__(self):
         __instance_brief = None
-        # # self.__class__ value: <class '__main__.ACls'>
         __cls_str = str(self.__class__)
         __cls_name = _utils.get_cls_name(cls_str=__cls_str)
         if __cls_name != "":
