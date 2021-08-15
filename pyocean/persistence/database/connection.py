@@ -1,10 +1,10 @@
 from pyocean.persistence.interface import OceanPersistence
 from pyocean.persistence.configuration import BaseDatabaseConfiguration
 from pyocean.persistence.database.configuration import BaseConfigurationKey, BaseConfigDefaultValue
+import pyocean._utils as _utils
 
 from abc import abstractmethod
 from typing import Dict
-import re
 
 
 
@@ -43,15 +43,11 @@ class BaseConnection(OceanPersistence):
         __instance_brief = None
         # # self.__class__ value: <class '__main__.ACls'>
         __cls_str = str(self.__class__)
-        __cls_name_search_result = re.search(r"<class '__main__\..[0-32]'>", re.escape(__cls_str))
-        if __cls_name_search_result is not None:
-            cls_name = __cls_name_search_result.group(0)
-            __instance_brief = f"{cls_name}(" \
-                               f"configuration={self._Database_Config})"
+        __cls_name = _utils.get_cls_name(cls_str=__cls_str)
+        if __cls_name != "":
+            __instance_brief = f"{__cls_name}(configuration={self._Database_Config})"
         else:
-            # logging.warning(f"Cannot parse strategy class naming and return __class__.")
             __instance_brief = __cls_str
-
         return __instance_brief
 
 

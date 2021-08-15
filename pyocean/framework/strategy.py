@@ -5,11 +5,11 @@ from pyocean.types import OceanTasks
 from pyocean.mode import FeatureMode
 from pyocean.tool import Feature
 from pyocean.persistence.interface import OceanPersistence
+import pyocean._utils as _utils
 
 from abc import ABCMeta, ABC, abstractmethod
 from typing import List, Iterable, Callable, Optional
 import logging
-import re
 
 
 
@@ -39,18 +39,15 @@ class BaseRunnableStrategy(metaclass=ABCMeta):
         __instance_brief = None
         # # self.__class__ value: <class '__main__.ACls'>
         __cls_str = str(self.__class__)
-        __cls_name_search_result = re.search(r"<class '__main__\..[0-32]'>", re.escape(__cls_str))
-        if __cls_name_search_result is not None:
-            cls_name = __cls_name_search_result.group(0)
-            __instance_brief = f"{cls_name}(" \
+        __cls_name = _utils.get_cls_name(cls_str=__cls_str)
+        if __cls_name != "":
+            __instance_brief = f"{__cls_name}(" \
                                f"workers_num={self._workers_num}, " \
                                f"features_factory={self._features_factory}, " \
                                f"persistence_strategy={self._persistence_strategy}, " \
                                f"db_connection_pool_size={self._db_conn_num})"
         else:
-            logging.warning(f"Cannot parse strategy class naming and return __class__.")
             __instance_brief = __cls_str
-
         return __instance_brief
 
 
@@ -60,12 +57,7 @@ class BaseRunnableStrategy(metaclass=ABCMeta):
             More information (like brief, not detail) about class.
         :return:
         """
-
-        __cls_str = str(self.__class__)
-        __cls_name_search_result = re.search(r"<class '__main__\..[0-32]'>", re.escape(__cls_str))
-        if __cls_name_search_result is not None:
-            cls_name = __cls_name_search_result.group(0)
-        return f"<Strategy {id(self)}>"
+        pass
 
 
     @property
