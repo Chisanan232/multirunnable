@@ -52,7 +52,7 @@ class BaseConnection(OceanPersistence):
 
 
     def __repr__(self):
-        pass
+        return f"{self.__str__()} at {id(self.__class__)}"
 
 
     @property

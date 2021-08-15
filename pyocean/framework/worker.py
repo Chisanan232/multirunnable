@@ -32,7 +32,7 @@ class BaseWorker(metaclass=ABCMeta):
 
 
     def __repr__(self):
-        return
+        return f"{self.__str__()} at {id(self.__class__)}"
 
 
     @property
@@ -141,7 +141,7 @@ class BaseSystem(metaclass=ABCMeta):
 
 
     def __repr__(self):
-        return
+        return f"{self.__str__()} at {id(self.__class__)}"
 
 
     @abstractmethod

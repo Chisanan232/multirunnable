@@ -57,7 +57,7 @@ class BaseRunnableStrategy(metaclass=ABCMeta):
             More information (like brief, not detail) about class.
         :return:
         """
-        pass
+        return f"{self.__str__()} at {id(self.__class__)}"
 
 
     @property

@@ -85,7 +85,7 @@ class PosixThread(metaclass=ABCMeta):
 
 
     def __repr__(self):
-        pass
+        return f"{self.__str__()} at {id(self.__class__)}"
 
 
 
