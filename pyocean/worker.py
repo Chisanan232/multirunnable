@@ -68,12 +68,11 @@ class OceanWorker(ABC, BaseWorker):
                 __worker_run_finish = True
             finally:
                 if __worker_run_finish is True:
-                    return self.get_result()
+                    break
                 __worker_run_time += 1
         else:
             self.post_done()
             self.post_stop()
-            return self.get_result()
 
 
     def pre_activate(self, queue_tasks: Optional[List[BaseQueueTask]] = None,
