@@ -2,6 +2,8 @@
 Set the customized Python package to Python Interpreter Environment Variable Path  so that we could import it if we need.
 """
 
+from typing import Callable
+from functools import wraps
 from logging import getLogger
 import getpass
 import pathlib
@@ -22,7 +24,7 @@ from pyocean.task import OceanTask, QueueTask
 from pyocean.worker import (
     OceanSystem,
     OceanSimpleWorker, OceanPersistenceWorker,
-    OceanAsyncWorker, OceanPersistenceAsyncWorker)
+    OceanSimpleAsyncWorker, OceanPersistenceAsyncWorker)
 from pyocean.parallel import MultiProcessingStrategy, MultiProcessingQueueType, ParallelResult
 from pyocean.concurrent import MultiThreadingStrategy, MultiThreadingQueueType, ConcurrentResult
 from pyocean.coroutine import (
