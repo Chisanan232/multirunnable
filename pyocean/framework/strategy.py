@@ -191,8 +191,8 @@ class RunnableStrategy(BaseRunnableStrategy, ABC):
             self._init_queue_process(tasks=queue_tasks)
 
         # # Filter mechanism
-        __lock_features = filter(lambda __feature: __feature not in [Feature.Event, Feature.Condition], features)
-        __communication_features = filter(lambda __feature: __feature in [Feature.Event, Feature.Condition], features)
+        __lock_features = filter(lambda __feature: __feature not in [Feature.Event, Feature.Condition], (features or []))
+        __communication_features = filter(lambda __feature: __feature in [Feature.Event, Feature.Condition], (features or []))
 
         # # Lock initialization
         if __lock_features:
