@@ -43,6 +43,19 @@ class ConcurrentStrategy(RunnableStrategy, ABC):
         pass
 
 
+    @staticmethod
+    def save_return_value(function: Callable) -> Callable:
+
+        @wraps(function)
+        def save_value_fun(self, task: BaseTask) -> None:
+            self = self
+            value = task.function(*task.func_args, **task.func_kwargs)
+            __thread_result = {"result": value}
+            self._Threading_Running_Result.append(__thread_result)
+
+        return save_value_fun
+
+
 
 class MultiThreadingStrategy(ConcurrentStrategy, Resultable):
 
@@ -87,19 +100,7 @@ class MultiThreadingStrategy(ConcurrentStrategy, Resultable):
         return self._Threads_List
 
 
-    def save_return_value(function: Callable) -> Callable:
-
-        @wraps(function)
-        def save_value_fun(self, task: BaseTask) -> None:
-            self = self
-            value = task.function(*task.func_args, **task.func_kwargs)
-            __thread_result = {"result": value}
-            self._Threading_Running_Result.append(__thread_result)
-
-        return save_value_fun
-
-
-    @save_return_value
+    @ConcurrentStrategy.save_return_value
     def target_task(self, task: BaseTask) -> None:
         task.function(self, *task.func_args, **task.func_kwargs)
 
