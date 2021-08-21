@@ -101,3 +101,91 @@ system = OceanSystem(mode=RunningMode.Parallel, worker_num=Thread_Number)
 ```
 
 Program still could run without any refactoring and doesn't need to modify anything.
+
+
+## Lock & Semaphore
+
+For Lock feature, the native library threading should call acquire and release to control how it runs like this:
+
+```python
+import threading
+import time
+
+... # Some logic
+
+lock = threading.Lock()
+
+print(f"Here is sample function running with lock.")
+lock.acquire()
+print(f"Process in lock and it will sleep 2 seconds.")
+time.sleep(2)
+print(f"Wake up process and release lock.")
+lock.release()
+
+... # Some logic
+
+```
+
+It also could use wih keyword "with":
+
+```python
+import threading
+import time
+
+... # Some logic
+
+lock = threading.Lock()
+
+print(f"Here is sample function running with lock.")
+with lock:
+    print(f"Process in lock and it will sleep 2 seconds.")
+    time.sleep(2)
+    print(f"Wake up process and release lock.")
+
+... # Some logic
+
+```
+
+With pyocean, it requires everyone should wrap the logic which needs to be run with lock to be a function,
+and you just add a decorator on it.
+
+```python
+from pyocean.api import LockDecorator
+import time
+
+@LockDecorator.run_with_lock
+def lock_function():
+    print("Running process in lock and will sleep 2 seconds.")
+    time.sleep(2)
+    print(f"Wake up process and release lock.")
+
+```
+
+So is semaphore:
+
+```python
+from pyocean.api import LockDecorator
+import time
+
+@LockDecorator.run_with_semaphore
+def lock_function():
+    print("Running process in lock and will sleep 2 seconds.")
+    time.sleep(2)
+    print(f"Wake up process and release lock.")
+
+```
+
+Please remember: you still need to initial lock or semaphore object before you use it.
+
+```python
+from pyocean import OceanSystem, RunningMode, Feature
+
+... # Any code is the same
+
+system = OceanSystem(mode=RunningMode.Parallel, worker_num=Thread_Number)
+system.run(task=task, features=[Feature.Lock, Feature.Semaphore])
+
+... # Any code is the same
+
+```
+
