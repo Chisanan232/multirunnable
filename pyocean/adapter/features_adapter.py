@@ -44,94 +44,109 @@ class _AdapterModuleFactory:
 
 class BaseAdapterFactory(metaclass=ABCMeta):
 
-    def __new__(cls, *args, **kwargs):
-        raise RuntimeError("These class is static factory so it shouldn't be create as instance.")
+    def __init__(self, mode: FeatureMode, **kwargs):
+        self._mode = mode
+        self._kwargs = {}
+        if self._mode is FeatureMode.Asynchronous:
+            self._kwargs["loop"] = _AsyncUtils.check_event_loop(event_loop=kwargs.get("event_loop", None))
 
-    @staticmethod
+
     @abstractmethod
-    def get_instance(mode: FeatureMode, **kwargs):
+    def get_instance(self):
+        pass
+
+
+    @abstractmethod
+    def globalize_instance(self, obj) -> None:
         pass
 
 
 
 class Lock(BaseAdapterFactory):
 
-    @staticmethod
-    def get_instance(mode: FeatureMode, **kwargs) -> OceanLock:
-        lock_instance: PosixThreadLock = _AdapterModuleFactory.get_lock_adapter(mode=mode)
-        if mode is FeatureMode.Asynchronous:
-            __event_loop = _AsyncUtils.check_event_loop(event_loop=kwargs.get("event_loop", None))
-            return lock_instance.get_lock(loop=__event_loop)
-        else:
-            return lock_instance.get_lock()
+    def get_instance(self) -> OceanLock:
+        lock_instance: PosixThreadLock = _AdapterModuleFactory.get_lock_adapter(mode=self._mode)
+        return lock_instance.get_lock(**self._kwargs)
+
+
+    def globalize_instance(self, obj) -> None:
+        Globalize.lock(lock=obj)
 
 
 
 class RLock(BaseAdapterFactory):
 
-    @staticmethod
-    def get_instance(mode: FeatureMode, **kwargs) -> OceanRLock:
-        lock_instance: PosixThreadLock = _AdapterModuleFactory.get_lock_adapter(mode=mode)
-        if mode is FeatureMode.Asynchronous:
-            __event_loop = _AsyncUtils.check_event_loop(event_loop=kwargs.get("event_loop", None))
-            return lock_instance.get_rlock(loop=__event_loop)
-        else:
-            return lock_instance.get_rlock()
+    def get_instance(self, **kwargs) -> OceanRLock:
+        lock_instance: PosixThreadLock = _AdapterModuleFactory.get_lock_adapter(mode=self._mode)
+        return lock_instance.get_rlock(**self._kwargs)
+
+
+    def globalize_instance(self, obj) -> None:
+        Globalize.rlock(rlock=obj)
 
 
 
 class Semaphore(BaseAdapterFactory):
+    
+    def __init__(self, mode: FeatureMode, value: int, **kwargs):
+        super(Semaphore, self).__init__(mode=mode, **kwargs)
+        self.__semaphore_value = value
 
-    @staticmethod
-    def get_instance(mode: FeatureMode, **kwargs) -> OceanSemaphore:
-        lock_instance: PosixThreadLock = _AdapterModuleFactory.get_lock_adapter(mode=mode)
-        __value: int = kwargs.get("value", None)
-        if mode is FeatureMode.Asynchronous:
-            __event_loop = _AsyncUtils.check_event_loop(event_loop=kwargs.get("event_loop", None))
-            return lock_instance.get_semaphore(value=__value, loop=__event_loop)
-        else:
-            return lock_instance.get_semaphore(value=__value)
+
+    def get_instance(self, **kwargs) -> OceanSemaphore:
+        lock_instance: PosixThreadLock = _AdapterModuleFactory.get_lock_adapter(mode=self._mode)
+        return lock_instance.get_semaphore(value=self.__semaphore_value, **self._kwargs)
+
+
+    def globalize_instance(self, obj) -> None:
+        Globalize.semaphore(smp=obj)
 
 
 
 class BoundedSemaphore(BaseAdapterFactory):
 
-    @staticmethod
-    def get_instance(mode: FeatureMode, **kwargs) -> OceanBoundedSemaphore:
-        lock_instance: PosixThreadLock = _AdapterModuleFactory.get_lock_adapter(mode=mode)
-        __value: int = kwargs.get("value", None)
-        if mode is FeatureMode.Asynchronous:
-            __event_loop = _AsyncUtils.check_event_loop(event_loop=kwargs.get("event_loop", None))
-            return lock_instance.get_bounded_semaphore(value=__value, loop=__event_loop)
-        else:
-            return lock_instance.get_bounded_semaphore(value=__value)
+    def __init__(self, mode: FeatureMode, value: int, **kwargs):
+        super(BoundedSemaphore, self).__init__(mode=mode, **kwargs)
+        self.__semaphore_value = value
+
+
+    def get_instance(self, **kwargs) -> OceanBoundedSemaphore:
+        lock_instance: PosixThreadLock = _AdapterModuleFactory.get_lock_adapter(mode=self._mode)
+        return lock_instance.get_bounded_semaphore(value=self.__semaphore_value, **self._kwargs)
+
+
+    def globalize_instance(self, obj) -> None:
+        Globalize.bounded_semaphore(bsmp=obj)
 
 
 
 class Event(BaseAdapterFactory):
 
-    @staticmethod
-    def get_instance(mode: FeatureMode, **kwargs) -> OceanEvent:
-        communication_instance: PosixThreadCommunication = _AdapterModuleFactory.get_communication_adapter(mode=mode)
-        if mode is FeatureMode.Asynchronous:
-            __event_loop = _AsyncUtils.check_event_loop(event_loop=kwargs.get("event_loop", None))
-            return communication_instance.get_event(loop=__event_loop)
-        else:
-            return communication_instance.get_event()
+    def get_instance(self) -> OceanEvent:
+        communication_instance: PosixThreadCommunication = _AdapterModuleFactory.get_communication_adapter(mode=self._mode)
+        return communication_instance.get_event(**self._kwargs)
+
+
+    def globalize_instance(self, obj) -> None:
+        Globalize.event(event=obj)
 
 
 
 class Condition(BaseAdapterFactory):
 
-    @staticmethod
-    def get_instance(mode: FeatureMode, **kwargs) -> OceanCondition:
-        communication_instance: PosixThreadCommunication = _AdapterModuleFactory.get_communication_adapter(mode=mode)
-        if mode is FeatureMode.Asynchronous:
-            __event_loop = _AsyncUtils.check_event_loop(event_loop=kwargs.get("event_loop", None))
-            __lock = _AsyncUtils.check_lock(lock=kwargs.get("lock", None))
-            return communication_instance.get_condition(loop=__event_loop, lock=__lock)
-        else:
-            return communication_instance.get_condition()
+    def __init__(self, mode: FeatureMode, **kwargs):
+        super(Condition, self).__init__(mode=mode, **kwargs)
+        if self._mode is FeatureMode.Asynchronous:
+            self._kwargs["lock"] = _AsyncUtils.check_lock(lock=kwargs.get("lock", None))
+
+
+    def get_instance(self) -> OceanCondition:
+        communication_instance: PosixThreadCommunication = _AdapterModuleFactory.get_communication_adapter(mode=self._mode)
+        return communication_instance.get_condition(**self._kwargs)
+
+
+    def globalize_instance(self, obj) -> None:
+        Globalize.condition(condition=obj)
 
 
 
