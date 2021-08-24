@@ -1,7 +1,5 @@
-from pyocean.framework.task import BaseQueueTask
 from pyocean.framework.strategy import RunnableStrategy, AsyncRunnableStrategy, Resultable
-from pyocean.mode import FeatureMode
-from pyocean.tool import Feature
+from pyocean.framework.collection import BaseList
 from pyocean.coroutine.result import CoroutineResult, AsynchronousResult
 
 from abc import ABCMeta, ABC, abstractmethod
@@ -21,7 +19,6 @@ class CoroutineStrategy(metaclass=ABCMeta):
 
 class BaseGreenletStrategy(CoroutineStrategy, RunnableStrategy, ABC):
 
-    _Running_Feature_Mode: FeatureMode = FeatureMode.MultiGreenlet
     _Gevent_List: List[Greenlet] = None
     _Gevent_Running_Result: List = []
 
@@ -29,13 +26,13 @@ class BaseGreenletStrategy(CoroutineStrategy, RunnableStrategy, ABC):
 
 class MultiGreenletStrategy(BaseGreenletStrategy, Resultable):
 
-    def initialization(self, queue_tasks: Optional[List[BaseQueueTask]] = None,
-                       features: Optional[List[Feature]] = None, *args, **kwargs) -> None:
+    def initialization(self, queue_tasks: Optional[BaseList] = None,
+                       features: Optional[BaseList] = None, *args, **kwargs) -> None:
         super(MultiGreenletStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
 
         # # Persistence
         if self._persistence_strategy is not None:
-            self._persistence_strategy.initialize(mode=self._Running_Feature_Mode, db_conn_num=self.db_connection_number)
+            self._persistence_strategy.initialize(db_conn_num=self.db_connection_number)
 
 
     def build_workers(self, function: Callable, *args, **kwargs) -> List[Greenlet]:
@@ -78,7 +75,6 @@ class MultiGreenletStrategy(BaseGreenletStrategy, Resultable):
 
 class BaseAsyncStrategy(CoroutineStrategy, AsyncRunnableStrategy, ABC):
 
-    _Running_Feature_Mode: FeatureMode = FeatureMode.Asynchronous
     _Async_Event_Loop = None
     _Async_Task_List: List[Task] = None
     _Async_Running_Result: List = []
@@ -95,14 +91,13 @@ class AsynchronousStrategy(BaseAsyncStrategy, Resultable):
         return self._Async_Event_Loop
 
 
-    async def initialization(self, queue_tasks: Optional[List[BaseQueueTask]] = None,
-                             features: Optional[List[Feature]] = None, *args, **kwargs) -> None:
+    async def initialization(self, queue_tasks: Optional[BaseList] = None,
+                             features: Optional[BaseList] = None, *args, **kwargs) -> None:
         await super(AsynchronousStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
 
         # # Persistence
         if self._persistence_strategy is not None:
             self._persistence_strategy.initialize(
-                mode=self._Running_Feature_Mode,
                 db_conn_num=self.db_connection_number,
                 event_loop=kwargs.get("event_loop"))
 

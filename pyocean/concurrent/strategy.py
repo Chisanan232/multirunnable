@@ -1,9 +1,8 @@
-from pyocean.framework.task import BaseQueueTask
 from pyocean.framework.strategy import RunnableStrategy, Resultable
+from pyocean.framework.collection import BaseList
 from pyocean.framework.worker import BaseTask
 from pyocean.task import OceanTask
-from pyocean.mode import RunningMode, FeatureMode
-from pyocean.tool import Feature
+from pyocean.mode import RunningMode
 from pyocean.concurrent.result import ConcurrentResult
 from pyocean.concurrent.exceptions import ThreadsListIsEmptyError
 from pyocean.exceptions import FunctionSignatureConflictError
@@ -17,7 +16,6 @@ from functools import wraps
 
 class ConcurrentStrategy(RunnableStrategy, ABC):
 
-    _Running_Feature_Mode: FeatureMode = FeatureMode.MultiThreading
     _Threads_List: List[Thread] = []
     _Threads_Running_Result: Dict[str, Dict[str, Union[object, bool]]] = {}
     _Threading_Running_Result: List = []
@@ -59,13 +57,13 @@ class ConcurrentStrategy(RunnableStrategy, ABC):
 
 class MultiThreadingStrategy(ConcurrentStrategy, Resultable):
 
-    def initialization(self, queue_tasks: Optional[List[BaseQueueTask]] = None,
-                       features: Optional[List[Feature]] = None, *args, **kwargs) -> None:
+    def initialization(self, queue_tasks: Optional[BaseList] = None,
+                       features: Optional[BaseList] = None, *args, **kwargs) -> None:
         super(MultiThreadingStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
 
         # # Persistence
         if self._persistence_strategy is not None:
-            self._persistence_strategy.initialize(mode=self._Running_Feature_Mode, db_conn_num=self.db_connection_number)
+            self._persistence_strategy.initialize(db_conn_num=self.db_connection_number)
 
 
     def build_workers(self, function: Callable, *args, **kwargs) -> List[Thread]:

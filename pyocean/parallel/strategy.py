@@ -1,9 +1,6 @@
-from pyocean.framework.task import BaseQueueTask
 from pyocean.framework.strategy import RunnableStrategy, Resultable
-from pyocean.framework.features import BaseFeatureAdapterFactory
+from pyocean.framework.collection import BaseList
 from pyocean.framework.result import ResultState
-from pyocean.mode import FeatureMode
-from pyocean.tool import Feature
 from pyocean.parallel.result import ParallelResult
 from pyocean.persistence.interface import OceanPersistence
 
@@ -17,14 +14,12 @@ from multiprocessing.managers import Namespace
 
 class ParallelStrategy(RunnableStrategy):
 
-    _Running_Feature_Mode: FeatureMode = FeatureMode.MultiProcessing
     _Manager: Manager = None
     _Namespace_Object: Namespace = None
     _Processors_Pool: Pool = None
     _Processors_Running_Result: List[Dict[str, Union[AsyncResult, bool]]] = {}
 
     def __init__(self, workers_num: int,
-                 features_factory: BaseFeatureAdapterFactory = None,
                  persistence_strategy: OceanPersistence = None, **kwargs):
         """
         Description:
@@ -33,13 +28,12 @@ class ParallelStrategy(RunnableStrategy):
         :param db_connection_pool_size:
         :param persistence_strategy:
         """
-        super().__init__(workers_num=workers_num, features_factory=features_factory, persistence_strategy=persistence_strategy, **kwargs)
+        super().__init__(workers_num=workers_num, persistence_strategy=persistence_strategy, **kwargs)
         self.__init_namespace_obj()
         if persistence_strategy is not None:
             namespace_persistence_strategy = cast(OceanPersistence, self.namespacing_obj(obj=persistence_strategy))
             super().__init__(
                 workers_num=workers_num,
-                features_factory=features_factory,
                 db_connection_pool_size=self.db_connection_number,
                 persistence_strategy=namespace_persistence_strategy)
         self._Processors_Running_Result = self._Manager.list()
@@ -79,13 +73,13 @@ class ParallelStrategy(RunnableStrategy):
 
 class MultiProcessingStrategy(ParallelStrategy, Resultable):
 
-    def initialization(self, queue_tasks: Optional[List[BaseQueueTask]] = None,
-                       features: Optional[List[Feature]] = None, *args, **kwargs) -> None:
+    def initialization(self, queue_tasks: Optional[BaseList] = None,
+                       features: Optional[BaseList] = None, *args, **kwargs) -> None:
         super(MultiProcessingStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
 
         # # Persistence
         if self._persistence_strategy is not None:
-            self._persistence_strategy.initialize(mode=self._Running_Feature_Mode, db_conn_num=self.db_connection_number)
+            self._persistence_strategy.initialize(db_conn_num=self.db_connection_number)
 
         # Initialize and build the Processes Pool.
         __pool_initializer: Callable = kwargs.get("pool_initializer", None)
