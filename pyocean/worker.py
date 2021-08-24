@@ -2,11 +2,11 @@ from pyocean.framework.task import BaseTask, BaseQueueTask
 from pyocean.framework.worker import BaseWorker, BaseAsyncWorker, BaseSystem
 from pyocean.framework.strategy import RunnableStrategy, AsyncRunnableStrategy, Resultable
 from pyocean.framework.result import OceanResult
-from pyocean.mode import RunningMode, FeatureMode
+from pyocean.mode import RunningMode
 from pyocean.tool import Feature
 from pyocean.api.decorator import ReTryMechanism
-from pyocean.adapter.features_adapter import FeatureAdapterFactory
-from pyocean.adapter.strategy_adapter import StrategyAdapter
+from pyocean.adapter.collection import BaseList
+from pyocean.adapter.strategy import StrategyAdapter
 from pyocean.persistence.interface import OceanPersistence
 
 from abc import ABC
@@ -20,17 +20,6 @@ class OceanWorker(ABC, BaseWorker):
 
     def __init__(self, mode: RunningMode, worker_num: int):
         super(OceanWorker, self).__init__(mode=mode, worker_num=worker_num)
-
-        __feature_mode = None
-        if self._mode is RunningMode.Parallel:
-            __feature_mode = FeatureMode.MultiProcessing
-        elif self._mode is RunningMode.Concurrent:
-            __feature_mode = FeatureMode.MultiThreading
-        elif self._mode is RunningMode.Greenlet:
-            __feature_mode = FeatureMode.MultiGreenlet
-        elif self._mode is RunningMode.Asynchronous:
-            __feature_mode = FeatureMode.Asynchronous
-        self._features_factory = FeatureAdapterFactory(mode=__feature_mode)
 
         self._initial_running_strategy()
 
@@ -48,7 +37,7 @@ class OceanWorker(ABC, BaseWorker):
     def start(self,
               task: BaseTask,
               queue_tasks: Optional[List[BaseQueueTask]] = None,
-              features: Optional[List[Feature]] = None,
+              features: Optional[List] = None,
               saving_mode: bool = False,
               init_args: Tuple = (), init_kwargs: Dict = {}) -> [OceanResult]:
 
@@ -76,7 +65,7 @@ class OceanWorker(ABC, BaseWorker):
 
 
     def pre_activate(self, queue_tasks: Optional[List[BaseQueueTask]] = None,
-                     features: Optional[List[Feature]] = None, *args, **kwargs) -> None:
+                     features: Optional[List] = None, *args, **kwargs) -> None:
         Running_Strategy.initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
 
 
@@ -122,17 +111,6 @@ class OceanAsyncWorker(BaseAsyncWorker):
 
     def __init__(self, mode: RunningMode, worker_num: int):
         super(OceanAsyncWorker, self).__init__(mode=mode, worker_num=worker_num)
-
-        __feature_mode = None
-        if self._mode is RunningMode.Parallel:
-            __feature_mode = FeatureMode.MultiProcessing
-        elif self._mode is RunningMode.Concurrent:
-            __feature_mode = FeatureMode.MultiThreading
-        elif self._mode is RunningMode.Greenlet:
-            __feature_mode = FeatureMode.MultiGreenlet
-        elif self._mode is RunningMode.Asynchronous:
-            __feature_mode = FeatureMode.Asynchronous
-        self._features_factory = FeatureAdapterFactory(mode=__feature_mode)
 
         self._initial_running_strategy()
 
@@ -250,8 +228,7 @@ class OceanSimpleWorker(OceanWorker):
     def _initial_running_strategy(self) -> None:
         __running_strategy_adapter = StrategyAdapter(
             mode=self._mode,
-            worker_num=self.worker_num,
-            features_factory=self._features_factory)
+            worker_num=self.worker_num)
         global Running_Strategy
         Running_Strategy = __running_strategy_adapter.get_simple_strategy()
 
@@ -270,8 +247,7 @@ class OceanPersistenceWorker(OceanWorker):
     def _initial_running_strategy(self) -> None:
         __running_strategy_adapter = StrategyAdapter(
             mode=self._mode,
-            worker_num=self.worker_num,
-            features_factory=self._features_factory)
+            worker_num=self.worker_num)
         global Running_Strategy
         Running_Strategy = __running_strategy_adapter.get_persistence_strategy(
             persistence_strategy=self.persistence_strategy,
@@ -289,8 +265,7 @@ class OceanSimpleAsyncWorker(OceanAsyncWorker):
     def _initial_running_strategy(self) -> None:
         __running_strategy_adapter = StrategyAdapter(
             mode=self._mode,
-            worker_num=self.worker_num,
-            features_factory=self._features_factory)
+            worker_num=self.worker_num)
         global Running_Strategy
         Running_Strategy = __running_strategy_adapter.get_simple_strategy()
 
@@ -309,8 +284,7 @@ class OceanPersistenceAsyncWorker(OceanAsyncWorker):
     def _initial_running_strategy(self) -> None:
         __running_strategy_adapter = StrategyAdapter(
             mode=self._mode,
-            worker_num=self.worker_num,
-            features_factory=self._features_factory)
+            worker_num=self.worker_num)
         global Running_Strategy
         Running_Strategy = __running_strategy_adapter.get_persistence_strategy(
             persistence_strategy=self.persistence_strategy,
@@ -323,8 +297,8 @@ class OceanSystem(BaseSystem):
 
     def run(self,
             task: BaseTask,
-            queue_tasks: Optional[List[BaseQueueTask]] = None,
-            features: Optional[List[Feature]] = None,
+            queue_tasks: Optional[BaseList] = None,
+            features: Optional[BaseList] = None,
             saving_mode: bool = False,
             timeout: int = 0) -> [OceanResult]:
 
@@ -344,8 +318,8 @@ class OceanSystem(BaseSystem):
                      task: BaseTask,
                      persistence_strategy: OceanPersistence,
                      db_connection_num: int,
-                     queue_tasks: Optional[List[BaseQueueTask]] = None,
-                     features: Optional[List[Feature]] = None,
+                     queue_tasks: Optional[BaseList] = None,
+                     features: Optional[BaseList] = None,
                      saving_mode: bool = False,
                      timeout: int = 0) -> [OceanResult]:
 
