@@ -1,5 +1,9 @@
 from pyocean.framework.task import BaseTask, BaseQueueTask
 from pyocean.framework.features import BaseQueueType
+from pyocean.framework.collection import BaseList
+from pyocean.types import OceanQueue
+from pyocean.adapter.queue import Queue
+from pyocean.adapter.collection import QueueTaskList
 
 from typing import Tuple, Dict, Iterable, Callable
 
@@ -112,6 +116,21 @@ class OceanTask(BaseTask):
 
 class QueueTask(BaseQueueTask):
 
+    _Queue_Task_List: QueueTaskList = None
+    __Queue_Adapter = None
+
+    def __add__(self, other) -> BaseList:
+        if isinstance(other, QueueTaskList):
+            other.append(self)
+            _Queue_Task_List = other
+        else:
+            if self._Queue_Task_List is None:
+                self._Queue_Task_List = QueueTaskList()
+            self._Queue_Task_List.append(self)
+            self._Queue_Task_List.append(other)
+        return self._Queue_Task_List
+
+
     @property
     def name(self) -> str:
         return self._Name
@@ -140,4 +159,28 @@ class QueueTask(BaseQueueTask):
     @value.setter
     def value(self, val: Iterable) -> None:
         self._Value = val
+
+
+    def get_queue(self) -> OceanQueue:
+        self.__Queue_Adapter = Queue(name=self.name, qtype=self.queue_type)
+        __queue_obj = self.__Queue_Adapter.get_instance()
+        return __queue_obj
+
+
+    def globalize(self, obj) -> None:
+        self.__Queue_Adapter.globalize_instance(obj=obj)
+
+
+    def init_queue_with_values(self) -> None:
+        __queue = self.get_queue()
+        for __value in self.value:
+            __queue.put(__value)
+        self.__Queue_Adapter.globalize_instance(obj=__queue)
+
+
+    async def async_init_queue_with_values(self) -> None:
+        __queue = self.get_queue()
+        for __value in self.value:
+            await __queue.put(__value)
+        self.__Queue_Adapter.globalize_instance(obj=__queue)
 

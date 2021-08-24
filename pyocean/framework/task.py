@@ -1,6 +1,7 @@
 from pyocean.framework.features import BaseQueueType
 from pyocean.framework.result import OceanResult
 from pyocean.mode import RunningMode
+from pyocean.types import OceanQueue
 import pyocean._utils as _utils
 
 from abc import ABCMeta, abstractmethod
@@ -270,4 +271,18 @@ class BaseQueueTask(metaclass=ABCMeta):
     def value(self) -> Iterable:
         pass
 
+
+    @abstractmethod
+    def get_queue(self) -> OceanQueue:
+        pass
+
+
+    @abstractmethod
+    def init_queue_with_values(self) -> OceanQueue:
+        pass
+
+
+    @abstractmethod
+    async def async_init_queue_with_values(self) -> OceanQueue:
+        pass
 
