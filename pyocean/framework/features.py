@@ -4,12 +4,10 @@ from pyocean.types import (
     OceanSemaphore, OceanBoundedSemaphore,
     OceanEvent, OceanCondition,
     OceanQueue)
-from pyocean.mode import FeatureMode
 import pyocean._utils as _utils
 
 from abc import ABCMeta, abstractmethod
 from enum import Enum
-import re
 
 
 
@@ -159,6 +157,23 @@ class PosixThreadCommunication(PosixThread):
 
 
 
+class BaseFeatureAdapterFactory(metaclass=ABCMeta):
+
+    def __init__(self, **kwargs):
+        self._kwargs = {}
+
+
+    @abstractmethod
+    def get_instance(self):
+        pass
+
+
+    @abstractmethod
+    def globalize_instance(self, obj) -> None:
+        pass
+
+
+
 class BaseGlobalizeAPI(metaclass=ABCMeta):
 
     """
@@ -268,52 +283,4 @@ class FeatureUtils:
         if __obj is None:
             raise ParameterCannotBeEmpty(param=param)
         return __obj
-
-
-
-class BaseFeatureAdapterFactory(metaclass=ABCMeta):
-
-    def __init__(self, mode: FeatureMode):
-        self._mode = mode
-        # # # # Should use lazy initialization design here.
-
-
-    def __str__(self):
-        __instance_brief = None
-        # # self.__class__ value: <class '__main__.ACls'>
-        __cls_str = str(self.__class__)
-        __cls_name_search_result = re.search(r"<class '__main__\..[0-32]'>", re.escape(__cls_str))
-        if __cls_name_search_result is not None:
-            cls_name = __cls_name_search_result.group(0)
-            __instance_brief = f"{cls_name}(" \
-                               f"mode={self._mode})"
-        else:
-            # logging.warning(f"Cannot parse strategy class naming and return __class__.")
-            __instance_brief = __cls_str
-
-        return __instance_brief
-
-
-    def __repr__(self):
-        pass
-
-
-    @abstractmethod
-    def get_queue_adapter(self) -> BaseQueue:
-        pass
-
-
-    @abstractmethod
-    def get_lock_adapter(self, **kwargs) -> PosixThreadLock:
-        pass
-
-
-    @abstractmethod
-    def get_communication_adapter(self, **kwargs) -> PosixThreadCommunication:
-        pass
-
-
-    @abstractmethod
-    def get_globalization(self) -> BaseGlobalizeAPI:
-        pass
 
