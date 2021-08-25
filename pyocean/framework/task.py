@@ -278,11 +278,16 @@ class BaseQueueTask(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def init_queue_with_values(self) -> OceanQueue:
+    def globalize(self, obj) -> None:
         pass
 
 
     @abstractmethod
-    async def async_init_queue_with_values(self) -> OceanQueue:
+    def init_queue_with_values(self) -> None:
+        pass
+
+
+    @abstractmethod
+    async def async_init_queue_with_values(self) -> None:
         pass
 
