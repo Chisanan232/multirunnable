@@ -6,15 +6,15 @@ from pyocean.types import OceanTasks
 import pyocean._utils as _utils
 
 from abc import ABCMeta, ABC, abstractmethod
-from typing import cast, List, Iterable, Callable, Optional
+from typing import cast, List, Iterable, Callable, Optional, Union
+from multipledispatch import dispatch
 import logging
 
 
 
 class BaseRunnableStrategy(metaclass=ABCMeta):
 
-    def __init__(self, workers_num: int,
-                 persistence_strategy: OceanPersistence = None, **kwargs):
+    def __init__(self, workers_num: int, persistence_strategy: OceanPersistence = None, **kwargs):
         self._workers_num = workers_num
         self._persistence_strategy = persistence_strategy
         self._db_conn_num = kwargs.get("db_connection_pool_size", None)
@@ -77,8 +77,11 @@ class BaseRunnableStrategy(metaclass=ABCMeta):
         pass
 
 
-    def initialization(self, queue_tasks: Optional[List[BaseQueueTask]] = None,
-                       features: Optional[BaseList] = None, *args, **kwargs) -> None:
+    def initialization(
+            self,
+            queue_tasks: Optional[Union[BaseQueueTask, BaseList]] = None,
+            features: Optional[Union[BaseFeatureAdapterFactory, BaseList]] = None,
+            *args, **kwargs) -> None:
         """
         Description:
             Initialize something configurations or something which be needed to be already before run multiple
@@ -163,8 +166,10 @@ class RunnableStrategy(BaseRunnableStrategy, ABC):
             return self._db_conn_num
 
 
-    def initialization(self, queue_tasks: Optional[BaseList] = None,
-                       features: Optional[BaseList] = None, *args, **kwargs) -> None:
+    def initialization(self,
+                       queue_tasks: Optional[Union[BaseQueueTask, BaseList]] = None,
+                       features: Optional[Union[BaseFeatureAdapterFactory, BaseList]] = None,
+                       *args, **kwargs) -> None:
         """
         Description:
             Initialize something configurations or something which be needed to be already before run multiple
@@ -180,13 +185,26 @@ class RunnableStrategy(BaseRunnableStrategy, ABC):
         # # # # beside design, needs to more think about how to use it? how to extend it? how to maintain it?
         # # Queue initialization
         if queue_tasks is not None:
-            self._init_queue_process(queue_tasks=queue_tasks)
+            self._init_queue_process(queue_tasks)
 
         # # Lock and communication features initialization
         if features is not None:
             self._init_lock_or_communication_process(features)
 
 
+    @dispatch(BaseQueueTask)
+    def _init_queue_process(self, queue_tasks: BaseQueueTask) -> None:
+        """
+        Description:
+            Initialize Queue object which be needed to handle in Queue-Task-List.
+        :param queue_tasks:
+        :return:
+        """
+
+        queue_tasks.init_queue_with_values()
+
+
+    @dispatch(BaseList)
     def _init_queue_process(self, queue_tasks: BaseList) -> None:
         """
         Description:
@@ -198,10 +216,26 @@ class RunnableStrategy(BaseRunnableStrategy, ABC):
         __queues_iterator = queue_tasks.iterator()
         while __queues_iterator.has_next():
             __queue_adapter = cast(BaseQueueTask, __queues_iterator.next())
-            __queue = __queue_adapter.init_queue_with_values()
+            __queue_adapter.init_queue_with_values()
 
 
-    def _init_lock_or_communication_process(self, features: BaseList):
+    @dispatch(BaseFeatureAdapterFactory)
+    def _init_lock_or_communication_process(self, features: BaseFeatureAdapterFactory) -> None:
+        """
+        Description:
+            Initialize Lock (Lock, RLock, Semaphore, Bounded Semaphore)
+            or communication object (Event, Condition) which be needed to
+            handle in Feature-List.
+        :param features:
+        :return:
+        """
+
+        __instance = features.get_instance()
+        features.globalize_instance(__instance)
+
+
+    @dispatch(BaseList)
+    def _init_lock_or_communication_process(self, features: BaseList) -> None:
         """
         Description:
             Initialize Lock (Lock, RLock, Semaphore, Bounded Semaphore)
@@ -221,8 +255,10 @@ class RunnableStrategy(BaseRunnableStrategy, ABC):
 
 class AsyncRunnableStrategy(RunnableStrategy, ABC):
 
-    async def initialization(self, queue_tasks: Optional[BaseList] = None,
-                             features: Optional[BaseList] = None, *args, **kwargs) -> None:
+    async def initialization(self,
+                             queue_tasks: Optional[Union[BaseQueueTask, BaseList]] = None,
+                             features: Optional[Union[BaseFeatureAdapterFactory, BaseList]] = None,
+                             *args, **kwargs) -> None:
         """
         Description:
             Asynchronous version of method 'initialization'.
@@ -242,6 +278,19 @@ class AsyncRunnableStrategy(RunnableStrategy, ABC):
             super()._init_lock_or_communication_process(features)
 
 
+    @dispatch(BaseQueueTask)
+    async def _init_queue_process(self, queue_tasks: BaseQueueTask) -> None:
+        """
+        Description:
+            Asynchronous version of method '_init_queue_process'.
+        :param queue_tasks:
+        :return:
+        """
+
+        await queue_tasks.async_init_queue_with_values()
+
+
+    @dispatch(BaseList)
     async def _init_queue_process(self, queue_tasks: BaseList) -> None:
         """
         Description:
@@ -253,7 +302,7 @@ class AsyncRunnableStrategy(RunnableStrategy, ABC):
         __queues_iterator = queue_tasks.iterator()
         while __queues_iterator.has_next():
             __queue_adapter = cast(BaseQueueTask, __queues_iterator.next())
-            __queue = await __queue_adapter.async_init_queue_with_values()
+            await __queue_adapter.async_init_queue_with_values()
 
 
     @abstractmethod
