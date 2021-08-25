@@ -1,11 +1,13 @@
-from pyocean.framework.task import BaseTask
+from pyocean.framework.task import BaseTask, BaseQueueTask
+from pyocean.framework.features import BaseFeatureAdapterFactory
+from pyocean.framework.collection import BaseList
 from pyocean.framework.result import OceanResult
 from pyocean.mode import RunningMode
-from pyocean.tool import Feature
+from pyocean.persistence.interface import OceanPersistence
 import pyocean._utils as _utils
 
 from abc import ABCMeta, abstractmethod
-from typing import List, Tuple, Dict, Optional
+from typing import List, Tuple, Dict, Optional, Union
 
 
 
@@ -49,15 +51,18 @@ class BaseWorker(metaclass=ABCMeta):
     @abstractmethod
     def start(self,
               task: BaseTask,
-              queue_tasks: Optional[List[BaseTask]] = None,
-              features: Optional[List[Feature]] = None,
+              queue_tasks: Optional[Union[BaseQueueTask, BaseList]] = None,
+              features: Optional[Union[BaseFeatureAdapterFactory, BaseList]] = None,
               saving_mode: bool = False,
               init_args: Tuple = (), init_kwargs: Dict = {}) -> None:
         pass
 
 
     @abstractmethod
-    def pre_activate(self, *args, **kwargs) -> None:
+    def pre_activate(self,
+                     queue_tasks: Optional[Union[BaseQueueTask, BaseList]] = None,
+                     features: Optional[Union[BaseFeatureAdapterFactory, BaseList]] = None,
+                     *args, **kwargs) -> None:
         pass
 
 
@@ -95,17 +100,20 @@ class BaseWorker(metaclass=ABCMeta):
 class BaseAsyncWorker(BaseWorker):
 
     @abstractmethod
-    async def start(self,
-                    task: BaseTask,
-                    queue_tasks: Optional[List[BaseTask]] = None,
-                    features: Optional[List[Feature]] = None,
-                    saving_mode: bool = False,
-                    init_args: Tuple = (), init_kwargs: Dict = {}) -> None:
+    def start(self,
+              task: BaseTask,
+              queue_tasks: Optional[Union[BaseQueueTask, BaseList]] = None,
+              features: Optional[Union[BaseFeatureAdapterFactory, BaseList]] = None,
+              saving_mode: bool = False,
+              init_args: Tuple = (), init_kwargs: Dict = {}) -> None:
         pass
 
 
     @abstractmethod
-    async def pre_activate(self, *args, **kwargs) -> None:
+    async def pre_activate(self,
+                           queue_tasks: Optional[Union[BaseQueueTask, BaseList]] = None,
+                           features: Optional[Union[BaseFeatureAdapterFactory, BaseList]] = None,
+                           *args, **kwargs) -> None:
         pass
 
 
@@ -145,7 +153,24 @@ class BaseSystem(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def run(self, task: BaseTask):
+    def run(self,
+            task: BaseTask,
+            queue_tasks: Optional[Union[BaseQueueTask, BaseList]] = None,
+            features: Optional[Union[BaseFeatureAdapterFactory, BaseList]] = None,
+            saving_mode: bool = False,
+            timeout: int = 0) -> [OceanResult]:
+        pass
+
+
+    @abstractmethod
+    def run_and_save(self,
+                     task: BaseTask,
+                     persistence_strategy: OceanPersistence,
+                     db_connection_num: int,
+                     queue_tasks: Optional[Union[BaseQueueTask, BaseList]] = None,
+                     features: Optional[Union[BaseFeatureAdapterFactory, BaseList]] = None,
+                     saving_mode: bool = False,
+                     timeout: int = 0) -> [OceanResult]:
         pass
 
 
