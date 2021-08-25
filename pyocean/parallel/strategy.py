@@ -1,4 +1,6 @@
 from pyocean.framework.strategy import RunnableStrategy, Resultable
+from pyocean.framework.task import BaseQueueTask
+from pyocean.framework.features import BaseFeatureAdapterFactory
 from pyocean.framework.collection import BaseList
 from pyocean.framework.result import ResultState
 from pyocean.parallel.result import ParallelResult
@@ -73,8 +75,10 @@ class ParallelStrategy(RunnableStrategy):
 
 class MultiProcessingStrategy(ParallelStrategy, Resultable):
 
-    def initialization(self, queue_tasks: Optional[BaseList] = None,
-                       features: Optional[BaseList] = None, *args, **kwargs) -> None:
+    def initialization(self,
+                       queue_tasks: Optional[Union[BaseQueueTask, BaseList]] = None,
+                       features: Optional[Union[BaseFeatureAdapterFactory, BaseList]] = None,
+                       *args, **kwargs) -> None:
         super(MultiProcessingStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
 
         # # Persistence
