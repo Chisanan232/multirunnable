@@ -1,22 +1,22 @@
-from pyocean.framework.task import BaseTask, BaseQueueTask
-from pyocean.framework.features import BaseQueueType
-from pyocean.framework.collection import BaseList
-from pyocean.types import OceanQueue
-from pyocean.adapter.queue import Queue
-from pyocean.adapter.collection import QueueTaskList
+from pyocean.framework.task import BaseTask as _BaseTask, BaseQueueTask as _BaseQueueTask
+from pyocean.framework.features import BaseQueueType as _BaseQueueType
+from pyocean.framework.collection import BaseList as _BaseList
+from pyocean.types import OceanQueue as _OceanQueue
+from pyocean.adapter.queue import Queue as _Queue
+from pyocean.adapter.collection import QueueTaskList as _QueueTaskList
 
 from typing import Tuple, Dict, Iterable, Callable
 
 
 
-class OceanTask(BaseTask):
+class OceanTask(_BaseTask):
 
     @property
     def function(self) -> Callable:
         return self._Function
 
 
-    def set_function(self, function: Callable) -> BaseTask:
+    def set_function(self, function: Callable) -> _BaseTask:
         self._Function = function
         return self
 
@@ -26,7 +26,7 @@ class OceanTask(BaseTask):
         return self._Fun_Args
 
 
-    def set_func_args(self, args: Tuple) -> BaseTask:
+    def set_func_args(self, args: Tuple) -> _BaseTask:
         self._Fun_Args = args
         return self
 
@@ -36,7 +36,7 @@ class OceanTask(BaseTask):
         return self._Fun_Kwargs
 
 
-    def set_func_kwargs(self, kwargs: Dict) -> BaseTask:
+    def set_func_kwargs(self, kwargs: Dict) -> _BaseTask:
         for key, value in kwargs.items():
             self._Fun_Kwargs[key] = value
         return self
@@ -47,7 +47,7 @@ class OceanTask(BaseTask):
         return self._Initialization
 
 
-    def set_initialization(self, init: Callable) -> BaseTask:
+    def set_initialization(self, init: Callable) -> _BaseTask:
         self._Initialization = init
         return self
 
@@ -57,7 +57,7 @@ class OceanTask(BaseTask):
         return self._Init_Args
 
 
-    def set_init_args(self, args: Tuple) -> BaseTask:
+    def set_init_args(self, args: Tuple) -> _BaseTask:
         self._Init_Args = args
         return self
 
@@ -67,7 +67,7 @@ class OceanTask(BaseTask):
         return self._Init_Kwargs
 
 
-    def set_init_kwargs(self, kwargs: Dict) -> BaseTask:
+    def set_init_kwargs(self, kwargs: Dict) -> _BaseTask:
         for key, value in kwargs.items():
             self._Init_Kwargs[key] = value
         return self
@@ -78,7 +78,7 @@ class OceanTask(BaseTask):
         return self._Group
 
 
-    def set_group(self, group: str) -> BaseTask:
+    def set_group(self, group: str) -> _BaseTask:
         self._Group = group
         return self
 
@@ -88,7 +88,7 @@ class OceanTask(BaseTask):
         return self._Done_Handler
 
 
-    def set_done_handler(self, hdlr: Callable) -> BaseTask:
+    def set_done_handler(self, hdlr: Callable) -> _BaseTask:
         self._Done_Handler = hdlr
         return self
 
@@ -98,7 +98,7 @@ class OceanTask(BaseTask):
         return self._Error_Handler
 
 
-    def set_error_handler(self, hdlr: Callable) -> BaseTask:
+    def set_error_handler(self, hdlr: Callable) -> _BaseTask:
         self._Error_Handler = hdlr
         return self
 
@@ -108,24 +108,24 @@ class OceanTask(BaseTask):
         return self._Running_Timeout
 
 
-    def set_running_timeout(self, timeout: int) -> BaseTask:
+    def set_running_timeout(self, timeout: int) -> _BaseTask:
         self._Running_Timeout = timeout
         return self
 
 
 
-class QueueTask(BaseQueueTask):
+class QueueTask(_BaseQueueTask):
 
-    _Queue_Task_List: QueueTaskList = None
+    _Queue_Task_List: _QueueTaskList = None
     __Queue_Adapter = None
 
-    def __add__(self, other) -> BaseList:
-        if isinstance(other, QueueTaskList):
+    def __add__(self, other) -> _BaseList:
+        if isinstance(other, _QueueTaskList):
             other.append(self)
             _Queue_Task_List = other
         else:
             if self._Queue_Task_List is None:
-                self._Queue_Task_List = QueueTaskList()
+                self._Queue_Task_List = _QueueTaskList()
             self._Queue_Task_List.append(self)
             self._Queue_Task_List.append(other)
         return self._Queue_Task_List
@@ -142,12 +142,12 @@ class QueueTask(BaseQueueTask):
 
 
     @property
-    def queue_type(self) -> BaseQueueType:
+    def queue_type(self) -> _BaseQueueType:
         return self._Queue_Type
 
 
     @queue_type.setter
-    def queue_type(self, qtype: BaseQueueType) -> None:
+    def queue_type(self, qtype: _BaseQueueType) -> None:
         self._Queue_Type = qtype
 
 
@@ -161,8 +161,8 @@ class QueueTask(BaseQueueTask):
         self._Value = val
 
 
-    def get_queue(self) -> OceanQueue:
-        self.__Queue_Adapter = Queue(name=self.name, qtype=self.queue_type)
+    def get_queue(self) -> _OceanQueue:
+        self.__Queue_Adapter = _Queue(name=self.name, qtype=self.queue_type)
         __queue_obj = self.__Queue_Adapter.get_instance()
         return __queue_obj
 

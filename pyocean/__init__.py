@@ -20,15 +20,23 @@ from pyocean.mode import RunningMode, FeatureMode
 from pyocean.task import OceanTask, QueueTask
 from pyocean.worker import (
     OceanSystem,
-    OceanSimpleWorker, OceanPersistenceWorker,
-    OceanSimpleAsyncWorker, OceanPersistenceAsyncWorker)
-from pyocean.parallel import MultiProcessingStrategy, MultiProcessingQueueType, ParallelResult
-from pyocean.concurrent import MultiThreadingStrategy, MultiThreadingQueueType, ConcurrentResult
+    OceanSimpleWorker,
+    OceanPersistenceWorker,
+    OceanSimpleAsyncWorker,
+    OceanPersistenceAsyncWorker)
+from pyocean.parallel import (
+    MultiProcessingQueueType,
+    MultiProcessingStrategy,
+    ParallelResult)
+from pyocean.concurrent import (
+    MultiThreadingQueueType,
+    MultiThreadingStrategy,
+    ConcurrentResult)
 from pyocean.coroutine import (
-    MultiGreenletStrategy,
     GeventQueueType,
+    MultiGreenletStrategy,
     CoroutineResult,
-    AsynchronousStrategy,
     AsynchronousQueueType,
+    AsynchronousStrategy,
     AsynchronousResult)
 

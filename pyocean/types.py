@@ -74,14 +74,30 @@ from asyncio.locks import (Lock as AsyncIOLock,
                            Event as AsyncIOEvent,
                            Condition as AsyncIOCondition)
 
-from typing import Union
+from typing import Union, NewType
 
 
-OceanTasks = Union[Thread, AsyncResult, ApplyResult, Greenlet, Task]
-OceanQueue = Union[Queue, MultiProcessingQueue, GeventQueue, AsyncIOQueue]
-OceanLock = Union[ThreadingLock, MultiProcessingLock, AsyncIOLock]
-OceanRLock = Union[ThreadingRLock, MultiProcessingRLock, GeventRLock]
-OceanSemaphore = Union[ThreadingSemaphore, MultiProcessingSemaphore, GeventSemaphore, AsyncIOSemaphore]
-OceanBoundedSemaphore = Union[ThreadingBoundedSemaphore, MultiProcessingBoundedSemaphore, GeventBoundedSemaphore, AsyncIOBoundedSemaphore]
-OceanEvent = Union[ThreadingEvent, MultiProcessingEvent, GeventEvent, AsyncIOEvent]
-OceanCondition = Union[ThreadingCondition, MultiProcessingCondition, AsyncIOCondition]
+__OceanTasks = Union[Thread, AsyncResult, ApplyResult, Greenlet, Task]
+OceanTasks = NewType("OceanTasks", __OceanTasks)
+
+__OceanQueue = Union[Queue, MultiProcessingQueue, GeventQueue, AsyncIOQueue]
+OceanQueue = NewType("OceanQueue", __OceanQueue)
+
+__OceanLock = Union[ThreadingLock, MultiProcessingLock, AsyncIOLock]
+OceanLock = NewType("OceanLock", __OceanLock)
+
+__OceanRLock = Union[ThreadingRLock, MultiProcessingRLock, GeventRLock]
+OceanRLock = NewType("OceanRLock", __OceanRLock)
+
+__OceanSemaphore = Union[ThreadingSemaphore, MultiProcessingSemaphore, GeventSemaphore, AsyncIOSemaphore]
+OceanSemaphore = NewType("OceanSemaphore", __OceanSemaphore)
+
+__OceanBoundedSemaphore = Union[ThreadingBoundedSemaphore, MultiProcessingBoundedSemaphore, GeventBoundedSemaphore, AsyncIOBoundedSemaphore]
+OceanBoundedSemaphore = NewType("OceanBoundedSemaphore", __OceanBoundedSemaphore)
+
+__OceanEvent = Union[ThreadingEvent, MultiProcessingEvent, GeventEvent, AsyncIOEvent]
+OceanEvent = NewType("OceanEvent", __OceanEvent)
+
+__OceanCondition = Union[ThreadingCondition, MultiProcessingCondition, AsyncIOCondition]
+OceanCondition = NewType("OceanCondition", __OceanCondition)
+

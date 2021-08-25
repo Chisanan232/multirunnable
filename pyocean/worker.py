@@ -1,24 +1,24 @@
-from pyocean.framework.task import BaseTask, BaseQueueTask
-from pyocean.framework.worker import BaseWorker, BaseAsyncWorker, BaseSystem
-from pyocean.framework.features import BaseFeatureAdapterFactory
-from pyocean.framework.collection import BaseList
-from pyocean.framework.strategy import RunnableStrategy, AsyncRunnableStrategy, Resultable
-from pyocean.framework.result import OceanResult
-from pyocean.mode import RunningMode
-from pyocean.api.decorator import ReTryMechanism
-from pyocean.adapter.strategy import StrategyAdapter
-from pyocean.persistence.interface import OceanPersistence
+from pyocean.framework.task import BaseTask as _BaseTask, BaseQueueTask as _BaseQueueTask
+from pyocean.framework.worker import BaseWorker as _BaseWorker, BaseAsyncWorker as _BaseAsyncWorker, BaseSystem as _BaseSystem
+from pyocean.framework.features import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
+from pyocean.framework.collection import BaseList as _BaseList
+from pyocean.framework.strategy import RunnableStrategy as _RunnableStrategy, AsyncRunnableStrategy as _AsyncRunnableStrategy, Resultable as _Resultable
+from pyocean.framework.result import OceanResult as _OceanResult
+from pyocean.mode import RunningMode as _RunningMode
+from pyocean.api.decorator import ReTryMechanism as _ReTryMechanism
+from pyocean.adapter.strategy import StrategyAdapter as _StrategyAdapter
+from pyocean.persistence.interface import OceanPersistence as _OceanPersistence
 
 from abc import ABC
 from typing import List, Tuple, Dict, Optional, Union
 
 
-Running_Strategy: Union[RunnableStrategy, AsyncRunnableStrategy] = None
+Running_Strategy: Union[_RunnableStrategy, _AsyncRunnableStrategy] = None
 
 
-class OceanWorker(ABC, BaseWorker):
+class OceanWorker(ABC, _BaseWorker):
 
-    def __init__(self, mode: RunningMode, worker_num: int):
+    def __init__(self, mode: _RunningMode, worker_num: int):
         super(OceanWorker, self).__init__(mode=mode, worker_num=worker_num)
 
         self._initial_running_strategy()
@@ -35,11 +35,11 @@ class OceanWorker(ABC, BaseWorker):
 
 
     def start(self,
-              task: BaseTask,
-              queue_tasks: Optional[Union[BaseQueueTask, BaseList]] = None,
-              features: Optional[Union[BaseFeatureAdapterFactory, BaseList]] = None,
+              task: _BaseTask,
+              queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+              features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
               saving_mode: bool = False,
-              init_args: Tuple = (), init_kwargs: Dict = {}) -> [OceanResult]:
+              init_args: Tuple = (), init_kwargs: Dict = {}) -> [_OceanResult]:
 
         __worker_run_time = 0
         __worker_run_finish = None
@@ -65,13 +65,13 @@ class OceanWorker(ABC, BaseWorker):
 
 
     def pre_activate(self,
-                     queue_tasks: Optional[Union[BaseQueueTask, BaseList]] = None,
-                     features: Optional[Union[BaseFeatureAdapterFactory, BaseList]] = None,
+                     queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+                     features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
                      *args, **kwargs) -> None:
         Running_Strategy.initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
 
 
-    def activate(self, task: BaseTask, saving_mode: bool = False) -> None:
+    def activate(self, task: _BaseTask, saving_mode: bool = False) -> None:
         if saving_mode is True:
             _kwargs = {"task": task}
             __worker_list = Running_Strategy.build_workers(function=self.run_task, **_kwargs)
@@ -80,8 +80,8 @@ class OceanWorker(ABC, BaseWorker):
         Running_Strategy.activate_workers(workers_list=__worker_list)
 
 
-    @ReTryMechanism.task
-    def run_task(self, task: BaseTask) -> [OceanResult]:
+    @_ReTryMechanism.task
+    def run_task(self, task: _BaseTask) -> [_OceanResult]:
         result = task.function(*task.func_args, **task.func_kwargs)
         return result
 
@@ -98,20 +98,20 @@ class OceanWorker(ABC, BaseWorker):
         pass
 
 
-    def get_result(self) -> [OceanResult]:
-        if isinstance(Running_Strategy, Resultable):
+    def get_result(self) -> [_OceanResult]:
+        if isinstance(Running_Strategy, _Resultable):
             return Running_Strategy.get_result()
         else:
             return []
 
 
 
-class OceanAsyncWorker(BaseAsyncWorker):
+class OceanAsyncWorker(_BaseAsyncWorker):
 
     _Initial_Object = None
     _Target_Function = None
 
-    def __init__(self, mode: RunningMode, worker_num: int):
+    def __init__(self, mode: _RunningMode, worker_num: int):
         super(OceanAsyncWorker, self).__init__(mode=mode, worker_num=worker_num)
 
         self._initial_running_strategy()
@@ -132,9 +132,9 @@ class OceanAsyncWorker(BaseAsyncWorker):
 
 
     def start(self,
-              task: BaseTask,
-              queue_tasks: Optional[Union[BaseQueueTask, BaseList]] = None,
-              features: Optional[Union[BaseFeatureAdapterFactory, BaseList]] = None,
+              task: _BaseTask,
+              queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+              features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
               saving_mode: bool = False,
               init_args: Tuple = (), init_kwargs: Dict = {}) -> None:
 
@@ -152,11 +152,11 @@ class OceanAsyncWorker(BaseAsyncWorker):
 
 
     async def async_process(self,
-                            task: BaseTask,
-                            queue_tasks: Optional[Union[BaseQueueTask, BaseList]] = None,
-                            features: Optional[Union[BaseFeatureAdapterFactory, BaseList]] = None,
+                            task: _BaseTask,
+                            queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+                            features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
                             saving_mode: bool = False,
-                            init_args: Tuple = (), init_kwargs: Dict = {}) -> [OceanResult]:
+                            init_args: Tuple = (), init_kwargs: Dict = {}) -> [_OceanResult]:
 
         __worker_run_time = 0
         __worker_run_finish = None
@@ -181,13 +181,13 @@ class OceanAsyncWorker(BaseAsyncWorker):
 
 
     async def pre_activate(self,
-                           queue_tasks: Optional[Union[BaseQueueTask, BaseList]] = None,
-                           features: Optional[Union[BaseFeatureAdapterFactory, BaseList]] = None,
+                           queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+                           features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
                            *args, **kwargs) -> None:
         await Running_Strategy.initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
 
 
-    async def activate(self, task: BaseTask, saving_mode: bool = False) -> None:
+    async def activate(self, task: _BaseTask, saving_mode: bool = False) -> None:
         if saving_mode is True:
             __kwargs = {"task": task}
             __worker_list = Running_Strategy.build_workers(function=self.run_task, **__kwargs)
@@ -196,8 +196,8 @@ class OceanAsyncWorker(BaseAsyncWorker):
         await Running_Strategy.activate_workers(workers_list=__worker_list)
 
 
-    @ReTryMechanism.async_task
-    async def run_task(self, task: BaseTask) -> [OceanResult]:
+    @_ReTryMechanism.async_task
+    async def run_task(self, task: _BaseTask) -> [_OceanResult]:
         result = await task.function(*task.func_args, **task.func_kwargs)
         return result
 
@@ -214,8 +214,8 @@ class OceanAsyncWorker(BaseAsyncWorker):
         pass
 
 
-    def get_result(self) -> [OceanResult]:
-        if isinstance(Running_Strategy, Resultable):
+    def get_result(self) -> [_OceanResult]:
+        if isinstance(Running_Strategy, _Resultable):
             return Running_Strategy.get_result()
         else:
             return []
@@ -224,12 +224,12 @@ class OceanAsyncWorker(BaseAsyncWorker):
 
 class OceanSimpleWorker(OceanWorker):
 
-    def __init__(self, mode: RunningMode, worker_num: int):
+    def __init__(self, mode: _RunningMode, worker_num: int):
         super().__init__(mode=mode, worker_num=worker_num)
 
 
     def _initial_running_strategy(self) -> None:
-        __running_strategy_adapter = StrategyAdapter(
+        __running_strategy_adapter = _StrategyAdapter(
             mode=self._mode,
             worker_num=self.worker_num)
         global Running_Strategy
@@ -239,8 +239,8 @@ class OceanSimpleWorker(OceanWorker):
 
 class OceanPersistenceWorker(OceanWorker):
 
-    def __init__(self, mode: RunningMode, worker_num: int,
-                 persistence_strategy: OceanPersistence,
+    def __init__(self, mode: _RunningMode, worker_num: int,
+                 persistence_strategy: _OceanPersistence,
                  db_connection_num: int):
         self.persistence_strategy = persistence_strategy
         self.db_connection_num = db_connection_num
@@ -248,7 +248,7 @@ class OceanPersistenceWorker(OceanWorker):
 
 
     def _initial_running_strategy(self) -> None:
-        __running_strategy_adapter = StrategyAdapter(
+        __running_strategy_adapter = _StrategyAdapter(
             mode=self._mode,
             worker_num=self.worker_num)
         global Running_Strategy
@@ -261,12 +261,12 @@ class OceanPersistenceWorker(OceanWorker):
 
 class OceanSimpleAsyncWorker(OceanAsyncWorker):
 
-    def __init__(self, mode: RunningMode, worker_num: int):
+    def __init__(self, mode: _RunningMode, worker_num: int):
         super().__init__(mode=mode, worker_num=worker_num)
 
 
     def _initial_running_strategy(self) -> None:
-        __running_strategy_adapter = StrategyAdapter(
+        __running_strategy_adapter = _StrategyAdapter(
             mode=self._mode,
             worker_num=self.worker_num)
         global Running_Strategy
@@ -276,8 +276,8 @@ class OceanSimpleAsyncWorker(OceanAsyncWorker):
 
 class OceanPersistenceAsyncWorker(OceanAsyncWorker):
 
-    def __init__(self, mode: RunningMode, worker_num: int,
-                 persistence_strategy: OceanPersistence,
+    def __init__(self, mode: _RunningMode, worker_num: int,
+                 persistence_strategy: _OceanPersistence,
                  db_connection_num: int):
         self.persistence_strategy = persistence_strategy
         self.db_connection_num = db_connection_num
@@ -285,7 +285,7 @@ class OceanPersistenceAsyncWorker(OceanAsyncWorker):
 
 
     def _initial_running_strategy(self) -> None:
-        __running_strategy_adapter = StrategyAdapter(
+        __running_strategy_adapter = _StrategyAdapter(
             mode=self._mode,
             worker_num=self.worker_num)
         global Running_Strategy
@@ -296,16 +296,16 @@ class OceanPersistenceAsyncWorker(OceanAsyncWorker):
 
 
 
-class OceanSystem(BaseSystem):
+class OceanSystem(_BaseSystem):
 
     def run(self,
-            task: BaseTask,
-            queue_tasks: Optional[Union[BaseQueueTask, BaseList]] = None,
-            features: Optional[Union[BaseFeatureAdapterFactory, BaseList]] = None,
+            task: _BaseTask,
+            queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+            features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
             saving_mode: bool = False,
-            timeout: int = 0) -> [OceanResult]:
+            timeout: int = 0) -> [_OceanResult]:
 
-        if self._mode is RunningMode.Asynchronous:
+        if self._mode is _RunningMode.Asynchronous:
             __ocean_worker = OceanSimpleAsyncWorker(mode=self._mode, worker_num=self._worker_num)
             __ocean_worker.running_timeout = timeout
             __ocean_worker.start(task=task, queue_tasks=queue_tasks, features=features, saving_mode=saving_mode)
@@ -318,15 +318,15 @@ class OceanSystem(BaseSystem):
 
 
     def run_and_save(self,
-                     task: BaseTask,
-                     persistence_strategy: OceanPersistence,
+                     task: _BaseTask,
+                     persistence_strategy: _OceanPersistence,
                      db_connection_num: int,
-                     queue_tasks: Optional[Union[BaseQueueTask, BaseList]] = None,
-                     features: Optional[Union[BaseFeatureAdapterFactory, BaseList]] = None,
+                     queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+                     features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
                      saving_mode: bool = False,
-                     timeout: int = 0) -> [OceanResult]:
+                     timeout: int = 0) -> [_OceanResult]:
 
-        if self._mode is RunningMode.Asynchronous:
+        if self._mode is _RunningMode.Asynchronous:
             __ocean_worker = OceanPersistenceAsyncWorker(
                 mode=self._mode,
                 worker_num=self._worker_num,
