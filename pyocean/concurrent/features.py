@@ -1,4 +1,7 @@
-from pyocean.framework.features import PosixThreadLock, PosixThreadCommunication, BaseQueue, BaseQueueType
+from pyocean.framework.features import (
+    PosixThreadLock as _PosixThreadLock,
+    PosixThreadCommunication as _PosixThreadCommunication,
+    BaseQueueType as _BaseQueueType)
 
 from threading import Lock, RLock, Event, Condition, Semaphore, BoundedSemaphore
 from queue import (
@@ -12,7 +15,7 @@ from typing import Union
 ThreadQueueDataType = Union[Thread_Queue, Thread_SimpleQueue, Thread_LifoQueue, Thread_PriorityQueue]
 
 
-class MultiThreadingQueueType(BaseQueueType):
+class MultiThreadingQueueType(_BaseQueueType):
 
     Queue = Thread_Queue()
     SimpleQueue = Thread_SimpleQueue()
@@ -21,14 +24,7 @@ class MultiThreadingQueueType(BaseQueueType):
 
 
 
-class ThreadQueue(BaseQueue):
-
-    def get_queue(self, qtype: MultiThreadingQueueType) -> ThreadQueueDataType:
-        return qtype.value
-
-
-
-class ThreadLock(PosixThreadLock):
+class ThreadLock(_PosixThreadLock):
 
     def get_lock(self) -> Lock:
         return Lock()
@@ -47,7 +43,7 @@ class ThreadLock(PosixThreadLock):
 
 
 
-class ThreadCommunication(PosixThreadCommunication):
+class ThreadCommunication(_PosixThreadCommunication):
 
     def get_event(self, *args, **kwargs) -> Event:
         return Event()

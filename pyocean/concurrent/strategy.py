@@ -1,20 +1,21 @@
-from pyocean.framework.strategy import RunnableStrategy, Resultable
-from pyocean.framework.collection import BaseList
-from pyocean.framework.worker import BaseTask
-from pyocean.task import OceanTask
-from pyocean.mode import RunningMode
-from pyocean.concurrent.result import ConcurrentResult
-from pyocean.concurrent.exceptions import ThreadsListIsEmptyError
-from pyocean.exceptions import FunctionSignatureConflictError
+from pyocean.framework.task import BaseTask as _BaseTask, BaseQueueTask as _BaseQueueTask
+from pyocean.framework.features import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
+from pyocean.framework.collection import BaseList as _BaseList
+from pyocean.framework.strategy import RunnableStrategy as _RunnableStrategy, Resultable as _Resultable
+from pyocean.mode import RunningMode as _RunningMode
+from pyocean.task import OceanTask as _OceanTask
+from pyocean.concurrent.result import ConcurrentResult as _ConcurrentResult
+from pyocean.exceptions import FunctionSignatureConflictError as _FunctionSignatureConflictError
+from pyocean.concurrent.exceptions import ThreadsListIsEmptyError as _ThreadsListIsEmptyError
 
 from abc import abstractmethod, ABC
 from typing import List, Dict, Callable, Optional, Union
-from threading import Thread
 from functools import wraps
+from threading import Thread
 
 
 
-class ConcurrentStrategy(RunnableStrategy, ABC):
+class ConcurrentStrategy(_RunnableStrategy, ABC):
 
     _Threads_List: List[Thread] = []
     _Threads_Running_Result: Dict[str, Dict[str, Union[object, bool]]] = {}
@@ -45,7 +46,7 @@ class ConcurrentStrategy(RunnableStrategy, ABC):
     def save_return_value(function: Callable) -> Callable:
 
         @wraps(function)
-        def save_value_fun(self, task: BaseTask) -> None:
+        def save_value_fun(self, task: _BaseTask) -> None:
             self = self
             value = task.function(*task.func_args, **task.func_kwargs)
             __thread_result = {"result": value}
@@ -55,10 +56,12 @@ class ConcurrentStrategy(RunnableStrategy, ABC):
 
 
 
-class MultiThreadingStrategy(ConcurrentStrategy, Resultable):
+class MultiThreadingStrategy(ConcurrentStrategy, _Resultable):
 
-    def initialization(self, queue_tasks: Optional[BaseList] = None,
-                       features: Optional[BaseList] = None, *args, **kwargs) -> None:
+    def initialization(self,
+                       queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+                       features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
+                       *args, **kwargs) -> None:
         super(MultiThreadingStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
 
         # # Persistence
@@ -68,15 +71,15 @@ class MultiThreadingStrategy(ConcurrentStrategy, Resultable):
 
     def build_workers(self, function: Callable, *args, **kwargs) -> List[Thread]:
 
-        def __general_task() -> OceanTask:
-            __otask = OceanTask(mode=RunningMode.Concurrent)
+        def __general_task() -> _OceanTask:
+            __otask = _OceanTask(mode=_RunningMode.Concurrent)
             __otask.set_function(function=function)
             __otask.set_func_args(args=args)
             __otask.set_func_kwargs(kwargs=kwargs)
             return __otask
 
         if args:
-            __task = filter(lambda arg: isinstance(arg, BaseTask), args)
+            __task = filter(lambda arg: isinstance(arg, _BaseTask), args)
             if __task is None:
                 __task = __general_task()
             __args = (__task,)
@@ -88,8 +91,8 @@ class MultiThreadingStrategy(ConcurrentStrategy, Resultable):
             if __task is None:
                 __task = __general_task()
             else:
-                if not isinstance(__task, BaseTask):
-                    raise FunctionSignatureConflictError
+                if not isinstance(__task, _BaseTask):
+                    raise _FunctionSignatureConflictError
             __kwargs = {"task": __task}
         else:
             __kwargs = {}
@@ -99,7 +102,7 @@ class MultiThreadingStrategy(ConcurrentStrategy, Resultable):
 
 
     @ConcurrentStrategy.save_return_value
-    def target_task(self, task: BaseTask) -> None:
+    def target_task(self, task: _BaseTask) -> None:
         task.function(self, *task.func_args, **task.func_kwargs)
 
 
@@ -112,18 +115,18 @@ class MultiThreadingStrategy(ConcurrentStrategy, Resultable):
             for threed_index in range(self.workers_number):
                 self._Threads_List[threed_index].join()
         else:
-            raise ThreadsListIsEmptyError
+            raise _ThreadsListIsEmptyError
 
 
-    def get_result(self) -> List[ConcurrentResult]:
+    def get_result(self) -> List[_ConcurrentResult]:
         __concurrent_result = self._result_handling()
         return __concurrent_result
 
 
-    def _result_handling(self) -> List[ConcurrentResult]:
+    def _result_handling(self) -> List[_ConcurrentResult]:
         __concurrent_results = []
         for __result in self._Threading_Running_Result:
-            __concurrent_result = ConcurrentResult()
+            __concurrent_result = _ConcurrentResult()
             __concurrent_result.data = __result.get("result")
 
             __concurrent_results.append(__concurrent_result)
