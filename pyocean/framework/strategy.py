@@ -271,7 +271,7 @@ class AsyncRunnableStrategy(RunnableStrategy, ABC):
 
         # # Queue initialization
         if queue_tasks is not None:
-            await self._init_queue_process(queue_tasks=queue_tasks)
+            await self._init_queue_process(queue_tasks)
 
         # # Lock and communication features initialization
         if features is not None:
