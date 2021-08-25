@@ -69,21 +69,3 @@ class QueueAdapterFactory(_BaseFeatureAdapterFactory, ABC):
     def __repr__(self):
         return f"<Queue Object(name={self._name}, qtype={self._qtype}) ar {id(self)}>"
 
-
-
-class BaseAdapter(metaclass=ABCMeta):
-
-    def __init__(self, mode: _FeatureMode):
-        """
-        Description:
-            It will import the target module and instancing the target class to be the instance object.
-            In the other words, it will
-              1. If it's parallel strategy, import pyocean.parallel.features.MultiProcessing.
-              2. If it's concurrent strategy, import pyocean.concurrent.features.{MultiThreading, Coroutine or Asynchronous}.
-        :param mode:
-        """
-
-        self._mode = mode
-        self._running_info: Dict[str, str] = mode.value
-        self._module: str = self._running_info.get("module")
-
