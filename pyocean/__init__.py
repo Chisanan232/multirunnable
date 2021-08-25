@@ -24,19 +24,4 @@ from pyocean.worker import (
     OceanPersistenceWorker,
     OceanSimpleAsyncWorker,
     OceanPersistenceAsyncWorker)
-from pyocean.parallel import (
-    MultiProcessingQueueType,
-    MultiProcessingStrategy,
-    ParallelResult)
-from pyocean.concurrent import (
-    MultiThreadingQueueType,
-    MultiThreadingStrategy,
-    ConcurrentResult)
-from pyocean.coroutine import (
-    GeventQueueType,
-    MultiGreenletStrategy,
-    CoroutineResult,
-    AsynchronousQueueType,
-    AsynchronousStrategy,
-    AsynchronousResult)
 
