@@ -1,7 +1,7 @@
-from pyocean.framework.result import OceanResult
+from pyocean.framework.result import OceanResult as _OceanResult
 
 
 
-class ParallelResult(OceanResult):
+class ParallelResult(_OceanResult):
     pass
 

@@ -1,10 +1,10 @@
-from pyocean.framework.strategy import RunnableStrategy, Resultable
-from pyocean.framework.task import BaseQueueTask
-from pyocean.framework.features import BaseFeatureAdapterFactory
-from pyocean.framework.collection import BaseList
-from pyocean.framework.result import ResultState
-from pyocean.parallel.result import ParallelResult
-from pyocean.persistence.interface import OceanPersistence
+from pyocean.framework.task import BaseQueueTask as _BaseQueueTask
+from pyocean.framework.features import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
+from pyocean.framework.collection import BaseList as _BaseList
+from pyocean.framework.strategy import RunnableStrategy as _RunnableStrategy, Resultable as _Resultable
+from pyocean.framework.result import ResultState as _ResultState
+from pyocean.parallel.result import ParallelResult as _ParallelResult
+from pyocean.persistence.interface import OceanPersistence as _OceanPersistence
 
 from abc import abstractmethod
 from typing import List, Dict, Iterable, Union, Callable, Optional, cast
@@ -14,7 +14,7 @@ from multiprocessing.managers import Namespace
 
 
 
-class ParallelStrategy(RunnableStrategy):
+class ParallelStrategy(_RunnableStrategy):
 
     _Manager: Manager = None
     _Namespace_Object: Namespace = None
@@ -22,7 +22,7 @@ class ParallelStrategy(RunnableStrategy):
     _Processors_Running_Result: List[Dict[str, Union[AsyncResult, bool]]] = {}
 
     def __init__(self, workers_num: int,
-                 persistence_strategy: OceanPersistence = None, **kwargs):
+                 persistence_strategy: _OceanPersistence = None, **kwargs):
         """
         Description:
             Converting the object to multiprocessing.manager.Namespace type object at initial state.
@@ -33,7 +33,7 @@ class ParallelStrategy(RunnableStrategy):
         super().__init__(workers_num=workers_num, persistence_strategy=persistence_strategy, **kwargs)
         self.__init_namespace_obj()
         if persistence_strategy is not None:
-            namespace_persistence_strategy = cast(OceanPersistence, self.namespacing_obj(obj=persistence_strategy))
+            namespace_persistence_strategy = cast(_OceanPersistence, self.namespacing_obj(obj=persistence_strategy))
             super().__init__(
                 workers_num=workers_num,
                 db_connection_pool_size=self.db_connection_number,
@@ -73,11 +73,11 @@ class ParallelStrategy(RunnableStrategy):
 
 
 
-class MultiProcessingStrategy(ParallelStrategy, Resultable):
+class MultiProcessingStrategy(ParallelStrategy, _Resultable):
 
     def initialization(self,
-                       queue_tasks: Optional[Union[BaseQueueTask, BaseList]] = None,
-                       features: Optional[Union[BaseFeatureAdapterFactory, BaseList]] = None,
+                       queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+                       features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
                        *args, **kwargs) -> None:
         super(MultiProcessingStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
 
@@ -119,21 +119,21 @@ class MultiProcessingStrategy(ParallelStrategy, Resultable):
         self._Processors_Pool.join()
 
 
-    def get_result(self) -> List[ParallelResult]:
+    def get_result(self) -> List[_ParallelResult]:
         __parallel_result = self._result_handling()
         return __parallel_result
 
 
-    def _result_handling(self) -> List[ParallelResult]:
+    def _result_handling(self) -> List[_ParallelResult]:
         __parallel_results = []
         for __result in self._Processors_Running_Result:
-            __parallel_result = ParallelResult()
+            __parallel_result = _ParallelResult()
 
             __process_successful = __result.get("successful")
             if __process_successful is True:
-                __parallel_result.state = ResultState.SUCCESS.value
+                __parallel_result.state = _ResultState.SUCCESS.value
             else:
-                __parallel_result.state = ResultState.FAIL.value
+                __parallel_result.state = _ResultState.FAIL.value
 
             __process_result = __result.get("result")
             __parallel_result.data = __process_result
