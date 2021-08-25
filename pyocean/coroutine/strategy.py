@@ -1,9 +1,16 @@
-from pyocean.framework.strategy import RunnableStrategy, AsyncRunnableStrategy, Resultable
-from pyocean.framework.collection import BaseList
-from pyocean.coroutine.result import CoroutineResult, AsynchronousResult
+from pyocean.framework.task import BaseQueueTask as _BaseQueueTask
+from pyocean.framework.features import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
+from pyocean.framework.strategy import (
+    RunnableStrategy as _RunnableStrategy,
+    AsyncRunnableStrategy as _AsyncRunnableStrategy,
+    Resultable as _Resultable)
+from pyocean.framework.collection import BaseList as _BaseList
+from pyocean.coroutine.result import (
+    CoroutineResult as _CoroutineResult,
+    AsynchronousResult as _AsynchronousResult)
 
 from abc import ABCMeta, ABC, abstractmethod
-from typing import List, Iterable, Callable, Optional
+from typing import List, Iterable, Callable, Optional, Union
 from gevent.greenlet import Greenlet
 from asyncio.tasks import Task
 import asyncio
@@ -17,17 +24,19 @@ class CoroutineStrategy(metaclass=ABCMeta):
 
 
 
-class BaseGreenletStrategy(CoroutineStrategy, RunnableStrategy, ABC):
+class BaseGreenletStrategy(CoroutineStrategy, _RunnableStrategy, ABC):
 
     _Gevent_List: List[Greenlet] = None
     _Gevent_Running_Result: List = []
 
 
 
-class MultiGreenletStrategy(BaseGreenletStrategy, Resultable):
+class MultiGreenletStrategy(BaseGreenletStrategy, _Resultable):
 
-    def initialization(self, queue_tasks: Optional[BaseList] = None,
-                       features: Optional[BaseList] = None, *args, **kwargs) -> None:
+    def initialization(self,
+                       queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+                       features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
+                       *args, **kwargs) -> None:
         super(MultiGreenletStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
 
         # # Persistence
@@ -62,10 +71,10 @@ class MultiGreenletStrategy(BaseGreenletStrategy, Resultable):
         return __coroutine_results
 
 
-    def _result_handling(self) -> List[CoroutineResult]:
+    def _result_handling(self) -> List[_CoroutineResult]:
         __coroutine_results = []
         for __result in self._Gevent_Running_Result:
-            __coroutine_result = CoroutineResult()
+            __coroutine_result = _CoroutineResult()
             __coroutine_result.data = __result
             __coroutine_results.append(__coroutine_result)
 
@@ -73,7 +82,7 @@ class MultiGreenletStrategy(BaseGreenletStrategy, Resultable):
 
 
 
-class BaseAsyncStrategy(CoroutineStrategy, AsyncRunnableStrategy, ABC):
+class BaseAsyncStrategy(CoroutineStrategy, _AsyncRunnableStrategy, ABC):
 
     _Async_Event_Loop = None
     _Async_Task_List: List[Task] = None
@@ -84,15 +93,17 @@ class BaseAsyncStrategy(CoroutineStrategy, AsyncRunnableStrategy, ABC):
 
 
 
-class AsynchronousStrategy(BaseAsyncStrategy, Resultable):
+class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
 
     def get_event_loop(self):
         self._Async_Event_Loop = asyncio.get_event_loop()
         return self._Async_Event_Loop
 
 
-    async def initialization(self, queue_tasks: Optional[BaseList] = None,
-                             features: Optional[BaseList] = None, *args, **kwargs) -> None:
+    async def initialization(self,
+                             queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+                             features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
+                             *args, **kwargs) -> None:
         await super(AsynchronousStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
 
         # # Persistence
@@ -128,10 +139,10 @@ class AsynchronousStrategy(BaseAsyncStrategy, Resultable):
         return __async_results
 
 
-    def _result_handling(self) -> List[AsynchronousResult]:
+    def _result_handling(self) -> List[_AsynchronousResult]:
         __async_results = []
         for __result in self._Async_Running_Result:
-            __async_result = AsynchronousResult()
+            __async_result = _AsynchronousResult()
 
             __async_result.worker_id = __result.get("async_id")
             __async_result.event_loop = __result.get("event_loop")

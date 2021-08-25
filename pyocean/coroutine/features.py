@@ -1,5 +1,12 @@
-from pyocean.types import OceanCondition, OceanEvent
-from pyocean.framework.features import PosixThreadLock, PosixThreadCommunication, BaseQueue, BaseQueueType
+from pyocean.framework.features import (
+    PosixThreadLock as _PosixThreadLock,
+    PosixThreadCommunication as _PosixThreadCommunication,
+    BaseQueueType as _BaseQueueType)
+from pyocean.types import (
+    OceanCondition as _OceanCondition,
+    OceanEvent as _OceanEvent
+)
+
 from gevent.queue import (
     Queue as _Greenlet_Queue,
     SimpleQueue as _Greenlet_SimpleQueue,
@@ -27,7 +34,7 @@ from typing import Optional, Union
 
 
 
-class GeventQueueType(BaseQueueType):
+class GeventQueueType(_BaseQueueType):
 
     Queue = _Greenlet_Queue()
     SimpleQueue = _Greenlet_SimpleQueue()
@@ -37,14 +44,7 @@ class GeventQueueType(BaseQueueType):
 
 
 
-class GreenletQueue(BaseQueue):
-
-    def get_queue(self, qtype: GeventQueueType):
-        return qtype.value
-
-
-
-class GreenletLock(PosixThreadLock):
+class GreenletLock(_PosixThreadLock):
 
     def get_lock(self) -> _Greenlet_Lock:
         return _Greenlet_Lock()
@@ -63,13 +63,13 @@ class GreenletLock(PosixThreadLock):
 
 
 
-class GreenletCommunicationSpec(PosixThreadCommunication):
+class GreenletCommunicationSpec(_PosixThreadCommunication):
 
-    def get_event(self, *args, **kwargs) -> OceanEvent:
+    def get_event(self, *args, **kwargs) -> _OceanEvent:
         pass
 
 
-    def get_condition(self, *args, **kwargs) -> OceanCondition:
+    def get_condition(self, *args, **kwargs) -> _OceanCondition:
         raise RuntimeError("Greenlet doesn't have condition attribute.")
 
 
@@ -81,7 +81,7 @@ class GreenletCommunication(GreenletCommunicationSpec):
 
 
 
-class AsynchronousQueueType(BaseQueueType):
+class AsynchronousQueueType(_BaseQueueType):
 
     Queue = _Async_Queue()
     PriorityQueue = _Async_PriorityQueue()
@@ -89,14 +89,7 @@ class AsynchronousQueueType(BaseQueueType):
 
 
 
-class AsyncQueue(BaseQueue):
-
-    def get_queue(self, qtype: AsynchronousQueueType):
-        return qtype.value
-
-
-
-class AsyncLock(PosixThreadLock):
+class AsyncLock(_PosixThreadLock):
 
     def get_lock(self, **kwargs) -> _Async_Lock:
         __loop = _AsyncUtils.chk_loop(loop=kwargs.get("loop", None))
@@ -119,7 +112,7 @@ class AsyncLock(PosixThreadLock):
 
 
 
-class AsyncCommunication(PosixThreadCommunication):
+class AsyncCommunication(_PosixThreadCommunication):
 
     def get_event(self, *args, **kwargs) -> _Async_Event:
         __loop = _AsyncUtils.chk_loop(loop=kwargs.get("loop", None))

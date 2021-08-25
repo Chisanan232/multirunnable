@@ -1,13 +1,13 @@
-from pyocean.framework.result import ResultState, OceanResult
+from pyocean.framework.result import OceanResult as _OceanResult
 
 
 
-class CoroutineResult(OceanResult):
+class CoroutineResult(_OceanResult):
     pass
 
 
 
-class AsynchronousResult(OceanResult):
+class AsynchronousResult(_OceanResult):
 
     _Event_Loop = None
 
