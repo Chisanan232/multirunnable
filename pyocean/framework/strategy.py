@@ -1,8 +1,8 @@
-from pyocean.framework.collection import BaseList
-from pyocean.framework.task import BaseQueueTask
-from pyocean.framework.features import BaseFeatureAdapterFactory
-from pyocean.persistence.interface import OceanPersistence
-from pyocean.types import OceanTasks
+from pyocean.framework.collection import BaseList as _BaseList
+from pyocean.framework.task import BaseQueueTask as _BaseQueueTask
+from pyocean.framework.features import BaseFeatureAdapterFactory as  _BaseFeatureAdapterFactory
+from pyocean.persistence.interface import OceanPersistence as _OceanPersistence
+from pyocean.types import OceanTasks as _OceanTasks
 import pyocean._utils as _utils
 
 from abc import ABCMeta, ABC, abstractmethod
@@ -14,7 +14,7 @@ import logging
 
 class BaseRunnableStrategy(metaclass=ABCMeta):
 
-    def __init__(self, workers_num: int, persistence_strategy: OceanPersistence = None, **kwargs):
+    def __init__(self, workers_num: int, persistence_strategy: _OceanPersistence = None, **kwargs):
         self._workers_num = workers_num
         self._persistence_strategy = persistence_strategy
         self._db_conn_num = kwargs.get("db_connection_pool_size", None)
@@ -79,8 +79,8 @@ class BaseRunnableStrategy(metaclass=ABCMeta):
 
     def initialization(
             self,
-            queue_tasks: Optional[Union[BaseQueueTask, BaseList]] = None,
-            features: Optional[Union[BaseFeatureAdapterFactory, BaseList]] = None,
+            queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+            features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
             *args, **kwargs) -> None:
         """
         Description:
@@ -96,7 +96,7 @@ class BaseRunnableStrategy(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def build_workers(self, function: Callable, *args, **kwargs) -> List[OceanTasks]:
+    def build_workers(self, function: Callable, *args, **kwargs) -> List[_OceanTasks]:
         """
         Description:
             Assign tasks into each different threads or processes.
@@ -109,7 +109,7 @@ class BaseRunnableStrategy(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def activate_workers(self, workers_list: List[OceanTasks]) -> None:
+    def activate_workers(self, workers_list: List[_OceanTasks]) -> None:
         """
         Description:
             Activate multiple threads or processes to run target task(s).
@@ -167,8 +167,8 @@ class RunnableStrategy(BaseRunnableStrategy, ABC):
 
 
     def initialization(self,
-                       queue_tasks: Optional[Union[BaseQueueTask, BaseList]] = None,
-                       features: Optional[Union[BaseFeatureAdapterFactory, BaseList]] = None,
+                       queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+                       features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
                        *args, **kwargs) -> None:
         """
         Description:
@@ -192,8 +192,8 @@ class RunnableStrategy(BaseRunnableStrategy, ABC):
             self._init_lock_or_communication_process(features)
 
 
-    @dispatch(BaseQueueTask)
-    def _init_queue_process(self, queue_tasks: BaseQueueTask) -> None:
+    @dispatch(_BaseQueueTask)
+    def _init_queue_process(self, queue_tasks: _BaseQueueTask) -> None:
         """
         Description:
             Initialize Queue object which be needed to handle in Queue-Task-List.
@@ -204,8 +204,8 @@ class RunnableStrategy(BaseRunnableStrategy, ABC):
         queue_tasks.init_queue_with_values()
 
 
-    @dispatch(BaseList)
-    def _init_queue_process(self, queue_tasks: BaseList) -> None:
+    @dispatch(_BaseList)
+    def _init_queue_process(self, queue_tasks: _BaseList) -> None:
         """
         Description:
             Initialize Queue object which be needed to handle in Queue-Task-List.
@@ -215,12 +215,12 @@ class RunnableStrategy(BaseRunnableStrategy, ABC):
 
         __queues_iterator = queue_tasks.iterator()
         while __queues_iterator.has_next():
-            __queue_adapter = cast(BaseQueueTask, __queues_iterator.next())
+            __queue_adapter = cast(_BaseQueueTask, __queues_iterator.next())
             __queue_adapter.init_queue_with_values()
 
 
-    @dispatch(BaseFeatureAdapterFactory)
-    def _init_lock_or_communication_process(self, features: BaseFeatureAdapterFactory) -> None:
+    @dispatch(_BaseFeatureAdapterFactory)
+    def _init_lock_or_communication_process(self, features: _BaseFeatureAdapterFactory) -> None:
         """
         Description:
             Initialize Lock (Lock, RLock, Semaphore, Bounded Semaphore)
@@ -234,8 +234,8 @@ class RunnableStrategy(BaseRunnableStrategy, ABC):
         features.globalize_instance(__instance)
 
 
-    @dispatch(BaseList)
-    def _init_lock_or_communication_process(self, features: BaseList) -> None:
+    @dispatch(_BaseList)
+    def _init_lock_or_communication_process(self, features: _BaseList) -> None:
         """
         Description:
             Initialize Lock (Lock, RLock, Semaphore, Bounded Semaphore)
@@ -247,7 +247,7 @@ class RunnableStrategy(BaseRunnableStrategy, ABC):
 
         __features_iterator = features.iterator()
         while __features_iterator.has_next():
-            __feature_adapter = cast(BaseFeatureAdapterFactory, __features_iterator.next())
+            __feature_adapter = cast(_BaseFeatureAdapterFactory, __features_iterator.next())
             __instance = __feature_adapter.get_instance()
             __feature_adapter.globalize_instance(__instance)
 
@@ -256,8 +256,8 @@ class RunnableStrategy(BaseRunnableStrategy, ABC):
 class AsyncRunnableStrategy(RunnableStrategy, ABC):
 
     async def initialization(self,
-                             queue_tasks: Optional[Union[BaseQueueTask, BaseList]] = None,
-                             features: Optional[Union[BaseFeatureAdapterFactory, BaseList]] = None,
+                             queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+                             features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
                              *args, **kwargs) -> None:
         """
         Description:
@@ -278,8 +278,8 @@ class AsyncRunnableStrategy(RunnableStrategy, ABC):
             super()._init_lock_or_communication_process(features)
 
 
-    @dispatch(BaseQueueTask)
-    async def _init_queue_process(self, queue_tasks: BaseQueueTask) -> None:
+    @dispatch(_BaseQueueTask)
+    async def _init_queue_process(self, queue_tasks: _BaseQueueTask) -> None:
         """
         Description:
             Asynchronous version of method '_init_queue_process'.
@@ -290,8 +290,8 @@ class AsyncRunnableStrategy(RunnableStrategy, ABC):
         await queue_tasks.async_init_queue_with_values()
 
 
-    @dispatch(BaseList)
-    async def _init_queue_process(self, queue_tasks: BaseList) -> None:
+    @dispatch(_BaseList)
+    async def _init_queue_process(self, queue_tasks: _BaseList) -> None:
         """
         Description:
             Asynchronous version of method '_init_queue_process'.
@@ -301,12 +301,12 @@ class AsyncRunnableStrategy(RunnableStrategy, ABC):
 
         __queues_iterator = queue_tasks.iterator()
         while __queues_iterator.has_next():
-            __queue_adapter = cast(BaseQueueTask, __queues_iterator.next())
+            __queue_adapter = cast(_BaseQueueTask, __queues_iterator.next())
             await __queue_adapter.async_init_queue_with_values()
 
 
     @abstractmethod
-    async def build_workers(self, function: Callable, *args, **kwargs) -> List[OceanTasks]:
+    async def build_workers(self, function: Callable, *args, **kwargs) -> List[_OceanTasks]:
         """
         Description:
             Asynchronous version of method 'build_workers'.
@@ -319,7 +319,7 @@ class AsyncRunnableStrategy(RunnableStrategy, ABC):
 
 
     @abstractmethod
-    async def activate_workers(self, workers_list: List[OceanTasks]) -> None:
+    async def activate_workers(self, workers_list: List[_OceanTasks]) -> None:
         """
         Description:
             Asynchronous version of method 'activate_workers'.

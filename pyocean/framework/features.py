@@ -1,9 +1,8 @@
-from pyocean.framework.exceptions import ParameterCannotBeEmpty
 from pyocean.types import (
-    OceanLock, OceanRLock,
-    OceanSemaphore, OceanBoundedSemaphore,
-    OceanEvent, OceanCondition,
-    OceanQueue)
+    OceanLock as _OceanLock, OceanRLock as _OceanRLock,
+    OceanSemaphore as _OceanSemaphore, OceanBoundedSemaphore as _OceanBoundedSemaphore,
+    OceanEvent as _OceanEvent, OceanCondition as _OceanCondition,
+    OceanQueue as _OceanQueue)
 import pyocean._utils as _utils
 
 from abc import ABCMeta, abstractmethod
@@ -20,7 +19,7 @@ class BaseQueueType(Enum):
 class BaseQueue(metaclass=ABCMeta):
 
     @abstractmethod
-    def get_queue(self, qtype: BaseQueueType) -> OceanQueue:
+    def get_queue(self, qtype: BaseQueueType) -> _OceanQueue:
         pass
 
 
@@ -90,7 +89,7 @@ class PosixThread(metaclass=ABCMeta):
 class PosixThreadLock(PosixThread):
 
     @abstractmethod
-    def get_lock(self, **kwargs) -> OceanLock:
+    def get_lock(self, **kwargs) -> _OceanLock:
         """
         Description:
             Get Lock object.
@@ -100,7 +99,7 @@ class PosixThreadLock(PosixThread):
 
 
     @abstractmethod
-    def get_rlock(self, **kwargs) -> OceanRLock:
+    def get_rlock(self, **kwargs) -> _OceanRLock:
         """
         Description:
             Get RLock object.
@@ -110,7 +109,7 @@ class PosixThreadLock(PosixThread):
 
 
     @abstractmethod
-    def get_semaphore(self, value: int, **kwargs) -> OceanSemaphore:
+    def get_semaphore(self, value: int, **kwargs) -> _OceanSemaphore:
         """
         Description:
             Get Semaphore object.
@@ -121,7 +120,7 @@ class PosixThreadLock(PosixThread):
 
 
     @abstractmethod
-    def get_bounded_semaphore(self, value: int, **kwargs) -> OceanBoundedSemaphore:
+    def get_bounded_semaphore(self, value: int, **kwargs) -> _OceanBoundedSemaphore:
         """
         Description:
             Get Bounded Semaphore object.
@@ -135,7 +134,7 @@ class PosixThreadLock(PosixThread):
 class PosixThreadCommunication(PosixThread):
 
     @abstractmethod
-    def get_event(self, *args, **kwargs) -> OceanEvent:
+    def get_event(self, *args, **kwargs) -> _OceanEvent:
         """
         Description:
             Get Event object.
@@ -146,7 +145,7 @@ class PosixThreadCommunication(PosixThread):
 
 
     @abstractmethod
-    def get_condition(self, *args, **kwargs) -> OceanCondition:
+    def get_condition(self, *args, **kwargs) -> _OceanCondition:
         """
         Description:
             Get Condition object.
@@ -264,23 +263,4 @@ class BaseGlobalizeAPI(metaclass=ABCMeta):
         :return:
         """
         pass
-
-
-
-class FeatureUtils:
-
-    @staticmethod
-    def chk_obj(param: str, **kwargs):
-        """
-        Description:
-            Ensure that the value of target parameter is not None.
-        :param param:
-        :param kwargs:
-        :return:
-        """
-
-        __obj = kwargs.get(param, None)
-        if __obj is None:
-            raise ParameterCannotBeEmpty(param=param)
-        return __obj
 

@@ -1,7 +1,7 @@
 # from pyocean.framework.features import BaseFeatureAdapterFactory
 
 from abc import ABCMeta, abstractmethod
-from typing import List, TypeVar, Generic, NewType
+from typing import List, TypeVar, Generic
 
 
 T = TypeVar("T")
@@ -79,7 +79,4 @@ class BaseList(metaclass=ABCMeta):
     @abstractmethod
     def iterator(self) -> BaseIterator:
         pass
-
-
-TypeBaseList = NewType("BaseList", BaseList)
 

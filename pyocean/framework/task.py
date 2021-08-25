@@ -1,7 +1,7 @@
-from pyocean.framework.features import BaseQueueType
-from pyocean.framework.result import OceanResult
-from pyocean.mode import RunningMode
-from pyocean.types import OceanQueue
+from pyocean.framework.features import BaseQueueType as _BaseQueueType
+from pyocean.framework.result import OceanResult as _OceanResult
+from pyocean.mode import RunningMode as _RunningMode
+from pyocean.types import OceanQueue as _OceanQueue
 import pyocean._utils as _utils
 
 from abc import ABCMeta, abstractmethod
@@ -12,7 +12,7 @@ from typing import List, Tuple, Dict, Iterable, Callable, Union
 class BaseTaskFunction:
 
     @classmethod
-    def function(cls, *args, **kwargs) -> List[OceanResult]:
+    def function(cls, *args, **kwargs) -> List[_OceanResult]:
         pass
 
 
@@ -22,12 +22,12 @@ class BaseTaskFunction:
 
 
     @classmethod
-    def done_handler(cls, result: List[OceanResult]) -> List[OceanResult]:
+    def done_handler(cls, result: List[_OceanResult]) -> List[_OceanResult]:
         return result
 
 
     @classmethod
-    def error_handler(cls, e: Exception) -> Union[List[OceanResult], Exception]:
+    def error_handler(cls, e: Exception) -> Union[List[_OceanResult], Exception]:
         raise e
 
 
@@ -35,7 +35,7 @@ class BaseTaskFunction:
 class BaseTaskAsyncFunction:
 
     @classmethod
-    async def function(cls, *args, **kwargs) -> List[OceanResult]:
+    async def function(cls, *args, **kwargs) -> List[_OceanResult]:
         pass
 
 
@@ -45,12 +45,12 @@ class BaseTaskAsyncFunction:
 
 
     @classmethod
-    async def done_handler(cls, result: List[OceanResult]) -> List[OceanResult]:
+    async def done_handler(cls, result: List[_OceanResult]) -> List[_OceanResult]:
         return result
 
 
     @classmethod
-    async def error_handler(cls, e: Exception) -> Union[List[OceanResult], Exception]:
+    async def error_handler(cls, e: Exception) -> Union[List[_OceanResult], Exception]:
         raise e
 
 
@@ -68,10 +68,10 @@ class BaseTask(metaclass=ABCMeta):
     _Error_Handler = None
     _Running_Timeout = 0
 
-    def __init__(self, mode: RunningMode):
+    def __init__(self, mode: _RunningMode):
         self._mode = mode
         __base_task_function_obj = None
-        if mode is RunningMode.Asynchronous:
+        if mode is _RunningMode.Asynchronous:
             __base_task_function_obj = BaseTaskAsyncFunction
         else:
             __base_task_function_obj = BaseTaskFunction
@@ -226,7 +226,7 @@ class BaseTask(metaclass=ABCMeta):
 class BaseQueueTask(metaclass=ABCMeta):
 
     _Name: str = ""
-    _Queue_Type: BaseQueueType = None
+    _Queue_Type: _BaseQueueType = None
     _Value: Iterable = None
 
     def __str__(self):
@@ -262,7 +262,7 @@ class BaseQueueTask(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def queue_type(self) -> BaseQueueType:
+    def queue_type(self) -> _BaseQueueType:
         pass
 
 
@@ -273,7 +273,7 @@ class BaseQueueTask(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def get_queue(self) -> OceanQueue:
+    def get_queue(self) -> _OceanQueue:
         pass
 
 
