@@ -1,8 +1,8 @@
-from pyocean.framework.worker import BaseTask
-from pyocean.framework.result import OceanResult
-from pyocean.types import OceanQueue
-from pyocean.api.exceptions import QueueNotExistWithName
-from pyocean.exceptions import GlobalObjectIsNoneError
+from pyocean.framework.task import BaseTask as _BaseTask
+from pyocean.framework.result import OceanResult as _OceanResult
+from pyocean.types import OceanQueue as _OceanQueue
+from pyocean.exceptions import GlobalObjectIsNoneError as _GlobalObjectIsNoneError
+from pyocean.api.exceptions import QueueNotExistWithName as _QueueNotExistWithName
 
 from functools import wraps
 from typing import List, Dict, Callable, Optional, Type, Any, Union
@@ -14,7 +14,7 @@ class ReTryMechanism:
     Running_Timeout = 1
 
     @staticmethod
-    def function(function: Callable[[Any, Any], Union[List[Type[OceanResult]], Exception]]):
+    def function(function: Callable[[Any, Any], Union[List[Type[_OceanResult]], Exception]]):
         """
         Description:
             A decorator which would add re-try mechanism around the
@@ -23,7 +23,7 @@ class ReTryMechanism:
         """
 
         @wraps(function)
-        def retry(*args, **kwargs) -> Union[List[Type[OceanResult]], Exception]:
+        def retry(*args, **kwargs) -> Union[List[Type[_OceanResult]], Exception]:
             result = None
 
             __fun_run_time = 0
@@ -55,7 +55,7 @@ class ReTryMechanism:
         """
 
         @wraps(function)
-        async def retry(*args, **kwargs) -> Union[List[Type[OceanResult]], Exception]:
+        async def retry(*args, **kwargs) -> Union[List[Type[_OceanResult]], Exception]:
             result = None
 
             __fun_run_time = 0
@@ -78,7 +78,7 @@ class ReTryMechanism:
 
 
     @staticmethod
-    def task(function: Callable[[BaseTask], Union[List[Type[OceanResult]], Exception]]):
+    def task(function: Callable[[_BaseTask], Union[List[Type[_OceanResult]], Exception]]):
         """
         Description:
             A decorator which would add re-try mechanism around the
@@ -87,7 +87,7 @@ class ReTryMechanism:
         """
 
         @wraps(function)
-        def task_retry(self, task: BaseTask) -> Union[List[Type[OceanResult]], Exception]:
+        def task_retry(self, task: _BaseTask) -> Union[List[Type[_OceanResult]], Exception]:
             result = None
 
             __fun_run_time = 0
@@ -110,7 +110,7 @@ class ReTryMechanism:
 
 
     @staticmethod
-    def async_task(function: Callable[[BaseTask], Union[List[Type[OceanResult]], Exception]]):
+    def async_task(function: Callable[[_BaseTask], Union[List[Type[_OceanResult]], Exception]]):
         """
         Description:
             A decorator which would add re-try mechanism around the
@@ -119,7 +119,7 @@ class ReTryMechanism:
         """
 
         @wraps(function)
-        async def task_retry(self, task: BaseTask) -> Union[List[Type[OceanResult]], Exception]:
+        async def task_retry(self, task: _BaseTask) -> Union[List[Type[_OceanResult]], Exception]:
             result = None
 
             __fun_run_time = 0
@@ -154,7 +154,7 @@ class ReTryMechanism:
 
 
     @classmethod
-    def _done_handling(cls, result: List[Type[OceanResult]]) -> List[Type[OceanResult]]:
+    def _done_handling(cls, result: List[Type[_OceanResult]]) -> List[Type[_OceanResult]]:
         """
         Description:
             Handling the result data after target function running done.
@@ -165,7 +165,7 @@ class ReTryMechanism:
 
 
     @classmethod
-    def _error_handling(cls, e: Exception) -> Union[List[Type[OceanResult]], Exception]:
+    def _error_handling(cls, e: Exception) -> Union[List[Type[_OceanResult]], Exception]:
         """
         Description:
             Handling all the error when occur any unexpected error in target function running.
@@ -188,7 +188,7 @@ class ReTryMechanism:
 
 
     @classmethod
-    async def _async_done_handling(cls, result: List[Type[OceanResult]]) -> List[Type[OceanResult]]:
+    async def _async_done_handling(cls, result: List[Type[_OceanResult]]) -> List[Type[_OceanResult]]:
         """
         Description:
             Handling the result data after target function running done.
@@ -199,7 +199,7 @@ class ReTryMechanism:
 
 
     @classmethod
-    async def _async_error_handling(cls, e: Exception) -> Union[List[Type[OceanResult]], Exception]:
+    async def _async_error_handling(cls, e: Exception) -> Union[List[Type[_OceanResult]], Exception]:
         """
         Description:
             Handling all the error when occur any unexpected error in target function running.
@@ -213,7 +213,7 @@ class ReTryMechanism:
 class LockDecorator:
 
     @staticmethod
-    def run_with_lock(function: Callable[[Any, Any], List[Type[OceanResult]]]):
+    def run_with_lock(function: Callable[[Any, Any], List[Type[_OceanResult]]]):
         """
         Description:
             A decorator which would add lock mechanism around the target
@@ -222,7 +222,7 @@ class LockDecorator:
         """
 
         @wraps(function)
-        def lock(*args, **kwargs) -> List[Type[OceanResult]]:
+        def lock(*args, **kwargs) -> List[Type[_OceanResult]]:
             from pyocean.api.manager import Running_Lock
 
             with Running_Lock:
@@ -233,7 +233,7 @@ class LockDecorator:
 
 
     @staticmethod
-    def run_with_semaphore(function: Callable[[Any, Any], List[Type[OceanResult]]]):
+    def run_with_semaphore(function: Callable[[Any, Any], List[Type[_OceanResult]]]):
         """
         Description:
             A decorator which would add semaphore mechanism around the
@@ -242,7 +242,7 @@ class LockDecorator:
         """
 
         @wraps(function)
-        def semaphore(*args, **kwargs) -> List[Type[OceanResult]]:
+        def semaphore(*args, **kwargs) -> List[Type[_OceanResult]]:
             from pyocean.api.manager import Running_Semaphore
 
             with Running_Semaphore:
@@ -253,7 +253,7 @@ class LockDecorator:
 
 
     @staticmethod
-    def run_with_bounded_semaphore(function: Callable[[Any, Any], List[Type[OceanResult]]]):
+    def run_with_bounded_semaphore(function: Callable[[Any, Any], List[Type[_OceanResult]]]):
         """
         Description:
             A decorator which would add bounded semaphore mechanism
@@ -262,7 +262,7 @@ class LockDecorator:
         """
 
         @wraps(function)
-        def bounded_semaphore(*args, **kwargs) -> List[Type[OceanResult]]:
+        def bounded_semaphore(*args, **kwargs) -> List[Type[_OceanResult]]:
             from pyocean.api.manager import Running_Bounded_Semaphore
 
             with Running_Bounded_Semaphore:
@@ -281,7 +281,7 @@ class LockDecorator:
         """
 
         @wraps(function)
-        async def lock(*args, **kwargs) -> List[Type[OceanResult]]:
+        async def lock(*args, **kwargs) -> List[Type[_OceanResult]]:
             from pyocean.api.manager import Running_Lock
 
             async with Running_Lock:
@@ -300,7 +300,7 @@ class LockDecorator:
         """
 
         @wraps(function)
-        async def semaphore(*args, **kwargs) -> List[Type[OceanResult]]:
+        async def semaphore(*args, **kwargs) -> List[Type[_OceanResult]]:
             from pyocean.api.manager import Running_Semaphore
 
             async with Running_Semaphore:
@@ -319,7 +319,7 @@ class LockDecorator:
         """
 
         @wraps(function)
-        async def bounded_semaphore(*args, **kwargs) -> List[Type[OceanResult]]:
+        async def bounded_semaphore(*args, **kwargs) -> List[Type[_OceanResult]]:
             from pyocean.api.manager import Running_Bounded_Semaphore
 
             async with Running_Bounded_Semaphore:
@@ -335,7 +335,7 @@ class QueueOperator:
     @classmethod
     def _checking_init(cls, target_obj: object) -> bool:
         if target_obj is None:
-            raise GlobalObjectIsNoneError
+            raise _GlobalObjectIsNoneError
         return True
 
 
@@ -350,7 +350,7 @@ class QueueOperator:
 
 
     @classmethod
-    def get_queue(cls) -> Optional[Dict[str, OceanQueue]]:
+    def get_queue(cls) -> Optional[Dict[str, _OceanQueue]]:
         from pyocean.api.manager import Running_Queue
 
         cls._checking_init(target_obj=Running_Queue)
@@ -358,12 +358,12 @@ class QueueOperator:
 
 
     @classmethod
-    def get_queue_with_name(cls, name: str) -> OceanQueue:
+    def get_queue_with_name(cls, name: str) -> _OceanQueue:
         from pyocean.api.manager import Running_Queue
 
         cls._checking_init(target_obj=Running_Queue)
         if cls.has_queue(name=name):
             return Running_Queue[name]
         else:
-            raise QueueNotExistWithName
+            raise _QueueNotExistWithName
 

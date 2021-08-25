@@ -1,36 +1,39 @@
-from pyocean.framework.features import BaseGlobalizeAPI
+from pyocean.framework.features import BaseGlobalizeAPI as _BaseGlobalizeAPI
 from pyocean.types import (
-    OceanQueue,
-    OceanLock, OceanRLock,
-    OceanSemaphore, OceanBoundedSemaphore,
-    OceanEvent, OceanCondition)
-from pyocean.exceptions import GlobalizeObjectError
+    OceanQueue as _OceanQueue,
+    OceanLock as _OceanLock,
+    OceanRLock as _OceanRLock,
+    OceanSemaphore as _OceanSemaphore,
+    OceanBoundedSemaphore as _OceanBoundedSemaphore,
+    OceanEvent as _OceanEvent,
+    OceanCondition as _OceanCondition)
+from pyocean.exceptions import GlobalizeObjectError as _GlobalizeObjectError
 
 from typing import Dict, Optional
 
 
-Running_Queue: Optional[Dict[str, OceanQueue]] = {}
-Running_Lock: Optional[OceanLock] = None
-Running_RLock: Optional[OceanRLock] = None
-Running_Semaphore: Optional[OceanSemaphore] = None
-Running_Bounded_Semaphore: Optional[OceanBoundedSemaphore] = None
-Running_Event: Optional[OceanEvent] = None
-Running_Condition: Optional[OceanCondition] = None
+Running_Queue: Optional[Dict[str, _OceanQueue]] = {}
+Running_Lock: Optional[_OceanLock] = None
+Running_RLock: Optional[_OceanRLock] = None
+Running_Semaphore: Optional[_OceanSemaphore] = None
+Running_Bounded_Semaphore: Optional[_OceanBoundedSemaphore] = None
+Running_Event: Optional[_OceanEvent] = None
+Running_Condition: Optional[_OceanCondition] = None
 
 
-class Globalize(BaseGlobalizeAPI):
+class Globalize(_BaseGlobalizeAPI):
 
     @staticmethod
-    def queue(name: str, queue: OceanQueue) -> None:
+    def queue(name: str, queue: _OceanQueue) -> None:
         if queue is not None:
             global Running_Queue
             Running_Queue[name] = queue
         else:
-            raise GlobalizeObjectError
+            raise _GlobalizeObjectError
 
 
     @staticmethod
-    def lock(lock: OceanLock) -> None:
+    def lock(lock: _OceanLock) -> None:
         """
         Description:
             Globalize Lock so that it could run between each different threads or processes.
@@ -42,11 +45,11 @@ class Globalize(BaseGlobalizeAPI):
             global Running_Lock
             Running_Lock = lock
         else:
-            raise GlobalizeObjectError
+            raise _GlobalizeObjectError
 
 
     @staticmethod
-    def rlock(rlock: OceanRLock) -> None:
+    def rlock(rlock: _OceanRLock) -> None:
         """
         Description:
             Globalize Lock so that it could run between each different threads or processes.
@@ -58,11 +61,11 @@ class Globalize(BaseGlobalizeAPI):
             global Running_RLock
             Running_RLock = rlock
         else:
-            raise GlobalizeObjectError
+            raise _GlobalizeObjectError
 
 
     @staticmethod
-    def semaphore(smp: OceanSemaphore) -> None:
+    def semaphore(smp: _OceanSemaphore) -> None:
         """
         Description:
             Globalize Semaphore so that it could run between each different threads or processes.
@@ -74,11 +77,11 @@ class Globalize(BaseGlobalizeAPI):
             global Running_Semaphore
             Running_Semaphore = smp
         else:
-            raise GlobalizeObjectError
+            raise _GlobalizeObjectError
 
 
     @staticmethod
-    def bounded_semaphore(bsmp: OceanBoundedSemaphore) -> None:
+    def bounded_semaphore(bsmp: _OceanBoundedSemaphore) -> None:
         """
         Description:
             Globalize Semaphore so that it could run between each different threads or processes.
@@ -90,23 +93,23 @@ class Globalize(BaseGlobalizeAPI):
             global Running_Bounded_Semaphore
             Running_Bounded_Semaphore = bsmp
         else:
-            raise GlobalizeObjectError
+            raise _GlobalizeObjectError
 
 
     @staticmethod
-    def event(event: OceanEvent) -> None:
+    def event(event: _OceanEvent) -> None:
         if event is not None:
             global Running_Event
             Running_Event = event
         else:
-            raise GlobalizeObjectError
+            raise _GlobalizeObjectError
 
 
     @staticmethod
-    def condition(condition: OceanCondition) -> None:
+    def condition(condition: _OceanCondition) -> None:
         if condition is not None:
             global Running_Condition
             Running_Condition = condition
         else:
-            raise GlobalizeObjectError
+            raise _GlobalizeObjectError
 
