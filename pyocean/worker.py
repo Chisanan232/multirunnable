@@ -1,11 +1,11 @@
 from pyocean.framework.task import BaseTask, BaseQueueTask
 from pyocean.framework.worker import BaseWorker, BaseAsyncWorker, BaseSystem
+from pyocean.framework.features import BaseFeatureAdapterFactory
+from pyocean.framework.collection import BaseList
 from pyocean.framework.strategy import RunnableStrategy, AsyncRunnableStrategy, Resultable
 from pyocean.framework.result import OceanResult
 from pyocean.mode import RunningMode
-from pyocean.tool import Feature
 from pyocean.api.decorator import ReTryMechanism
-from pyocean.adapter.collection import BaseList
 from pyocean.adapter.strategy import StrategyAdapter
 from pyocean.persistence.interface import OceanPersistence
 
@@ -36,8 +36,8 @@ class OceanWorker(ABC, BaseWorker):
 
     def start(self,
               task: BaseTask,
-              queue_tasks: Optional[List[BaseQueueTask]] = None,
-              features: Optional[List] = None,
+              queue_tasks: Optional[Union[BaseQueueTask, BaseList]] = None,
+              features: Optional[Union[BaseFeatureAdapterFactory, BaseList]] = None,
               saving_mode: bool = False,
               init_args: Tuple = (), init_kwargs: Dict = {}) -> [OceanResult]:
 
@@ -64,8 +64,10 @@ class OceanWorker(ABC, BaseWorker):
             self.post_stop()
 
 
-    def pre_activate(self, queue_tasks: Optional[List[BaseQueueTask]] = None,
-                     features: Optional[List] = None, *args, **kwargs) -> None:
+    def pre_activate(self,
+                     queue_tasks: Optional[Union[BaseQueueTask, BaseList]] = None,
+                     features: Optional[Union[BaseFeatureAdapterFactory, BaseList]] = None,
+                     *args, **kwargs) -> None:
         Running_Strategy.initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
 
 
@@ -131,8 +133,8 @@ class OceanAsyncWorker(BaseAsyncWorker):
 
     def start(self,
               task: BaseTask,
-              queue_tasks: Optional[List[BaseQueueTask]] = None,
-              features: Optional[List[Feature]] = None,
+              queue_tasks: Optional[Union[BaseQueueTask, BaseList]] = None,
+              features: Optional[Union[BaseFeatureAdapterFactory, BaseList]] = None,
               saving_mode: bool = False,
               init_args: Tuple = (), init_kwargs: Dict = {}) -> None:
 
@@ -151,8 +153,8 @@ class OceanAsyncWorker(BaseAsyncWorker):
 
     async def async_process(self,
                             task: BaseTask,
-                            queue_tasks: Optional[List[BaseQueueTask]] = None,
-                            features: Optional[List[Feature]] = None,
+                            queue_tasks: Optional[Union[BaseQueueTask, BaseList]] = None,
+                            features: Optional[Union[BaseFeatureAdapterFactory, BaseList]] = None,
                             saving_mode: bool = False,
                             init_args: Tuple = (), init_kwargs: Dict = {}) -> [OceanResult]:
 
@@ -179,8 +181,9 @@ class OceanAsyncWorker(BaseAsyncWorker):
 
 
     async def pre_activate(self,
-                           queue_tasks: Optional[List[BaseQueueTask]] = None,
-                           features: Optional[List[Feature]] = None, *args, **kwargs) -> None:
+                           queue_tasks: Optional[Union[BaseQueueTask, BaseList]] = None,
+                           features: Optional[Union[BaseFeatureAdapterFactory, BaseList]] = None,
+                           *args, **kwargs) -> None:
         await Running_Strategy.initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
 
 
@@ -297,8 +300,8 @@ class OceanSystem(BaseSystem):
 
     def run(self,
             task: BaseTask,
-            queue_tasks: Optional[BaseList] = None,
-            features: Optional[BaseList] = None,
+            queue_tasks: Optional[Union[BaseQueueTask, BaseList]] = None,
+            features: Optional[Union[BaseFeatureAdapterFactory, BaseList]] = None,
             saving_mode: bool = False,
             timeout: int = 0) -> [OceanResult]:
 
@@ -318,8 +321,8 @@ class OceanSystem(BaseSystem):
                      task: BaseTask,
                      persistence_strategy: OceanPersistence,
                      db_connection_num: int,
-                     queue_tasks: Optional[BaseList] = None,
-                     features: Optional[BaseList] = None,
+                     queue_tasks: Optional[Union[BaseQueueTask, BaseList]] = None,
+                     features: Optional[Union[BaseFeatureAdapterFactory, BaseList]] = None,
                      saving_mode: bool = False,
                      timeout: int = 0) -> [OceanResult]:
 
