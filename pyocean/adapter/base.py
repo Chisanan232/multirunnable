@@ -1,7 +1,7 @@
-from pyocean.framework.features import BaseFeatureAdapterFactory
-from pyocean.framework.collection import BaseList
-from pyocean.mode import FeatureMode
-from pyocean.adapter.collection import FeatureList
+from pyocean.framework.features import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
+from pyocean.framework.collection import BaseList as _BaseList
+from pyocean.mode import FeatureMode as _FeatureMode
+from pyocean.adapter.collection import FeatureList as _FeatureList
 from pyocean.adapter._utils import _AsyncUtils
 
 from abc import ABCMeta, ABC
@@ -9,14 +9,14 @@ from typing import Dict
 
 
 
-class FeatureAdapterFactory(BaseFeatureAdapterFactory, ABC):
+class FeatureAdapterFactory(_BaseFeatureAdapterFactory, ABC):
 
-    _Feature_List: BaseList = None
+    _Feature_List: _BaseList = None
 
-    def __init__(self, mode: FeatureMode, **kwargs):
+    def __init__(self, mode: _FeatureMode, **kwargs):
         super(FeatureAdapterFactory, self).__init__(**kwargs)
         self._mode = mode
-        if self._mode is FeatureMode.Asynchronous:
+        if self._mode is _FeatureMode.Asynchronous:
             self._kwargs["loop"] = _AsyncUtils.check_event_loop(event_loop=kwargs.get("event_loop", None))
 
 
@@ -25,7 +25,7 @@ class FeatureAdapterFactory(BaseFeatureAdapterFactory, ABC):
 
 
     def __repr__(self):
-        if self._mode is FeatureMode.Asynchronous:
+        if self._mode is _FeatureMode.Asynchronous:
             __mode = self._mode
             __loop = self._kwargs["loop"]
             return f"<TargetObject(loop={__loop}) object with {__mode} mode at {id(self)}>"
@@ -33,20 +33,20 @@ class FeatureAdapterFactory(BaseFeatureAdapterFactory, ABC):
             return self.__repr__()
 
 
-    def __add__(self, other) -> BaseList:
-        if isinstance(other, BaseList):
+    def __add__(self, other) -> _BaseList:
+        if isinstance(other, _BaseList):
             other.append(self)
             self._Feature_List = other
         else:
             if self._Feature_List is None:
-                self._Feature_List = FeatureList()
+                self._Feature_List = _FeatureList()
             self._Feature_List.append(self)
             self._Feature_List.append(other)
         return self._Feature_List
 
 
 
-class QueueAdapterFactory(BaseFeatureAdapterFactory, ABC):
+class QueueAdapterFactory(_BaseFeatureAdapterFactory, ABC):
 
     def __init__(self, **kwargs):
         super(QueueAdapterFactory, self).__init__(**kwargs)
@@ -73,7 +73,7 @@ class QueueAdapterFactory(BaseFeatureAdapterFactory, ABC):
 
 class BaseAdapter(metaclass=ABCMeta):
 
-    def __init__(self, mode: FeatureMode):
+    def __init__(self, mode: _FeatureMode):
         """
         Description:
             It will import the target module and instancing the target class to be the instance object.
