@@ -5,6 +5,7 @@ from pyocean.framework.strategy import RunnableStrategy as _RunnableStrategy, Re
 from pyocean.framework.result import ResultState as _ResultState
 from pyocean.parallel.result import ParallelResult as _ParallelResult
 from pyocean.persistence.interface import OceanPersistence as _OceanPersistence
+from pyocean.mode import FeatureMode as _FeatureMode
 
 from abc import abstractmethod
 from typing import List, Dict, Iterable, Union, Callable, Optional, cast
@@ -16,6 +17,7 @@ from multiprocessing.managers import Namespace
 
 class ParallelStrategy(_RunnableStrategy):
 
+    _Strategy_Feature_Mode = _FeatureMode.Parallel
     _Manager: Manager = None
     _Namespace_Object: Namespace = None
     _Processors_Pool: Pool = None

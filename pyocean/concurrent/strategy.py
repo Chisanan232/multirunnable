@@ -2,7 +2,7 @@ from pyocean.framework.task import BaseTask as _BaseTask, BaseQueueTask as _Base
 from pyocean.framework.features import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
 from pyocean.framework.collection import BaseList as _BaseList
 from pyocean.framework.strategy import RunnableStrategy as _RunnableStrategy, Resultable as _Resultable
-from pyocean.mode import RunningMode as _RunningMode
+from pyocean.mode import RunningMode as _RunningMode, FeatureMode as _FeatureMode
 from pyocean.task import OceanTask as _OceanTask
 from pyocean.concurrent.result import ConcurrentResult as _ConcurrentResult
 from pyocean.exceptions import FunctionSignatureConflictError as _FunctionSignatureConflictError
@@ -17,6 +17,7 @@ from threading import Thread
 
 class ConcurrentStrategy(_RunnableStrategy, ABC):
 
+    _Strategy_Feature_Mode = _FeatureMode.Parallel
     _Threads_List: List[Thread] = []
     _Threads_Running_Result: Dict[str, Dict[str, Union[object, bool]]] = {}
     _Threading_Running_Result: List = []

@@ -2,6 +2,7 @@ from pyocean.framework.collection import BaseList as _BaseList
 from pyocean.framework.task import BaseQueueTask as _BaseQueueTask
 from pyocean.framework.features import BaseFeatureAdapterFactory as  _BaseFeatureAdapterFactory
 from pyocean.persistence.interface import OceanPersistence as _OceanPersistence
+from pyocean.mode import FeatureMode as _FeatureMode
 from pyocean.types import OceanTasks as _OceanTasks
 import pyocean._utils as _utils
 
@@ -132,6 +133,8 @@ class BaseRunnableStrategy(metaclass=ABCMeta):
 
 class RunnableStrategy(BaseRunnableStrategy, ABC):
 
+    _Strategy_Feature_Mode: _FeatureMode = None
+
     @property
     def workers_number(self) -> int:
         """
@@ -172,8 +175,8 @@ class RunnableStrategy(BaseRunnableStrategy, ABC):
                        *args, **kwargs) -> None:
         """
         Description:
-            Initialize something configurations or something which be needed to be already before run multiple
-            threads or processes.
+            Initialize something configurations or something which be
+            needed to be already before run multiple threads or processes.
         :param queue_tasks:
         :param features:
         :param args:
@@ -189,7 +192,7 @@ class RunnableStrategy(BaseRunnableStrategy, ABC):
 
         # # Lock and communication features initialization
         if features is not None:
-            self._init_lock_or_communication_process(features)
+            self._init_lock_or_communication_process(features, **kwargs)
 
 
     @dispatch(_BaseQueueTask)
@@ -220,7 +223,7 @@ class RunnableStrategy(BaseRunnableStrategy, ABC):
 
 
     @dispatch(_BaseFeatureAdapterFactory)
-    def _init_lock_or_communication_process(self, features: _BaseFeatureAdapterFactory) -> None:
+    def _init_lock_or_communication_process(self, features: _BaseFeatureAdapterFactory, **kwargs) -> None:
         """
         Description:
             Initialize Lock (Lock, RLock, Semaphore, Bounded Semaphore)
@@ -230,12 +233,13 @@ class RunnableStrategy(BaseRunnableStrategy, ABC):
         :return:
         """
 
-        __instance = features.get_instance()
+        features.feature_mode = self._Strategy_Feature_Mode
+        __instance = features.get_instance(**kwargs)
         features.globalize_instance(__instance)
 
 
     @dispatch(_BaseList)
-    def _init_lock_or_communication_process(self, features: _BaseList) -> None:
+    def _init_lock_or_communication_process(self, features: _BaseList, **kwargs) -> None:
         """
         Description:
             Initialize Lock (Lock, RLock, Semaphore, Bounded Semaphore)
@@ -248,7 +252,8 @@ class RunnableStrategy(BaseRunnableStrategy, ABC):
         __features_iterator = features.iterator()
         while __features_iterator.has_next():
             __feature_adapter = cast(_BaseFeatureAdapterFactory, __features_iterator.next())
-            __instance = __feature_adapter.get_instance()
+            __feature_adapter.feature_mode = self._Strategy_Feature_Mode
+            __instance = __feature_adapter.get_instance(**kwargs)
             __feature_adapter.globalize_instance(__instance)
 
 
@@ -275,7 +280,7 @@ class AsyncRunnableStrategy(RunnableStrategy, ABC):
 
         # # Lock and communication features initialization
         if features is not None:
-            super()._init_lock_or_communication_process(features)
+            super()._init_lock_or_communication_process(features, **kwargs)
 
 
     @dispatch(_BaseQueueTask)

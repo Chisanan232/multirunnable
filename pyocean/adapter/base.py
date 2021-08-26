@@ -4,33 +4,30 @@ from pyocean.mode import FeatureMode as _FeatureMode
 from pyocean.adapter.collection import FeatureList as _FeatureList
 from pyocean.adapter._utils import _AsyncUtils
 
-from abc import ABCMeta, ABC
-from typing import Dict
+from abc import ABC, abstractmethod
 
 
 
 class FeatureAdapterFactory(_BaseFeatureAdapterFactory, ABC):
 
+    _Mode: _FeatureMode = None
     _Feature_List: _BaseList = None
 
-    def __init__(self, mode: _FeatureMode, **kwargs):
-        super(FeatureAdapterFactory, self).__init__(**kwargs)
-        self._mode = mode
-        if self._mode is _FeatureMode.Asynchronous:
-            self._kwargs["loop"] = _AsyncUtils.check_event_loop(event_loop=kwargs.get("event_loop", None))
+    def __init__(self):
+        self._kwargs = {}
 
 
     def __str__(self):
-        return f"<TargetObject object with {self._mode} mode at {id(self)}>"
+        return f"<TargetObject Adapter object with {self._Mode} mode at {id(self)}>"
 
 
     def __repr__(self):
-        if self._mode is _FeatureMode.Asynchronous:
-            __mode = self._mode
-            __loop = self._kwargs["loop"]
-            return f"<TargetObject(loop={__loop}) object with {__mode} mode at {id(self)}>"
+        __mode = self._Mode
+        if self._Mode is _FeatureMode.Asynchronous:
+            __loop = self._kwargs.get("loop", None)
+            return f"<TargetObject(loop={__loop}) Adapter object with {__mode} mode at {id(self)}>"
         else:
-            return self.__repr__()
+            return f"<TargetObject() Adapter object with {__mode} mode at {id(self)}>"
 
 
     def __add__(self, other) -> _BaseList:
@@ -45,12 +42,25 @@ class FeatureAdapterFactory(_BaseFeatureAdapterFactory, ABC):
         return self._Feature_List
 
 
+    @property
+    def feature_mode(self) -> _FeatureMode:
+        return self._Mode
+
+
+    @feature_mode.setter
+    def feature_mode(self, mode: _FeatureMode) -> None:
+        self._Mode = mode
+
+
+    def _chk_param_by_mode(self, **kwargs):
+        if self._Mode is _FeatureMode.Asynchronous:
+            self._kwargs["loop"] = _AsyncUtils.check_event_loop(event_loop=kwargs.get("event_loop", None))
+
+
 
 class QueueAdapterFactory(_BaseFeatureAdapterFactory, ABC):
 
     def __init__(self, **kwargs):
-        super(QueueAdapterFactory, self).__init__(**kwargs)
-
         self._name = kwargs.get("name", None)
         if self._name is None:
             raise Exception("The name of Queue object shouldn't be None object. "

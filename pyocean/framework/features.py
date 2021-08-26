@@ -158,12 +158,8 @@ class PosixThreadCommunication(PosixThread):
 
 class BaseFeatureAdapterFactory(metaclass=ABCMeta):
 
-    def __init__(self, **kwargs):
-        self._kwargs = {}
-
-
     @abstractmethod
-    def get_instance(self):
+    def get_instance(self, **kwargs):
         pass
 
 

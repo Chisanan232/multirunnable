@@ -5,6 +5,7 @@ from pyocean.framework.strategy import (
     AsyncRunnableStrategy as _AsyncRunnableStrategy,
     Resultable as _Resultable)
 from pyocean.framework.collection import BaseList as _BaseList
+from pyocean.mode import FeatureMode as _FeatureMode
 from pyocean.coroutine.result import (
     CoroutineResult as _CoroutineResult,
     AsynchronousResult as _AsynchronousResult)
@@ -26,6 +27,7 @@ class CoroutineStrategy(metaclass=ABCMeta):
 
 class BaseGreenletStrategy(CoroutineStrategy, _RunnableStrategy, ABC):
 
+    _Strategy_Feature_Mode = _FeatureMode.Greenlet
     _Gevent_List: List[Greenlet] = None
     _Gevent_Running_Result: List = []
 
@@ -84,6 +86,7 @@ class MultiGreenletStrategy(BaseGreenletStrategy, _Resultable):
 
 class BaseAsyncStrategy(CoroutineStrategy, _AsyncRunnableStrategy, ABC):
 
+    _Strategy_Feature_Mode = _FeatureMode.Asynchronous
     _Async_Event_Loop = None
     _Async_Task_List: List[Task] = None
     _Async_Running_Result: List = []

@@ -18,7 +18,7 @@ class Event(_FeatureAdapterFactory):
 
 
     def get_instance(self) -> _OceanEvent:
-        communication_instance: _PosixThreadCommunication = _ModuleFactory.get_communication_adapter(mode=self._mode)
+        communication_instance: _PosixThreadCommunication = _ModuleFactory.get_communication_adapter(mode=self.feature_mode)
         return communication_instance.get_event(**self._kwargs)
 
 
@@ -29,28 +29,24 @@ class Event(_FeatureAdapterFactory):
 
 class Condition(_FeatureAdapterFactory):
 
-    def __init__(self, mode: _FeatureMode, **kwargs):
-        super(Condition, self).__init__(mode=mode, **kwargs)
-        if self._mode is _FeatureMode.Asynchronous:
-            self._kwargs["lock"] = _AsyncUtils.check_lock(lock=kwargs.get("lock", None))
-
-
     def __str__(self):
         return super(Condition, self).__str__().replace("TargetObject", "Condition")
 
 
     def __repr__(self):
-        __mode = self._mode
+        __mode = self._Mode
         if __mode is _FeatureMode.Asynchronous:
-            __loop = self._kwargs["loop"]
-            __lock = self._kwargs["lock"]
+            __loop = self._kwargs.get("loop", None)
+            __lock = self._kwargs.get("lock", None)
             return f"<Condition(loop={__loop}, lock={__lock}) object with {__mode} mode at {id(self)}>"
         else:
             return self.__str__()
 
 
-    def get_instance(self) -> _OceanCondition:
-        communication_instance: _PosixThreadCommunication = _ModuleFactory.get_communication_adapter(mode=self._mode)
+    def get_instance(self, **kwargs) -> _OceanCondition:
+        if self._Mode is _FeatureMode.Asynchronous:
+            self._kwargs["lock"] = _AsyncUtils.check_lock(lock=kwargs.get("lock", None))
+        communication_instance: _PosixThreadCommunication = _ModuleFactory.get_communication_adapter(mode=self.feature_mode)
         return communication_instance.get_condition(**self._kwargs)
 
 

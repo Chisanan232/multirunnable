@@ -21,8 +21,9 @@ class Lock(_FeatureAdapterFactory):
         return super(Lock, self).__repr__().replace("TargetObject", "Lock")
 
 
-    def get_instance(self) -> _OceanLock:
-        lock_instance: _PosixThreadLock = _ModuleFactory.get_lock_adapter(mode=self._mode)
+    def get_instance(self, **kwargs) -> _OceanLock:
+        self._chk_param_by_mode(**kwargs)
+        lock_instance: _PosixThreadLock = _ModuleFactory.get_lock_adapter(mode=self.feature_mode)
         return lock_instance.get_lock(**self._kwargs)
 
 
@@ -42,7 +43,8 @@ class RLock(_FeatureAdapterFactory):
 
 
     def get_instance(self, **kwargs) -> _OceanRLock:
-        lock_instance: _PosixThreadLock = _ModuleFactory.get_lock_adapter(mode=self._mode)
+        self._chk_param_by_mode(**kwargs)
+        lock_instance: _PosixThreadLock = _ModuleFactory.get_lock_adapter(mode=self.feature_mode)
         return lock_instance.get_rlock(**self._kwargs)
 
 
@@ -53,8 +55,8 @@ class RLock(_FeatureAdapterFactory):
 
 class Semaphore(_FeatureAdapterFactory):
 
-    def __init__(self, mode: _FeatureMode, value: int, **kwargs):
-        super(Semaphore, self).__init__(mode=mode, **kwargs)
+    def __init__(self, value: int):
+        super(Semaphore, self).__init__()
         self.__semaphore_value = value
 
 
@@ -63,7 +65,7 @@ class Semaphore(_FeatureAdapterFactory):
 
 
     def __repr__(self):
-        __mode = self._mode
+        __mode = self._Mode
         __value = self.__semaphore_value
         if __mode is _FeatureMode.Asynchronous:
             __loop = self._kwargs["loop"]
@@ -73,7 +75,8 @@ class Semaphore(_FeatureAdapterFactory):
 
 
     def get_instance(self, **kwargs) -> _OceanSemaphore:
-        lock_instance: _PosixThreadLock = _ModuleFactory.get_lock_adapter(mode=self._mode)
+        self._chk_param_by_mode(**kwargs)
+        lock_instance: _PosixThreadLock = _ModuleFactory.get_lock_adapter(mode=self.feature_mode)
         return lock_instance.get_semaphore(value=self.__semaphore_value, **self._kwargs)
 
 
@@ -84,8 +87,8 @@ class Semaphore(_FeatureAdapterFactory):
 
 class BoundedSemaphore(_FeatureAdapterFactory):
 
-    def __init__(self, mode: _FeatureMode, value: int, **kwargs):
-        super(BoundedSemaphore, self).__init__(mode=mode, **kwargs)
+    def __init__(self, value: int):
+        super(BoundedSemaphore, self).__init__()
         self.__semaphore_value = value
 
 
@@ -94,17 +97,18 @@ class BoundedSemaphore(_FeatureAdapterFactory):
 
 
     def __repr__(self):
-        __mode = self._mode
+        __mode = self._Mode
         __value = self.__semaphore_value
         if __mode is _FeatureMode.Asynchronous:
-            __loop = self._kwargs["loop"]
+            __loop = self._kwargs.get("loop", None)
             return f"<BoundedSemaphore(value={__value}, loop={__loop}) object with {__mode} mode at {id(self)}>"
         else:
             return f"<BoundedSemaphore(value={__value}) object with {__mode} mode at {id(self)}>"
 
 
     def get_instance(self, **kwargs) -> _OceanBoundedSemaphore:
-        lock_instance: _PosixThreadLock = _ModuleFactory.get_lock_adapter(mode=self._mode)
+        self._chk_param_by_mode(**kwargs)
+        lock_instance: _PosixThreadLock = _ModuleFactory.get_lock_adapter(mode=self.feature_mode)
         return lock_instance.get_bounded_semaphore(value=self.__semaphore_value, **self._kwargs)
 
 

@@ -32,21 +32,21 @@ _Strategy_Class: str = "Strategy"
 
 class FeatureMode(Enum):
 
-    MultiProcessing = {
+    Parallel = {
         "module": _Parallel_Module + _Feature_Module,
         "queue": _Parallel_Feature_Class + _Queue_Class,
         "lock": _Parallel_Feature_Class + _Lock_Class,
         "communication": _Parallel_Feature_Class + _Communication_Class
     }
 
-    MultiThreading = {
+    Concurrent = {
         "module": _Concurrent_Module + _Feature_Module,
         "queue": _Concurrent_Feature_Class + _Queue_Class,
         "lock": _Concurrent_Feature_Class + _Lock_Class,
         "communication": _Concurrent_Feature_Class + _Communication_Class
     }
 
-    MultiGreenlet = {
+    Greenlet = {
         "module": _Coroutine_Module + _Feature_Module,
         "queue": _Greenlet_Feature_Class + _Queue_Class,
         "lock": _Greenlet_Feature_Class + _Lock_Class,
