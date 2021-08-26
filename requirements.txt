@@ -1,5 +1,6 @@
 gevent==1.4.0
+multipledispatch==0.6.0
 colorama==0.4.1
-deprecated==1.2.11
 kafka-python==2.0.2
 openpyxl==2.6.1
+deprecated==1.2.11
