@@ -8,7 +8,8 @@ package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute(
 sys.path.append(package_pyocean_path)
 
 # pyocean package
-from pyocean import OceanSystem, OceanTask, QueueTask, RunningMode, Feature
+from pyocean import OceanSystem, OceanTask, QueueTask, RunningMode
+from pyocean.adapter import Lock, BoundedSemaphore
 from pyocean.coroutine import GeventQueueType, CoroutineResult
 from pyocean.persistence import OceanPersistence, DatabaseDriver
 from pyocean.persistence.database import DatabaseConfig
@@ -25,9 +26,12 @@ class ExampleOceanSystem:
 
     __Database_Config_Path = "Your database config path"
 
-    __Greenlet_Number = 5
+    __Greenlet_Number: int
+    __Greenlet_DB_CONNECTION_Number: int
 
-    def __init__(self):
+    def __init__(self, worker_num: int, db_conn_num: int):
+        self.__Greenlet_Number = worker_num
+        self.__Greenlet_DB_CONNECTION_Number = db_conn_num
         self.__logger = ocean_logger
 
 
@@ -44,17 +48,15 @@ class ExampleOceanSystem:
         __queue_task.value = [sql_query for _ in range(20)]
 
         __system = OceanSystem(mode=RunningMode.Greenlet, worker_num=self.__Greenlet_Number)
-        # result: List[CoroutineResult] = __system.run_and_save(
-        #     task=__task,
-        #     queue_tasks=[__queue_task],
-        #     features=[Feature.Bounded_Semaphore],
-        #     persistence_strategy=self.persistence_strategy(),
-        #     db_connection_num=self.__Parallel_Number
-        # )
+        __lock = Lock()
+        __bounded_semaphore = BoundedSemaphore(value=2)
+        __features = __lock + __bounded_semaphore
+
         result: List[CoroutineResult] = __system.run_and_save(
             task=__task,
-            queue_tasks=[__queue_task],
-            features=[Feature.Bounded_Semaphore],
+            queue_tasks=__queue_task,
+            # features=__features,
+            features=__bounded_semaphore,
             persistence_strategy=self.persistence_strategy(),
             db_connection_num=self.__Greenlet_Number,
             saving_mode=True
@@ -106,5 +108,5 @@ if __name__ == '__main__':
     __process_number = 1
     __db_connection_thread_number = 1
 
-    __example_system = ExampleOceanSystem()
+    __example_system = ExampleOceanSystem(worker_num=__process_number, db_conn_num=__db_connection_thread_number)
     __example_system.main_run()

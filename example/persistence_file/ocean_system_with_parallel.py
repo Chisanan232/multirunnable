@@ -8,7 +8,8 @@ package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute(
 sys.path.append(package_pyocean_path)
 
 # pyocean package
-from pyocean import OceanSystem, OceanTask, QueueTask, RunningMode, Feature
+from pyocean import OceanSystem, OceanTask, QueueTask, RunningMode
+from pyocean.adapter import Lock, BoundedSemaphore
 from pyocean.parallel import MultiProcessingQueueType, ParallelResult
 from pyocean.persistence import OceanPersistence, DatabaseDriver
 from pyocean.persistence.database import DatabaseConfig
@@ -25,10 +26,12 @@ class ExampleOceanSystem:
 
     __Database_Config_Path = "Your database config path"
 
-    __Parallel_Number = 5
+    __Parallel_Number: int
+    __Parallel_DB_CONNECTION_Number: int
 
-    def __init__(self, worker_num: int):
+    def __init__(self, worker_num: int, db_conn_num: int):
         self.__Parallel_Number = worker_num
+        self.__Parallel_DB_CONNECTION_Number = db_conn_num
         self.__logger = ocean_logger
 
 
@@ -45,22 +48,20 @@ class ExampleOceanSystem:
         __queue_task.value = [sql_query for _ in range(20)]
 
         __system = OceanSystem(mode=RunningMode.Parallel, worker_num=self.__Parallel_Number)
-        # result: List[ParallelResult] = __system.run_and_save(
-        #     task=__task,
-        #     queue_tasks=[__queue_task],
-        #     features=[Feature.Bounded_Semaphore],
-        #     persistence_strategy=self.persistence_strategy(),
-        #     db_connection_num=self.__Parallel_Number
-        # )
+        __lock = Lock()
+        __bounded_semaphore = BoundedSemaphore(value=2)
+        __features = __lock + __bounded_semaphore
+
         result: List[ParallelResult] = __system.run_and_save(
             task=__task,
-            queue_tasks=[__queue_task],
-            features=[Feature.Bounded_Semaphore],
+            queue_tasks=__queue_task,
+            # features=__features,
+            features=__bounded_semaphore,
             persistence_strategy=self.persistence_strategy(),
-            db_connection_num=self.__Parallel_Number,
+            db_connection_num=self.__Parallel_DB_CONNECTION_Number,
             saving_mode=True
         )
-        print("Parallel result: ", result)
+
         for r in result:
             print(f"+============ {r.worker_id} =============+")
             print("Result.pid: ", r.pid)
@@ -107,5 +108,5 @@ if __name__ == '__main__':
     __process_number = 2
     __db_connection_thread_number = 2
 
-    __example_system = ExampleOceanSystem(worker_num=__process_number)
+    __example_system = ExampleOceanSystem(worker_num=__process_number, db_conn_num=__db_connection_thread_number)
     __example_system.main_run()
