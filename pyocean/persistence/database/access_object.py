@@ -1,4 +1,4 @@
-from pyocean.api.decorator import QueueOperator
+from pyocean.api.operator import QueueOperator
 from pyocean.persistence.interface import OceanPersistence, OceanDao
 from pyocean.persistence.database.connection import BaseConnection
 
