@@ -1,11 +1,12 @@
 from pyocean.framework.task import BaseTask as _BaseTask
 from pyocean.framework.result import OceanResult as _OceanResult
-from pyocean.types import OceanQueue as _OceanQueue
-from pyocean.exceptions import GlobalObjectIsNoneError as _GlobalObjectIsNoneError
-from pyocean.api.exceptions import QueueNotExistWithName as _QueueNotExistWithName
+from pyocean.api.operator import (
+    LockOperator as _LockOperator,
+    SemaphoreOperator as _SemaphoreOperator,
+    BoundedSemaphoreOperator as _BoundedSemaphoreOperator)
 
-from functools import wraps
-from typing import List, Dict, Callable, Optional, Type, Any, Union
+from functools import wraps, update_wrapper, partial
+from typing import List, Tuple, Dict, Callable, Type, Any, Union
 
 
 
@@ -23,7 +24,7 @@ class ReTryMechanism:
         """
 
         @wraps(function)
-        def retry(*args, **kwargs) -> Union[List[Type[_OceanResult]], Exception]:
+        def retry_function(*args, **kwargs) -> Union[List[Type[_OceanResult]], Exception]:
             result = None
 
             __fun_run_time = 0
@@ -42,7 +43,7 @@ class ReTryMechanism:
             else:
                 return result
 
-        return retry
+        return retry_function
 
 
     @staticmethod
@@ -55,7 +56,7 @@ class ReTryMechanism:
         """
 
         @wraps(function)
-        async def retry(*args, **kwargs) -> Union[List[Type[_OceanResult]], Exception]:
+        async def retry_async_function(*args, **kwargs) -> Union[List[Type[_OceanResult]], Exception]:
             result = None
 
             __fun_run_time = 0
@@ -74,11 +75,12 @@ class ReTryMechanism:
             else:
                 return result
 
-        return retry
+        return retry_async_function
 
 
-    @staticmethod
-    def task(function: Callable[[_BaseTask], Union[List[Type[_OceanResult]], Exception]]):
+    # @staticmethod
+    @classmethod
+    def task(cls, function: Callable[[_BaseTask], Union[List[Type[_OceanResult]], Exception]]):
         """
         Description:
             A decorator which would add re-try mechanism around the
@@ -210,6 +212,132 @@ class ReTryMechanism:
 
 
 
+class ReTryDefaultFunction:
+
+    def initial(self, *args, **kwargs):
+        pass
+
+
+    def error_handling(self, e: Exception):
+        raise e
+
+
+    def done_handling(self, result):
+        return result
+
+
+    def final_handling(self):
+        pass
+
+
+def retry(function: Callable = None, timeout: int = 1):
+
+    if function:
+        return _Retry(function=function, timeout=timeout)
+    else:
+        @wraps(function)
+        def __retry(function: Callable):
+            return _Retry(function=function, timeout=timeout)
+        return __retry
+
+
+class _Retry:
+
+    __Running_Timeout: int = None
+
+    __default_func = ReTryDefaultFunction()
+
+    __Target_Function: Callable = None
+    __Initial_Function: Callable = __default_func.initial
+    __Initial_Args: Tuple = ()
+    __Initial_Kwargs: Dict = {}
+    __Exception_Handling_Function: Callable = __default_func.error_handling
+    __Done_Handling_Function: Callable = __default_func.done_handling
+    __Final_Handling_Function: Callable = __default_func.final_handling
+
+
+    def __init__(self, function: Callable, timeout: int = 1):
+        update_wrapper(self, function)
+        self.__Target_Function = function
+        self.__Running_Timeout = timeout
+
+
+    def __get__(self, instance, owner):
+        return partial(self.__call__, instance)
+
+
+    def __call__(self, instance, *args, **kwargs):
+        __running_counter = 0
+        __result = None
+
+        while __running_counter < self.__Running_Timeout:
+            try:
+                self.__Initial_Function(*self.__Initial_Args, **self.__Initial_Kwargs)
+                __result = self.__Target_Function(instance, *args, **kwargs)
+            except Exception as e:
+                __error_handling_result = self.__Exception_Handling_Function(e)
+                if __error_handling_result:
+                    __result = __error_handling_result
+                else:
+                    __result = e
+            else:
+                __result = self.__Done_Handling_Function(__result)
+            finally:
+                self.__Final_Handling_Function()
+                __running_counter += 1
+        else:
+            __result = TimeoutError("The target function running timeout.")
+
+        return __result
+
+
+    @classmethod
+    def initialization(cls, function: Callable):
+
+        cls.__Initial_Function = function
+        __self = cls
+
+        @wraps(function)
+        def __wrapper(*args, **kwargs):
+            __self.__Initial_Args = args
+            __self.__Initial_Kwargs = kwargs
+
+        return __wrapper
+
+
+    @classmethod
+    def error_handling(cls, function: Callable):
+        cls.__Exception_Handling_Function = function
+        __self = cls
+
+        @wraps(function)
+        def __wrapper(e: Exception):
+            pass
+        return __wrapper
+
+
+    @classmethod
+    def done_handling(cls, function):
+        cls.__Done_Handling_Function = function
+        __self = cls
+
+        @wraps(function)
+        def __wrapper(func_result):
+            pass
+        return __wrapper
+
+
+    @classmethod
+    def final_handling(cls, function):
+        cls.__Final_Handling_Function = function
+
+        @wraps(function)
+        def __wrapper(func_result):
+            pass
+        return __wrapper
+
+
+
 class LockDecorator:
 
     @staticmethod
@@ -223,9 +351,10 @@ class LockDecorator:
 
         @wraps(function)
         def lock(*args, **kwargs) -> List[Type[_OceanResult]]:
-            from pyocean.api.manager import Running_Lock
+            # from pyocean.api.manager import Running_Lock
+            __lock = _LockOperator()
 
-            with Running_Lock:
+            with __lock:
                 result = function(*args, **kwargs)
             return result
 
@@ -243,9 +372,10 @@ class LockDecorator:
 
         @wraps(function)
         def semaphore(*args, **kwargs) -> List[Type[_OceanResult]]:
-            from pyocean.api.manager import Running_Semaphore
+            # from pyocean.api.manager import Running_Semaphore
+            __semaphore = _SemaphoreOperator()
 
-            with Running_Semaphore:
+            with __semaphore:
                 result = function(*args, **kwargs)
             return result
 
@@ -263,9 +393,10 @@ class LockDecorator:
 
         @wraps(function)
         def bounded_semaphore(*args, **kwargs) -> List[Type[_OceanResult]]:
-            from pyocean.api.manager import Running_Bounded_Semaphore
+            # from pyocean.api.manager import Running_Bounded_Semaphore
+            __bounded_semaphore = _BoundedSemaphoreOperator()
 
-            with Running_Bounded_Semaphore:
+            with __bounded_semaphore:
                 result = function(*args, **kwargs)
             return result
 
@@ -282,9 +413,10 @@ class LockDecorator:
 
         @wraps(function)
         async def lock(*args, **kwargs) -> List[Type[_OceanResult]]:
-            from pyocean.api.manager import Running_Lock
+            # from pyocean.api.manager import Running_Lock
+            __lock = LockDecorator()
 
-            async with Running_Lock:
+            async with __lock:
                 result = await function(*args, **kwargs)
             return result
 
@@ -301,9 +433,10 @@ class LockDecorator:
 
         @wraps(function)
         async def semaphore(*args, **kwargs) -> List[Type[_OceanResult]]:
-            from pyocean.api.manager import Running_Semaphore
+            # from pyocean.api.manager import Running_Semaphore
+            __semaphore = _SemaphoreOperator()
 
-            async with Running_Semaphore:
+            async with __semaphore:
                 result = await function(*args, **kwargs)
             return result
 
@@ -320,9 +453,10 @@ class LockDecorator:
 
         @wraps(function)
         async def bounded_semaphore(*args, **kwargs) -> List[Type[_OceanResult]]:
-            from pyocean.api.manager import Running_Bounded_Semaphore
+            # from pyocean.api.manager import Running_Bounded_Semaphore
+            __bounded_semaphore = _BoundedSemaphoreOperator()
 
-            async with Running_Bounded_Semaphore:
+            async with __bounded_semaphore:
                 result = await function(*args, **kwargs)
             return result
 
@@ -330,40 +464,124 @@ class LockDecorator:
 
 
 
-class QueueOperator:
+class RunWith:
 
-    @classmethod
-    def _checking_init(cls, target_obj: object) -> bool:
-        if target_obj is None:
-            raise _GlobalObjectIsNoneError
-        return True
+    @staticmethod
+    def Lock(function: Callable[[Any, Any], List[Type[_OceanResult]]]):
+        """
+        Description:
+            A decorator which would add lock mechanism around the target
+            function for fixed time.
+        :return:
+        """
 
+        @wraps(function)
+        def __lock_process(*args, **kwargs) -> List[Type[_OceanResult]]:
+            __lock = _LockOperator()
 
-    @classmethod
-    def has_queue(cls, name: str):
-        from pyocean.api.manager import Running_Queue
+            with __lock:
+                result = function(*args, **kwargs)
+            return result
 
-        if name in Running_Queue.keys():
-            return True
-        else:
-            return False
-
-
-    @classmethod
-    def get_queue(cls) -> Optional[Dict[str, _OceanQueue]]:
-        from pyocean.api.manager import Running_Queue
-
-        cls._checking_init(target_obj=Running_Queue)
-        return Running_Queue
+        return __lock_process
 
 
-    @classmethod
-    def get_queue_with_name(cls, name: str) -> _OceanQueue:
-        from pyocean.api.manager import Running_Queue
+    @staticmethod
+    def Semaphore(function: Callable[[Any, Any], List[Type[_OceanResult]]]):
+        """
+        Description:
+            A decorator which would add semaphore mechanism around the
+            target function for fixed time.
+        :return:
+        """
 
-        cls._checking_init(target_obj=Running_Queue)
-        if cls.has_queue(name=name):
-            return Running_Queue[name]
-        else:
-            raise _QueueNotExistWithName
+        @wraps(function)
+        def __semaphore_process(*args, **kwargs) -> List[Type[_OceanResult]]:
+            __semaphore = _SemaphoreOperator()
+
+            with __semaphore:
+                result = function(*args, **kwargs)
+            return result
+
+        return __semaphore_process
+
+
+    @staticmethod
+    def Bounded_Semaphore(function: Callable[[Any, Any], List[Type[_OceanResult]]]):
+        """
+        Description:
+            A decorator which would add bounded semaphore mechanism
+            around the target function for fixed time.
+        :return:
+        """
+
+        @wraps(function)
+        def __bounded_semaphore_process(*args, **kwargs) -> List[Type[_OceanResult]]:
+            __bounded_semaphore = _BoundedSemaphoreOperator()
+
+            with __bounded_semaphore:
+                result = function(*args, **kwargs)
+            return result
+
+        return __bounded_semaphore_process
+
+
+
+class AsyncRunWith:
+
+    @staticmethod
+    def Lock(function: Callable):
+        """
+        Description:
+            Asynchronous version of run_with_lock.
+        :return:
+        """
+
+        @wraps(function)
+        async def __lock_process(*args, **kwargs) -> List[Type[_OceanResult]]:
+            __lock = LockDecorator()
+
+            async with __lock:
+                result = await function(*args, **kwargs)
+            return result
+
+        return __lock_process
+
+
+    @staticmethod
+    def Semaphore(function: Callable):
+        """
+        Description:
+            Asynchronous version of run_with_semaphore.
+        :return:
+        """
+
+        @wraps(function)
+        async def __semaphore_process(*args, **kwargs) -> List[Type[_OceanResult]]:
+            __semaphore = _SemaphoreOperator()
+
+            async with __semaphore:
+                result = await function(*args, **kwargs)
+            return result
+
+        return __semaphore_process
+
+
+    @staticmethod
+    def Bounded_Semaphore(function: Callable):
+        """
+        Description:
+             Asynchronous version of run_with_bounded_semaphore.
+       :return:
+        """
+
+        @wraps(function)
+        async def __bounded_semaphore_process(*args, **kwargs) -> List[Type[_OceanResult]]:
+            __bounded_semaphore = _BoundedSemaphoreOperator()
+
+            async with __bounded_semaphore:
+                result = await function(*args, **kwargs)
+            return result
+
+        return __bounded_semaphore_process
 
