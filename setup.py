@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="pyocean",
-    version="0.10.0",
+    version="0.12.2",
     author="Liu, Bryant",
     author_email="chi10211201@cycu.org.tw",
     description="A Python framework integrate running multi-work simultaneously with different strategy.",
@@ -15,12 +15,13 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: APACHE License",
+        "License :: OSI Approved :: APACHE-2.0 License",
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',
     install_requires=[
         "gevent==1.4.0",
+        "multipledispatch==0.6.0",
         "colorama==0.4.1",
         "kafka-python==2.0.2",
         "openpyxl==2.6.1",
