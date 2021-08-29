@@ -9,18 +9,23 @@ from pyocean.types import (
 from pyocean.exceptions import GlobalObjectIsNoneError as _GlobalObjectIsNoneError
 from pyocean.api.exceptions import QueueNotExistWithName as _QueueNotExistWithName
 
-from abc import ABCMeta
+from abc import ABCMeta, abstractmethod
 from typing import Dict, Optional
 import inspect
 
 
 
-class Operator(metaclass=ABCMeta):
+class AdapterOperator(metaclass=ABCMeta):
+
+    # @abstractmethod
+    # def _get_feature_instance(self):
+    #     pass
+
     pass
 
 
 
-class LockOperator(Operator):
+class LockOperator(AdapterOperator):
 
     def __init__(self):
         from .manager import Running_Lock
@@ -48,7 +53,7 @@ class LockOperator(Operator):
 
 
 
-class RLockOperator(Operator):
+class RLockOperator(AdapterOperator):
 
     def __init__(self):
         from .manager import Running_RLock
@@ -78,7 +83,7 @@ class RLockOperator(Operator):
 
 
 
-class SemaphoreOperator(Operator):
+class SemaphoreOperator(AdapterOperator):
 
     def __init__(self):
         from .manager import Running_Semaphore
@@ -112,7 +117,7 @@ class SemaphoreOperator(Operator):
 
 
 
-class BoundedSemaphoreOperator(Operator):
+class BoundedSemaphoreOperator(AdapterOperator):
 
     def __init__(self):
         from .manager import Running_Bounded_Semaphore
@@ -129,8 +134,11 @@ class BoundedSemaphoreOperator(Operator):
         # # # # Coroutine - gevent (greenlet framework) has parameter 'blocking'
         # # # # Async - asyncio doesn't have any parameter
         __kwargs = {}
+        print("Semaphore: ", self.__bounded_semaphore.acquire)
         __acquire_signature = inspect.signature(self.__bounded_semaphore.acquire)
+        print("Semaphore signature: ", __acquire_signature)
         __acquire_parameter = __acquire_signature.parameters
+        print("Semaphore parameter: ", __acquire_parameter)
         if "blocking" in __acquire_parameter.keys():
             __kwargs.get("blocking", blocking)
         if "timeout" in __acquire_parameter.keys():
@@ -140,6 +148,13 @@ class BoundedSemaphoreOperator(Operator):
         # self.__bounded_semaphore.acquire(timeout=timeout)
 
     __enter__ = acquire
+
+    # async def __aenter__(self):
+    #     await self.acquire()
+    #     return None
+    #
+    # async def __aexit__(self, exc_type, exc_val, exc_tb):
+    #     self.release()
 
     # def __enter__(self):
     #     self.__bounded_semaphore.__enter__()
@@ -163,7 +178,7 @@ class BoundedSemaphoreOperator(Operator):
 
 
 
-class EventOperator(Operator):
+class EventOperator(AdapterOperator):
 
     def __init__(self):
         from .manager import Running_Event
@@ -193,7 +208,7 @@ class EventOperator(Operator):
 
 
 
-class ConditionOperator(Operator):
+class ConditionOperator(AdapterOperator):
 
     def __init__(self):
         from .manager import Running_Condition
@@ -241,7 +256,7 @@ class ConditionOperator(Operator):
 
 
 
-class QueueOperator(Operator):
+class QueueOperator(AdapterOperator):
 
     @classmethod
     def _checking_init(cls, target_obj: object) -> bool:
