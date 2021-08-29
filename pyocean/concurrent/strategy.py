@@ -17,7 +17,7 @@ from threading import Thread
 
 class ConcurrentStrategy(_RunnableStrategy, ABC):
 
-    _Strategy_Feature_Mode = _FeatureMode.Parallel
+    _Strategy_Feature_Mode = _FeatureMode.Concurrent
     _Threads_List: List[Thread] = []
     _Threads_Running_Result: Dict[str, Dict[str, Union[object, bool]]] = {}
     _Threading_Running_Result: List = []

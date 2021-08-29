@@ -11,6 +11,7 @@ from pyocean.api.exceptions import QueueNotExistWithName as _QueueNotExistWithNa
 
 from abc import ABCMeta
 from typing import Dict, Optional
+import inspect
 
 
 
@@ -28,6 +29,14 @@ class LockOperator(Operator):
 
     def __repr__(self):
         return f"<Operator object for {repr(self.__lock)}>"
+
+
+    def __enter__(self):
+        self.__lock.__enter__()
+
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.__lock.__exit__(exc_type, exc_val, exc_tb)
 
 
     def acquire(self):
@@ -51,6 +60,11 @@ class RLockOperator(Operator):
 
 
     def acquire(self, blocking: bool = True, timeout: int = -1):
+        # # # # Parallel - multiprocessing doesn't have parameter 'blocking' and type is bool
+        # # # # Concurrent - threading has parameter 'blocking' and type is bool
+        # # # # Coroutine - gevent (greenlet framework) has parameter 'blocking' and type is int
+        # # # # Async - asyncio doesn't have any parameter
+        __acquire_parameter = inspect.signature(self.__rlock.acquire).parameters
         self.__rlock.acquire(blocking=blocking, timeout=timeout)
 
     __enter__ = acquire
@@ -60,7 +74,7 @@ class RLockOperator(Operator):
 
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.__rlock.__exit__(exc_type=exc_type, exc_val=exc_val, exc_tb=exc_tb)
+        self.__rlock.__exit__(exc_type, exc_val, exc_tb)
 
 
 
@@ -76,7 +90,15 @@ class SemaphoreOperator(Operator):
 
 
     def acquire(self, blocking: bool = True, timeout: int = None):
-        self.__semaphore.acquire(blocking=blocking, timeout=timeout)
+        # # # # Concurrent - threading has parameter 'blocking'
+        # # # # Coroutine - gevent (greenlet framework) has parameter 'blocking'
+        # self.__semaphore.acquire(blocking=blocking, timeout=timeout)
+
+        # # # # Async - asyncio doesn't have any parameter
+
+        # # # # Parallel - multiprocessing doesn't have parameter 'blocking'
+        __acquire_parameter = inspect.signature(self.__semaphore.acquire).parameters
+        self.__semaphore.acquire(timeout=timeout)
 
     __enter__ = acquire
 
@@ -102,8 +124,20 @@ class BoundedSemaphoreOperator(Operator):
 
 
     def acquire(self, blocking: bool = True, timeout: int = None):
-        # self.__bounded_semaphore.acquire(blocking=blocking, timeout=timeout)
-        self.__bounded_semaphore.acquire(timeout=timeout)
+        # # # # Parallel - multiprocessing doesn't have parameter 'blocking'
+        # # # # Concurrent - threading has parameter 'blocking'
+        # # # # Coroutine - gevent (greenlet framework) has parameter 'blocking'
+        # # # # Async - asyncio doesn't have any parameter
+        __kwargs = {}
+        __acquire_signature = inspect.signature(self.__bounded_semaphore.acquire)
+        __acquire_parameter = __acquire_signature.parameters
+        if "blocking" in __acquire_parameter.keys():
+            __kwargs.get("blocking", blocking)
+        if "timeout" in __acquire_parameter.keys():
+            __kwargs.get("timeout", timeout)
+
+        self.__bounded_semaphore.acquire(**__kwargs)
+        # self.__bounded_semaphore.acquire(timeout=timeout)
 
     __enter__ = acquire
 
@@ -149,6 +183,8 @@ class EventOperator(Operator):
 
 
     def wait(self, timeout: int = None) -> bool:
+        # # # # Parallel & Concurrent & Greenlet are the same -  have parameter
+        # # # # Async - asyncio doesn't have any parameter
         return self.__event.wait(timeout)
 
 
@@ -185,10 +221,14 @@ class ConditionOperator(Operator):
 
 
     def wait(self, timeout: int = None) -> None:
+        # # # # Async - asyncio doesn't have any parameter
+        # # # # Parallel & Concurrent are the same -  have parameter
         self.__condition.wait(timeout)
 
 
     def wait_for(self, predicate, timeout: int = None) -> bool:
+        # # # # Async - asyncio only have one parameter 'predicate'
+        # # # # Parallel & Concurrent are the same -  have parameter
         return self.__condition.wait_for(predicate=predicate, timeout=timeout)
 
 
