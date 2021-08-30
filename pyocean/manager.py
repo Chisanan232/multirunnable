@@ -1,8 +1,7 @@
 from pyocean.framework.task import BaseTask as _BaseTask, BaseQueueTask as _BaseQueueTask
 from pyocean.framework.manager import (
     BaseManager as _BaseManager,
-    BaseAsyncManager as _BaseAsyncManager,
-    BaseSystem as _BaseSystem)
+    BaseAsyncManager as _BaseAsyncManager)
 from pyocean.framework.features import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
 from pyocean.framework.adapter.collection import BaseList as _BaseList
 from pyocean.framework.strategy import (
@@ -299,66 +298,5 @@ class OceanPersistenceAsyncManager(OceanAsyncWorker):
             persistence_strategy=self.persistence_strategy,
             db_connection_num=self.db_connection_num
         )
-
-
-
-class OceanSystem(_BaseSystem):
-
-    def run(self,
-            task: _BaseTask,
-            queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
-            features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
-            saving_mode: bool = False,
-            timeout: int = 0) -> [_OceanResult]:
-
-        if self._mode is _RunningMode.Asynchronous:
-            __ocean_worker = OceanSimpleAsyncManager(mode=self._mode, worker_num=self._worker_num)
-            __ocean_worker.running_timeout = timeout
-            __ocean_worker.start(task=task, queue_tasks=queue_tasks, features=features, saving_mode=saving_mode)
-            return __ocean_worker.get_result()
-        else:
-            __ocean_worker = OceanSimpleManager(mode=self._mode, worker_num=self._worker_num)
-            __ocean_worker.running_timeout = timeout
-            __ocean_worker.start(task=task, queue_tasks=queue_tasks, features=features, saving_mode=saving_mode)
-            return __ocean_worker.get_result()
-
-
-    def run_and_save(self,
-                     task: _BaseTask,
-                     persistence_strategy: _OceanPersistence,
-                     db_connection_num: int,
-                     queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
-                     features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
-                     saving_mode: bool = False,
-                     timeout: int = 0) -> [_OceanResult]:
-
-        if self._mode is _RunningMode.Asynchronous:
-            __ocean_worker = OceanPersistenceAsyncManager(
-                mode=self._mode,
-                worker_num=self._worker_num,
-                persistence_strategy=persistence_strategy,
-                db_connection_num=db_connection_num)
-
-            __ocean_worker.running_timeout = timeout
-            __ocean_worker.start(task=task, queue_tasks=queue_tasks, features=features, saving_mode=saving_mode)
-            return __ocean_worker.get_result()
-        else:
-            __ocean_worker = OceanPersistenceManager(
-                mode=self._mode,
-                worker_num=self._worker_num,
-                persistence_strategy=persistence_strategy,
-                db_connection_num=db_connection_num)
-
-            __ocean_worker.running_timeout = timeout
-            __ocean_worker.start(task=task, queue_tasks=queue_tasks, features=features, saving_mode=saving_mode)
-            return __ocean_worker.get_result()
-
-
-    def dispatcher(self):
-        pass
-
-
-    def terminate(self):
-        pass
 
 
