@@ -7,6 +7,7 @@ from pyocean.adapter._utils import _AsyncUtils
 from abc import ABC
 
 
+
 class FeatureAdapterFactory(_BaseFeatureAdapterFactory, ABC):
 
     _Mode: _FeatureMode = None
