@@ -1,3 +1,8 @@
+from pyocean.framework.api.operator import (
+    AdapterOperator as _AdapterOperator,
+    BaseLockAdapterOperator as _BaseLockAdapterOperator,
+    AsyncAdapterOperator as _AsyncAdapterOperator,
+    BaseAsyncLockAdapterOperator as _BaseAsyncLockOperator)
 from pyocean.types import (
     OceanLock as _OceanLock,
     OceanRLock as _OceanRLock,
@@ -9,184 +14,172 @@ from pyocean.types import (
 from pyocean.exceptions import GlobalObjectIsNoneError as _GlobalObjectIsNoneError
 from pyocean.api.exceptions import QueueNotExistWithName as _QueueNotExistWithName
 
-from abc import ABCMeta, abstractmethod
 from typing import Dict, Optional
 import inspect
 
 
 
-class AdapterOperator(metaclass=ABCMeta):
-
-    # @abstractmethod
-    # def _get_feature_instance(self):
-    #     pass
-
-    pass
-
-
-
-class LockOperator(AdapterOperator):
+class LockAdapterOperator(_BaseLockAdapterOperator):
 
     def __init__(self):
-        from .manager import Running_Lock
-        self.__lock: _OceanLock = Running_Lock
+        _BaseLockAdapterOperator.__init__(self)
+        self.__lock: _OceanLock = self._feature_instance
 
 
     def __repr__(self):
         return f"<Operator object for {repr(self.__lock)}>"
 
 
-    def __enter__(self):
-        self.__lock.__enter__()
+    def _get_feature_instance(self) -> _OceanLock:
+        from .manager import Running_Lock
+        return Running_Lock
 
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.__lock.__exit__(exc_type, exc_val, exc_tb)
-
-
-    def acquire(self):
+    def acquire(self) -> None:
         self.__lock.acquire()
 
 
-    def release(self):
+    def release(self) -> None:
         self.__lock.release()
 
 
 
-class RLockOperator(AdapterOperator):
+class RLockOperator(_BaseLockAdapterOperator):
 
     def __init__(self):
-        from .manager import Running_RLock
-        self.__rlock: _OceanRLock = Running_RLock
+        _BaseLockAdapterOperator.__init__(self)
+        self.__rlock: _OceanRLock = self._feature_instance
 
 
     def __repr__(self):
         return f"<Operator object for {repr(self.__rlock)}>"
 
 
-    def acquire(self, blocking: bool = True, timeout: int = -1):
+    def _get_feature_instance(self) -> _OceanRLock:
+        from .manager import Running_RLock
+        return Running_RLock
+
+
+    def acquire(self, blocking: bool = True, timeout: int = -1) -> None:
+        # # # # From document, Parallel, Concurrent and Gevent all has both 2 parameters 'blocking' and 'timeout'.
         # # # # Parallel - multiprocessing doesn't have parameter 'blocking' and type is bool
         # # # # Concurrent - threading has parameter 'blocking' and type is bool
         # # # # Coroutine - gevent (greenlet framework) has parameter 'blocking' and type is int
         # # # # Async - asyncio doesn't have any parameter
-        __acquire_parameter = inspect.signature(self.__rlock.acquire).parameters
         self.__rlock.acquire(blocking=blocking, timeout=timeout)
 
-    __enter__ = acquire
+    # __enter__ = acquire
 
-    def release(self):
+    def release(self) -> None:
         self.__rlock.release()
 
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.__rlock.__exit__(exc_type, exc_val, exc_tb)
 
-
-
-class SemaphoreOperator(AdapterOperator):
+class SemaphoreOperator(_BaseLockAdapterOperator):
 
     def __init__(self):
-        from .manager import Running_Semaphore
-        self.__semaphore: _OceanSemaphore = Running_Semaphore
+        _BaseLockAdapterOperator.__init__(self)
+        self.__semaphore: _OceanSemaphore = self._feature_instance
 
 
     def __repr__(self):
         return f"<Operator object for {repr(self.__semaphore)}>"
 
 
-    def acquire(self, blocking: bool = True, timeout: int = None):
-        # # # # Concurrent - threading has parameter 'blocking'
-        # # # # Coroutine - gevent (greenlet framework) has parameter 'blocking'
-        # self.__semaphore.acquire(blocking=blocking, timeout=timeout)
+    def _get_feature_instance(self) -> _OceanSemaphore:
+        from .manager import Running_Semaphore
+        return Running_Semaphore
 
-        # # # # Async - asyncio doesn't have any parameter
 
-        # # # # Parallel - multiprocessing doesn't have parameter 'blocking'
-        __acquire_parameter = inspect.signature(self.__semaphore.acquire).parameters
-        self.__semaphore.acquire(timeout=timeout)
+    def acquire(self, blocking: bool = True, timeout: int = None) -> None:
+        """
+        Note:
+            Parallel -  multiprocessing doesn't have parameter 'blocking'
+            Concurrent - threading has parameter 'blocking'
+            Coroutine - gevent (greenlet framework) has parameter 'blocking'
+            Async - asyncio doesn't have any parameter
 
-    __enter__ = acquire
+        :param blocking:
+        :param timeout:
+        :return:
+        """
 
-    def release(self, n: int = 1):
+        __kwargs = {}
+        __kwargs.get("blocking", blocking)
+        __kwargs.get("timeout", timeout)
+        self.__semaphore.acquire(**__kwargs)
+
+    # __enter__ = acquire
+
+    def release(self, n: int = 1) -> None:
         # Needs to double check
         self.__semaphore.release(n=n)
 
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.__semaphore.__exit__(exc_type=exc_type, exc_val=exc_val, exc_tb=exc_tb)
 
-
-
-class BoundedSemaphoreOperator(AdapterOperator):
+class BoundedSemaphoreOperator(_BaseLockAdapterOperator):
 
     def __init__(self):
-        from .manager import Running_Bounded_Semaphore
-        self.__bounded_semaphore: _OceanBoundedSemaphore = Running_Bounded_Semaphore
+        _BaseLockAdapterOperator.__init__(self)
+        self.__bounded_semaphore: _OceanBoundedSemaphore = self._feature_instance
 
 
     def __repr__(self):
         return f"<Operator object for {repr(self.__bounded_semaphore)}>"
 
 
-    def acquire(self, blocking: bool = True, timeout: int = None):
-        # # # # Parallel - multiprocessing doesn't have parameter 'blocking'
-        # # # # Concurrent - threading has parameter 'blocking'
-        # # # # Coroutine - gevent (greenlet framework) has parameter 'blocking'
-        # # # # Async - asyncio doesn't have any parameter
+    def _get_feature_instance(self) -> _OceanBoundedSemaphore:
+        from .manager import Running_Bounded_Semaphore
+        return Running_Bounded_Semaphore
+
+
+    def acquire(self, blocking: bool = True, timeout: int = None) -> None:
+        """
+        Note:
+            Parallel -  multiprocessing doesn't have parameter 'blocking'
+            Concurrent - threading has parameter 'blocking'
+            Coroutine - gevent (greenlet framework) has parameter 'blocking'
+            Async - asyncio doesn't have any parameter
+
+        :param blocking:
+        :param timeout:
+        :return:
+        """
+
         __kwargs = {}
-        print("Semaphore: ", self.__bounded_semaphore.acquire)
-        __acquire_signature = inspect.signature(self.__bounded_semaphore.acquire)
-        print("Semaphore signature: ", __acquire_signature)
-        __acquire_parameter = __acquire_signature.parameters
-        print("Semaphore parameter: ", __acquire_parameter)
-        if "blocking" in __acquire_parameter.keys():
-            __kwargs.get("blocking", blocking)
-        if "timeout" in __acquire_parameter.keys():
-            __kwargs.get("timeout", timeout)
+        # __acquire_signature = inspect.signature(self.__bounded_semaphore.acquire)
+        # __acquire_parameter = __acquire_signature.parameters
+        # if "blocking" in __acquire_parameter.keys():
+        #     __kwargs.get("blocking", blocking)
+        # if "timeout" in __acquire_parameter.keys():
+        #     __kwargs.get("timeout", timeout)
+
+        __kwargs.get("blocking", blocking)
+        __kwargs.get("timeout", timeout)
 
         self.__bounded_semaphore.acquire(**__kwargs)
-        # self.__bounded_semaphore.acquire(timeout=timeout)
 
-    __enter__ = acquire
+    # __enter__ = acquire
 
-    # async def __aenter__(self):
-    #     await self.acquire()
-    #     return None
-    #
-    # async def __aexit__(self, exc_type, exc_val, exc_tb):
-    #     self.release()
-
-    # def __enter__(self):
-    #     self.__bounded_semaphore.__enter__()
-
-    def release(self):
+    def release(self) -> None:
         self.__bounded_semaphore.release()
 
 
-    # # # # Error records:
-    # # # # Parallel - multiprocessing
-    # File "/.../apache-pyocean/pyocean/api/operator.py", line 118, in __exit__
-    #     self.__bounded_semaphore.__exit__(exc_type=exc_type, exc_val=exc_val, exc_tb=exc_tb)
-    # TypeError: __exit__() got an unexpected keyword argument 'exc_type'
 
-    # def __exit__(self, exc_type, exc_val, exc_tb):
-    #     self.__bounded_semaphore.__exit__(exc_type=exc_type, exc_val=exc_val, exc_tb=exc_tb)
-
-
-    def __exit__(self, *args, **kwargs):
-        self.__bounded_semaphore.__exit__(*args, **kwargs)
-
-
-
-class EventOperator(AdapterOperator):
+class EventOperator(_AdapterOperator):
 
     def __init__(self):
-        from .manager import Running_Event
-        self.__event: _OceanEvent = Running_Event
+        _AdapterOperator.__init__(self)
+        self.__event: _OceanEvent = self._get_feature_instance()
 
 
     def __repr__(self):
         return f"<Operator object for {repr(self.__event)}>"
+
+
+    def _get_feature_instance(self) -> _OceanEvent:
+        from .manager import Running_Event
+        return Running_Event
 
 
     def set(self) -> None:
@@ -198,8 +191,15 @@ class EventOperator(AdapterOperator):
 
 
     def wait(self, timeout: int = None) -> bool:
-        # # # # Parallel & Concurrent & Greenlet are the same -  have parameter
-        # # # # Async - asyncio doesn't have any parameter
+        """
+        Note:
+            Parallel & Concurrent & Green Thread are the same -  have parameter
+            Async - asyncio doesn't have any parameter
+
+        :param timeout:
+        :return:
+        """
+
         return self.__event.wait(timeout)
 
 
@@ -208,23 +208,20 @@ class EventOperator(AdapterOperator):
 
 
 
-class ConditionOperator(AdapterOperator):
+class ConditionOperator(_BaseLockAdapterOperator):
 
     def __init__(self):
-        from .manager import Running_Condition
-        self.__condition: _OceanCondition = Running_Condition
-
-
-    def __enter__(self):
-        return self.__condition.__enter__()
-
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        return self.__condition.__exit(exc_type=exc_type, exc_val=exc_val, exc_tb=exc_tb)
+        _BaseLockAdapterOperator.__init__(self)
+        self.__condition: _OceanCondition = self._feature_instance
 
 
     def __repr__(self):
         return f"<Operator object for {repr(self.__condition)}>"
+
+
+    def _get_feature_instance(self) -> _OceanCondition:
+        from .manager import Running_Condition
+        return Running_Condition
 
 
     def acquire(self, blocking: bool = True, timeout: int = None) -> None:
@@ -236,14 +233,29 @@ class ConditionOperator(AdapterOperator):
 
 
     def wait(self, timeout: int = None) -> None:
-        # # # # Async - asyncio doesn't have any parameter
-        # # # # Parallel & Concurrent are the same -  have parameter
+        """
+        Note:
+            Parallel & Concurrent are the same -  have parameter
+            Async - asyncio doesn't have any parameter
+
+        :param timeout:
+        :return:
+        """
+
         self.__condition.wait(timeout)
 
 
     def wait_for(self, predicate, timeout: int = None) -> bool:
-        # # # # Async - asyncio only have one parameter 'predicate'
-        # # # # Parallel & Concurrent are the same -  have parameter
+        """
+        Note:
+            Parallel & Concurrent are the same -  have parameter
+            Async - asyncio only have one parameter 'predicate'
+
+        :param predicate:
+        :param timeout:
+        :return:
+        """
+
         return self.__condition.wait_for(predicate=predicate, timeout=timeout)
 
 
@@ -256,7 +268,162 @@ class ConditionOperator(AdapterOperator):
 
 
 
-class QueueOperator(AdapterOperator):
+class LockAsyncOperator(_BaseAsyncLockOperator):
+
+    def __init__(self):
+        _BaseAsyncLockOperator.__init__(self)
+        self.__lock: _OceanLock = self._feature_instance
+
+
+    def __repr__(self):
+        return f"<AsyncOperator object for {repr(self.__lock)}>"
+
+
+    def _get_feature_instance(self) -> _OceanLock:
+        from .manager import Running_Lock
+        return Running_Lock
+
+
+    async def acquire(self):
+        await self.__lock.acquire()
+
+
+    def release(self):
+        self.__lock.release()
+
+
+
+class SemaphoreAsyncOperator(_BaseAsyncLockOperator):
+
+    def __init__(self):
+        _BaseAsyncLockOperator.__init__(self)
+        self.__semaphore: _OceanSemaphore = self._feature_instance
+
+
+    def __repr__(self):
+        return f"<AsyncOperator object for {repr(self.__semaphore)}>"
+
+
+    def _get_feature_instance(self) -> _OceanSemaphore:
+        from .manager import Running_Semaphore
+        return Running_Semaphore
+
+
+    async def acquire(self):
+        await self.__semaphore.acquire()
+
+
+    def release(self):
+        self.__semaphore.release()
+
+
+
+class BoundedSemaphoreAsyncOperator(_BaseAsyncLockOperator):
+
+    def __init__(self):
+        _BaseAsyncLockOperator.__init__(self)
+        self.__bounded_semaphore: _OceanBoundedSemaphore = self._feature_instance
+
+
+    def __repr__(self):
+        return f"<AsyncOperator object for {repr(self.__bounded_semaphore)}>"
+
+
+    def _get_feature_instance(self) -> _OceanBoundedSemaphore:
+        from .manager import Running_Bounded_Semaphore
+        return Running_Bounded_Semaphore
+
+
+    async def acquire(self):
+        await self.__bounded_semaphore.acquire()
+
+
+    def release(self):
+        self.__bounded_semaphore.release()
+
+
+
+class EventAsyncOperator(_AsyncAdapterOperator):
+
+    def __init__(self):
+        _AsyncAdapterOperator.__init__(self)
+        self.__event: _OceanEvent = self._get_feature_instance()
+
+
+    def __repr__(self):
+        return f"<AsyncOperator object for {repr(self.__event)}>"
+
+
+    def _get_feature_instance(self) -> _OceanEvent:
+        from .manager import Running_Event
+        return Running_Event
+
+
+    def set(self) -> None:
+        self.__event.set()
+
+
+    def is_set(self) -> bool:
+        return self.__event.is_set()
+
+
+    async def wait(self, timeout: int = None) -> bool:
+        # # # # Parallel & Concurrent & Greenlet are the same -  have parameter
+        # # # # Async - asyncio doesn't have any parameter
+        return await self.__event.wait(timeout)
+
+
+    def clear(self) -> None:
+        self.__event.clear()
+
+
+
+class ConditionAsyncOperator(_BaseAsyncLockOperator):
+
+    def __init__(self):
+        _BaseAsyncLockOperator.__init__(self)
+        self.__condition: _OceanCondition = self._feature_instance
+
+
+    def __repr__(self):
+        return f"<AsyncOperator object for {repr(self.__condition)}>"
+
+
+    def _get_feature_instance(self) -> _OceanCondition:
+        from .manager import Running_Condition
+        return Running_Condition
+
+
+    async def acquire(self) -> None:
+        await self.__condition.acquire()
+
+
+    def release(self) -> None:
+        self.__condition.release()
+
+
+    async def wait(self, timeout: int = None) -> None:
+        # # # # Async - asyncio doesn't have any parameter
+        # # # # Parallel & Concurrent are the same -  have parameter
+        return await self.__condition.wait(timeout)
+
+
+    async def wait_for(self, predicate) -> bool:
+        # # # # Async - asyncio only have one parameter 'predicate'
+        # # # # Parallel & Concurrent are the same -  have parameter
+        return await self.__condition.wait_for(predicate=predicate)
+
+
+    def notify(self, n: int = 1) -> None:
+        self.__condition.notify(n=n)
+
+
+    def notify_all(self) -> None:
+        self.__condition.notify_all()
+
+
+
+class QueueOperator(_AdapterOperator):
 
     @classmethod
     def _checking_init(cls, target_obj: object) -> bool:
@@ -292,4 +459,5 @@ class QueueOperator(AdapterOperator):
             return Running_Queue[name]
         else:
             raise _QueueNotExistWithName
+
 
