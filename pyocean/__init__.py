@@ -18,10 +18,10 @@ PYOCEAN_LOGGER = getLogger(__user)
 
 from pyocean.mode import RunningMode, FeatureMode
 from pyocean.task import OceanTask, QueueTask
-from pyocean.worker import (
+from pyocean.manager import (
     OceanSystem,
-    OceanSimpleWorker,
-    OceanPersistenceWorker,
-    OceanSimpleAsyncWorker,
-    OceanPersistenceAsyncWorker)
+    OceanSimpleManager,
+    OceanPersistenceManager,
+    OceanSimpleAsyncManager,
+    OceanPersistenceAsyncManager)
 

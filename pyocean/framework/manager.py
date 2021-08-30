@@ -11,7 +11,7 @@ from typing import List, Tuple, Dict, Optional, Union
 
 
 
-class BaseWorker(metaclass=ABCMeta):
+class BaseManager(metaclass=ABCMeta):
 
     _Worker_Timeout = 3
 
@@ -97,7 +97,7 @@ class BaseWorker(metaclass=ABCMeta):
 
 
 
-class BaseAsyncWorker(BaseWorker):
+class BaseAsyncManager(BaseManager):
 
     @abstractmethod
     def start(self,

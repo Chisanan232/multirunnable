@@ -32,7 +32,7 @@ The framework section code:
 
 """
 
-from pyocean.framework.worker import BaseWorker, BaseAsyncWorker
+from pyocean.framework.manager import BaseManager, BaseAsyncManager
 from pyocean.framework.task import BaseTask, BaseQueueTask
 
 from pyocean.framework.strategy import RunnableStrategy, AsyncRunnableStrategy, Resultable

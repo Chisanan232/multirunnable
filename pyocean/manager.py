@@ -1,8 +1,14 @@
 from pyocean.framework.task import BaseTask as _BaseTask, BaseQueueTask as _BaseQueueTask
-from pyocean.framework.worker import BaseWorker as _BaseWorker, BaseAsyncWorker as _BaseAsyncWorker, BaseSystem as _BaseSystem
+from pyocean.framework.manager import (
+    BaseManager as _BaseManager,
+    BaseAsyncManager as _BaseAsyncManager,
+    BaseSystem as _BaseSystem)
 from pyocean.framework.features import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
 from pyocean.framework.adapter.collection import BaseList as _BaseList
-from pyocean.framework.strategy import RunnableStrategy as _RunnableStrategy, AsyncRunnableStrategy as _AsyncRunnableStrategy, Resultable as _Resultable
+from pyocean.framework.strategy import (
+    RunnableStrategy as _RunnableStrategy,
+    AsyncRunnableStrategy as _AsyncRunnableStrategy,
+    Resultable as _Resultable)
 from pyocean.framework.result import OceanResult as _OceanResult
 from pyocean.mode import RunningMode as _RunningMode
 from pyocean.api.decorator import ReTryMechanism as _ReTryMechanism
@@ -16,10 +22,10 @@ from typing import Tuple, Dict, Optional, Union
 Running_Strategy: Union[_RunnableStrategy, _AsyncRunnableStrategy] = None
 
 
-class OceanWorker(ABC, _BaseWorker):
+class OceanManager(ABC, _BaseManager):
 
     def __init__(self, mode: _RunningMode, worker_num: int):
-        super(OceanWorker, self).__init__(mode=mode, worker_num=worker_num)
+        super(OceanManager, self).__init__(mode=mode, worker_num=worker_num)
 
         self._initial_running_strategy()
 
@@ -106,7 +112,7 @@ class OceanWorker(ABC, _BaseWorker):
 
 
 
-class OceanAsyncWorker(_BaseAsyncWorker):
+class OceanAsyncWorker(_BaseAsyncManager):
 
     _Initial_Object = None
     _Target_Function = None
@@ -222,7 +228,7 @@ class OceanAsyncWorker(_BaseAsyncWorker):
 
 
 
-class OceanSimpleWorker(OceanWorker):
+class OceanSimpleManager(OceanManager):
 
     def __init__(self, mode: _RunningMode, worker_num: int):
         super().__init__(mode=mode, worker_num=worker_num)
@@ -237,7 +243,7 @@ class OceanSimpleWorker(OceanWorker):
 
 
 
-class OceanPersistenceWorker(OceanWorker):
+class OceanPersistenceManager(OceanManager):
 
     def __init__(self, mode: _RunningMode, worker_num: int,
                  persistence_strategy: _OceanPersistence,
@@ -259,7 +265,7 @@ class OceanPersistenceWorker(OceanWorker):
 
 
 
-class OceanSimpleAsyncWorker(OceanAsyncWorker):
+class OceanSimpleAsyncManager(OceanAsyncWorker):
 
     def __init__(self, mode: _RunningMode, worker_num: int):
         super().__init__(mode=mode, worker_num=worker_num)
@@ -274,7 +280,7 @@ class OceanSimpleAsyncWorker(OceanAsyncWorker):
 
 
 
-class OceanPersistenceAsyncWorker(OceanAsyncWorker):
+class OceanPersistenceAsyncManager(OceanAsyncWorker):
 
     def __init__(self, mode: _RunningMode, worker_num: int,
                  persistence_strategy: _OceanPersistence,
@@ -306,12 +312,12 @@ class OceanSystem(_BaseSystem):
             timeout: int = 0) -> [_OceanResult]:
 
         if self._mode is _RunningMode.Asynchronous:
-            __ocean_worker = OceanSimpleAsyncWorker(mode=self._mode, worker_num=self._worker_num)
+            __ocean_worker = OceanSimpleAsyncManager(mode=self._mode, worker_num=self._worker_num)
             __ocean_worker.running_timeout = timeout
             __ocean_worker.start(task=task, queue_tasks=queue_tasks, features=features, saving_mode=saving_mode)
             return __ocean_worker.get_result()
         else:
-            __ocean_worker = OceanSimpleWorker(mode=self._mode, worker_num=self._worker_num)
+            __ocean_worker = OceanSimpleManager(mode=self._mode, worker_num=self._worker_num)
             __ocean_worker.running_timeout = timeout
             __ocean_worker.start(task=task, queue_tasks=queue_tasks, features=features, saving_mode=saving_mode)
             return __ocean_worker.get_result()
@@ -327,7 +333,7 @@ class OceanSystem(_BaseSystem):
                      timeout: int = 0) -> [_OceanResult]:
 
         if self._mode is _RunningMode.Asynchronous:
-            __ocean_worker = OceanPersistenceAsyncWorker(
+            __ocean_worker = OceanPersistenceAsyncManager(
                 mode=self._mode,
                 worker_num=self._worker_num,
                 persistence_strategy=persistence_strategy,
@@ -337,7 +343,7 @@ class OceanSystem(_BaseSystem):
             __ocean_worker.start(task=task, queue_tasks=queue_tasks, features=features, saving_mode=saving_mode)
             return __ocean_worker.get_result()
         else:
-            __ocean_worker = OceanPersistenceWorker(
+            __ocean_worker = OceanPersistenceManager(
                 mode=self._mode,
                 worker_num=self._worker_num,
                 persistence_strategy=persistence_strategy,
