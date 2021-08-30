@@ -1,5 +1,5 @@
 from pyocean.framework.task import BaseTask as _BaseTask, BaseQueueTask as _BaseQueueTask
-from pyocean.framework.manager import BaseSystem as _BaseSystem
+from pyocean.framework.system import BaseSystem as _BaseSystem
 from pyocean.framework.features import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
 from pyocean.framework.adapter.collection import BaseList as _BaseList
 from pyocean.framework.result import OceanResult as _OceanResult
@@ -65,12 +65,4 @@ class OceanSystem(_BaseSystem):
             __ocean_worker.running_timeout = timeout
             __ocean_worker.start(task=task, queue_tasks=queue_tasks, features=features, saving_mode=saving_mode)
             return __ocean_worker.get_result()
-
-
-    def dispatcher(self):
-        pass
-
-
-    def terminate(self):
-        pass
 
