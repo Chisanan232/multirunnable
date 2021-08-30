@@ -1,4 +1,4 @@
-from pyocean.api.manager import Globalize as _Globalize
+from pyocean.api.manage import Globalize as _Globalize
 from pyocean.types import OceanQueue as _OceanQueue
 from pyocean.adapter.base import QueueAdapterFactory as _QueueAdapterFactory
 

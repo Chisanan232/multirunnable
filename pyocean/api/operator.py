@@ -31,7 +31,7 @@ class LockAdapterOperator(_BaseLockAdapterOperator):
 
 
     def _get_feature_instance(self) -> _OceanLock:
-        from .manager import Running_Lock
+        from .manage import Running_Lock
         return Running_Lock
 
 
@@ -56,7 +56,7 @@ class RLockOperator(_BaseLockAdapterOperator):
 
 
     def _get_feature_instance(self) -> _OceanRLock:
-        from .manager import Running_RLock
+        from .manage import Running_RLock
         return Running_RLock
 
 
@@ -87,7 +87,7 @@ class SemaphoreOperator(_BaseLockAdapterOperator):
 
 
     def _get_feature_instance(self) -> _OceanSemaphore:
-        from .manager import Running_Semaphore
+        from .manage import Running_Semaphore
         return Running_Semaphore
 
 
@@ -129,7 +129,7 @@ class BoundedSemaphoreOperator(_BaseLockAdapterOperator):
 
 
     def _get_feature_instance(self) -> _OceanBoundedSemaphore:
-        from .manager import Running_Bounded_Semaphore
+        from .manage import Running_Bounded_Semaphore
         return Running_Bounded_Semaphore
 
 
@@ -178,7 +178,7 @@ class EventOperator(_AdapterOperator):
 
 
     def _get_feature_instance(self) -> _OceanEvent:
-        from .manager import Running_Event
+        from .manage import Running_Event
         return Running_Event
 
 
@@ -220,7 +220,7 @@ class ConditionOperator(_BaseLockAdapterOperator):
 
 
     def _get_feature_instance(self) -> _OceanCondition:
-        from .manager import Running_Condition
+        from .manage import Running_Condition
         return Running_Condition
 
 
@@ -280,7 +280,7 @@ class LockAsyncOperator(_BaseAsyncLockOperator):
 
 
     def _get_feature_instance(self) -> _OceanLock:
-        from .manager import Running_Lock
+        from .manage import Running_Lock
         return Running_Lock
 
 
@@ -305,7 +305,7 @@ class SemaphoreAsyncOperator(_BaseAsyncLockOperator):
 
 
     def _get_feature_instance(self) -> _OceanSemaphore:
-        from .manager import Running_Semaphore
+        from .manage import Running_Semaphore
         return Running_Semaphore
 
 
@@ -330,7 +330,7 @@ class BoundedSemaphoreAsyncOperator(_BaseAsyncLockOperator):
 
 
     def _get_feature_instance(self) -> _OceanBoundedSemaphore:
-        from .manager import Running_Bounded_Semaphore
+        from .manage import Running_Bounded_Semaphore
         return Running_Bounded_Semaphore
 
 
@@ -355,7 +355,7 @@ class EventAsyncOperator(_AsyncAdapterOperator):
 
 
     def _get_feature_instance(self) -> _OceanEvent:
-        from .manager import Running_Event
+        from .manage import Running_Event
         return Running_Event
 
 
@@ -390,7 +390,7 @@ class ConditionAsyncOperator(_BaseAsyncLockOperator):
 
 
     def _get_feature_instance(self) -> _OceanCondition:
-        from .manager import Running_Condition
+        from .manage import Running_Condition
         return Running_Condition
 
 
@@ -434,7 +434,7 @@ class QueueOperator(_AdapterOperator):
 
     @classmethod
     def has_queue(cls, name: str):
-        from .manager import Running_Queue
+        from .manage import Running_Queue
 
         if name in Running_Queue.keys():
             return True
@@ -444,7 +444,7 @@ class QueueOperator(_AdapterOperator):
 
     @classmethod
     def get_queue(cls) -> Optional[Dict[str, _OceanQueue]]:
-        from .manager import Running_Queue
+        from .manage import Running_Queue
 
         cls._checking_init(target_obj=Running_Queue)
         return Running_Queue
@@ -452,7 +452,7 @@ class QueueOperator(_AdapterOperator):
 
     @classmethod
     def get_queue_with_name(cls, name: str) -> _OceanQueue:
-        from .manager import Running_Queue
+        from .manage import Running_Queue
 
         cls._checking_init(target_obj=Running_Queue)
         if cls.has_queue(name=name):

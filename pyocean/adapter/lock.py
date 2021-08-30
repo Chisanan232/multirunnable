@@ -1,6 +1,6 @@
 from pyocean.framework.features import PosixThreadLock as _PosixThreadLock
 from pyocean.mode import FeatureMode as _FeatureMode
-from pyocean.api.manager import Globalize as _Globalize
+from pyocean.api.manage import Globalize as _Globalize
 from pyocean.types import (
     OceanLock as _OceanLock,
     OceanRLock as _OceanRLock,

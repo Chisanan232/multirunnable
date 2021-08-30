@@ -1,6 +1,6 @@
 from pyocean.framework.features import PosixThreadCommunication as _PosixThreadCommunication
 from pyocean.mode import FeatureMode as _FeatureMode
-from pyocean.api.manager import Globalize as _Globalize
+from pyocean.api.manage import Globalize as _Globalize
 from pyocean.types import OceanEvent as _OceanEvent, OceanCondition as _OceanCondition
 from pyocean.adapter.base import FeatureAdapterFactory as _FeatureAdapterFactory
 from pyocean.adapter._utils import _ModuleFactory, _AsyncUtils

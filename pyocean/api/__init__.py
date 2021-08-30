@@ -1,4 +1,4 @@
-from pyocean.api.manager import Globalize as _Globalize
+from pyocean.api.manage import Globalize as _Globalize
 from pyocean.api.decorator import (
     ReTryMechanism as _ReTryMechanism,
     retry as _retry,
