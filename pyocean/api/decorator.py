@@ -1,11 +1,15 @@
 from pyocean.framework.task import BaseTask as _BaseTask
 from pyocean.framework.result import OceanResult as _OceanResult
 from pyocean.api.operator import (
-    LockOperator as _LockOperator,
+    LockAdapterOperator as _LockOperator,
     SemaphoreOperator as _SemaphoreOperator,
-    BoundedSemaphoreOperator as _BoundedSemaphoreOperator)
+    BoundedSemaphoreOperator as _BoundedSemaphoreOperator,
+    LockAsyncOperator as _LockAsyncOperator,
+    SemaphoreAsyncOperator as _SemaphoreAsyncOperator,
+    BoundedSemaphoreAsyncOperator as _BoundedSemaphoreAsyncOperator)
 
 from functools import wraps, update_wrapper, partial
+from abc import ABCMeta, abstractmethod
 from typing import List, Tuple, Dict, Callable, Type, Any, Union
 import inspect
 
@@ -213,7 +217,30 @@ class ReTryMechanism:
 
 
 
-class ReTryDefaultFunction:
+class BaseDefaultFunction(metaclass=ABCMeta):
+
+    @abstractmethod
+    def initial(self, *args, **kwargs):
+        pass
+
+
+    @abstractmethod
+    def error_handling(self, e: Exception):
+        raise e
+
+
+    @abstractmethod
+    def done_handling(self, result):
+        return result
+
+
+    @abstractmethod
+    def final_handling(self):
+        pass
+
+
+
+class ReTryDefaultFunction(BaseDefaultFunction):
 
     def initial(self, *args, **kwargs):
         pass
@@ -339,7 +366,7 @@ class _Retry:
 
 
 
-class AsyncReTryDefaultFunction:
+class AsyncReTryDefaultFunction(BaseDefaultFunction):
 
     async def initial(self, *args, **kwargs):
         pass
@@ -398,7 +425,7 @@ class _AsyncRetry:
         return partial(self.__call__, instance)
 
 
-    def __call__(self, instance, *args, **kwargs):
+    async def __call__(self, instance, *args, **kwargs):
         __running_counter = 0
         __result = None
 
@@ -482,132 +509,6 @@ class _AsyncRetry:
 
 
 
-class LockDecorator:
-
-    @staticmethod
-    def run_with_lock(function: Callable[[Any, Any], List[Type[_OceanResult]]]):
-        """
-        Description:
-            A decorator which would add lock mechanism around the target
-            function for fixed time.
-        :return:
-        """
-
-        @wraps(function)
-        def lock(*args, **kwargs) -> List[Type[_OceanResult]]:
-            # from pyocean.api.manager import Running_Lock
-            __lock = _LockOperator()
-
-            with __lock:
-                result = function(*args, **kwargs)
-            return result
-
-        return lock
-
-
-    @staticmethod
-    def run_with_semaphore(function: Callable[[Any, Any], List[Type[_OceanResult]]]):
-        """
-        Description:
-            A decorator which would add semaphore mechanism around the
-            target function for fixed time.
-        :return:
-        """
-
-        @wraps(function)
-        def semaphore(*args, **kwargs) -> List[Type[_OceanResult]]:
-            # from pyocean.api.manager import Running_Semaphore
-            __semaphore = _SemaphoreOperator()
-
-            with __semaphore:
-                result = function(*args, **kwargs)
-            return result
-
-        return semaphore
-
-
-    @staticmethod
-    def run_with_bounded_semaphore(function: Callable[[Any, Any], List[Type[_OceanResult]]]):
-        """
-        Description:
-            A decorator which would add bounded semaphore mechanism
-            around the target function for fixed time.
-        :return:
-        """
-
-        @wraps(function)
-        def bounded_semaphore(*args, **kwargs) -> List[Type[_OceanResult]]:
-            # from pyocean.api.manager import Running_Bounded_Semaphore
-            __bounded_semaphore = _BoundedSemaphoreOperator()
-
-            with __bounded_semaphore:
-                result = function(*args, **kwargs)
-            return result
-
-        return bounded_semaphore
-
-
-    @staticmethod
-    def async_run_with_lock(function: Callable):
-        """
-        Description:
-            Asynchronous version of run_with_lock.
-        :return:
-        """
-
-        @wraps(function)
-        async def lock(*args, **kwargs) -> List[Type[_OceanResult]]:
-            # from pyocean.api.manager import Running_Lock
-            __lock = LockDecorator()
-
-            async with __lock:
-                result = await function(*args, **kwargs)
-            return result
-
-        return lock
-
-
-    @staticmethod
-    def async_run_with_semaphore(function: Callable):
-        """
-        Description:
-            Asynchronous version of run_with_semaphore.
-        :return:
-        """
-
-        @wraps(function)
-        async def semaphore(*args, **kwargs) -> List[Type[_OceanResult]]:
-            # from pyocean.api.manager import Running_Semaphore
-            __semaphore = _SemaphoreOperator()
-
-            async with __semaphore:
-                result = await function(*args, **kwargs)
-            return result
-
-        return semaphore
-
-
-    @staticmethod
-    def async_run_with_bounded_semaphore(function: Callable):
-        """
-        Description:
-             Asynchronous version of run_with_bounded_semaphore.
-       :return:
-        """
-
-        @wraps(function)
-        async def bounded_semaphore(*args, **kwargs) -> List[Type[_OceanResult]]:
-            # from pyocean.api.manager import Running_Bounded_Semaphore
-            __bounded_semaphore = _BoundedSemaphoreOperator()
-
-            async with __bounded_semaphore:
-                result = await function(*args, **kwargs)
-            return result
-
-        return bounded_semaphore
-
-
-
 class RunWith:
 
     @staticmethod
@@ -683,7 +584,7 @@ class AsyncRunWith:
 
         @wraps(function)
         async def __lock_process(*args, **kwargs) -> List[Type[_OceanResult]]:
-            __lock = LockDecorator()
+            __lock = _LockAsyncOperator()
 
             async with __lock:
                 result = await function(*args, **kwargs)
@@ -702,7 +603,7 @@ class AsyncRunWith:
 
         @wraps(function)
         async def __semaphore_process(*args, **kwargs) -> List[Type[_OceanResult]]:
-            __semaphore = _SemaphoreOperator()
+            __semaphore = _SemaphoreAsyncOperator()
 
             async with __semaphore:
                 result = await function(*args, **kwargs)
@@ -721,7 +622,7 @@ class AsyncRunWith:
 
         @wraps(function)
         async def __bounded_semaphore_process(*args, **kwargs) -> List[Type[_OceanResult]]:
-            __bounded_semaphore = _BoundedSemaphoreOperator()
+            __bounded_semaphore = _BoundedSemaphoreAsyncOperator()
 
             async with __bounded_semaphore:
                 result = await function(*args, **kwargs)
