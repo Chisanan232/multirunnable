@@ -1,6 +1,6 @@
 from pyocean.framework.task import BaseTask as _BaseTask, BaseQueueTask as _BaseQueueTask
 from pyocean.framework.features import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
-from pyocean.framework.collection import BaseList as _BaseList
+from pyocean.framework.adapter.collection import BaseList as _BaseList
 from pyocean.framework.result import OceanResult as _OceanResult
 from pyocean.mode import RunningMode as _RunningMode
 from pyocean.persistence.interface import OceanPersistence as _OceanPersistence

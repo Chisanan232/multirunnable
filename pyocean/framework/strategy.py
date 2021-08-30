@@ -1,4 +1,4 @@
-from pyocean.framework.collection import BaseList as _BaseList
+from pyocean.framework.adapter.collection import BaseList as _BaseList
 from pyocean.framework.task import BaseQueueTask as _BaseQueueTask
 from pyocean.framework.features import BaseFeatureAdapterFactory as  _BaseFeatureAdapterFactory
 from pyocean.persistence.interface import OceanPersistence as _OceanPersistence

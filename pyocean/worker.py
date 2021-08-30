@@ -1,7 +1,7 @@
 from pyocean.framework.task import BaseTask as _BaseTask, BaseQueueTask as _BaseQueueTask
 from pyocean.framework.worker import BaseWorker as _BaseWorker, BaseAsyncWorker as _BaseAsyncWorker, BaseSystem as _BaseSystem
 from pyocean.framework.features import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
-from pyocean.framework.collection import BaseList as _BaseList
+from pyocean.framework.adapter.collection import BaseList as _BaseList
 from pyocean.framework.strategy import RunnableStrategy as _RunnableStrategy, AsyncRunnableStrategy as _AsyncRunnableStrategy, Resultable as _Resultable
 from pyocean.framework.result import OceanResult as _OceanResult
 from pyocean.mode import RunningMode as _RunningMode
@@ -10,7 +10,7 @@ from pyocean.adapter.strategy import StrategyAdapter as _StrategyAdapter
 from pyocean.persistence.interface import OceanPersistence as _OceanPersistence
 
 from abc import ABC
-from typing import List, Tuple, Dict, Optional, Union
+from typing import Tuple, Dict, Optional, Union
 
 
 Running_Strategy: Union[_RunnableStrategy, _AsyncRunnableStrategy] = None

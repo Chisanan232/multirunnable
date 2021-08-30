@@ -1,5 +1,5 @@
 from pyocean.framework.task import BaseQueueTask as _BaseQueueTask
-from pyocean.framework.collection import BaseList as _BaseList, BaseIterator as _BaseIterator
+from pyocean.framework.adapter.collection import BaseList as _BaseList, BaseIterator as _BaseIterator
 from pyocean.framework.features import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
 
 from typing import List

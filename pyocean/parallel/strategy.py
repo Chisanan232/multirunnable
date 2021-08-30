@@ -1,6 +1,6 @@
 from pyocean.framework.task import BaseQueueTask as _BaseQueueTask
 from pyocean.framework.features import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
-from pyocean.framework.collection import BaseList as _BaseList
+from pyocean.framework.adapter.collection import BaseList as _BaseList
 from pyocean.framework.strategy import RunnableStrategy as _RunnableStrategy, Resultable as _Resultable
 from pyocean.framework.result import ResultState as _ResultState
 from pyocean.parallel.result import ParallelResult as _ParallelResult

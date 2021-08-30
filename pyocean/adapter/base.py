@@ -1,11 +1,10 @@
 from pyocean.framework.features import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
-from pyocean.framework.collection import BaseList as _BaseList
+from pyocean.framework.adapter.collection import BaseList as _BaseList
 from pyocean.mode import FeatureMode as _FeatureMode
 from pyocean.adapter.collection import FeatureList as _FeatureList
 from pyocean.adapter._utils import _AsyncUtils
 
-from abc import ABC, abstractmethod
-
+from abc import ABC
 
 
 class FeatureAdapterFactory(_BaseFeatureAdapterFactory, ABC):

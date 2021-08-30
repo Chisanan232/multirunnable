@@ -1,6 +1,6 @@
 from pyocean.framework.task import BaseTask as _BaseTask, BaseQueueTask as _BaseQueueTask
 from pyocean.framework.features import BaseQueueType as _BaseQueueType
-from pyocean.framework.collection import BaseList as _BaseList
+from pyocean.framework.adapter.collection import BaseList as _BaseList
 from pyocean.types import OceanQueue as _OceanQueue
 from pyocean.adapter.queue import Queue as _Queue
 from pyocean.adapter.collection import QueueTaskList as _QueueTaskList

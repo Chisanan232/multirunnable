@@ -4,13 +4,13 @@ from pyocean.framework.strategy import (
     RunnableStrategy as _RunnableStrategy,
     AsyncRunnableStrategy as _AsyncRunnableStrategy,
     Resultable as _Resultable)
-from pyocean.framework.collection import BaseList as _BaseList
+from pyocean.framework.adapter.collection import BaseList as _BaseList
 from pyocean.mode import FeatureMode as _FeatureMode
 from pyocean.coroutine.result import (
     CoroutineResult as _CoroutineResult,
     AsynchronousResult as _AsynchronousResult)
 
-from abc import ABCMeta, ABC, abstractmethod
+from abc import ABCMeta, ABC
 from typing import List, Iterable, Callable, Optional, Union
 from gevent.greenlet import Greenlet
 from asyncio.tasks import Task
