@@ -7,7 +7,7 @@ from pyocean.types import OceanTasks as _OceanTasks
 import pyocean._utils as _utils
 
 from abc import ABCMeta, ABC, abstractmethod
-from typing import cast, List, Iterable, Callable, Optional, Union
+from typing import cast, List, Tuple, Dict, Iterable, Callable, Optional, Union
 from multipledispatch import dispatch
 import logging
 
@@ -341,6 +341,29 @@ class AsyncRunnableStrategy(RunnableStrategy, ABC):
             Asynchronous version of method 'close'.
         :return:
         """
+        pass
+
+
+
+class BaseMapStrategy(metaclass=ABCMeta):
+
+    @abstractmethod
+    def generate_worker(self, target: Callable, args: Tuple = (), kwargs: Dict = {}) -> _OceanTasks:
+        pass
+
+
+    @abstractmethod
+    def activate_worker(self, workers: List[_OceanTasks]) -> None:
+        pass
+
+
+    @abstractmethod
+    def close_worker(self, workers: List[_OceanTasks]) -> None:
+        pass
+
+
+    @abstractmethod
+    def start_new_worker(self, target: Callable, args: Tuple = (), kwargs: Dict = {}) -> None:
         pass
 
 
