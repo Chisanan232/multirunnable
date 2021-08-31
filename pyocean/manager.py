@@ -1,7 +1,8 @@
 from pyocean.framework.task import BaseTask as _BaseTask, BaseQueueTask as _BaseQueueTask
 from pyocean.framework.manager import (
     BaseManager as _BaseManager,
-    BaseAsyncManager as _BaseAsyncManager)
+    BaseAsyncManager as _BaseAsyncManager,
+    BaseMapManager as _BaseMapManager)
 from pyocean.framework.features import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
 from pyocean.framework.adapter.collection import BaseList as _BaseList
 from pyocean.framework.strategy import (
@@ -11,11 +12,17 @@ from pyocean.framework.strategy import (
 from pyocean.framework.result import OceanResult as _OceanResult
 from pyocean.mode import RunningMode as _RunningMode
 from pyocean.api.decorator import ReTryMechanism as _ReTryMechanism
-from pyocean.adapter.strategy import StrategyAdapter as _StrategyAdapter
+from pyocean.adapter.strategy import (
+    StrategyAdapter as _StrategyAdapter,
+    MapStrategyAdapter as _MapStrategyAdapter)
 from pyocean.persistence.interface import OceanPersistence as _OceanPersistence
 
 from abc import ABC
-from typing import Tuple, Dict, Optional, Union
+from typing import Tuple, Dict, Optional, Union, List, Callable as CallableType, Iterable as IterableType
+from types import MethodType, FunctionType
+from collections import Iterable, Callable
+from multipledispatch import dispatch
+import inspect
 
 
 Running_Strategy: Union[_RunnableStrategy, _AsyncRunnableStrategy] = None
@@ -299,4 +306,92 @@ class OceanPersistenceAsyncManager(OceanAsyncWorker):
             db_connection_num=self.db_connection_num
         )
 
+
+
+class OceanMapManager(_BaseMapManager):
+
+    ParameterCannotBeNoneError = TypeError("It should not pass 'None' value parameter(s).")
+    InvalidParameterBePass = TypeError("The parameters data type is invalid. It should all be tuple or dict.")
+
+    def __init__(self, mode: _RunningMode):
+        __running_strategy_adapter = _MapStrategyAdapter(mode=mode)
+        self.running_strategy = __running_strategy_adapter.get_map_strategy()
+
+
+    def map_by_param(self, function: CallableType, args_iter: IterableType = []) -> None:
+        __checksum = self.__chk_args_content(args_iter=args_iter)
+
+        __workers_list = []
+        for args in args_iter:
+            __worker = self.__generate_worker(function, args)
+            __workers_list.append(__worker)
+
+        self.running_strategy.activate_worker(workers=__workers_list)
+        self.running_strategy.close_worker(workers=__workers_list)
+
+
+    def map_by_function(self, functions: IterableType[Callable], args_iter: IterableType = []) -> None:
+        self.__chk_function_and_args(functions=functions, args_iter=args_iter)
+
+        __workers_list = []
+        if args_iter is None or args_iter == []:
+            args_iter = [() for _ in range(len(list(functions)))]
+
+        for fun, args in zip(functions, args_iter):
+            print("CallableType: ", type(fun) is CallableType)
+            print("MethodType: ", type(fun) is MethodType)
+            print("FunctionType: ", type(fun) is FunctionType)
+            print("args: ", args)
+            __worker = self.__generate_worker(fun, args)
+            __workers_list.append(__worker)
+
+        self.running_strategy.activate_worker(__workers_list)
+        self.running_strategy.close_worker(__workers_list)
+
+
+    def __chk_args_content(self, args_iter: IterableType) -> List[Union[type, bool]]:
+        """
+        Description:
+            The arguments only receive iterator of element which is
+            tuple or dictionary object
+        :param args_iter:
+        :return:
+        """
+
+        if args_iter is None:
+            raise self.ParameterCannotBeNoneError
+
+        checksum = map(lambda ele: type(ele) if (type(ele) is tuple or type(ele) is dict) else False, args_iter)
+        if False in checksum:
+            raise self.InvalidParameterBePass
+        return list(checksum)
+
+
+    @dispatch(MethodType, tuple)
+    def __generate_worker(self, function, args):
+        __worker = self.running_strategy.generate_worker(target=function, *args)
+        return __worker
+
+
+    @dispatch(MethodType, dict)
+    def ___generate_worker(self, function, args):
+        __worker = self.running_strategy.generate_worker(target=function, **args)
+        return __worker
+
+
+    def __chk_function_and_args(self, functions: IterableType[Callable], args_iter: IterableType):
+        if functions is None or args_iter is None:
+            raise self.ParameterCannotBeNoneError
+
+        self.__chk_args_content(args_iter=args_iter)
+        self.__chk_fun_signature_and_param(functions=functions, args_iter=args_iter)
+
+
+    def __chk_fun_signature_and_param(self, functions: IterableType[Callable], args_iter: IterableType) -> bool:
+        for fun, args in zip(functions, args_iter):
+            __fun_signature = inspect.signature(fun)
+            __fun_parameter = __fun_signature.parameters
+            if args != () and args != {} and len(__fun_parameter.keys()) != len(args):
+                raise ValueError("The signature and parameter aren't mapping.")
+        return True
 
