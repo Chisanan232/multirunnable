@@ -1,17 +1,23 @@
 from pyocean.framework.task import BaseQueueTask as _BaseQueueTask
 from pyocean.framework.features import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
 from pyocean.framework.adapter.collection import BaseList as _BaseList
-from pyocean.framework.strategy import RunnableStrategy as _RunnableStrategy, Resultable as _Resultable
+from pyocean.framework.strategy import (
+    RunnableStrategy as _RunnableStrategy,
+    BaseMapStrategy as _BaseMapStrategy,
+    Resultable as _Resultable)
 from pyocean.framework.result import ResultState as _ResultState
 from pyocean.parallel.result import ParallelResult as _ParallelResult
 from pyocean.persistence.interface import OceanPersistence as _OceanPersistence
 from pyocean.mode import FeatureMode as _FeatureMode
+from pyocean.types import OceanTasks as _OceanTasks
 
 from abc import abstractmethod
-from typing import List, Dict, Iterable, Union, Callable, Optional, cast
-from multiprocessing import Manager
+from typing import List, Tuple, Dict, Iterable as IterableType, Union, Callable, Optional, cast
+from collections import Iterable
+from multiprocessing import Process, Pipe, Manager
 from multiprocessing.pool import Pool, AsyncResult, ApplyResult
 from multiprocessing.managers import Namespace
+from multipledispatch import dispatch
 
 
 
@@ -75,13 +81,13 @@ class ParallelStrategy(_RunnableStrategy):
 
 
 
-class MultiProcessingStrategy(ParallelStrategy, _Resultable):
+class ProcessPoolStrategy(ParallelStrategy, _Resultable):
 
     def initialization(self,
                        queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
                        features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
                        *args, **kwargs) -> None:
-        super(MultiProcessingStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
+        super(ProcessPoolStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
 
         # # Persistence
         if self._persistence_strategy is not None:
@@ -89,7 +95,7 @@ class MultiProcessingStrategy(ParallelStrategy, _Resultable):
 
         # Initialize and build the Processes Pool.
         __pool_initializer: Callable = kwargs.get("pool_initializer", None)
-        __pool_initargs: Iterable = kwargs.get("pool_initargs", None)
+        __pool_initargs: IterableType = kwargs.get("pool_initargs", None)
         self._Processors_Pool = Pool(processes=self.workers_number, initializer=__pool_initializer, initargs=__pool_initargs)
 
 
@@ -143,4 +149,66 @@ class MultiProcessingStrategy(ParallelStrategy, _Resultable):
             __parallel_results.append(__parallel_result)
 
         return __parallel_results
+
+
+
+class MultiProcessesStrategy(ParallelStrategy, _Resultable):
+
+    def activate_worker(self, worker: Union[ApplyResult, AsyncResult]) -> None:
+        pass
+
+
+    def build_workers(self, function: Callable, *args, **kwargs) -> List[_OceanTasks]:
+        pass
+
+
+    def close(self) -> None:
+        pass
+
+
+    def get_result(self) -> IterableType[object]:
+        pass
+
+
+
+class MultiProcessingMapStrategy(_BaseMapStrategy):
+
+    def generate_worker(self, target: Callable, *args, **kwargs) -> Process:
+        return Process(target=target, args=args, kwargs=kwargs)
+
+
+    @dispatch(Process)
+    def activate_worker(self, workers: Process) -> None:
+        workers.start()
+
+
+    @dispatch(Iterable)
+    def activate_worker(self, workers: List[Process]) -> None:
+        for worker in workers:
+            self.activate_worker(worker)
+
+
+    @dispatch(Process)
+    def close_worker(self, workers: Process) -> None:
+        workers.join()
+
+
+    @dispatch(Iterable)
+    def close_worker(self, workers: List[Process]) -> None:
+        for worker in workers:
+            self.close_worker(worker)
+
+
+    @dispatch(Process, tuple, dict)
+    def start_new_worker(self, target: Callable, args: Tuple = (), kwargs: Dict = {}) -> Process:
+        __worker = self.generate_worker(target=target, *args, **kwargs)
+        self.activate_worker(__worker)
+        return __worker
+
+
+    @dispatch(Iterable, tuple, dict)
+    def start_new_worker(self, target: List[Callable], args: Tuple = (), kwargs: Dict = {}) -> List[Process]:
+        __workers = [self.generate_worker(target=__function, *args, **kwargs) for __function in target]
+        self.activate_worker(__workers)
+        return __workers
 
