@@ -318,8 +318,14 @@ class OceanMapManager(_BaseMapManager):
         self.running_strategy = __running_strategy_adapter.get_map_strategy()
 
 
-    def map_by_param(self, function: CallableType, args_iter: IterableType = []) -> None:
+    def map_by_param(self,
+                     function: CallableType,
+                     args_iter: IterableType = [],
+                     queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+                     features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
         __checksum = self.__chk_args_content(args_iter=args_iter)
+
+        self.running_strategy.initialization(queue_tasks=queue_tasks, features=features)
 
         __workers_list = []
         for args in args_iter:
@@ -330,8 +336,14 @@ class OceanMapManager(_BaseMapManager):
         self.running_strategy.close_worker(workers=__workers_list)
 
 
-    def map_by_function(self, functions: IterableType[Callable], args_iter: IterableType = []) -> None:
+    def map_by_function(self,
+                        functions: IterableType[Callable],
+                        args_iter: IterableType = [],
+                        queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+                        features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
         self.__chk_function_and_args(functions=functions, args_iter=args_iter)
+
+        self.running_strategy.initialization(queue_tasks=queue_tasks, features=features)
 
         __workers_list = []
         if args_iter is None or args_iter == []:
@@ -394,4 +406,8 @@ class OceanMapManager(_BaseMapManager):
             if args != () and args != {} and len(__fun_parameter.keys()) != len(args):
                 raise ValueError("The signature and parameter aren't mapping.")
         return True
+
+
+    def start_new_worker(self, target: Callable, *args, **kwargs):
+        self.running_strategy.start_new_worker(target=target, *args, **kwargs)
 

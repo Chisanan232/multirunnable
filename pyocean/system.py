@@ -12,7 +12,7 @@ from pyocean.manager import (
     OceanPersistenceAsyncManager as _OceanPersistenceAsyncWorker,
     OceanMapManager as _OceanMapManager)
 
-from typing import Optional, Union
+from typing import Callable, Optional, Union
 
 
 
@@ -80,12 +80,17 @@ class OceanSystem(_BaseSystem):
             return __result
 
 
-    def map_by_params(self, function, args_iter=[]):
+    def map_by_params(self, function, args_iter=[], queue_tasks=None, features=None):
         __manager = _OceanMapManager(mode=self._mode)
-        __manager.map_by_param(function=function, args_iter=args_iter)
+        __manager.map_by_param(function=function, args_iter=args_iter, queue_tasks=queue_tasks, features=features)
 
 
-    def map_by_functions(self, functions, args_iter=[]):
+    def map_by_functions(self, functions, args_iter=[], queue_tasks=None, features=None):
         __manager = _OceanMapManager(mode=self._mode)
-        __manager.map_by_function(functions=functions, args_iter=args_iter)
+        __manager.map_by_function(functions=functions, args_iter=args_iter, queue_tasks=queue_tasks, features=features)
+
+
+    def start_new_worker(self, target: Callable, *args, **kwargs):
+        __manager = _OceanMapManager(mode=self._mode)
+        __manager.start_new_worker(target=target, *args, **kwargs)
 
