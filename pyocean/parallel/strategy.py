@@ -173,6 +173,8 @@ class MultiProcessesStrategy(ParallelStrategy, _Resultable):
 
 class MultiProcessingMapStrategy(_BaseMapStrategy):
 
+    _Strategy_Feature_Mode: _FeatureMode = _FeatureMode.Parallel
+
     def generate_worker(self, target: Callable, *args, **kwargs) -> Process:
         return Process(target=target, args=args, kwargs=kwargs)
 
