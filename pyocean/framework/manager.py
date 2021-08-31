@@ -6,7 +6,7 @@ from pyocean.mode import RunningMode as _RunningMode
 import pyocean._utils as _utils
 
 from abc import ABCMeta, abstractmethod
-from typing import List, Tuple, Dict, Optional, Union
+from typing import List, Tuple, Dict, Callable, Iterable, Optional, Union
 
 
 
@@ -123,5 +123,40 @@ class BaseAsyncManager(BaseManager):
 
     @abstractmethod
     async def run_task(self, task: _BaseTask) -> List[_OceanResult]:
+        pass
+
+
+
+class BaseMapManager(metaclass=ABCMeta):
+
+    @abstractmethod
+    def map_by_param(self, functions: Callable, args_iter: Iterable = []) -> None:
+        """
+        Description:
+            Receive a parameters (the arguments of target function) List
+            object and distribute them to
+            1. Multiple Worker (Process, Thread, etc) by the length of list object.
+            2. Multiple Worker by an option value like 'worker_num' or something else.
+        :param functions:
+        :param args_iter:
+        :return:
+        """
+
+        pass
+
+
+    @abstractmethod
+    def map_by_function(self, functions: Iterable[Callable], args_iter: Iterable = []) -> None:
+        """
+        Description:
+            Receive a function (Callable object) List object and distribute
+            them to
+            1. Multiple Worker (Process, Thread, etc) by the length of list object.
+            2. Multiple Worker by an option value like 'worker_num' or something else.
+        :param args_iter:
+        :param functions:
+        :return:
+        """
+
         pass
 
