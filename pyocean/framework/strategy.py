@@ -131,9 +131,86 @@ class BaseRunnableStrategy(metaclass=ABCMeta):
 
 
 
+class RunnableInitialization:
+
+    _Strategy_Feature_Mode: _FeatureMode = None
+
+    def __init__(self, mode: _FeatureMode):
+        self._Strategy_Feature_Mode = mode
+
+
+    @dispatch(_BaseQueueTask)
+    def init_queue_process(self, queue_tasks: _BaseQueueTask) -> None:
+        """
+        Description:
+            Initialize Queue object which be needed to handle in Queue-Task-List.
+        :param queue_tasks:
+        :return:
+        """
+
+        queue_tasks.init_queue_with_values()
+
+
+    @dispatch(_BaseList)
+    def init_queue_process(self, queue_tasks: _BaseList) -> None:
+        """
+        Description:
+            Initialize Queue object which be needed to handle in Queue-Task-List.
+        :param queue_tasks:
+        :return:
+        """
+
+        __queues_iterator = queue_tasks.iterator()
+        while __queues_iterator.has_next():
+            __queue_adapter = cast(_BaseQueueTask, __queues_iterator.next())
+            __queue_adapter.init_queue_with_values()
+
+
+    @dispatch(_BaseFeatureAdapterFactory)
+    def init_lock_or_communication_process(self, features: _BaseFeatureAdapterFactory, **kwargs) -> None:
+        """
+        Description:
+            Initialize Lock (Lock, RLock, Semaphore, Bounded Semaphore)
+            or communication object (Event, Condition) which be needed to
+            handle in Feature-List.
+        :param features:
+        :return:
+        """
+
+        features.feature_mode = self._Strategy_Feature_Mode
+        __instance = features.get_instance(**kwargs)
+        features.globalize_instance(__instance)
+
+
+    @dispatch(_BaseList)
+    def init_lock_or_communication_process(self, features: _BaseList, **kwargs) -> None:
+        """
+        Description:
+            Initialize Lock (Lock, RLock, Semaphore, Bounded Semaphore)
+            or communication object (Event, Condition) which be needed to
+            handle in Feature-List.
+        :param features:
+        :return:
+        """
+
+        __features_iterator = features.iterator()
+        while __features_iterator.has_next():
+            __feature_adapter = cast(_BaseFeatureAdapterFactory, __features_iterator.next())
+            __feature_adapter.feature_mode = self._Strategy_Feature_Mode
+            __instance = __feature_adapter.get_instance(**kwargs)
+            __feature_adapter.globalize_instance(__instance)
+
+
+
 class RunnableStrategy(BaseRunnableStrategy, ABC):
 
     _Strategy_Feature_Mode: _FeatureMode = None
+    __Initialization = None
+
+    def __init__(self, workers_num: int, **kwargs):
+        super().__init__(workers_num, **kwargs)
+        self.__Initialization = RunnableInitialization(mode=self._Strategy_Feature_Mode)
+
 
     @property
     def workers_number(self) -> int:
@@ -195,66 +272,74 @@ class RunnableStrategy(BaseRunnableStrategy, ABC):
             self._init_lock_or_communication_process(features, **kwargs)
 
 
-    @dispatch(_BaseQueueTask)
-    def _init_queue_process(self, queue_tasks: _BaseQueueTask) -> None:
-        """
-        Description:
-            Initialize Queue object which be needed to handle in Queue-Task-List.
-        :param queue_tasks:
-        :return:
-        """
-
-        queue_tasks.init_queue_with_values()
+    def _init_queue_process(self, queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]]) -> None:
+        self.__Initialization.init_queue_process(queue_tasks)
 
 
-    @dispatch(_BaseList)
-    def _init_queue_process(self, queue_tasks: _BaseList) -> None:
-        """
-        Description:
-            Initialize Queue object which be needed to handle in Queue-Task-List.
-        :param queue_tasks:
-        :return:
-        """
-
-        __queues_iterator = queue_tasks.iterator()
-        while __queues_iterator.has_next():
-            __queue_adapter = cast(_BaseQueueTask, __queues_iterator.next())
-            __queue_adapter.init_queue_with_values()
+    def _init_lock_or_communication_process(self, features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]], **kwargs) -> None:
+        self.__Initialization.init_lock_or_communication_process(features, **kwargs)
 
 
-    @dispatch(_BaseFeatureAdapterFactory)
-    def _init_lock_or_communication_process(self, features: _BaseFeatureAdapterFactory, **kwargs) -> None:
-        """
-        Description:
-            Initialize Lock (Lock, RLock, Semaphore, Bounded Semaphore)
-            or communication object (Event, Condition) which be needed to
-            handle in Feature-List.
-        :param features:
-        :return:
-        """
-
-        features.feature_mode = self._Strategy_Feature_Mode
-        __instance = features.get_instance(**kwargs)
-        features.globalize_instance(__instance)
-
-
-    @dispatch(_BaseList)
-    def _init_lock_or_communication_process(self, features: _BaseList, **kwargs) -> None:
-        """
-        Description:
-            Initialize Lock (Lock, RLock, Semaphore, Bounded Semaphore)
-            or communication object (Event, Condition) which be needed to
-            handle in Feature-List.
-        :param features:
-        :return:
-        """
-
-        __features_iterator = features.iterator()
-        while __features_iterator.has_next():
-            __feature_adapter = cast(_BaseFeatureAdapterFactory, __features_iterator.next())
-            __feature_adapter.feature_mode = self._Strategy_Feature_Mode
-            __instance = __feature_adapter.get_instance(**kwargs)
-            __feature_adapter.globalize_instance(__instance)
+    # @dispatch(_BaseQueueTask)
+    # def _init_queue_process(self, queue_tasks: _BaseQueueTask) -> None:
+    #     """
+    #     Description:
+    #         Initialize Queue object which be needed to handle in Queue-Task-List.
+    #     :param queue_tasks:
+    #     :return:
+    #     """
+    #
+    #     queue_tasks.init_queue_with_values()
+    #
+    #
+    # @dispatch(_BaseList)
+    # def _init_queue_process(self, queue_tasks: _BaseList) -> None:
+    #     """
+    #     Description:
+    #         Initialize Queue object which be needed to handle in Queue-Task-List.
+    #     :param queue_tasks:
+    #     :return:
+    #     """
+    #
+    #     __queues_iterator = queue_tasks.iterator()
+    #     while __queues_iterator.has_next():
+    #         __queue_adapter = cast(_BaseQueueTask, __queues_iterator.next())
+    #         __queue_adapter.init_queue_with_values()
+    #
+    #
+    # @dispatch(_BaseFeatureAdapterFactory)
+    # def _init_lock_or_communication_process(self, features: _BaseFeatureAdapterFactory, **kwargs) -> None:
+    #     """
+    #     Description:
+    #         Initialize Lock (Lock, RLock, Semaphore, Bounded Semaphore)
+    #         or communication object (Event, Condition) which be needed to
+    #         handle in Feature-List.
+    #     :param features:
+    #     :return:
+    #     """
+    #
+    #     features.feature_mode = self._Strategy_Feature_Mode
+    #     __instance = features.get_instance(**kwargs)
+    #     features.globalize_instance(__instance)
+    #
+    #
+    # @dispatch(_BaseList)
+    # def _init_lock_or_communication_process(self, features: _BaseList, **kwargs) -> None:
+    #     """
+    #     Description:
+    #         Initialize Lock (Lock, RLock, Semaphore, Bounded Semaphore)
+    #         or communication object (Event, Condition) which be needed to
+    #         handle in Feature-List.
+    #     :param features:
+    #     :return:
+    #     """
+    #
+    #     __features_iterator = features.iterator()
+    #     while __features_iterator.has_next():
+    #         __feature_adapter = cast(_BaseFeatureAdapterFactory, __features_iterator.next())
+    #         __feature_adapter.feature_mode = self._Strategy_Feature_Mode
+    #         __instance = __feature_adapter.get_instance(**kwargs)
+    #         __feature_adapter.globalize_instance(__instance)
 
 
 
@@ -346,6 +431,34 @@ class AsyncRunnableStrategy(RunnableStrategy, ABC):
 
 
 class BaseMapStrategy(metaclass=ABCMeta):
+
+    _Strategy_Feature_Mode: _FeatureMode = None
+    __Initialization = None
+
+    def __init__(self):
+        self.__Initialization = RunnableInitialization(mode=self._Strategy_Feature_Mode)
+
+
+    def initialization(self,
+                       queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+                       features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
+                       *args, **kwargs) -> None:
+        # # Queue initialization
+        if queue_tasks is not None:
+            self._init_queue_process(queue_tasks)
+
+        # # Lock and communication features initialization
+        if features is not None:
+            self._init_lock_or_communication_process(features, **kwargs)
+
+
+    def _init_queue_process(self, queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]]) -> None:
+        self.__Initialization.init_queue_process(queue_tasks)
+
+
+    def _init_lock_or_communication_process(self, features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]], **kwargs) -> None:
+        self.__Initialization.init_lock_or_communication_process(features, **kwargs)
+
 
     @abstractmethod
     def generate_worker(self, target: Callable, args: Tuple = (), kwargs: Dict = {}) -> _OceanTasks:
