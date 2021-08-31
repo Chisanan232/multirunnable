@@ -12,7 +12,7 @@ from pyocean.manager import (
     OceanPersistenceAsyncManager as _OceanPersistenceAsyncWorker,
     OceanMapManager as _OceanMapManager)
 
-from typing import Callable, Optional, Union
+from typing import List, Iterable, Callable, Optional, Union
 
 
 
@@ -80,12 +80,20 @@ class OceanSystem(_BaseSystem):
             return __result
 
 
-    def map_by_params(self, function, args_iter=[], queue_tasks=None, features=None):
+    def map_by_params(self,
+                      function: Callable,
+                      args_iter: Iterable = [],
+                      queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+                      features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None):
         __manager = _OceanMapManager(mode=self._mode)
         __manager.map_by_param(function=function, args_iter=args_iter, queue_tasks=queue_tasks, features=features)
 
 
-    def map_by_functions(self, functions, args_iter=[], queue_tasks=None, features=None):
+    def map_by_functions(self,
+                         functions: List[Callable],
+                         args_iter: Iterable = [],
+                         queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+                         features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None):
         __manager = _OceanMapManager(mode=self._mode)
         __manager.map_by_function(functions=functions, args_iter=args_iter, queue_tasks=queue_tasks, features=features)
 

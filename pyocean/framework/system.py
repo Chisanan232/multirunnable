@@ -7,7 +7,7 @@ from pyocean.persistence.interface import OceanPersistence as _OceanPersistence
 import pyocean._utils as _utils
 
 from abc import ABCMeta, abstractmethod
-from typing import Optional, Union
+from typing import List, Iterable, Callable, Optional, Union
 
 
 
@@ -54,6 +54,24 @@ class BaseSystem(metaclass=ABCMeta):
                      features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
                      saving_mode: bool = False,
                      timeout: int = 0) -> [_OceanResult]:
+        pass
+
+
+    @abstractmethod
+    def map_by_params(self,
+                      function: Callable,
+                      args_iter: Iterable = [],
+                      queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+                      features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None):
+        pass
+
+
+    @abstractmethod
+    def map_by_functions(self,
+                         functions: List[Callable],
+                         args_iter: Iterable = [],
+                         queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+                         features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None):
         pass
 
 
