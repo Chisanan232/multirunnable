@@ -40,7 +40,6 @@ class BaseSystem(metaclass=ABCMeta):
             task: _BaseTask,
             queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
             features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
-            saving_mode: bool = False,
             timeout: int = 0) -> [_OceanResult]:
         pass
 
@@ -52,7 +51,6 @@ class BaseSystem(metaclass=ABCMeta):
                      db_connection_num: int,
                      queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
                      features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
-                     saving_mode: bool = False,
                      timeout: int = 0) -> [_OceanResult]:
         pass
 

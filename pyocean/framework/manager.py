@@ -3,6 +3,7 @@ from pyocean.framework.features import BaseFeatureAdapterFactory as _BaseFeature
 from pyocean.framework.adapter.collection import BaseList as _BaseList
 from pyocean.framework.result import OceanResult as _OceanResult
 from pyocean.mode import RunningMode as _RunningMode
+from pyocean.types import OceanTasks as _OceanTasks
 import pyocean._utils as _utils
 
 from abc import ABCMeta, abstractmethod
@@ -13,6 +14,7 @@ from typing import List, Tuple, Dict, Callable, Iterable, Optional, Union
 class BaseManager(metaclass=ABCMeta):
 
     _Worker_Timeout = 3
+    _Ocean_Tasks_List: List[_OceanTasks] = []
 
     def __init__(self, mode: _RunningMode, worker_num: int):
         self._mode = mode
@@ -52,7 +54,6 @@ class BaseManager(metaclass=ABCMeta):
               task: _BaseTask,
               queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
               features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
-              saving_mode: bool = False,
               init_args: Tuple = (), init_kwargs: Dict = {}) -> None:
         pass
 
@@ -66,12 +67,7 @@ class BaseManager(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def activate(self, task: _BaseTask, saving_mode: bool = False) -> None:
-        pass
-
-
-    @abstractmethod
-    def run_task(self, task: _BaseTask) -> List[_OceanResult]:
+    def activate(self, function: Callable, *args, **kwargs) -> None:
         pass
 
 
@@ -103,7 +99,6 @@ class BaseAsyncManager(BaseManager):
               task: _BaseTask,
               queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
               features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
-              saving_mode: bool = False,
               init_args: Tuple = (), init_kwargs: Dict = {}) -> None:
         pass
 
@@ -117,7 +112,7 @@ class BaseAsyncManager(BaseManager):
 
 
     @abstractmethod
-    async def activate(self, task: _BaseTask, saving_mode: bool = False) -> None:
+    async def activate(self, function: Callable, *args, **kwargs) -> None:
         pass
 
 

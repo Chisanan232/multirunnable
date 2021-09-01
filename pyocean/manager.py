@@ -50,7 +50,6 @@ class OceanManager(ABC, _BaseManager):
               task: _BaseTask,
               queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
               features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
-              saving_mode: bool = False,
               init_args: Tuple = (), init_kwargs: Dict = {}) -> [_OceanResult]:
 
         __worker_run_time = 0
@@ -59,7 +58,7 @@ class OceanManager(ABC, _BaseManager):
         while __worker_run_time < self.running_timeout + 1:
             try:
                 self.pre_activate(queue_tasks=queue_tasks, features=features, *init_args, **init_kwargs)
-                self.activate(task=task, saving_mode=saving_mode)
+                self.activate(function=task.function, *task.func_args, **task.func_kwargs)
             except Exception as e:
                 self.pre_stop(e=e)
                 __worker_run_finish = False
@@ -83,19 +82,9 @@ class OceanManager(ABC, _BaseManager):
         Running_Strategy.initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
 
 
-    def activate(self, task: _BaseTask, saving_mode: bool = False) -> None:
-        if saving_mode is True:
-            _kwargs = {"task": task}
-            __worker_list = Running_Strategy.build_workers(function=self.run_task, **_kwargs)
-        else:
-            __worker_list = Running_Strategy.build_workers(function=task.function, *task.func_args, **task.func_kwargs)
-        Running_Strategy.activate_workers(workers_list=__worker_list)
-
-
-    @_ReTryMechanism.task
-    def run_task(self, task: _BaseTask) -> [_OceanResult]:
-        result = task.function(*task.func_args, **task.func_kwargs)
-        return result
+    def activate(self, function: Callable, *args, **kwargs) -> None:
+        Running_Strategy.build_workers(function=function, *args, **kwargs)
+        Running_Strategy.activate_workers()
 
 
     def pre_stop(self, e: Exception) -> None:
@@ -147,7 +136,6 @@ class OceanAsyncWorker(_BaseAsyncManager):
               task: _BaseTask,
               queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
               features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
-              saving_mode: bool = False,
               init_args: Tuple = (), init_kwargs: Dict = {}) -> None:
 
         __event_loop = Running_Strategy.get_event_loop()
@@ -157,7 +145,6 @@ class OceanAsyncWorker(_BaseAsyncManager):
                 task=task,
                 queue_tasks=queue_tasks,
                 features=features,
-                saving_mode=saving_mode,
                 init_args=init_args, init_kwargs=init_kwargs
             ))
         self.post_stop()
@@ -167,7 +154,6 @@ class OceanAsyncWorker(_BaseAsyncManager):
                             task: _BaseTask,
                             queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
                             features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
-                            saving_mode: bool = False,
                             init_args: Tuple = (), init_kwargs: Dict = {}) -> [_OceanResult]:
 
         __worker_run_time = 0
@@ -176,7 +162,7 @@ class OceanAsyncWorker(_BaseAsyncManager):
         while __worker_run_time < self.running_timeout + 1:
             try:
                 await self.pre_activate(queue_tasks=queue_tasks, features=features, *init_args, **init_kwargs)
-                await self.activate(task=task, saving_mode=saving_mode)
+                await self.activate(function=task.function, *task.func_args, **task.func_kwargs)
             except Exception as e:
                 await self.pre_stop(e=e)
                 __worker_run_finish = False
@@ -199,13 +185,9 @@ class OceanAsyncWorker(_BaseAsyncManager):
         await Running_Strategy.initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
 
 
-    async def activate(self, task: _BaseTask, saving_mode: bool = False) -> None:
-        if saving_mode is True:
-            __kwargs = {"task": task}
-            __worker_list = Running_Strategy.build_workers(function=self.run_task, **__kwargs)
-        else:
-            __worker_list = Running_Strategy.build_workers(function=task.function, *task.func_args, **task.func_kwargs)
-        await Running_Strategy.activate_workers(workers_list=__worker_list)
+    async def activate(self, function: Callable, *args, **kwargs) -> None:
+        await Running_Strategy.build_workers(function=function, *args, **kwargs)
+        await Running_Strategy.activate_workers()
 
 
     @_ReTryMechanism.async_task
@@ -327,10 +309,12 @@ class OceanMapManager(_BaseMapManager):
 
         self.running_strategy.initialization(queue_tasks=queue_tasks, features=features)
 
-        __workers_list = []
-        for args in args_iter:
-            __worker = self.__generate_worker(function, args)
-            __workers_list.append(__worker)
+        # __workers_list = []
+        # for args in args_iter:
+        #     __worker = self.__generate_worker(function, args)
+        #     __workers_list.append(__worker)
+
+        __workers_list = [self.__generate_worker(function, args) for args in args_iter]
 
         self.running_strategy.activate_worker(workers=__workers_list)
         self.running_strategy.close_worker(workers=__workers_list)
@@ -345,10 +329,10 @@ class OceanMapManager(_BaseMapManager):
 
         self.running_strategy.initialization(queue_tasks=queue_tasks, features=features)
 
-        __workers_list = []
         if args_iter is None or args_iter == []:
             args_iter = [() for _ in range(len(list(functions)))]
 
+        __workers_list = []
         for fun, args in zip(functions, args_iter):
             print("CallableType: ", type(fun) is CallableType)
             print("MethodType: ", type(fun) is MethodType)
@@ -356,6 +340,8 @@ class OceanMapManager(_BaseMapManager):
             print("args: ", args)
             __worker = self.__generate_worker(fun, args)
             __workers_list.append(__worker)
+
+        # __workers_list = [self.__generate_worker(fun, args) for fun, args in zip(functions, args_iter)]
 
         self.running_strategy.activate_worker(__workers_list)
         self.running_strategy.close_worker(__workers_list)
@@ -373,10 +359,11 @@ class OceanMapManager(_BaseMapManager):
         if args_iter is None:
             raise self.ParameterCannotBeNoneError
 
-        checksum = map(lambda ele: type(ele) if (type(ele) is tuple or type(ele) is dict) else False, args_iter)
-        if False in checksum:
+        checksum_iter = map(lambda ele: type(ele) if (type(ele) is tuple or type(ele) is dict) else False, args_iter)
+        checksum = all(checksum_iter)
+        if checksum is False:
             raise self.InvalidParameterBePass
-        return list(checksum)
+        return list(checksum_iter)
 
 
     @dispatch(MethodType, tuple)

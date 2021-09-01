@@ -26,20 +26,19 @@ class OceanSystem(_BaseSystem):
             task: _BaseTask,
             queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
             features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
-            saving_mode: bool = False,
             timeout: int = 0) -> [_OceanResult]:
 
         if self._mode is _RunningMode.Asynchronous:
             __ocean_worker = _OceanSimpleAsyncWorker(mode=self._mode, worker_num=self._worker_num)
             __ocean_worker.running_timeout = timeout
-            __ocean_worker.start(task=task, queue_tasks=queue_tasks, features=features, saving_mode=saving_mode)
+            __ocean_worker.start(task=task, queue_tasks=queue_tasks, features=features)
             __result = __ocean_worker.get_result()
             __ocean_worker.post_stop()
             return __result
         else:
             __ocean_worker = _OceanSimpleWorker(mode=self._mode, worker_num=self._worker_num)
             __ocean_worker.running_timeout = timeout
-            __ocean_worker.start(task=task, queue_tasks=queue_tasks, features=features, saving_mode=saving_mode)
+            __ocean_worker.start(task=task, queue_tasks=queue_tasks, features=features)
             __result = __ocean_worker.get_result()
             __ocean_worker.post_stop()
             return __result
@@ -51,7 +50,6 @@ class OceanSystem(_BaseSystem):
                      db_connection_num: int,
                      queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
                      features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
-                     saving_mode: bool = False,
                      timeout: int = 0) -> [_OceanResult]:
 
         if self._mode is _RunningMode.Asynchronous:
@@ -62,7 +60,7 @@ class OceanSystem(_BaseSystem):
                 db_connection_num=db_connection_num)
 
             __ocean_worker.running_timeout = timeout
-            __ocean_worker.start(task=task, queue_tasks=queue_tasks, features=features, saving_mode=saving_mode)
+            __ocean_worker.start(task=task, queue_tasks=queue_tasks, features=features)
             __result = __ocean_worker.get_result()
             __ocean_worker.post_stop()
             return __result
@@ -74,7 +72,7 @@ class OceanSystem(_BaseSystem):
                 db_connection_num=db_connection_num)
 
             __ocean_worker.running_timeout = timeout
-            __ocean_worker.start(task=task, queue_tasks=queue_tasks, features=features, saving_mode=saving_mode)
+            __ocean_worker.start(task=task, queue_tasks=queue_tasks, features=features)
             __result = __ocean_worker.get_result()
             __ocean_worker.post_stop()
             return __result
