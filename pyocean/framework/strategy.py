@@ -97,7 +97,7 @@ class BaseRunnableStrategy(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def build_workers(self, function: Callable, *args, **kwargs) -> List[_OceanTasks]:
+    def build_workers(self, function: Callable, *args, **kwargs) -> None:
         """
         Description:
             Assign tasks into each different threads or processes.
@@ -110,11 +110,10 @@ class BaseRunnableStrategy(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def activate_workers(self, workers_list: List[_OceanTasks]) -> None:
+    def activate_workers(self) -> None:
         """
         Description:
             Activate multiple threads or processes to run target task(s).
-        :param workers_list:
         :return:
         """
         pass
@@ -280,68 +279,6 @@ class RunnableStrategy(BaseRunnableStrategy, ABC):
         self.__Initialization.init_lock_or_communication_process(features, **kwargs)
 
 
-    # @dispatch(_BaseQueueTask)
-    # def _init_queue_process(self, queue_tasks: _BaseQueueTask) -> None:
-    #     """
-    #     Description:
-    #         Initialize Queue object which be needed to handle in Queue-Task-List.
-    #     :param queue_tasks:
-    #     :return:
-    #     """
-    #
-    #     queue_tasks.init_queue_with_values()
-    #
-    #
-    # @dispatch(_BaseList)
-    # def _init_queue_process(self, queue_tasks: _BaseList) -> None:
-    #     """
-    #     Description:
-    #         Initialize Queue object which be needed to handle in Queue-Task-List.
-    #     :param queue_tasks:
-    #     :return:
-    #     """
-    #
-    #     __queues_iterator = queue_tasks.iterator()
-    #     while __queues_iterator.has_next():
-    #         __queue_adapter = cast(_BaseQueueTask, __queues_iterator.next())
-    #         __queue_adapter.init_queue_with_values()
-    #
-    #
-    # @dispatch(_BaseFeatureAdapterFactory)
-    # def _init_lock_or_communication_process(self, features: _BaseFeatureAdapterFactory, **kwargs) -> None:
-    #     """
-    #     Description:
-    #         Initialize Lock (Lock, RLock, Semaphore, Bounded Semaphore)
-    #         or communication object (Event, Condition) which be needed to
-    #         handle in Feature-List.
-    #     :param features:
-    #     :return:
-    #     """
-    #
-    #     features.feature_mode = self._Strategy_Feature_Mode
-    #     __instance = features.get_instance(**kwargs)
-    #     features.globalize_instance(__instance)
-    #
-    #
-    # @dispatch(_BaseList)
-    # def _init_lock_or_communication_process(self, features: _BaseList, **kwargs) -> None:
-    #     """
-    #     Description:
-    #         Initialize Lock (Lock, RLock, Semaphore, Bounded Semaphore)
-    #         or communication object (Event, Condition) which be needed to
-    #         handle in Feature-List.
-    #     :param features:
-    #     :return:
-    #     """
-    #
-    #     __features_iterator = features.iterator()
-    #     while __features_iterator.has_next():
-    #         __feature_adapter = cast(_BaseFeatureAdapterFactory, __features_iterator.next())
-    #         __feature_adapter.feature_mode = self._Strategy_Feature_Mode
-    #         __instance = __feature_adapter.get_instance(**kwargs)
-    #         __feature_adapter.globalize_instance(__instance)
-
-
 
 class AsyncRunnableStrategy(RunnableStrategy, ABC):
 
@@ -396,7 +333,7 @@ class AsyncRunnableStrategy(RunnableStrategy, ABC):
 
 
     @abstractmethod
-    async def build_workers(self, function: Callable, *args, **kwargs) -> List[_OceanTasks]:
+    async def build_workers(self, function: Callable, *args, **kwargs) -> None:
         """
         Description:
             Asynchronous version of method 'build_workers'.
@@ -409,11 +346,10 @@ class AsyncRunnableStrategy(RunnableStrategy, ABC):
 
 
     @abstractmethod
-    async def activate_workers(self, workers_list: List[_OceanTasks]) -> None:
+    async def activate_workers(self) -> None:
         """
         Description:
             Asynchronous version of method 'activate_workers'.
-        :param workers_list:
         :return:
         """
         pass
