@@ -1,5 +1,18 @@
-from abc import ABCMeta, abstractmethod
+from pyocean.types import (
+    OceanLock as _OceanLock,
+    OceanRLock as _OceanRLock,
+    OceanSemaphore as _OceanSemaphore,
+    OceanBoundedSemaphore as _OceanBoundedSemaphore,
+    OceanEvent as _OceanEvent,
+    OceanCondition as _OceanCondition,
+    OceanQueue as _OceanQueue)
 
+from abc import ABCMeta, abstractmethod
+from typing import Union, NewType
+
+
+__OceanFeature = Union[_OceanLock, _OceanRLock, _OceanSemaphore, _OceanBoundedSemaphore, _OceanEvent, _OceanCondition, _OceanQueue]
+_OceanFeatureType = NewType("OceanFeatureType", __OceanFeature)
 
 
 class AdapterOperator(metaclass=ABCMeta):
@@ -10,12 +23,14 @@ class AdapterOperator(metaclass=ABCMeta):
 
 class BaseLockAdapterOperator(AdapterOperator):
 
+    _Feature_Instance: _OceanFeatureType = None
+
     def __init__(self, *args, **kwargs):
-        self._feature_instance = self._get_feature_instance()
+        pass
 
 
     def __repr__(self):
-        pass
+        return f"<Operator object for {repr(self._feature_instance)}>"
 
 
     def __enter__(self):
@@ -25,42 +40,25 @@ class BaseLockAdapterOperator(AdapterOperator):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._feature_instance.__exit__(exc_type, exc_val, exc_tb)
 
-    # # # # Error records:
-    # # # # Parallel - multiprocessing
-    # File "/.../apache-pyocean/pyocean/api/operator.py", line 118, in __exit__
-    #     self.__bounded_semaphore.__exit__(exc_type=exc_type, exc_val=exc_val, exc_tb=exc_tb)
-    # TypeError: __exit__() got an unexpected keyword argument 'exc_type'
 
-    # # # # Concurrent - threading
-    #   File "/apache-pyocean/pyocean/concurrent/strategy.py", line 52, in save_value_fun
-    #     value = task.function(*task.func_args, **task.func_kwargs)
-    #   File "/apache-pyocean/example/persistence_file/dao.py", line 33, in get_test_data
-    #     data = self.sql_process_many()
-    #   File "/apache-pyocean/pyocean/api/decorator.py", line 668, in __bounded_semaphore_process
-    #     result = function(*args, **kwargs)
-    #   File "/apache-pyocean/pyocean/api/operator.py", line 190, in __exit__
-    #     self.__bounded_semaphore.__exit__(exc_type=exc_type, exc_val=exc_val, exc_tb=exc_tb)
-    #  TypeError: __exit__() got an unexpected keyword argument 'exc_type'
+    @property
+    def _feature_instance(self) -> _OceanFeatureType:
+        if self._Feature_Instance is None:
+            self._Feature_Instance = self._get_feature_instance()
+            if self._Feature_Instance is None:
+                __feature_opt_class = self.__class__.__name__
+                __feature = __feature_opt_class.replace("Operator", "")
+                raise ValueError(f"The {__feature} object not be initialed yet.")
+        return self._Feature_Instance
 
-    # # # # Green Thread - gevent
-    #   File "/apache-pyocean/pyocean/api/decorator.py", line 104, in task_retry
-    #     result = task.error_handler(e=e)
-    #   File "/apache-pyocean/pyocean/framework/task.py", line 31, in error_handler
-    #     raise e
-    #   File "/apache-pyocean/pyocean/api/decorator.py", line 102, in task_retry
-    #     result = task.function(*task.func_args, **task.func_kwargs)
-    #   File "/apache-pyocean/example/persistence_file/dao.py", line 33, in get_test_data
-    #     data = self.sql_process_many()
-    #   File "/apache-pyocean/pyocean/api/decorator.py", line 668, in __bounded_semaphore_process
-    #     result = function(*args, **kwargs)
-    #   File "/apache-pyocean/pyocean/api/operator.py", line 201, in __exit__
-    #     self.__bounded_semaphore.__exit__(exc_type=exc_type, exc_val=exc_val, exc_tb=exc_tb)
-    #   File "src/gevent/_semaphore.py", line 144, in gevent.__semaphore.Semaphore.__exit__
-    # TypeError: __exit__() takes exactly 3 positional arguments (0 given)
+
+    @_feature_instance.setter
+    def _feature_instance(self, feature: _OceanFeatureType) -> None:
+        self._Feature_Instance = feature
 
 
     @abstractmethod
-    def _get_feature_instance(self):
+    def _get_feature_instance(self) -> _OceanFeatureType:
         pass
 
 
@@ -104,12 +102,14 @@ class AsyncAdapterOperator(metaclass=ABCMeta):
 
 class BaseAsyncLockAdapterOperator(AsyncAdapterOperator):
 
+    _Feature_Instance: _OceanFeatureType = None
+
     def __init__(self, *args, **kwargs):
-        self._feature_instance = self._get_feature_instance()
+        pass
 
 
     def __repr__(self):
-        pass
+        return f"<AsyncOperator object for {repr(self._feature_instance)}>"
 
 
     def __await__(self):
@@ -130,8 +130,24 @@ class BaseAsyncLockAdapterOperator(AsyncAdapterOperator):
         return _AsyncContextManager(self)
 
 
+    @property
+    def _feature_instance(self) -> _OceanFeatureType:
+        if self._Feature_Instance is None:
+            self._Feature_Instance = self._get_feature_instance()
+            if self._Feature_Instance is None:
+                __feature_opt_class = self.__class__.__name__
+                __feature = __feature_opt_class.replace("Operator", "")
+                raise ValueError(f"The {__feature} object not be initialed yet.")
+        return self._Feature_Instance
+
+
+    @_feature_instance.setter
+    def _feature_instance(self, feature: _OceanFeatureType) -> None:
+        self._Feature_Instance = feature
+
+
     @abstractmethod
-    def _get_feature_instance(self):
+    def _get_feature_instance(self) -> _OceanFeatureType:
         pass
 
 
