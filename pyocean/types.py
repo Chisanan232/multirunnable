@@ -101,3 +101,6 @@ OceanEvent = NewType("OceanEvent", __OceanEvent)
 __OceanCondition = Union[ThreadingCondition, MultiProcessingCondition, AsyncIOCondition]
 OceanCondition = NewType("OceanCondition", __OceanCondition)
 
+__OceanFeature = Union[OceanLock, OceanRLock, OceanSemaphore, OceanBoundedSemaphore, OceanEvent, OceanCondition]
+OceanFeature = NewType("OceanFeature", __OceanFeature)
+
