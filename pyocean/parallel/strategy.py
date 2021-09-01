@@ -9,10 +9,10 @@ from pyocean.framework.result import ResultState as _ResultState
 from pyocean.parallel.result import ParallelResult as _ParallelResult
 from pyocean.persistence.interface import OceanPersistence as _OceanPersistence
 from pyocean.mode import FeatureMode as _FeatureMode
-from pyocean.types import OceanTasks as _OceanTasks
 
 from abc import abstractmethod
 from typing import List, Tuple, Dict, Iterable as IterableType, Union, Callable, Optional, cast
+from types import MethodType
 from collections import Iterable
 from multiprocessing import Process, Pipe, Manager
 from multiprocessing.pool import Pool, AsyncResult, ApplyResult
@@ -27,6 +27,7 @@ class ParallelStrategy(_RunnableStrategy):
     _Manager: Manager = None
     _Namespace_Object: Namespace = None
     _Processors_Pool: Pool = None
+    _Processors_List: List[Union[ApplyResult, AsyncResult]] = None
     _Processors_Running_Result: List[Dict[str, Union[AsyncResult, bool]]] = {}
 
     def __init__(self, workers_num: int,
@@ -54,13 +55,13 @@ class ParallelStrategy(_RunnableStrategy):
         self._Namespace_Object = self._Manager.Namespace()
 
 
-    def activate_workers(self, workers_list: List[Union[ApplyResult, AsyncResult]]) -> None:
+    def activate_workers(self) -> None:
         # # Method 1.
-        for worker in workers_list:
+        for worker in self._Processors_List:
             self.activate_worker(worker=worker)
 
         # # Method 2.
-        # with workers_list as worker:
+        # with self._Processors_List as worker:
         #     self.activate_worker(worker=worker)
 
 
@@ -103,13 +104,14 @@ class ProcessPoolStrategy(ParallelStrategy, _Resultable):
                       function: Callable,
                       callback: Callable = None,
                       error_callback: Callable = None,
-                      *args, **kwargs) -> List[Union[AsyncResult, ApplyResult]]:
-        return [self._Processors_Pool.apply_async(func=function,
-                                                  args=args,
-                                                  kwds=kwargs,
-                                                  callback=callback,
-                                                  error_callback=error_callback)
-                for _ in range(self.workers_number)]
+                      *args, **kwargs) -> None:
+        self._Processors_List = [
+            self._Processors_Pool.apply_async(func=function,
+                                              args=args,
+                                              kwds=kwargs,
+                                              callback=callback,
+                                              error_callback=error_callback)
+            for _ in range(self.workers_number)]
 
 
     def activate_worker(self, worker: Union[AsyncResult, ApplyResult]) -> None:
@@ -154,16 +156,31 @@ class ProcessPoolStrategy(ParallelStrategy, _Resultable):
 
 class MultiProcessesStrategy(ParallelStrategy, _Resultable):
 
-    def activate_worker(self, worker: Union[ApplyResult, AsyncResult]) -> None:
-        pass
+    __Process_List: List[Process] = None
+
+    def initialization(self,
+                       queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+                       features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
+                       *args, **kwargs) -> None:
+        super(MultiProcessesStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
+
+        # # Persistence
+        if self._persistence_strategy is not None:
+            self._persistence_strategy.initialize(db_conn_num=self.db_connection_number)
 
 
-    def build_workers(self, function: Callable, *args, **kwargs) -> List[_OceanTasks]:
-        pass
+    def build_workers(self, function: Callable, *args, **kwargs) -> None:
+        self.__Process_List = [Process(target=function, args=args, kwargs=kwargs) for _ in range(self.workers_number)]
+
+
+    def activate_worker(self, worker: Union[Process]) -> None:
+        worker.start()
 
 
     def close(self) -> None:
-        pass
+        for __process in self.__Process_List:
+            __process.close()
+            __process.join()
 
 
     def get_result(self) -> IterableType[object]:
@@ -201,7 +218,7 @@ class MultiProcessingMapStrategy(_BaseMapStrategy):
             self.close_worker(worker)
 
 
-    @dispatch(Process, tuple, dict)
+    @dispatch(MethodType, tuple, dict)
     def start_new_worker(self, target: Callable, args: Tuple = (), kwargs: Dict = {}) -> Process:
         __worker = self.generate_worker(target=target, *args, **kwargs)
         self.activate_worker(__worker)

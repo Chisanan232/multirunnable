@@ -3,6 +3,7 @@ from pyocean.framework.features import BaseFeatureAdapterFactory as _BaseFeature
 from pyocean.framework.strategy import (
     RunnableStrategy as _RunnableStrategy,
     AsyncRunnableStrategy as _AsyncRunnableStrategy,
+    BaseMapStrategy as _BaseMapStrategy,
     Resultable as _Resultable)
 from pyocean.framework.adapter.collection import BaseList as _BaseList
 from pyocean.mode import FeatureMode as _FeatureMode
@@ -46,19 +47,18 @@ class MultiGreenletStrategy(BaseGreenletStrategy, _Resultable):
             self._persistence_strategy.initialize(db_conn_num=self.db_connection_number)
 
 
-    def build_workers(self, function: Callable, *args, **kwargs) -> List[Greenlet]:
+    def build_workers(self, function: Callable, *args, **kwargs) -> None:
         # # General Greenlet
         # self._Gevent_List = [greenlet(run=function) for _ in range(self.threads_number)]
         # # Greenlet framework -- Gevent
         self._Gevent_List = [gevent.spawn(function, *args, **kwargs) for _ in range(self.workers_number)]
-        return self._Gevent_List
 
 
-    def activate_workers(self, workers_list: List[Greenlet]) -> None:
+    def activate_workers(self) -> None:
         # # General Greenlet
         # value = worker.switch()
         # # Greenlet framework -- Gevent
-        greenlets_list = gevent.joinall(workers_list)
+        greenlets_list = gevent.joinall(self._Gevent_List)
         for one_greenlet in greenlets_list:
             self._Gevent_Running_Result.append(one_greenlet.value)
 
@@ -116,13 +116,12 @@ class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
                 event_loop=kwargs.get("event_loop"))
 
 
-    def build_workers(self, function: Callable, *args, **kwargs) -> List[Task]:
+    async def build_workers(self, function: Callable, *args, **kwargs) -> None:
         self._Async_Task_List = [self._Async_Event_Loop.create_task(function(*args, **kwargs)) for _ in range(self.workers_number)]
-        return self._Async_Task_List
 
 
-    async def activate_workers(self, workers_list: List[Task]) -> None:
-        finished, unfinished = await asyncio.wait(workers_list)
+    async def activate_workers(self) -> None:
+        finished, unfinished = await asyncio.wait(self._Async_Task_List)
         for finish in finished:
             self._Async_Running_Result.append(
                 {"async_id": id,
