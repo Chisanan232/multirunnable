@@ -1,13 +1,16 @@
+from pyocean.framework.task import BasePersistenceTask as _BasePersistenceTask
 from pyocean.framework.strategy import (
     RunnableStrategy as _RunnableStrategy,
+    GeneralRunnableStrategy as _GeneralRunnableStrategy,
+    PoolRunnableStrategy as _PoolRunnableStrategy,
     AsyncRunnableStrategy as _AsyncRunnableStrategy,
-    BaseMapStrategy as _BaseMapStrategy)
-from pyocean.persistence.interface import OceanPersistence
+    BaseRunnableMapStrategy as _BaseMapStrategy)
+from pyocean.persistence.interface import OceanPersistence as _OceanPersistence
 from pyocean.mode import RunningMode as _RunningMode
 from pyocean._import_utils import ImportPyocean as _ImportPyocean
 
 from abc import ABCMeta
-from typing import Dict, Union, cast
+from typing import Dict, Union, Type, cast
 
 
 
@@ -35,7 +38,7 @@ class StrategyAdapter(BaseStrategyAdapter):
 
 
     def get_persistence_strategy(self,
-                                 persistence_strategy: OceanPersistence,
+                                 persistence_strategy: _OceanPersistence,
                                  db_connection_num: int) -> Union[_RunnableStrategy, _AsyncRunnableStrategy]:
         __strategy_cls = _ImportPyocean.get_class(pkg_path=self._module, cls_name=self.__strategy_cls_name)
         __strategy_instance = __strategy_cls(
@@ -46,15 +49,50 @@ class StrategyAdapter(BaseStrategyAdapter):
 
 
 
-class MapStrategyAdapter(BaseStrategyAdapter):
+class ExecutorStrategyAdapter(BaseStrategyAdapter):
 
-    def __init__(self, mode: _RunningMode):
+    def __init__(self, mode: _RunningMode, executors: int):
         super().__init__(mode=mode)
-        self.__map_strategy_cls_name: str = self._running_info.get("map_strategy")
+        self._executors_number = executors
+        self.__strategy_cls_name: str = self._running_info.get("general_strategy")
 
 
-    def get_map_strategy(self) -> Union[_BaseMapStrategy]:
-        __strategy_cls = _ImportPyocean.get_class(pkg_path=self._module, cls_name=self.__map_strategy_cls_name)
-        __strategy_instance = __strategy_cls()
+    def get_simple(self) -> _GeneralRunnableStrategy:
+        __strategy_cls = _ImportPyocean.get_class(pkg_path=self._module, cls_name=self.__strategy_cls_name)
+        __strategy_instance = __strategy_cls(workers_num=self._executors_number)
+        # __strategy_instance = cast(Union[RunnableStrategy, AsyncRunnableStrategy], __strategy_instance)
+        return __strategy_instance
+
+
+    def get_persistence(self, persistence: _BasePersistenceTask) -> _GeneralRunnableStrategy:
+        __strategy_cls = _ImportPyocean.get_class(pkg_path=self._module, cls_name=self.__strategy_cls_name)
+        __strategy_instance = __strategy_cls(
+            pool_size=self._executors_number,
+            persistence=persistence)
+        return __strategy_instance
+
+
+
+class PoolStrategyAdapter(BaseStrategyAdapter):
+
+    def __init__(self, mode: _RunningMode, pool_size: int, tasks_size: int):
+        super().__init__(mode=mode)
+        self._pool_size = pool_size
+        self._tasks_size = tasks_size
+        self.__strategy_cls_name: str = self._running_info.get("pool_strategy")
+
+
+    def get_simple(self) -> _PoolRunnableStrategy:
+        __strategy_cls = _ImportPyocean.get_class(pkg_path=self._module, cls_name=self.__strategy_cls_name)
+        __strategy_instance = __strategy_cls(pool_size=self._pool_size, tasks_size=self._tasks_size)
+        return __strategy_instance
+
+
+    def get_persistence(self, persistence: _BasePersistenceTask) -> _PoolRunnableStrategy:
+        __strategy_cls = _ImportPyocean.get_class(pkg_path=self._module, cls_name=self.__strategy_cls_name)
+        __strategy_instance = __strategy_cls(
+            pool_size=self._pool_size,
+            tasks_size=self._tasks_size,
+            persistence=persistence)
         return __strategy_instance
 
