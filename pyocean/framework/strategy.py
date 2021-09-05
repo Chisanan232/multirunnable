@@ -1,7 +1,9 @@
 from pyocean.framework.adapter.collection import BaseList as _BaseList
-from pyocean.framework.task import BaseQueueTask as _BaseQueueTask
+from pyocean.framework.task import (
+    BaseQueueTask as _BaseQueueTask,
+    BasePersistenceTask as _BasePersistenceTask)
 from pyocean.framework.features import BaseFeatureAdapterFactory as  _BaseFeatureAdapterFactory
-from pyocean.persistence.interface import OceanPersistence as _OceanPersistence
+from pyocean.framework.result import OceanResult as _OceanResult
 from pyocean.mode import FeatureMode as _FeatureMode
 from pyocean.types import OceanTasks as _OceanTasks
 import pyocean._utils as _utils
@@ -15,59 +17,47 @@ import logging
 
 class BaseRunnableStrategy(metaclass=ABCMeta):
 
-    def __init__(self, workers_num: int, persistence_strategy: _OceanPersistence = None, **kwargs):
-        self._workers_num = workers_num
-        self._persistence_strategy = persistence_strategy
-        self._db_conn_num = kwargs.get("db_connection_pool_size", None)
+    def __init__(self, persistence: _BasePersistenceTask = None):
+        self._persistence_strategy = None
+        self._db_conn_num = None
+        if persistence is not None:
+            self.__persistence = persistence
+            self._persistence_strategy = persistence.strategy
+            self._db_conn_num = persistence.connection_pool_size
 
 
     def __str__(self):
         """
         Description:
             Just a clear and pointed info about this "instance".
-
-        Example:
-            BaseRunnableStrategy(workers_num=X, features_factory=Y, persistence_strategy=Z)
         :return:
         """
-
-        __instance_brief = None
-        # # self.__class__ value: <class '__main__.ACls'>
-        __cls_str = str(self.__class__)
-        __cls_name = _utils.get_cls_name(cls_str=__cls_str)
-        if __cls_name != "":
-            __instance_brief = f"{__cls_name}(" \
-                               f"workers_num={self._workers_num}, " \
-                               f"persistence_strategy={self._persistence_strategy}, " \
-                               f"db_connection_pool_size={self._db_conn_num})"
-        else:
-            __instance_brief = __cls_str
-        return __instance_brief
+        return f"{self.__str__()} at {id(self.__class__)}"
 
 
     def __repr__(self):
         """
         Description:
             More information (like brief, not detail) about class.
+
+        Example:
+            BaseRunnableStrategy(persistence=X)
         :return:
         """
-        return f"{self.__str__()} at {id(self.__class__)}"
+        __instance_brief = None
+        # # self.__class__ value: <class '__main__.ACls'>
+        __cls_str = str(self.__class__)
+        __cls_name = _utils.get_cls_name(cls_str=__cls_str)
+        if __cls_name != "":
+            __instance_brief = f"{__cls_name}(persistence={self.__persistence}) "
+        else:
+            __instance_brief = __cls_str
+        return __instance_brief
 
 
     @property
     @abstractmethod
-    def workers_number(self) -> int:
-        """
-        Description:
-            The number of threads or processes be create and activate to do something.
-        :return:
-        """
-        pass
-
-
-    @property
-    @abstractmethod
-    def db_connection_number(self) -> int:
+    def db_connection_pool_size(self) -> int:
         """
         Description:
             The number of the connection instances which target to do something operators with database.
@@ -96,36 +86,41 @@ class BaseRunnableStrategy(metaclass=ABCMeta):
         pass
 
 
-    @abstractmethod
-    def build_workers(self, function: Callable, *args, **kwargs) -> None:
-        """
-        Description:
-            Assign tasks into each different threads or processes.
-        :param function:
-        :param args:
-        :param kwargs:
-        :return:
-        """
-        pass
+    # @abstractmethod
+    # def build_workers(self, function: Callable, *args, **kwargs) -> None:
+    #     """
+    #     Description:
+    #         Assign tasks into each different threads or processes.
+    #     :param function:
+    #     :param args:
+    #     :param kwargs:
+    #     :return:
+    #     """
+    #     pass
+
+
+    # @abstractmethod
+    # def activate_workers(self) -> None:
+    #     """
+    #     Description:
+    #         Activate multiple threads or processes to run target task(s).
+    #     :return:
+    #     """
+    #     pass
 
 
     @abstractmethod
-    def activate_workers(self) -> None:
-        """
-        Description:
-            Activate multiple threads or processes to run target task(s).
-        :return:
-        """
-        pass
-
-
-    @abstractmethod
-    def close(self) -> None:
+    def close(self, *args, **kwargs) -> None:
         """
         Description:
             The final in procedure which the program should be run.
         :return:
         """
+        pass
+
+
+    @abstractmethod
+    def terminal(self) -> None:
         pass
 
 
@@ -206,23 +201,13 @@ class RunnableStrategy(BaseRunnableStrategy, ABC):
     _Strategy_Feature_Mode: _FeatureMode = None
     __Initialization = None
 
-    def __init__(self, workers_num: int, **kwargs):
-        super().__init__(workers_num, **kwargs)
+    def __init__(self, persistence: _BasePersistenceTask = None):
+        super().__init__(persistence=persistence)
         self.__Initialization = RunnableInitialization(mode=self._Strategy_Feature_Mode)
 
 
     @property
-    def workers_number(self) -> int:
-        """
-        Description:
-            The number of threads or processes be create and activate to do something.
-        :return:
-        """
-        return self._workers_num
-
-
-    @property
-    def db_connection_number(self) -> int:
+    def db_connection_pool_size(self) -> int:
         """
         Description:
             The number of the connection instances which target to do something operators with database.
@@ -232,11 +217,11 @@ class RunnableStrategy(BaseRunnableStrategy, ABC):
         """
         from multiprocessing import cpu_count
 
-        if self._db_conn_num is None:
-            if self._workers_num < cpu_count():
-                return self._workers_num
-            else:
-                return cpu_count()
+        if self._db_conn_num < 0:
+            raise ValueError("The database connection pool size cannot less than 0.")
+
+        if self._db_conn_num is None or self._db_conn_num == 0:
+            return cpu_count()
         else:
             if self._db_conn_num > cpu_count():
                 logging.warning("Warning about suggestion is the best "
@@ -277,6 +262,208 @@ class RunnableStrategy(BaseRunnableStrategy, ABC):
 
     def _init_lock_or_communication_process(self, features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]], **kwargs) -> None:
         self.__Initialization.init_lock_or_communication_process(features, **kwargs)
+
+
+
+class GeneralRunnableStrategy(RunnableStrategy):
+    
+    def __init__(self, workers_num: int, persistence: _BasePersistenceTask = None):
+        super(GeneralRunnableStrategy, self).__init__(persistence=persistence)
+        self._workers_num = workers_num
+
+
+    @property
+    def workers_number(self) -> int:
+        """
+        Description:
+            The number of threads or processes be create and activate to do something.
+        :return:
+        """
+        return self._workers_num
+
+
+    @abstractmethod
+    def generate_worker(self, target: Callable, *args, **kwargs):
+        """
+        Description:
+            Activate multiple threads or processes to run target task(s).
+        :return:
+        """
+        pass
+
+
+    @abstractmethod
+    def activate_workers(self, workers) -> None:
+        """
+        Description:
+            Activate multiple threads or processes to run target task(s).
+        :return:
+        """
+        pass
+
+
+    @abstractmethod
+    def start_new_worker(self, target, *args, **kwargs) -> None:
+        """
+        Description:
+            Activate
+        :return:
+        """
+        pass
+
+
+    @abstractmethod
+    def close(self, workers) -> None:
+        """
+        Description:
+            Activate
+        :return:
+        """
+        pass
+
+
+    @abstractmethod
+    def terminal(self) -> None:
+        """
+        Description:
+            Activate
+        :return:
+        """
+        pass
+
+
+    @abstractmethod
+    def kill(self) -> None:
+        """
+        Description:
+            Activate
+        :return:
+        """
+        pass
+
+
+
+class PoolRunnableStrategy(RunnableStrategy):
+
+    def __init__(self, pool_size: int, tasks_size: int, persistence: _BasePersistenceTask = None):
+        super(PoolRunnableStrategy, self).__init__(persistence=persistence)
+        self._pool_size = pool_size
+        self._tasks_size = tasks_size
+
+
+    @property
+    def pool_size(self) -> int:
+        """
+        Description:
+            The number of threads or processes be create and activate to do something.
+        :return:
+        """
+        return self._pool_size
+
+
+    @property
+    def tasks_size(self) -> int:
+        """
+        Description:
+            The number of threads or processes be create and activate to do something.
+        :return:
+        """
+        return self._tasks_size
+
+
+    @abstractmethod
+    def apply(self, function: Callable, *args, **kwargs) -> None:
+        """
+        Description:
+            Activate multiple threads or processes to run target task(s).
+        :return:
+        """
+        pass
+
+
+    @abstractmethod
+    def async_apply(self,
+                    function: Callable,
+                    args: Tuple = (),
+                    kwargs: Dict = {},
+                    callback: Callable = None,
+                    error_callback: Callable = None) -> None:
+        """
+        Description:
+            Asynchronous version of 'run'.
+        :return:
+        """
+        pass
+
+
+    @abstractmethod
+    def map(self, function: Callable, args_iter: Iterable[Iterable] = (), chunksize: int = None) -> None:
+        """
+        Description:
+            Activate multiple threads or processes to run target task(s).
+        :return:
+        """
+        pass
+
+
+    @abstractmethod
+    def async_map(self,
+                  function: Callable,
+                  args_iter: Iterable = (),
+                  chunksize: int = None,
+                  callback: Callable = None,
+                  error_callback: Callable = None) -> None:
+        """
+        Description:
+            Asynchronous version of 'async_map_by_args'.
+        :return:
+        """
+        pass
+
+
+    @abstractmethod
+    def map_by_args(self, function: Callable, args_iter: Iterable[Iterable] = (), chunksize: int = None) -> None:
+        """
+        Description:
+            Activate multiple threads or processes to run target task(s).
+        :return:
+        """
+        pass
+
+
+    @abstractmethod
+    def async_map_by_args(self,
+                          function: Callable,
+                          args_iter: Iterable[Iterable] = (),
+                          chunksize: int = None,
+                          callback: Callable = None,
+                          error_callback: Callable = None) -> None:
+        """
+        Description:
+            Asynchronous version of 'async_map_by_functions'.
+        :return:
+        """
+        pass
+
+
+    @abstractmethod
+    def imap_by_args(self, function: Callable, args_iter: Iterable[Iterable] = (), chunksize: int = 1) -> None:
+        """
+        Description:
+            Activate multiple threads or processes to run target task(s).
+        :return:
+        """
+        pass
+
+
+    @abstractmethod
+    def imap_unordered_by_args(self, function: Callable, args_iter: Iterable[Iterable] = (), chunksize: int = 1) -> None:
+        """
+        Description:
+            Asynchronous version of 'async_map_by_args'.
+        :return:
+        """
+        pass
 
 
 
@@ -366,7 +553,7 @@ class AsyncRunnableStrategy(RunnableStrategy, ABC):
 
 
 
-class BaseMapStrategy(metaclass=ABCMeta):
+class BaseRunnableMapStrategy(metaclass=ABCMeta):
 
     _Strategy_Feature_Mode: _FeatureMode = None
     __Initialization = None
@@ -420,7 +607,7 @@ class BaseMapStrategy(metaclass=ABCMeta):
 class Resultable(metaclass=ABCMeta):
 
     @abstractmethod
-    def get_result(self) -> Iterable[object]:
+    def get_result(self) -> List[_OceanResult]:
         """
         Description:
             Return the result of every tasks done.
