@@ -3,8 +3,7 @@ from pyocean.framework.strategy import (
     RunnableStrategy as _RunnableStrategy,
     GeneralRunnableStrategy as _GeneralRunnableStrategy,
     PoolRunnableStrategy as _PoolRunnableStrategy,
-    AsyncRunnableStrategy as _AsyncRunnableStrategy,
-    BaseRunnableMapStrategy as _BaseMapStrategy)
+    AsyncRunnableStrategy as _AsyncRunnableStrategy)
 from pyocean.persistence.interface import OceanPersistence as _OceanPersistence
 from pyocean.mode import RunningMode as _RunningMode
 from pyocean._import_utils import ImportPyocean as _ImportPyocean
@@ -54,12 +53,12 @@ class ExecutorStrategyAdapter(BaseStrategyAdapter):
     def __init__(self, mode: _RunningMode, executors: int):
         super().__init__(mode=mode)
         self._executors_number = executors
-        self.__strategy_cls_name: str = self._running_info.get("general_strategy")
+        self.__strategy_cls_name: str = self._running_info.get("executor_strategy")
 
 
     def get_simple(self) -> _GeneralRunnableStrategy:
         __strategy_cls = _ImportPyocean.get_class(pkg_path=self._module, cls_name=self.__strategy_cls_name)
-        __strategy_instance = __strategy_cls(workers_num=self._executors_number)
+        __strategy_instance = __strategy_cls(executors=self._executors_number)
         # __strategy_instance = cast(Union[RunnableStrategy, AsyncRunnableStrategy], __strategy_instance)
         return __strategy_instance
 
@@ -67,7 +66,7 @@ class ExecutorStrategyAdapter(BaseStrategyAdapter):
     def get_persistence(self, persistence: _BasePersistenceTask) -> _GeneralRunnableStrategy:
         __strategy_cls = _ImportPyocean.get_class(pkg_path=self._module, cls_name=self.__strategy_cls_name)
         __strategy_instance = __strategy_cls(
-            pool_size=self._executors_number,
+            executors=self._executors_number,
             persistence=persistence)
         return __strategy_instance
 
