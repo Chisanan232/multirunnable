@@ -1,9 +1,13 @@
-from pyocean.framework.task import BaseTask as _BaseTask, BaseQueueTask as _BaseQueueTask
+from pyocean.framework.task import (
+    BaseTask as _BaseTask,
+    BaseQueueTask as _BaseQueueTask,
+    BasePersistenceTask as _BasePersistenceTask)
 from pyocean.framework.features import BaseQueueType as _BaseQueueType
 from pyocean.framework.adapter.collection import BaseList as _BaseList
 from pyocean.types import OceanQueue as _OceanQueue
 from pyocean.adapter.queue import Queue as _Queue
 from pyocean.adapter.collection import QueueTaskList as _QueueTaskList
+from pyocean.persistence.interface import OceanPersistence as _OceanPersistence
 
 from typing import Tuple, Dict, Iterable, Callable
 
@@ -183,4 +187,27 @@ class QueueTask(_BaseQueueTask):
         for __value in self.value:
             await __queue.put(__value)
         self.__Queue_Adapter.globalize_instance(obj=__queue)
+
+
+
+class OceanPersistenceTask(_BasePersistenceTask):
+
+    @property
+    def strategy(self) -> _OceanPersistence:
+        return self._Persistence_Strategy
+
+
+    @strategy.setter
+    def strategy(self, persistence: _OceanPersistence) -> None:
+        self._Persistence_Strategy = persistence
+
+
+    @property
+    def connection_pool_size(self) -> int:
+        return self._Database_Connection_Number
+
+
+    @connection_pool_size.setter
+    def connection_pool_size(self, size: int) -> None:
+        self._Database_Connection_Number = size
 
