@@ -72,35 +72,28 @@ class RunningMode(Enum):
     Parallel = {
         "strategy_module": _Parallel_Package + _Strategy_Package,
         "strategy": _Process_Pool_Common_Class + _Strategy_Class,
-        "general_strategy": _Parallel_Class + _Strategy_Class,
+        "executor_strategy": _Parallel_Class + _Strategy_Class,
         "pool_strategy": _Parallel_Class + _Pool_Strategy_Class
-    }
-
-    MultiProcesses = {
-        "strategy_module": _Parallel_Package + _Strategy_Package,
-        "strategy": _Processes_Common_Class + _Strategy_Class,
-        "general_strategy": _Concurrent_Class + _Strategy_Class,
-        "pool_strategy": _Concurrent_Class + _Pool_Strategy_Class
     }
 
     Concurrent = {
         "strategy_module": _Concurrent_Package + _Strategy_Package,
         "strategy": _Concurrent_Common_Class + _Strategy_Class,
-        "general_strategy": _Concurrent_Class + _Strategy_Class,
+        "executor_strategy": _Concurrent_Class + _Strategy_Class,
         "pool_strategy": _Concurrent_Class + _Pool_Strategy_Class
     }
 
     Greenlet = {
         "strategy_module": _Coroutine_Package + _Strategy_Package,
         "strategy": _Greenlet_Common_Class + _Strategy_Class,
-        "general_strategy": _Greenlet_Class + _Strategy_Class,
+        "executor_strategy": _Greenlet_Class + _Strategy_Class,
         "pool_strategy": _Greenlet_Class + _Pool_Strategy_Class
     }
 
     Asynchronous = {
         "strategy_module": _Coroutine_Package + _Strategy_Package,
         "strategy": _Async_Common_Class + _Strategy_Class,
-        "general_strategy": _Async_Class + _Strategy_Class,
+        "executor_strategy": _Async_Class + _Strategy_Class,
         "pool_strategy": _Async_Class + _Pool_Strategy_Class
     }
 
