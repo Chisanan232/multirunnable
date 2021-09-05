@@ -86,34 +86,11 @@ class BaseRunnableStrategy(metaclass=ABCMeta):
         pass
 
 
-    # @abstractmethod
-    # def build_workers(self, function: Callable, *args, **kwargs) -> None:
-    #     """
-    #     Description:
-    #         Assign tasks into each different threads or processes.
-    #     :param function:
-    #     :param args:
-    #     :param kwargs:
-    #     :return:
-    #     """
-    #     pass
-
-
-    # @abstractmethod
-    # def activate_workers(self) -> None:
-    #     """
-    #     Description:
-    #         Activate multiple threads or processes to run target task(s).
-    #     :return:
-    #     """
-    #     pass
-
-
     @abstractmethod
     def close(self, *args, **kwargs) -> None:
         """
         Description:
-            The final in procedure which the program should be run.
+            Close and join executor or pool.
         :return:
         """
         pass
@@ -121,6 +98,11 @@ class BaseRunnableStrategy(metaclass=ABCMeta):
 
     @abstractmethod
     def terminal(self) -> None:
+        """
+        Description:
+            Terminate executor or pool.
+        :return:
+        """
         pass
 
 
@@ -267,66 +249,56 @@ class RunnableStrategy(BaseRunnableStrategy, ABC):
 
 class GeneralRunnableStrategy(RunnableStrategy):
     
-    def __init__(self, workers_num: int, persistence: _BasePersistenceTask = None):
+    def __init__(self, executors: int, persistence: _BasePersistenceTask = None):
         super(GeneralRunnableStrategy, self).__init__(persistence=persistence)
-        self._workers_num = workers_num
+        self._executors_num = executors
 
 
     @property
-    def workers_number(self) -> int:
+    def executors_number(self) -> int:
         """
         Description:
-            The number of threads or processes be create and activate to do something.
+            The number of executors (processes, threads, etc) be created and activated to do something.
         :return:
         """
-        return self._workers_num
+        return self._executors_num
 
 
     @abstractmethod
-    def generate_worker(self, target: Callable, *args, **kwargs):
+    def generate_worker(self, target: Callable, *args, **kwargs) -> _OceanTasks:
         """
         Description:
-            Activate multiple threads or processes to run target task(s).
-        :return:
-        """
-        pass
-
-
-    @abstractmethod
-    def activate_workers(self, workers) -> None:
-        """
-        Description:
-            Activate multiple threads or processes to run target task(s).
+            Initial and instantiate multiple executors (processes, threads, etc).
         :return:
         """
         pass
 
 
     @abstractmethod
-    def start_new_worker(self, target, *args, **kwargs) -> None:
+    def activate_workers(self, workers: Union[_OceanTasks, List[_OceanTasks]]) -> None:
         """
         Description:
-            Activate
+            Activate multiple executors (processes, threads, etc) to run target task(s).
         :return:
         """
         pass
 
 
     @abstractmethod
-    def close(self, workers) -> None:
+    def start_new_worker(self, target: Callable, *args, **kwargs) -> None:
         """
         Description:
-            Activate
+            Initial and activate an executor (process, thread, etc).
         :return:
         """
         pass
 
 
     @abstractmethod
-    def terminal(self) -> None:
+    def close(self, workers: Union[_OceanTasks, List[_OceanTasks]]) -> None:
         """
         Description:
-            Activate
+            Close and join executor.
         :return:
         """
         pass
@@ -336,7 +308,7 @@ class GeneralRunnableStrategy(RunnableStrategy):
     def kill(self) -> None:
         """
         Description:
-            Activate
+            Kill executor.
         :return:
         """
         pass
@@ -355,7 +327,8 @@ class PoolRunnableStrategy(RunnableStrategy):
     def pool_size(self) -> int:
         """
         Description:
-            The number of threads or processes be create and activate to do something.
+            The number of executors (process, thread, etc) which been
+            instantiated and temporally saving in Pool.
         :return:
         """
         return self._pool_size
@@ -375,7 +348,7 @@ class PoolRunnableStrategy(RunnableStrategy):
     def apply(self, function: Callable, *args, **kwargs) -> None:
         """
         Description:
-            Activate multiple threads or processes to run target task(s).
+            Refer to multiprocessing.pool.apply.
         :return:
         """
         pass
@@ -390,17 +363,17 @@ class PoolRunnableStrategy(RunnableStrategy):
                     error_callback: Callable = None) -> None:
         """
         Description:
-            Asynchronous version of 'run'.
+            Refer to multiprocessing.pool.apply_async.
         :return:
         """
         pass
 
 
     @abstractmethod
-    def map(self, function: Callable, args_iter: Iterable[Iterable] = (), chunksize: int = None) -> None:
+    def map(self, function: Callable, args_iter: Iterable = (), chunksize: int = None) -> None:
         """
         Description:
-            Activate multiple threads or processes to run target task(s).
+            Refer to multiprocessing.pool.map.
         :return:
         """
         pass
@@ -415,7 +388,7 @@ class PoolRunnableStrategy(RunnableStrategy):
                   error_callback: Callable = None) -> None:
         """
         Description:
-            Asynchronous version of 'async_map_by_args'.
+            Refer to multiprocessing.pool.map_async.
         :return:
         """
         pass
@@ -425,7 +398,7 @@ class PoolRunnableStrategy(RunnableStrategy):
     def map_by_args(self, function: Callable, args_iter: Iterable[Iterable] = (), chunksize: int = None) -> None:
         """
         Description:
-            Activate multiple threads or processes to run target task(s).
+            Refer to multiprocessing.pool.starmap.
         :return:
         """
         pass
@@ -440,7 +413,7 @@ class PoolRunnableStrategy(RunnableStrategy):
                           error_callback: Callable = None) -> None:
         """
         Description:
-            Asynchronous version of 'async_map_by_functions'.
+            Refer to multiprocessing.pool.starmap_async.
         :return:
         """
         pass
@@ -450,7 +423,7 @@ class PoolRunnableStrategy(RunnableStrategy):
     def imap_by_args(self, function: Callable, args_iter: Iterable[Iterable] = (), chunksize: int = 1) -> None:
         """
         Description:
-            Activate multiple threads or processes to run target task(s).
+            Refer to multiprocessing.pool.imap.
         :return:
         """
         pass
@@ -460,7 +433,17 @@ class PoolRunnableStrategy(RunnableStrategy):
     def imap_unordered_by_args(self, function: Callable, args_iter: Iterable[Iterable] = (), chunksize: int = 1) -> None:
         """
         Description:
-            Asynchronous version of 'async_map_by_args'.
+            Refer to multiprocessing.pool.imap_unordered.
+        :return:
+        """
+        pass
+
+
+    @abstractmethod
+    def close(self) -> None:
+        """
+        Description:
+            Close and join pool.
         :return:
         """
         pass
