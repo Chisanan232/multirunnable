@@ -49,6 +49,14 @@ class BaseExecutor(metaclass=ABCMeta):
 
     @abstractmethod
     def start_new_worker(self, target: Callable, *args, **kwargs) -> None:
+        """
+        Description:
+            Initial and activate an executor to run.
+        :param target:
+        :param args:
+        :param kwargs:
+        :return:
+        """
         pass
 
 
@@ -85,6 +93,11 @@ class BaseExecutor(metaclass=ABCMeta):
 
     @abstractmethod
     def async_map(self) -> None:
+        """
+        Description:
+            Asynchronous version of map.
+        :return:
+        """
         pass
 
 
@@ -111,15 +124,30 @@ class BaseExecutor(metaclass=ABCMeta):
 
     @abstractmethod
     def terminal(self) -> None:
+        """
+        Description:
+            Terminate executor.
+        :return:
+        """
         pass
 
 
     @abstractmethod
     def kill(self) -> None:
+        """
+        Description:
+            Kill executor.
+        :return:
+        """
         pass
 
 
     @abstractmethod
     def result(self) -> List[_OceanResult]:
+        """
+        Description:
+            Get the running result.
+        :return:
+        """
         pass
 
