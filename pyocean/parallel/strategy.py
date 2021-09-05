@@ -6,7 +6,6 @@ from pyocean.framework.adapter.collection import BaseList as _BaseList
 from pyocean.framework.strategy import (
     GeneralRunnableStrategy as _GeneralRunnableStrategy,
     PoolRunnableStrategy as _PoolRunnableStrategy,
-    BaseRunnableMapStrategy as _BaseRunnableMapStrategy,
     Resultable as _Resultable)
 from pyocean.framework.result import ResultState as _ResultState
 from pyocean.parallel.result import ParallelResult as _ParallelResult
@@ -69,13 +68,13 @@ class ProcessStrategy(ParallelStrategy, _GeneralRunnableStrategy, _Resultable):
     _Strategy_Feature_Mode: _FeatureMode = _FeatureMode.Parallel
     __Process_List: List[Process] = None
 
-    def __init__(self, workers_num: int, persistence: _BasePersistenceTask = None):
+    def __init__(self, executors: int, persistence: _BasePersistenceTask = None):
         """
         Description:
             Converting the object to multiprocessing.manager.Namespace type object at initial state.
         :param persistence:
         """
-        super().__init__(workers_num=workers_num, persistence=persistence)
+        super().__init__(executors=executors, persistence=persistence)
         self._init_namespace_obj()
         if persistence is not None:
             namespace_persistence = cast(_BasePersistenceTask, self.namespacing_obj(obj=persistence))
