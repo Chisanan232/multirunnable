@@ -21,7 +21,11 @@ Pool_Runnable_Strategy: _Pool_Runnable_Type = None
 
 class Pool(ABC, _BasePool):
 
+    NotSupportError = Exception("Asynchronous not support Pool strategy.")
+
     def __init__(self, mode: _RunningMode, pool_size: int):
+        if mode is _RunningMode.Asynchronous:
+            raise self.NotSupportError
         super(Pool, self).__init__(mode=mode, pool_size=pool_size)
         # self._initial_running_strategy()
 
