@@ -160,6 +160,7 @@ class SimpleExecutor(Executor):
         __running_strategy_adapter = _ExecutorStrategyAdapter(
             mode=self._mode,
             executors=self._executors_number)
+
         global General_Runnable_Strategy
         General_Runnable_Strategy = __running_strategy_adapter.get_simple()
 
@@ -186,6 +187,7 @@ class PersistenceExecutor(Executor):
         __running_strategy_adapter = _ExecutorStrategyAdapter(
             mode=self._mode,
             executors=self._executors_number)
+
         global General_Runnable_Strategy
         General_Runnable_Strategy = __running_strategy_adapter.get_persistence(persistence=__persistence_task)
 
