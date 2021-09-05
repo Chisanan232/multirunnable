@@ -155,11 +155,6 @@ class ProcessPoolStrategy(ParallelStrategy, _PoolRunnableStrategy, _Resultable):
     _Processors_List: List[Union[ApplyResult, AsyncResult]] = None
 
     def __init__(self, pool_size: int, tasks_size: int, persistence: _BasePersistenceTask = None):
-        """
-        Description:
-            Converting the object to multiprocessing.manager.Namespace type object at initial state.
-        :param persistence:
-        """
         super().__init__(pool_size=pool_size, tasks_size=tasks_size, persistence=persistence)
         self._init_namespace_obj()
         if persistence is not None:
@@ -225,14 +220,6 @@ class ProcessPoolStrategy(ParallelStrategy, _PoolRunnableStrategy, _Resultable):
 
 
     def map(self, function: Callable, args_iter: IterableType = (), chunksize: int = None) -> None:
-        """
-        Description:
-            Map.
-        :param function:
-        :param args_iter:
-        :param chunksize:
-        :return:
-        """
         __process_running_result = None
 
         try:
