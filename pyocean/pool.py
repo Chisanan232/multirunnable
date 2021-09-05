@@ -8,8 +8,7 @@ from pyocean.framework.strategy import (
 from pyocean.framework.result import OceanResult as _OceanResult
 from pyocean.mode import RunningMode as _RunningMode
 from pyocean.task import OceanPersistenceTask as _OceanPersistenceTask
-from pyocean.adapter.strategy import (
-    PoolStrategyAdapter as _PoolStrategyAdapter)
+from pyocean.adapter.strategy import PoolStrategyAdapter as _PoolStrategyAdapter
 from pyocean.persistence.interface import OceanPersistence as _OceanPersistence
 
 from abc import ABC
@@ -133,6 +132,7 @@ class SimplePool(Pool):
             mode=self._mode,
             pool_size=self.pool_size,
             tasks_size=self._tasks_size)
+
         global Pool_Runnable_Strategy
         Pool_Runnable_Strategy = __running_strategy_adapter.get_simple()
 
@@ -162,6 +162,7 @@ class PersistencePool(Pool):
             mode=self._mode,
             pool_size=self.pool_size,
             tasks_size=self.tasks_size)
+
         global Pool_Runnable_Strategy
         Pool_Runnable_Strategy = __running_strategy_adapter.get_persistence(persistence=__persistence_task)
 
