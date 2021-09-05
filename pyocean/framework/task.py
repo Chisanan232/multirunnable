@@ -2,6 +2,7 @@ from pyocean.framework.features import BaseQueueType as _BaseQueueType
 from pyocean.framework.result import OceanResult as _OceanResult
 from pyocean.mode import RunningMode as _RunningMode
 from pyocean.types import OceanQueue as _OceanQueue
+from pyocean.persistence.interface import OceanPersistence as _OceanPersistence
 import pyocean._utils as _utils
 
 from abc import ABCMeta, abstractmethod
@@ -289,5 +290,23 @@ class BaseQueueTask(metaclass=ABCMeta):
 
     @abstractmethod
     async def async_init_queue_with_values(self) -> None:
+        pass
+
+
+
+class BasePersistenceTask(metaclass=ABCMeta):
+
+    _Persistence_Strategy: _OceanPersistence = None
+    _Database_Connection_Number: int = 0
+
+    @property
+    @abstractmethod
+    def strategy(self) -> _OceanPersistence:
+        pass
+
+
+    @property
+    @abstractmethod
+    def connection_pool_size(self) -> int:
         pass
 
