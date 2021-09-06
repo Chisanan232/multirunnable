@@ -1,8 +1,10 @@
-from package_gevent.pool import Pool
-from package_gevent.threadpool import ThreadPool, ThreadPoolExecutor, Greenlet
+from gevent.pool import Pool
+from gevent.threadpool import ThreadPool, ThreadPoolExecutor, Greenlet
 # from gevent.thread import Greenlet
-from package_gevent.threading import Thread
+from gevent.threading import Thread
 from typing import List
+import random
+import time
 import os
 
 
@@ -43,6 +45,9 @@ class TestGeventPool:
     @classmethod
     def main_run_fun(cls, index):
         print(f"Run the function with Greenlet! - {index}, pid: {os.getpid()}")
+        __random_sleep = random.randrange(1, 10)
+        print(f"Will sleep for {__random_sleep} seconds.")
+        time.sleep(__random_sleep)
         return "Yee"
 
 

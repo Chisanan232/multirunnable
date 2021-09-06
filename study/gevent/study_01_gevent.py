@@ -1,5 +1,5 @@
-from package_gevent import greenlet, Greenlet
-import package_gevent
+from gevent import greenlet, Greenlet
+import gevent
 from datetime import datetime
 from typing import List
 import os
@@ -27,11 +27,13 @@ class GeventTest:
 
 
     def generate_greenlets(self) -> List:
-        return [package_gevent.spawn(self.running_process) for _ in range(self.__greenlet_number)]
+        return [gevent.spawn(self.running_process, index) for index in range(self.__greenlet_number)]
 
 
     def activate_greenlet(self, greenlet_list: List[Greenlet]) -> None:
-        package_gevent.joinall(greenlet_list)
+        greenlet_list = gevent.joinall(greenlet_list)
+        for gl in greenlet_list:
+            print(f"value: {gl.value}")
         # for one_greenlet in greenlet_list:
         #     one_greenlet.start()
 
@@ -41,8 +43,10 @@ class GeventTest:
             one_greenlet.kill()
 
 
-    def running_process(self) -> None:
+    def running_process(self, index) -> str:
         print(f"This is Greenlet. - PID: {os.getpid()}")
+        print(f"This is parameter: {index} - PID: {os.getpid()}")
+        return f"index-{index}"
 
 
 if __name__ == '__main__':

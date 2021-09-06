@@ -13,6 +13,7 @@ _Strategy_Package: str = "strategy"
 _Parallel_Class: str = "Process"
 _Concurrent_Class: str = "Thread"
 _Greenlet_Class: str = "Greenlet"
+_GreenThread_Class: str = "GreenThread"
 _Async_Class: str = "Async"
 
 _Queue_Class: str = "Queue"
@@ -51,7 +52,7 @@ class FeatureMode(Enum):
         "communication": _Concurrent_Class + _Communication_Class
     }
 
-    Greenlet = {
+    GreenThread = {
         "module": _Coroutine_Package + _Feature_Package,
         "queue": _Greenlet_Class + _Queue_Class,
         "lock": _Greenlet_Class + _Lock_Class,
@@ -83,11 +84,11 @@ class RunningMode(Enum):
         "pool_strategy": _Concurrent_Class + _Pool_Strategy_Class
     }
 
-    Greenlet = {
+    GreenThread = {
         "strategy_module": _Coroutine_Package + _Strategy_Package,
         "strategy": _Greenlet_Common_Class + _Strategy_Class,
-        "executor_strategy": _Greenlet_Class + _Strategy_Class,
-        "pool_strategy": _Greenlet_Class + _Pool_Strategy_Class
+        "executor_strategy": _GreenThread_Class + _Strategy_Class,
+        "pool_strategy": _GreenThread_Class + _Pool_Strategy_Class
     }
 
     Asynchronous = {
