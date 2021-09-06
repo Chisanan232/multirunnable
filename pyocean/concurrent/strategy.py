@@ -64,6 +64,17 @@ class ThreadStrategy(_GeneralRunnableStrategy, ConcurrentStrategy, _Resultable):
     _Strategy_Feature_Mode: _FeatureMode = _FeatureMode.Concurrent
     __Thread_List: List[Thread] = None
 
+    def initialization(self,
+                       queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+                       features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
+                       *args, **kwargs) -> None:
+        super(ThreadStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
+
+        # # Persistence
+        if self._persistence_strategy is not None:
+            self._persistence_strategy.initialize(db_conn_num=self.db_connection_pool_size)
+
+
     @dispatch(MethodType, tuple, dict)
     def start_new_worker(self, target: Callable, args: Tuple = (), kwargs: Dict = {}) -> Thread:
         __worker = self.generate_worker(target=target, *args, **kwargs)
