@@ -6,7 +6,7 @@ from pyocean.mode import RunningMode as _RunningMode
 import pyocean._utils as _utils
 
 from abc import ABCMeta, abstractmethod
-from typing import List, Optional, Union, Callable as CallableType, Iterable as IterableType
+from typing import List, Tuple, Dict, Optional, Union, Callable as CallableType, Iterable as IterableType
 from types import MethodType, FunctionType
 from collections import Iterable, Callable
 
@@ -61,12 +61,20 @@ class BaseExecutor(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def run(self) -> None:
+    def run(self,
+            function: CallableType,
+            args: Optional[Union[Tuple, Dict]] = None,
+            queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+            features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
         pass
 
 
     @abstractmethod
-    def async_run(self) -> None:
+    def async_run(self,
+                  function: CallableType,
+                  args_iter: IterableType = [],
+                  queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+                  features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
         pass
 
 
