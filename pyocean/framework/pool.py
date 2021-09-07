@@ -164,7 +164,7 @@ class BasePool(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def imap_by_args(self, function: Callable, args_iter: Iterable = (), chunksize: int = 1) -> None:
+    def imap(self, function: Callable, args_iter: Iterable = (), chunksize: int = 1) -> None:
         """
         Description:
             The adapter of multiprocessing.pool.imap.
@@ -177,7 +177,7 @@ class BasePool(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def imap_unordered_by_args(self, function: Callable, args_iter: Iterable = (), chunksize: int = 1) -> None:
+    def imap_unordered(self, function: Callable, args_iter: Iterable = (), chunksize: int = 1) -> None:
         """
         Description:
             The adapter of multiprocessing.pool.imap_unordered.

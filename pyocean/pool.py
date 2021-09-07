@@ -101,12 +101,12 @@ class Pool(ABC, _BasePool):
             error_callback=error_callback)
 
 
-    def imap_by_args(self, function: Callable, args_iter: Iterable = (), chunksize: int = 1) -> None:
-        Pool_Runnable_Strategy.imap_by_args(function=function, args_iter=args_iter, chunksize=chunksize)
+    def imap(self, function: Callable, args_iter: Iterable = (), chunksize: int = 1) -> None:
+        Pool_Runnable_Strategy.imap(function=function, args_iter=args_iter, chunksize=chunksize)
 
 
-    def imap_unordered_by_args(self, function: Callable, args_iter: Iterable = (), chunksize: int = 1) -> None:
-        Pool_Runnable_Strategy.imap_unordered_by_args(function=function, args_iter=args_iter, chunksize=chunksize)
+    def imap_unordered(self, function: Callable, args_iter: Iterable = (), chunksize: int = 1) -> None:
+        Pool_Runnable_Strategy.imap_unordered(function=function, args_iter=args_iter, chunksize=chunksize)
 
 
     def close(self) -> None:
