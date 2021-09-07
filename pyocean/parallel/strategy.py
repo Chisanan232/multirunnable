@@ -289,7 +289,7 @@ class ProcessPoolStrategy(ParallelStrategy, _PoolRunnableStrategy, _Resultable):
         self._result_saving(successful=__process_run_successful, result=__process_running_result)
 
 
-    def imap_by_args(self, function: Callable, args_iter: IterableType = (), chunksize: int = 1) -> None:
+    def imap(self, function: Callable, args_iter: IterableType = (), chunksize: int = 1) -> None:
         __process_running_result = None
 
         try:
@@ -305,7 +305,7 @@ class ProcessPoolStrategy(ParallelStrategy, _PoolRunnableStrategy, _Resultable):
         self._result_saving(successful=__process_run_successful, result=__process_running_result)
 
 
-    def imap_unordered_by_args(self, function: Callable, args_iter: IterableType = (), chunksize: int = 1) -> None:
+    def imap_unordered(self, function: Callable, args_iter: IterableType = (), chunksize: int = 1) -> None:
         __process_running_result = None
 
         try:
