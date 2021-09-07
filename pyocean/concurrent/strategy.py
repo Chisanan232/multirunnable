@@ -1,3 +1,6 @@
+from pyocean.mode import FeatureMode as _FeatureMode
+from pyocean.types import OceanTasks as _OceanTasks
+from pyocean.concurrent.result import ConcurrentResult as _ConcurrentResult
 from pyocean.framework import OceanResult as _OceanResult
 from pyocean.framework.task import (
     BaseQueueTask as _BaseQueueTask,
@@ -8,19 +11,16 @@ from pyocean.framework.strategy import (
     GeneralRunnableStrategy as _GeneralRunnableStrategy,
     PoolRunnableStrategy as _PoolRunnableStrategy,
     Resultable as _Resultable)
-from pyocean.mode import FeatureMode as _FeatureMode
-from pyocean.concurrent.result import ConcurrentResult as _ConcurrentResult
 
-from typing import List, Dict, Callable, Iterable as IterableType, Optional, Union, Tuple, cast
 from types import MethodType
+from typing import List, Dict, Callable, Iterable as IterableType, Optional, Union, Tuple, cast
+from functools import wraps
 from collections import Iterable
 from multipledispatch import dispatch
-from functools import wraps
+from threading import Thread
 from multiprocessing.pool import ThreadPool
 from multiprocessing.pool import AsyncResult, ApplyResult
-from threading import Thread
 
-from pyocean.types import OceanTasks as _OceanTasks
 
 
 class ConcurrentStrategy:

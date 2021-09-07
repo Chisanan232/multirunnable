@@ -1,3 +1,5 @@
+from pyocean.mode import FeatureMode as _FeatureMode
+from pyocean.parallel.result import ParallelResult as _ParallelResult
 from pyocean.framework.task import (
     BaseQueueTask as _BaseQueueTask,
     BasePersistenceTask as _BasePersistenceTask)
@@ -8,16 +10,14 @@ from pyocean.framework.strategy import (
     PoolRunnableStrategy as _PoolRunnableStrategy,
     Resultable as _Resultable)
 from pyocean.framework.result import ResultState as _ResultState
-from pyocean.parallel.result import ParallelResult as _ParallelResult
-from pyocean.mode import FeatureMode as _FeatureMode
 
+from types import FunctionType, MethodType
 from typing import List, Tuple, Dict, Iterable as IterableType, Union, Callable, Optional, cast
-from types import MethodType
 from collections import Iterable
-from multiprocessing import Process, Pipe, Manager
+from multipledispatch import dispatch
+from multiprocessing import Process, Manager
 from multiprocessing.pool import Pool, AsyncResult, ApplyResult
 from multiprocessing.managers import Namespace
-from multipledispatch import dispatch
 
 
 
@@ -94,7 +94,7 @@ class ProcessStrategy(ParallelStrategy, _GeneralRunnableStrategy, _Resultable):
             self._persistence_strategy.initialize(db_conn_num=self.db_connection_pool_size)
 
 
-    @dispatch(MethodType, tuple, dict)
+    @dispatch((FunctionType, MethodType), tuple, dict)
     def start_new_worker(self, target: Callable, args: Tuple = (), kwargs: Dict = {}) -> Process:
         __worker = self.generate_worker(target=target, *args, **kwargs)
         self.activate_workers(__worker)
