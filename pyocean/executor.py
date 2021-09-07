@@ -16,7 +16,6 @@ from typing import List, Tuple, Dict, Optional, Union, List, Callable as Callabl
 from types import MethodType, FunctionType
 from collections import Iterable, Callable
 from multipledispatch import dispatch
-import inspect
 
 
 _General_Runnable_Type = Union[_GeneralRunnableStrategy, _Resultable]
@@ -37,11 +36,22 @@ class Executor(ABC, BaseExecutor):
         General_Runnable_Strategy.start_new_worker(target=target, *args, **kwargs)
 
 
-    def run(self) -> None:
-        pass
+    def run(self,
+            function: CallableType,
+            args: Optional[Union[Tuple, Dict]] = None,
+            queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+            features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
+        General_Runnable_Strategy.initialization(queue_tasks=queue_tasks, features=features)
+        __workers_list = [self._generate_worker(function, args) for _ in range(self._executors_number)]
+        General_Runnable_Strategy.activate_workers(__workers_list)
+        General_Runnable_Strategy.close(__workers_list)
 
 
-    def async_run(self) -> None:
+    def async_run(self,
+                  function: CallableType,
+                  args_iter: IterableType = [],
+                  queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+                  features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
         pass
 
 
@@ -52,8 +62,8 @@ class Executor(ABC, BaseExecutor):
             features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
         General_Runnable_Strategy.initialization(queue_tasks=queue_tasks, features=features)
         __workers_list = [self._generate_worker(function, args) for args in args_iter]
-        General_Runnable_Strategy.activate_workers(workers=__workers_list)
-        General_Runnable_Strategy.close(workers=__workers_list)
+        General_Runnable_Strategy.activate_workers(__workers_list)
+        General_Runnable_Strategy.close(__workers_list)
 
 
     def async_map(self) -> None:
@@ -72,17 +82,7 @@ class Executor(ABC, BaseExecutor):
         if args_iter is None or args_iter == []:
             args_iter = [() for _ in range(len(list(functions)))]
 
-        __workers_list = []
-        for fun, args in zip(functions, args_iter):
-            print("CallableType: ", type(fun) is CallableType)
-            print("MethodType: ", type(fun) is MethodType)
-            print("FunctionType: ", type(fun) is FunctionType)
-            print("fun: ", fun)
-            print("args: ", args)
-            __worker = self._generate_worker(fun, args)
-            __workers_list.append(__worker)
-
-        # __workers_list = [self.__generate_worker(fun, args) for fun, args in zip(functions, args_iter)]
+        __workers_list = [self._generate_worker(fun, args) for fun, args in zip(functions, args_iter)]
 
         General_Runnable_Strategy.activate_workers(__workers_list)
         General_Runnable_Strategy.close(__workers_list)
@@ -119,13 +119,13 @@ class Executor(ABC, BaseExecutor):
         return list(checksum_iter)
 
 
-    @dispatch(MethodType, tuple)
+    @dispatch((FunctionType, MethodType), tuple)
     def _generate_worker(self, function: CallableType, args):
         __worker = General_Runnable_Strategy.generate_worker(function, *args)
         return __worker
 
 
-    @dispatch(MethodType, dict)
+    @dispatch((FunctionType, MethodType), dict)
     def _generate_worker(self, function: CallableType, args):
         __worker = General_Runnable_Strategy.generate_worker(function, **args)
         return __worker
@@ -136,16 +136,6 @@ class Executor(ABC, BaseExecutor):
             raise self.ParameterCannotBeNoneError
 
         self.__chk_args_content(args_iter=args_iter)
-        self.__chk_fun_signature_and_param(functions=functions, args_iter=args_iter)
-
-
-    def __chk_fun_signature_and_param(self, functions: IterableType[Callable], args_iter: IterableType) -> bool:
-        for fun, args in zip(functions, args_iter):
-            __fun_signature = inspect.signature(fun)
-            __fun_parameter = __fun_signature.parameters
-            if args != () and args != {} and len(__fun_parameter.keys()) != len(args):
-                raise ValueError("The signature and parameter aren't mapping.")
-        return True
 
 
 
