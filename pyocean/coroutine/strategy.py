@@ -21,8 +21,15 @@ from multipledispatch import dispatch
 from gevent.greenlet import Greenlet
 from gevent.pool import Pool
 from asyncio.tasks import Task
+import functools
+import itertools
 import asyncio
 import gevent
+
+
+
+def starmapstar(args):
+    return list(itertools.starmap(args[0], args[1]))
 
 
 
@@ -128,7 +135,7 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
     _Strategy_Feature_Mode: _FeatureMode = _FeatureMode.GreenThread
 
     _GreenThread_Pool: Pool = None
-    _GreenThread_List: List[Greenlet] = None
+    _GreenThread_List: List[Greenlet] = []
     # _GreenThread_Running_Result: List = []
 
     def __init__(self, pool_size: int, tasks_size: int, persistence: _BasePersistenceTask = None):
@@ -231,20 +238,39 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
         :param chunksize:
         :return:
         """
-        pass
-        # __process_running_result = None
-        #
-        # try:
-        #     __process_running_result = self._GreenThread_Pool.starmap(
-        #         func=function, iterable=args_iter, chunksize=chunksize)
-        #     __exception = None
-        #     __process_run_successful = False
-        # except Exception as e:
-        #     __exception = e
-        #     __process_run_successful = False
-        #
-        # # Save Running result state and Running result value as dict
-        # self._result_saving(successful=__process_run_successful, result=__process_running_result)
+        args_iter_set = set(args_iter)
+        if len(args_iter_set) == 1:
+            _arguments = tuple(args_iter_set)[0]
+            self._map_with_args(function=function, args=_arguments)
+        else:
+            __results = []
+            __process_run_successful = None
+
+            try:
+                for _args in args_iter:
+                    _greenlet = self._GreenThread_Pool.spawn(function, *_args)
+                    self._GreenThread_List.append(_greenlet)
+
+                for _one_greenlet in self._GreenThread_List:
+                    _one_greenlet.join()
+                    _one_greenlet_value = _one_greenlet.value
+                    __results.append(_one_greenlet_value)
+
+                __process_run_successful = True
+                __exception = None
+            except Exception as e:
+                __process_run_successful = False
+                __exception = e
+
+            # Save Running result state and Running result value as dict
+            self._result_saving(successful=__process_run_successful, result=__results)
+
+
+    def _map_with_args(self, function: Callable, args: Iterable) -> None:
+        _args = args[:-1]
+        _last_args = args[-1:] * len(_args)
+        partial_function = functools.partial(func=function, *_args)
+        self.map(function=partial_function, args_iter=_last_args)
 
 
     def async_map_by_args(self,
@@ -253,18 +279,7 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
                           chunksize: int = None,
                           callback: Callable = None,
                           error_callback: Callable = None) -> None:
-        pass
-        # __map_result = self._GreenThread_Pool.starmap_async(
-        #     func=function,
-        #     iterable=args_iter,
-        #     chunksize=chunksize,
-        #     callback=callback,
-        #     error_callback=error_callback)
-        # __process_running_result = __map_result.get()
-        # __process_run_successful = __map_result.successful()
-        #
-        # # Save Running result state and Running result value as dict
-        # self._result_saving(successful=__process_run_successful, result=__process_running_result)
+        self.async_map(function=function, args_iter=args_iter, callback=callback)
 
 
     def imap(self, function: Callable, args_iter: IterableType = (), chunksize: int = 1) -> None:
