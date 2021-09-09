@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="pyocean",
-    version="0.12.2",
+    version="0.14.0",
     author="Liu, Bryant",
     author_email="chi10211201@cycu.org.tw",
     description="A Python framework integrate running multi-work simultaneously with different strategy.",
