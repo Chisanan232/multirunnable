@@ -1,3 +1,4 @@
+from pyocean.framework import OceanResult as _OceanResult
 from pyocean.mode import FeatureMode as _FeatureMode
 from pyocean.coroutine.result import (
     CoroutineResult as _CoroutineResult,
@@ -14,7 +15,7 @@ from pyocean.framework.strategy import (
     Resultable as _Resultable)
 
 from abc import ABCMeta, ABC
-from types import MethodType
+from types import FunctionType, MethodType
 from typing import List, Iterable as IterableType, Callable, Optional, Union, Tuple, Dict
 from collections import Iterable
 from multipledispatch import dispatch
@@ -64,7 +65,6 @@ class BaseGreenThreadStrategy(CoroutineStrategy):
 class GreenThreadStrategy(BaseGreenThreadStrategy, _GeneralRunnableStrategy, _Resultable):
 
     _Strategy_Feature_Mode: _FeatureMode = _FeatureMode.GreenThread
-    __GreenThread_List: List[Greenlet] = None
 
     def initialization(self,
                        queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
@@ -347,6 +347,145 @@ class BaseAsyncStrategy(CoroutineStrategy, _AsyncRunnableStrategy, ABC):
 
 
 class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
+
+    _Strategy_Feature_Mode: _FeatureMode = _FeatureMode.Asynchronous
+
+    async def initialization(self,
+                             queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+                             features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
+                             *args, **kwargs) -> None:
+        await super(AsynchronousStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
+
+        # # Persistence
+        if self._persistence_strategy is not None:
+            self._persistence_strategy.initialize(
+                db_conn_num=self.db_connection_pool_size,
+                event_loop=kwargs.get("event_loop"))
+
+
+    @dispatch(MethodType, tuple, dict)
+    def start_new_worker(self, target: Callable, args: Tuple = (), kwargs: Dict = {}) -> None:
+
+        async def __start_new_async_task():
+            __worker = await self.generate_worker(target=target, *args, **kwargs)
+            await self.activate_workers(__worker)
+
+        asyncio.run(__start_new_async_task())
+
+
+    @dispatch(Iterable, tuple, dict)
+    def start_new_worker(self, target: List[Callable], args: Tuple = (), kwargs: Dict = {}) -> None:
+
+        async def __start_new_async_tasks():
+            __workers = [await self.generate_worker(target=__function, *args, **kwargs) for __function in target]
+            await self.activate_workers(__workers)
+
+        asyncio.run(__start_new_async_tasks())
+
+
+    def run(self,
+            function: Callable,
+            args: Optional[Union[Tuple, Dict]] = None,
+            queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+            features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
+
+        async def __run_process():
+            await self.initialization(queue_tasks=queue_tasks, features=features)
+            workers_list = [self._generate_worker(function, args) for _ in range(self.executors_number)]
+            await self.activate_workers(workers_list)
+
+        asyncio.run(__run_process())
+
+
+    def map(self,
+            function: Callable,
+            args_iter: IterableType = [],
+            queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+            features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
+
+        async def __map_process():
+            await self.initialization(queue_tasks=queue_tasks, features=features)
+            __workers_list = [self._generate_worker(function, args) for args in args_iter]
+            await self.activate_workers(__workers_list)
+
+        asyncio.run(__map_process())
+
+
+    def map_with_function(self,
+                          functions: IterableType[Callable],
+                          args_iter: IterableType = [],
+                          queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+                          features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
+
+        async def __map_with_function_process():
+            nonlocal args_iter
+            if args_iter is None or args_iter == []:
+                args_iter = [() for _ in range(len(list(functions)))]
+
+            await self.initialization(queue_tasks=queue_tasks, features=features)
+            __workers_list = [self._generate_worker(fun, args) for fun, args in zip(functions, args_iter)]
+            await self.activate_workers(__workers_list)
+
+        asyncio.run(__map_with_function_process())
+
+
+    def generate_worker(self, target: Callable, *args, **kwargs) -> Task:
+        return asyncio.create_task(target(*args, **kwargs))
+
+
+    @dispatch(Task)
+    async def activate_workers(self, workers: Task) -> None:
+        value = await workers
+        self._Async_Running_Result.append(value)
+
+
+    @dispatch(Iterable)
+    async def activate_workers(self, workers: List[Task]) -> None:
+        for worker in workers:
+            await self.activate_workers(worker)
+
+
+    @dispatch(Task)
+    async def close(self, workers: Task) -> None:
+        pass
+
+
+    @dispatch(Iterable)
+    async def close(self, workers: List[Task]) -> None:
+        pass
+
+
+    def terminal(self) -> None:
+        pass
+
+
+    def kill(self) -> None:
+        pass
+
+
+    def get_result(self) -> List[_AsynchronousResult]:
+        __async_results = self._result_handling()
+        return __async_results
+
+
+    def _result_handling(self) -> List[_AsynchronousResult]:
+        # __async_results = []
+        # for __result in self._Async_Running_Result:
+        #     __async_result = _AsynchronousResult()
+        #
+        #     __async_result.worker_id = __result.get("async_id")
+        #     __async_result.event_loop = __result.get("event_loop")
+        #     __async_result.data = __result.get("result_data")
+        #     __async_result.exception = __result.get("exceptions")
+        #
+        #     __async_results.append(__async_result)
+        #
+        # return __async_results
+        return self._Async_Running_Result
+
+
+
+class OldAsynchronousStrategy(BaseAsyncStrategy, _Resultable):
 
     def get_event_loop(self):
         self._Async_Event_Loop = asyncio.get_event_loop()
