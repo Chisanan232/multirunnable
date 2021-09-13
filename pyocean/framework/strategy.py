@@ -9,6 +9,7 @@ from pyocean.types import OceanTasks as _OceanTasks
 import pyocean._utils as _utils
 
 from abc import ABCMeta, ABC, abstractmethod
+from types import MethodType, FunctionType
 from typing import cast, List, Tuple, Dict, Iterable, Callable, Optional, Union
 from multipledispatch import dispatch
 import logging
@@ -264,6 +265,83 @@ class GeneralRunnableStrategy(RunnableStrategy):
         return self._executors_num
 
 
+    def run(self,
+            function: Callable,
+            args: Optional[Union[Tuple, Dict]] = None,
+            queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+            features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
+        """
+        Description:
+            Generally running multiple target tasks.
+        :param function:
+        :param args:
+        :param queue_tasks:
+        :param features:
+        :return:
+        """
+        self.initialization(queue_tasks=queue_tasks, features=features)
+        __workers_list = [self._generate_worker(function, args) for _ in range(self.executors_number)]
+        self.activate_workers(__workers_list)
+        self.close(__workers_list)
+
+
+    def map(self,
+            function: Callable,
+            args_iter: Iterable = [],
+            queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+            features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
+        """
+        Description:
+            Map version of running target function by the iterator of arguments.
+        :param function:
+        :param args_iter:
+        :param queue_tasks:
+        :param features:
+        :return:
+        """
+        self.initialization(queue_tasks=queue_tasks, features=features)
+        # __workers_list = map(self._generate_worker, args_iter)
+        __workers_list = [self._generate_worker(function, args) for args in args_iter]
+        self.activate_workers(list(__workers_list))
+        self.close(__workers_list)
+
+
+    def map_with_function(self,
+                          functions: Iterable[Callable],
+                          args_iter: Iterable = [],
+                          queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+                          features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
+        """
+        Description:
+            Map by (functions, arguments).
+        :param functions:
+        :param args_iter:
+        :param queue_tasks:
+        :param features:
+        :return:
+        """
+        # self.__chk_function_and_args(functions=functions, args_iter=args_iter)
+        if args_iter is None or args_iter == []:
+            args_iter = [() for _ in range(len(list(functions)))]
+
+        self.initialization(queue_tasks=queue_tasks, features=features)
+        __workers_list = [self._generate_worker(fun, args) for fun, args in zip(functions, args_iter)]
+        self.activate_workers(__workers_list)
+        self.close(__workers_list)
+
+
+    @dispatch((FunctionType, MethodType), tuple)
+    def _generate_worker(self, function: Callable, args):
+        __worker = self.generate_worker(function, *args)
+        return __worker
+
+
+    @dispatch((FunctionType, MethodType), dict)
+    def _generate_worker(self, function: Callable, args):
+        __worker = self.generate_worker(function, **args)
+        return __worker
+
+
     @abstractmethod
     def generate_worker(self, target: Callable, *args, **kwargs) -> _OceanTasks:
         """
@@ -450,7 +528,7 @@ class PoolRunnableStrategy(RunnableStrategy):
 
 
 
-class AsyncRunnableStrategy(RunnableStrategy, ABC):
+class AsyncRunnableStrategy(GeneralRunnableStrategy, ABC):
 
     async def initialization(self,
                              queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
@@ -503,86 +581,42 @@ class AsyncRunnableStrategy(RunnableStrategy, ABC):
 
 
     @abstractmethod
-    async def build_workers(self, function: Callable, *args, **kwargs) -> None:
+    async def generate_worker(self, target: Callable, *args, **kwargs) -> _OceanTasks:
         """
         Description:
-            Asynchronous version of method 'build_workers'.
-        :param function:
-        :param args:
-        :param kwargs:
+            Initial and instantiate multiple executors (processes, threads, etc).
         :return:
         """
         pass
 
 
     @abstractmethod
-    async def activate_workers(self) -> None:
+    async def activate_workers(self, workers: Union[_OceanTasks, List[_OceanTasks]]) -> None:
         """
         Description:
-            Asynchronous version of method 'activate_workers'.
+            Activate multiple executors (processes, threads, etc) to run target task(s).
         :return:
         """
         pass
 
 
     @abstractmethod
-    async def close(self) -> None:
+    async def start_new_worker(self, target: Callable, *args, **kwargs) -> None:
+        """
+        Description:
+            Initial and activate an executor (process, thread, etc).
+        :return:
+        """
+        pass
+
+
+    @abstractmethod
+    async def close(self, workers: Union[_OceanTasks, List[_OceanTasks]]) -> None:
         """
         Description:
             Asynchronous version of method 'close'.
         :return:
         """
-        pass
-
-
-
-class BaseRunnableMapStrategy(metaclass=ABCMeta):
-
-    _Strategy_Feature_Mode: _FeatureMode = None
-    __Initialization = None
-
-    def __init__(self):
-        self.__Initialization = RunnableInitialization(mode=self._Strategy_Feature_Mode)
-
-
-    def initialization(self,
-                       queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
-                       features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
-                       *args, **kwargs) -> None:
-        # # Queue initialization
-        if queue_tasks is not None:
-            self._init_queue_process(queue_tasks)
-
-        # # Lock and communication features initialization
-        if features is not None:
-            self._init_lock_or_communication_process(features, **kwargs)
-
-
-    def _init_queue_process(self, queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]]) -> None:
-        self.__Initialization.init_queue_process(queue_tasks)
-
-
-    def _init_lock_or_communication_process(self, features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]], **kwargs) -> None:
-        self.__Initialization.init_lock_or_communication_process(features, **kwargs)
-
-
-    @abstractmethod
-    def generate_worker(self, target: Callable, args: Tuple = (), kwargs: Dict = {}) -> _OceanTasks:
-        pass
-
-
-    @abstractmethod
-    def activate_worker(self, workers: List[_OceanTasks]) -> None:
-        pass
-
-
-    @abstractmethod
-    def close_worker(self, workers: List[_OceanTasks]) -> None:
-        pass
-
-
-    @abstractmethod
-    def start_new_worker(self, target: Callable, args: Tuple = (), kwargs: Dict = {}) -> None:
         pass
 
 
