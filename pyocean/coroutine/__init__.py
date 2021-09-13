@@ -1,6 +1,6 @@
 from pyocean.coroutine.features import (
     GeventQueueType, GreenletLock, GreenletCommunication,
-    AsynchronousQueueType, AsyncLock, AsyncCommunication)
+    AsynchronousQueueType, AsynchronousLock, AsynchronousCommunication)
 from pyocean.coroutine.strategy import (
     CoroutineStrategy,
     GreenThreadStrategy,

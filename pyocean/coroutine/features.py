@@ -89,7 +89,7 @@ class AsynchronousQueueType(_BaseQueueType):
 
 
 
-class AsyncLock(_PosixThreadLock):
+class AsynchronousLock(_PosixThreadLock):
 
     def get_lock(self, **kwargs) -> _Async_Lock:
         __loop = _AsyncUtils.chk_loop(loop=kwargs.get("loop", None))
@@ -112,7 +112,7 @@ class AsyncLock(_PosixThreadLock):
 
 
 
-class AsyncCommunication(_PosixThreadCommunication):
+class AsynchronousCommunication(_PosixThreadCommunication):
 
     def get_event(self, *args, **kwargs) -> _Async_Event:
         __loop = _AsyncUtils.chk_loop(loop=kwargs.get("loop", None))
