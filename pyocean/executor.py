@@ -12,10 +12,8 @@ from pyocean.task import OceanPersistenceTask as _OceanPersistenceTask
 from pyocean.persistence.interface import OceanPersistence as _OceanPersistence
 
 from abc import ABC
-from typing import List, Tuple, Dict, Optional, Union, List, Callable as CallableType, Iterable as IterableType, NewType
-from types import MethodType, FunctionType
+from typing import Tuple, Dict, Optional, Union, List, Callable as CallableType, Iterable as IterableType, NewType
 from collections import Iterable, Callable
-from multipledispatch import dispatch
 
 
 _General_Runnable_Type = Union[_GeneralRunnableStrategy, _Resultable]
@@ -29,7 +27,6 @@ class Executor(ABC, BaseExecutor):
 
     def __init__(self, mode: _RunningMode, executors: int):
         super(Executor, self).__init__(mode=mode, executors=executors)
-        # self._initial_running_strategy()
 
 
     def start_new_worker(self, target: Callable, *args, **kwargs) -> None:
@@ -46,10 +43,6 @@ class Executor(ABC, BaseExecutor):
             args=args,
             queue_tasks=queue_tasks,
             features=features)
-        # General_Runnable_Strategy.initialization(queue_tasks=queue_tasks, features=features)
-        # __workers_list = [self._generate_worker(function, args) for _ in range(self._executors_number)]
-        # General_Runnable_Strategy.activate_workers(__workers_list)
-        # General_Runnable_Strategy.close(__workers_list)
 
 
     def async_run(self,
@@ -70,10 +63,6 @@ class Executor(ABC, BaseExecutor):
             args_iter=args_iter,
             queue_tasks=queue_tasks,
             features=features)
-        # General_Runnable_Strategy.initialization(queue_tasks=queue_tasks, features=features)
-        # __workers_list = [self._generate_worker(function, args) for args in args_iter]
-        # General_Runnable_Strategy.activate_workers(__workers_list)
-        # General_Runnable_Strategy.close(__workers_list)
 
 
     def async_map(self) -> None:
@@ -90,17 +79,6 @@ class Executor(ABC, BaseExecutor):
             args_iter=args_iter,
             queue_tasks=queue_tasks,
             features=features)
-        # self.__chk_function_and_args(functions=functions, args_iter=args_iter)
-        #
-        # General_Runnable_Strategy.initialization(queue_tasks=queue_tasks, features=features)
-        #
-        # if args_iter is None or args_iter == []:
-        #     args_iter = [() for _ in range(len(list(functions)))]
-        #
-        # __workers_list = [self._generate_worker(fun, args) for fun, args in zip(functions, args_iter)]
-        #
-        # General_Runnable_Strategy.activate_workers(__workers_list)
-        # General_Runnable_Strategy.close(__workers_list)
 
 
     def terminal(self) -> None:
@@ -113,44 +91,6 @@ class Executor(ABC, BaseExecutor):
 
     def result(self) -> List[_OceanResult]:
         return General_Runnable_Strategy.get_result()
-
-
-    def __chk_args_content(self, args_iter: IterableType) -> List[Union[type, bool]]:
-        """
-        Description:
-            The arguments only receive iterator of element which is
-            tuple or dictionary object
-        :param args_iter:
-        :return:
-        """
-
-        if args_iter is None:
-            raise self.ParameterCannotBeNoneError
-
-        checksum_iter = map(lambda ele: type(ele) if (type(ele) is tuple or type(ele) is dict) else False, args_iter)
-        checksum = all(checksum_iter)
-        if checksum is False:
-            raise self.InvalidParameterBePass
-        return list(checksum_iter)
-
-
-    @dispatch((FunctionType, MethodType), tuple)
-    def _generate_worker(self, function: CallableType, args):
-        __worker = General_Runnable_Strategy.generate_worker(function, *args)
-        return __worker
-
-
-    @dispatch((FunctionType, MethodType), dict)
-    def _generate_worker(self, function: CallableType, args):
-        __worker = General_Runnable_Strategy.generate_worker(function, **args)
-        return __worker
-
-
-    def __chk_function_and_args(self, functions: IterableType[Callable], args_iter: IterableType):
-        if functions is None or args_iter is None:
-            raise self.ParameterCannotBeNoneError
-
-        self.__chk_args_content(args_iter=args_iter)
 
 
 
