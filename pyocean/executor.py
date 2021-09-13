@@ -41,10 +41,15 @@ class Executor(ABC, BaseExecutor):
             args: Optional[Union[Tuple, Dict]] = None,
             queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
             features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
-        General_Runnable_Strategy.initialization(queue_tasks=queue_tasks, features=features)
-        __workers_list = [self._generate_worker(function, args) for _ in range(self._executors_number)]
-        General_Runnable_Strategy.activate_workers(__workers_list)
-        General_Runnable_Strategy.close(__workers_list)
+        General_Runnable_Strategy.run(
+            function=function,
+            args=args,
+            queue_tasks=queue_tasks,
+            features=features)
+        # General_Runnable_Strategy.initialization(queue_tasks=queue_tasks, features=features)
+        # __workers_list = [self._generate_worker(function, args) for _ in range(self._executors_number)]
+        # General_Runnable_Strategy.activate_workers(__workers_list)
+        # General_Runnable_Strategy.close(__workers_list)
 
 
     def async_run(self,
@@ -60,10 +65,15 @@ class Executor(ABC, BaseExecutor):
             args_iter: IterableType = [],
             queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
             features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
-        General_Runnable_Strategy.initialization(queue_tasks=queue_tasks, features=features)
-        __workers_list = [self._generate_worker(function, args) for args in args_iter]
-        General_Runnable_Strategy.activate_workers(__workers_list)
-        General_Runnable_Strategy.close(__workers_list)
+        General_Runnable_Strategy.map(
+            function=function,
+            args_iter=args_iter,
+            queue_tasks=queue_tasks,
+            features=features)
+        # General_Runnable_Strategy.initialization(queue_tasks=queue_tasks, features=features)
+        # __workers_list = [self._generate_worker(function, args) for args in args_iter]
+        # General_Runnable_Strategy.activate_workers(__workers_list)
+        # General_Runnable_Strategy.close(__workers_list)
 
 
     def async_map(self) -> None:
@@ -75,17 +85,22 @@ class Executor(ABC, BaseExecutor):
                           args_iter: IterableType = [],
                           queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
                           features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
-        self.__chk_function_and_args(functions=functions, args_iter=args_iter)
-
-        General_Runnable_Strategy.initialization(queue_tasks=queue_tasks, features=features)
-
-        if args_iter is None or args_iter == []:
-            args_iter = [() for _ in range(len(list(functions)))]
-
-        __workers_list = [self._generate_worker(fun, args) for fun, args in zip(functions, args_iter)]
-
-        General_Runnable_Strategy.activate_workers(__workers_list)
-        General_Runnable_Strategy.close(__workers_list)
+        self.map_with_function(
+            functions=functions,
+            args_iter=args_iter,
+            queue_tasks=queue_tasks,
+            features=features)
+        # self.__chk_function_and_args(functions=functions, args_iter=args_iter)
+        #
+        # General_Runnable_Strategy.initialization(queue_tasks=queue_tasks, features=features)
+        #
+        # if args_iter is None or args_iter == []:
+        #     args_iter = [() for _ in range(len(list(functions)))]
+        #
+        # __workers_list = [self._generate_worker(fun, args) for fun, args in zip(functions, args_iter)]
+        #
+        # General_Runnable_Strategy.activate_workers(__workers_list)
+        # General_Runnable_Strategy.close(__workers_list)
 
 
     def terminal(self) -> None:
