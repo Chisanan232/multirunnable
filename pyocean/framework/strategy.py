@@ -11,6 +11,7 @@ import pyocean._utils as _utils
 from abc import ABCMeta, ABC, abstractmethod
 from types import MethodType, FunctionType
 from typing import cast, List, Tuple, Dict, Iterable, Callable, Optional, Union
+from functools import partial as PartialFunctionType
 from multipledispatch import dispatch
 import logging
 
@@ -330,14 +331,14 @@ class GeneralRunnableStrategy(RunnableStrategy):
         self.close(__workers_list)
 
 
-    @dispatch((FunctionType, MethodType), tuple)
-    def _generate_worker(self, function: Callable, args):
+    @dispatch((FunctionType, MethodType, PartialFunctionType), tuple)
+    def _generate_worker(self, function: Callable, args) -> _OceanTasks:
         __worker = self.generate_worker(function, *args)
         return __worker
 
 
-    @dispatch((FunctionType, MethodType), dict)
-    def _generate_worker(self, function: Callable, args):
+    @dispatch((FunctionType, MethodType, PartialFunctionType), dict)
+    def _generate_worker(self, function: Callable, args) -> _OceanTasks:
         __worker = self.generate_worker(function, **args)
         return __worker
 
@@ -578,16 +579,6 @@ class AsyncRunnableStrategy(GeneralRunnableStrategy, ABC):
         while __queues_iterator.has_next():
             __queue_adapter = cast(_BaseQueueTask, __queues_iterator.next())
             await __queue_adapter.async_init_queue_with_values()
-
-
-    @abstractmethod
-    async def generate_worker(self, target: Callable, *args, **kwargs) -> _OceanTasks:
-        """
-        Description:
-            Initial and instantiate multiple executors (processes, threads, etc).
-        :return:
-        """
-        pass
 
 
     @abstractmethod
