@@ -26,7 +26,6 @@ from multiprocessing.pool import AsyncResult, ApplyResult
 class ConcurrentStrategy:
 
     _Strategy_Feature_Mode = _FeatureMode.Concurrent
-    _Threading_Running_Result: List = []
     _Thread_Running_Result: List[Dict[str, Union[AsyncResult, bool]]] = []
 
     @classmethod
@@ -37,7 +36,7 @@ class ConcurrentStrategy:
         def save_value_fun(*args, **kwargs) -> None:
             value = function(*args, **kwargs)
             __thread_result = {"result": value}
-            __self._Threading_Running_Result.append(__thread_result)
+            __self._Thread_Running_Result.append(__thread_result)
 
         return save_value_fun
 
@@ -90,7 +89,13 @@ class ThreadStrategy(ConcurrentStrategy, _GeneralRunnableStrategy, _Resultable):
 
 
     def generate_worker(self, target: Callable, *args, **kwargs) -> _OceanTasks:
-        return Thread(target=target, args=args, kwargs=kwargs)
+
+        @ConcurrentStrategy.save_return_value
+        def _target_function(*_args, **_kwargs):
+            result_value = target(*_args, **_kwargs)
+            return result_value
+
+        return Thread(target=_target_function, args=args, kwargs=kwargs)
 
 
     @dispatch(Thread)
@@ -124,7 +129,7 @@ class ThreadStrategy(ConcurrentStrategy, _GeneralRunnableStrategy, _Resultable):
 
 
     def get_result(self) -> List[_OceanResult]:
-        pass
+        return self.result()
 
 
 

@@ -110,11 +110,15 @@ class GreenThreadStrategy(BaseGreenThreadStrategy, _GeneralRunnableStrategy, _Re
     @dispatch(Greenlet)
     def close(self, workers: Greenlet) -> None:
         workers.join()
+        result = GreenThreadStrategy._format_result(worker=workers)
+        self._GreenThread_Running_Result.append(result)
 
 
     @dispatch(Iterable)
     def close(self, workers: List[Greenlet]) -> None:
         gevent.joinall(workers)
+        results = map(GreenThreadStrategy._format_result, workers)
+        self._GreenThread_Running_Result = list(results)
 
 
     def kill(self) -> None:
@@ -127,6 +131,20 @@ class GreenThreadStrategy(BaseGreenThreadStrategy, _GeneralRunnableStrategy, _Re
 
     def get_result(self) -> List[_CoroutineResult]:
         return self.result()
+
+
+    @staticmethod
+    def _format_result(worker: Greenlet) -> Dict:
+        return {
+            "loop": worker.loop,
+            "parent": worker.parent,
+            "name": worker.name,
+            "args": worker.args,
+            "kwargs": worker.kwargs,
+            "value": worker.value,
+            "exception": worker.exception,
+            "successfully": worker.successful()
+        }
 
 
 
@@ -436,7 +454,9 @@ class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
     @dispatch(Task)
     async def activate_workers(self, workers: Task) -> None:
         value = await workers
-        self._Async_Running_Result.append(value)
+        self._Async_Running_Result.append({
+            "result": value
+        })
 
 
     @dispatch(Iterable)
@@ -469,19 +489,20 @@ class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
 
 
     def _result_handling(self) -> List[_AsynchronousResult]:
-        # __async_results = []
-        # for __result in self._Async_Running_Result:
-        #     __async_result = _AsynchronousResult()
-        #
-        #     __async_result.worker_id = __result.get("async_id")
-        #     __async_result.event_loop = __result.get("event_loop")
-        #     __async_result.data = __result.get("result_data")
-        #     __async_result.exception = __result.get("exceptions")
-        #
-        #     __async_results.append(__async_result)
-        #
-        # return __async_results
-        return self._Async_Running_Result
+        __async_results = []
+        for __result in self._Async_Running_Result:
+            __async_result = _AsynchronousResult()
+
+            # __async_result.worker_id = __result.get("async_id")
+            # __async_result.event_loop = __result.get("event_loop")
+            # __async_result.data = __result.get("result_data")
+            # __async_result.exception = __result.get("exceptions")
+
+            __async_result.data = __result.get("result")
+
+            __async_results.append(__async_result)
+
+        return __async_results
 
 
 

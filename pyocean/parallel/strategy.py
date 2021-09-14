@@ -13,6 +13,7 @@ from pyocean.framework.result import ResultState as _ResultState
 
 from types import FunctionType, MethodType
 from typing import List, Tuple, Dict, Iterable as IterableType, Union, Callable, Optional, cast
+from functools import wraps
 from collections import Iterable
 from multipledispatch import dispatch
 from multiprocessing import Process, Manager
@@ -24,18 +25,31 @@ from multiprocessing.managers import Namespace
 class ParallelStrategy:
 
     _Strategy_Feature_Mode = _FeatureMode.Parallel
-    _Manager: Manager = None
-    _Namespace_Object: Namespace = None
-    _Processors_Running_Result: List[Dict[str, Union[AsyncResult, bool]]] = {}
+    _Manager: Manager = Manager()
+    _Namespace_Object: Namespace = _Manager.Namespace()
+    _Processors_Running_Result: List[Dict] = _Manager.list()
 
-    def _init_namespace_obj(self) -> None:
-        self._Manager = Manager()
-        self._Namespace_Object = self._Manager.Namespace()
+    # def _init_namespace_obj(self) -> None:
+    #     self._Manager = Manager()
+    #     self._Namespace_Object = self._Manager.Namespace()
 
 
     def namespacing_obj(self, obj: object) -> object:
         setattr(self._Namespace_Object, repr(obj), obj)
         return getattr(self._Namespace_Object, repr(obj))
+
+
+    @classmethod
+    def save_return_value(cls, function: Callable) -> Callable:
+        __self = cls
+
+        @wraps(function)
+        def save_value_fun(*args, **kwargs) -> None:
+            value = function(*args, **kwargs)
+            __thread_result = {"result": value}
+            __self._Processors_Running_Result.append(__thread_result)
+
+        return save_value_fun
 
 
     def result(self) -> List[_ParallelResult]:
@@ -48,13 +62,13 @@ class ParallelStrategy:
         for __result in self._Processors_Running_Result:
             __parallel_result = _ParallelResult()
 
-            __process_successful = __result.get("successful")
+            __process_successful = __result.get("successful", None)
             if __process_successful is True:
                 __parallel_result.state = _ResultState.SUCCESS.value
             else:
                 __parallel_result.state = _ResultState.FAIL.value
 
-            __process_result = __result.get("result")
+            __process_result = __result.get("result", None)
             __parallel_result.data = __process_result
 
             __parallel_results.append(__parallel_result)
@@ -75,12 +89,12 @@ class ProcessStrategy(ParallelStrategy, _GeneralRunnableStrategy, _Resultable):
         :param persistence:
         """
         super().__init__(executors=executors, persistence=persistence)
-        self._init_namespace_obj()
+        # self._init_namespace_obj()
         if persistence is not None:
             namespace_persistence = cast(_BasePersistenceTask, self.namespacing_obj(obj=persistence))
             # super().__init__(persistence=namespace_persistence)
             self._persistence = namespace_persistence
-        self._Processors_Running_Result = self._Manager.list()
+        # self._Processors_Running_Result = self._Manager.list()
 
 
     def initialization(self,
@@ -109,7 +123,13 @@ class ProcessStrategy(ParallelStrategy, _GeneralRunnableStrategy, _Resultable):
 
 
     def generate_worker(self, target: Callable, *args, **kwargs) -> Process:
-        return Process(target=target, args=args, kwargs=kwargs)
+
+        @ParallelStrategy.save_return_value
+        def _target_function(*_args, **_kwargs):
+            result_value = target(*_args, **_kwargs)
+            return result_value
+
+        return Process(target=_target_function, args=args, kwargs=kwargs)
 
 
     @dispatch(Process)
@@ -156,12 +176,12 @@ class ProcessPoolStrategy(ParallelStrategy, _PoolRunnableStrategy, _Resultable):
 
     def __init__(self, pool_size: int, tasks_size: int, persistence: _BasePersistenceTask = None):
         super().__init__(pool_size=pool_size, tasks_size=tasks_size, persistence=persistence)
-        self._init_namespace_obj()
+        # self._init_namespace_obj()
         if persistence is not None:
             namespace_persistence = cast(_BasePersistenceTask, self.namespacing_obj(obj=persistence))
             # super().__init__(persistence=namespace_persistence)
             self._persistence = namespace_persistence
-        self._Processors_Running_Result = self._Manager.list()
+        # self._Processors_Running_Result = self._Manager.list()
 
 
     def initialization(self,
