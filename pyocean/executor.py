@@ -2,9 +2,7 @@ from pyocean.framework.task import BaseQueueTask as _BaseQueueTask
 from pyocean.framework.features import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
 from pyocean.framework.adapter.collection import BaseList as _BaseList
 from pyocean.framework.executor import BaseExecutor
-from pyocean.framework.strategy import (
-    GeneralRunnableStrategy as _GeneralRunnableStrategy,
-    Resultable as _Resultable)
+from pyocean.framework.strategy import GeneralRunnableStrategy as _GeneralRunnableStrategy
 from pyocean.framework.result import OceanResult as _OceanResult
 from pyocean.mode import RunningMode as _RunningMode
 from pyocean.adapter.strategy import ExecutorStrategyAdapter as _ExecutorStrategyAdapter
@@ -16,7 +14,7 @@ from typing import Tuple, Dict, Optional, Union, List, Callable as CallableType,
 from collections import Iterable, Callable
 
 
-_General_Runnable_Type = Union[_GeneralRunnableStrategy, _Resultable]
+_General_Runnable_Type = Union[_GeneralRunnableStrategy]
 General_Runnable_Strategy: _General_Runnable_Type = None
 
 
@@ -74,7 +72,7 @@ class Executor(ABC, BaseExecutor):
                           args_iter: IterableType = [],
                           queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
                           features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
-        self.map_with_function(
+        General_Runnable_Strategy.map_with_function(
             functions=functions,
             args_iter=args_iter,
             queue_tasks=queue_tasks,
