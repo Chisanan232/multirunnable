@@ -17,7 +17,8 @@ class Event(_FeatureAdapterFactory):
         return super(Event, self).__repr__().replace("TargetObject", "Event")
 
 
-    def get_instance(self) -> _OceanEvent:
+    def get_instance(self, **kwargs) -> _OceanEvent:
+        self._chk_param_by_mode(**kwargs)
         communication_instance: _PosixThreadCommunication = _ModuleFactory.get_communication_adapter(mode=self.feature_mode)
         return communication_instance.get_event(**self._kwargs)
 
@@ -44,6 +45,7 @@ class Condition(_FeatureAdapterFactory):
 
 
     def get_instance(self, **kwargs) -> _OceanCondition:
+        self._chk_param_by_mode(**kwargs)
         if self._Mode is _FeatureMode.Asynchronous:
             self._kwargs["lock"] = _AsyncUtils.check_lock(lock=kwargs.get("lock", None))
         communication_instance: _PosixThreadCommunication = _ModuleFactory.get_communication_adapter(mode=self.feature_mode)
