@@ -368,21 +368,6 @@ class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
 
     _Strategy_Feature_Mode: _FeatureMode = _FeatureMode.Asynchronous
 
-    async def initialization(self,
-                             queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
-                             features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
-                             *args, **kwargs) -> None:
-        _running_event_loop = asyncio.get_running_loop()
-        kwargs["event_loop"] = _running_event_loop
-        await super(AsynchronousStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
-
-        # # Persistence
-        if self._persistence_strategy is not None:
-            self._persistence_strategy.initialize(
-                db_conn_num=self.db_connection_pool_size,
-                event_loop=kwargs.get("event_loop"))
-
-
     @dispatch(MethodType, tuple, dict)
     def start_new_worker(self, target: Callable, args: Tuple = (), kwargs: Dict = {}) -> None:
 
@@ -447,6 +432,21 @@ class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
             await self.activate_workers(__workers_list)
 
         asyncio.run(__map_with_function_process())
+
+
+    async def initialization(self,
+                             queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+                             features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
+                             *args, **kwargs) -> None:
+        _running_event_loop = asyncio.get_running_loop()
+        kwargs["event_loop"] = _running_event_loop
+        await super(AsynchronousStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
+
+        # # Persistence
+        if self._persistence_strategy is not None:
+            self._persistence_strategy.initialize(
+                db_conn_num=self.db_connection_pool_size,
+                event_loop=kwargs.get("event_loop"))
 
 
     def generate_worker(self, target: Callable, *args, **kwargs) -> Task:
