@@ -120,7 +120,8 @@ class AsynchronousCommunication(_PosixThreadCommunication):
 
 
     def get_condition(self, *args, **kwargs) -> _Async_Condition:
-        __lock = _AsyncUtils.chk_lock(lock=kwargs.get("lock", None))
+        # __lock = _AsyncUtils.chk_lock(lock=kwargs.get("lock", None))
+        __lock = kwargs.get("lock", None)
         __loop = _AsyncUtils.chk_loop(loop=kwargs.get("loop", None))
         return _Async_Condition(lock=__lock, loop=__loop)
 
