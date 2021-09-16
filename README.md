@@ -80,10 +80,6 @@ if __name__ == '__main__':
 
 ```
 
-First, it must initialize an OceanTask to let it know target function and its arguments if it needs. </br>
-Second, choose one strategy mode you need, for example above, we use Concurrent. </br>
-Finally, run it.
-
 How about Parallel? I want to let it be more fast. 
 Only one thing you need to do: change the mode.
 
