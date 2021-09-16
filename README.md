@@ -62,25 +62,22 @@ Currently, it has 4 options could use: Parallel, Concurrent, Greenlet and Asynch
 Here's an example to do the same thing with pyocean:
 
 ```python
-from pyocean import OceanTask, OceanSystem, RunningMode
+from pyocean import SimpleExecutor, RunningMode
 import random
+import time
 
 Thread_Number = 5
 
-
 def function(index):
     print(f"This is function with index {index}")
+    time.sleep(3)
 
 
 if __name__ == '__main__':
-    # Initialize task object
-    task = OceanTask(mode=RunningMode.Concurrent)
-    task.set_function(function=function)
-    task.set_func_kwargs(kwargs={"index": f"test_{random.randrange(10, 20)}"})
+    
+    executor = SimpleExecutor(mode=RunningMode.Concurrent, executors=Thread_Number)
+    executor.run(function=function, args={"index": f"test_{random.randrange(1, 10)}"})
 
-    # Initialize ocean-system and assign task
-    system = OceanSystem(mode=RunningMode.Concurrent, worker_num=Thread_Number)
-    system.run(task=task)
 ```
 
 First, it must initialize an OceanTask to let it know target function and its arguments if it needs. </br>
@@ -94,7 +91,7 @@ Only one thing you need to do: change the mode.
 
 ... # Any code is the same
 
-system = OceanSystem(mode=RunningMode.Parallel, worker_num=Thread_Number)
+executor = SimpleExecutor(mode=RunningMode.Parallel, executors=Thread_Number)
 
 ... # Any code is the same
 
@@ -150,10 +147,10 @@ With pyocean, it requires everyone should wrap the logic which needs to be run w
 and you just add a decorator on it.
 
 ```python
-from pyocean.api import LockDecorator
+from pyocean.api import RunWith
 import time
 
-@LockDecorator.run_with_lock
+@RunWith.Lock
 def lock_function():
     print("Running process in lock and will sleep 2 seconds.")
     time.sleep(2)
@@ -164,10 +161,10 @@ def lock_function():
 So is semaphore:
 
 ```python
-from pyocean.api import LockDecorator
+from pyocean.api import RunWith
 import time
 
-@LockDecorator.run_with_semaphore
+@RunWith.Lock
 def lock_function():
     print("Running process in lock and will sleep 2 seconds.")
     time.sleep(2)
@@ -178,14 +175,31 @@ def lock_function():
 Please remember: you still need to initial lock or semaphore object before you use it.
 
 ```python
-from pyocean import OceanSystem, RunningMode, Feature
+from pyocean import SimpleExecutor, RunningMode
+from pyocean.api import RunWith
+from pyocean.adapter import Lock
+import time
 
-... # Any code is the same
+Thread_Number = 5
 
-system = OceanSystem(mode=RunningMode.Parallel, worker_num=Thread_Number)
-system.run(task=task, features=[Feature.Lock, Feature.Semaphore])
+@RunWith.Lock
+def lock_function():
+    print("This is testing process with Lock and sleep for 3 seconds.")
+    time.sleep(3)
 
-... # Any code is the same
+
+if __name__ == '__main__':
+    
+        # Initialize Lock object
+        __lock = Lock()
+
+        # # # # Initial Executor object
+        __executor = SimpleExecutor(mode=RunningMode.Concurrent, executors=Thread_Number)
+
+        # # # # Running the Executor
+        __executor.run(
+            function=lock_function,
+            features=__lock)
 
 ```
 
