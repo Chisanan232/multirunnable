@@ -288,10 +288,10 @@ class EventAsyncOperator(_AsyncAdapterOperator):
         return self._event_instance.is_set()
 
 
-    async def wait(self, timeout: int = None) -> bool:
+    async def wait(self) -> bool:
         # # # # Parallel & Concurrent & Greenlet are the same -  have parameter
         # # # # Async - asyncio doesn't have any parameter
-        return await self._event_instance.wait(timeout)
+        return await self._event_instance.wait()
 
 
     def clear(self) -> None:
@@ -314,10 +314,10 @@ class ConditionAsyncOperator(_BaseAsyncLockOperator):
         self._feature_instance.release()
 
 
-    async def wait(self, timeout: int = None) -> None:
+    async def wait(self) -> None:
         # # # # Async - asyncio doesn't have any parameter
         # # # # Parallel & Concurrent are the same -  have parameter
-        return await self._feature_instance.wait(timeout)
+        return await self._feature_instance.wait()
 
 
     async def wait_for(self, predicate) -> bool:
