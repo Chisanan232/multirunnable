@@ -331,6 +331,12 @@ class GeneralRunnableStrategy(RunnableStrategy):
         self.close(__workers_list)
 
 
+    @dispatch((FunctionType, MethodType, PartialFunctionType), type(None))
+    def _generate_worker(self, function: Callable, args) -> _OceanTasks:
+        __worker = self.generate_worker(function)
+        return __worker
+
+
     @dispatch((FunctionType, MethodType, PartialFunctionType), tuple)
     def _generate_worker(self, function: Callable, args) -> _OceanTasks:
         __worker = self.generate_worker(function, *args)
