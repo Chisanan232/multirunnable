@@ -1,9 +1,9 @@
-from pyocean.framework.features import BaseQueueType as _BaseQueueType
-from pyocean.framework.result import OceanResult as _OceanResult
-from pyocean.mode import RunningMode as _RunningMode
-from pyocean.types import OceanQueue as _OceanQueue
-from pyocean.persistence.interface import OceanPersistence as _OceanPersistence
-import pyocean._utils as _utils
+from multirunnable.framework.features import BaseQueueType as _BaseQueueType
+from multirunnable.framework.result import OceanResult as _OceanResult
+from multirunnable.mode import RunningMode as _RunningMode
+from multirunnable.types import OceanQueue as _OceanQueue
+from multirunnable.persistence.interface import OceanPersistence as _OceanPersistence
+import multirunnable._utils as _utils
 
 from abc import ABCMeta, abstractmethod
 from typing import List, Tuple, Dict, Iterable, Callable, Union

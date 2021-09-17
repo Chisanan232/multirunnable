@@ -1,13 +1,13 @@
-from pyocean.framework.task import (
+from multirunnable.framework.task import (
     BaseTask as _BaseTask,
     BaseQueueTask as _BaseQueueTask,
     BasePersistenceTask as _BasePersistenceTask)
-from pyocean.framework.features import BaseQueueType as _BaseQueueType
-from pyocean.framework.adapter.collection import BaseList as _BaseList
-from pyocean.types import OceanQueue as _OceanQueue
-from pyocean.adapter.queue import Queue as _Queue
-from pyocean.adapter.collection import QueueTaskList as _QueueTaskList
-from pyocean.persistence.interface import OceanPersistence as _OceanPersistence
+from multirunnable.framework.features import BaseQueueType as _BaseQueueType
+from multirunnable.framework.adapter.collection import BaseList as _BaseList
+from multirunnable.types import OceanQueue as _OceanQueue
+from multirunnable.adapter.queue import Queue as _Queue
+from multirunnable.adapter.collection import QueueTaskList as _QueueTaskList
+from multirunnable.persistence.interface import OceanPersistence as _OceanPersistence
 
 from typing import Tuple, Dict, Iterable, Callable
 
