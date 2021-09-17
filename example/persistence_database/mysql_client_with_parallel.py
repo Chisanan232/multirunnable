@@ -83,7 +83,7 @@ class TestCode:
         sql_tasks = [sql_query for _ in range(20)]
         test_dao = TestDao(connection_strategy=test_task.running_persistence())
         # test_dao = test_factory.dao(connection_strategy=test_task.running_persistence())
-        test_task_procedure.run(function=test_dao.get_test_data, tasks=sql_tasks)
+        test_task_procedure.apply(function=test_dao.get_test_data, tasks=sql_tasks)
         data = test_task_procedure.result
         self.__logger.info(f"Final data: {data}")
 

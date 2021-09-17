@@ -77,7 +77,7 @@ class TestRunningMode(RunningModeTestCases):
 
 
     def test_greenlet_mode(self):
-        self.__check_mechanism(mode=RunningMode.Greenlet)
+        self.__check_mechanism(mode=RunningMode.GreenThread)
 
 
     def test_asynchronous_mode(self):

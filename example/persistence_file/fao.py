@@ -6,7 +6,11 @@ from typing import Iterable, List, Union, Tuple
 
 class ExampleFao:
 
-    __Config_Path = "The .properties configuration file path."
+    # __Config_Path = "The .properties configuration file path."
+    __Config_Path = "/Users/bryantliu/DevelopProject/" \
+                    "KobeDevelopProject/Crawler-PyFrameworok/" \
+                    "apache-pyocean/sources/config/file/" \
+                    "file_config.properties"
 
     def __init__(self):
         self.__file_fao = SimpleFileFao(config=self.__Config_Path)

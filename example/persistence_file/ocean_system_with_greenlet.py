@@ -38,7 +38,7 @@ class ExampleOceanSystem:
     def main_run(self):
         test_dao = TestDao(connection_strategy=self.persistence_strategy())
 
-        __task = OceanTask(mode=RunningMode.Greenlet)
+        __task = OceanTask(mode=RunningMode.GreenThread)
         __task.set_function(function=test_dao.get_test_data)
 
         __queue_task = QueueTask()
@@ -47,7 +47,7 @@ class ExampleOceanSystem:
         sql_query = "select * from stock_data_2330 limit 3;"
         __queue_task.value = [sql_query for _ in range(20)]
 
-        __system = OceanSystem(mode=RunningMode.Greenlet, worker_num=self.__Greenlet_Number)
+        __system = OceanSystem(mode=RunningMode.GreenThread, worker_num=self.__Greenlet_Number)
         __lock = Lock()
         __bounded_semaphore = BoundedSemaphore(value=2)
         __features = __lock + __bounded_semaphore

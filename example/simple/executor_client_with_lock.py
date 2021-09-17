@@ -20,6 +20,7 @@ class ExampleTargetFunction:
 
     def target_function(self, *args, **kwargs) -> str:
         print("This is ExampleTargetFunction.target_function.")
+        "multi"
         time.sleep(3)
         # gevent.sleep(3)
         print("This is target function args: ", args)

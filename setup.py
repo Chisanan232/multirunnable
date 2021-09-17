@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="pyocean",
-    version="0.14.0",
+    version="0.14.2",
     author="Liu, Bryant",
     author_email="chi10211201@cycu.org.tw",
     description="A Python framework integrate running multi-work simultaneously with different strategy.",
@@ -14,9 +14,15 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(),
     classifiers=[
-        "Programming Language :: Python :: 3",
+        "Programming Language :: Python",
         "License :: OSI Approved :: APACHE-2.0 License",
         "Operating System :: OS Independent",
+        "Topic :: Parallel/Engineering",
+        "Topic :: Concurrent/Engineering",
+        "Topic :: Coroutine/Engineering",
+        "Programming Language :: Python :: 3 :: Only",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
     ],
     python_requires='>=3.6',
     install_requires=[

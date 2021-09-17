@@ -21,6 +21,7 @@ class AbstractedAsyncClass(metaclass=ABCMeta):
         pass
 
 
+
     @abstractmethod
     def fun_1(self, params):
         pass

@@ -1,4 +1,4 @@
-from pyocean.api import LockDecorator, QueueOperator
+from pyocean.api import RunWith, AsyncRunWith, QueueOperator
 from pyocean.persistence import OceanPersistence
 from pyocean.persistence.database import BaseDao, SingleConnection, MultiConnections
 from pyocean.logger import ocean_logger
@@ -43,26 +43,22 @@ class TestDao(BaseDao):
             raise Exception("ConnectionStrategy is invalid...")
 
 
-    @LockDecorator.run_with_lock
+    @RunWith.Lock
     def sql_process_one(self):
         # sql_tasks = self.get_all_sql_tasks()
         sql_tasks = QueueOperator.get_queue_with_name(name="test_sql_task")
         self._logger.debug(f"SQL tasks: {sql_tasks}")
-        # from pyocean.framework.strategy import Running_Queue
-        # one_sql_query = Running_Queue.get()
         one_sql_query = sql_tasks.get()
         self._logger.debug(f"SQL tasks query: {one_sql_query}")
         data = self.running_sql_query_process(sql_query=one_sql_query)
         return data
 
 
-    @LockDecorator.run_with_bounded_semaphore
+    @RunWith.Bounded_Semaphore
     def sql_process_many(self):
         # sql_tasks = self.get_all_sql_tasks()
         sql_tasks = QueueOperator.get_queue_with_name(name="test_sql_task")
         self._logger.debug(f"SQL tasks: {sql_tasks}")
-        # from pyocean.framework.strategy import Running_Queue
-        # one_sql_query = Running_Queue.get()
         one_sql_query = sql_tasks.get()
         self._logger.debug(f"SQL tasks query: {one_sql_query}")
         data = self.running_sql_query_process(sql_query=one_sql_query)
@@ -155,7 +151,7 @@ class AsyncTestDao(BaseDao):
             pass
 
 
-    @LockDecorator.async_run_with_lock
+    @AsyncRunWith.Lock
     async def sql_process_one(self):
         # sql_tasks = self.get_all_sql_tasks()
         sql_tasks = QueueOperator.get_queue_with_name(name="test_sql_task")
@@ -166,7 +162,7 @@ class AsyncTestDao(BaseDao):
         return data
 
 
-    @LockDecorator.async_run_with_bounded_semaphore
+    @AsyncRunWith.Bounded_Semaphore
     async def sql_process_many(self):
         # sql_tasks = self.get_all_sql_tasks()
         sql_tasks = QueueOperator.get_queue_with_name(name="test_sql_task")

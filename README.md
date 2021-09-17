@@ -160,7 +160,7 @@ So is semaphore:
 from pyocean.api import RunWith
 import time
 
-@RunWith.Lock
+@RunWith.Semaphore
 def lock_function():
     print("Running process in lock and will sleep 2 seconds.")
     time.sleep(2)

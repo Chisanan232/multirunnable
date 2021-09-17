@@ -8,7 +8,7 @@ package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute(
 sys.path.append(package_pyocean_path)
 
 # pyocean package
-from pyocean import OceanSystem, OceanTask, QueueTask, RunningMode
+from pyocean import PersistencePool, OceanTask, QueueTask, RunningMode
 from pyocean.adapter import Lock, BoundedSemaphore
 from pyocean.parallel import MultiProcessingQueueType, ParallelResult
 from pyocean.persistence import OceanPersistence, DatabaseDriver
@@ -47,20 +47,22 @@ class ExampleOceanSystem:
         sql_query = "select * from stock_data_2330 limit 3;"
         __queue_task.value = [sql_query for _ in range(20)]
 
-        __system = OceanSystem(mode=RunningMode.Parallel, worker_num=self.__Parallel_Number)
+        # # # # Initial and instantiate feature object: Lock and Bounded Semaphore
         __lock = Lock()
         __bounded_semaphore = BoundedSemaphore(value=2)
         __features = __lock + __bounded_semaphore
 
-        result: List[ParallelResult] = __system.run_and_save(
-            task=__task,
-            queue_tasks=__queue_task,
-            # features=__features,
-            features=__bounded_semaphore,
+        # # # # Initial and instantiate pool object with persistence strategy
+        __pool = PersistencePool(
+            mode=RunningMode.Parallel,
+            pool_size=self.__Parallel_Number,
+            tasks_size=self.__Parallel_Number,
             persistence_strategy=self.persistence_strategy(),
-            db_connection_num=self.__Parallel_DB_CONNECTION_Number,
-            saving_mode=True
-        )
+            db_connection_pool_size=self.__Parallel_DB_CONNECTION_Number)
+
+        __pool.initial(queue_tasks=__queue_task, features=__features)
+        __pool.async_apply(function=test_dao.get_test_data)
+        result = __pool.get_result()
 
         for r in result:
             print(f"+============ {r.worker_id} =============+")

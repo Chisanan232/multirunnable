@@ -11,7 +11,7 @@ class AsyncFactory:
         self.__loop = event_loop
 
 
-    async def run_task(self):
+    async def run_task(self, params):
         # # Method 1.
         tasks = [self.__loop.create_task(self.task_component(index)) for index in range(self.__thread_num)]
         # # Method 2.
@@ -39,7 +39,7 @@ class AsyncFactory:
         for finish in finished:
             event_loop = finish.get_loop()
             exception = finish.exception()
-            done_flag = finish.done()
+            done_flag = finish.close()
             result_flag = finish.result()
             # if result_flag == "Greenlet-8":
             #     finish.set_result(result={"test": "test_1"})
@@ -88,7 +88,7 @@ class MainCode:
         # # Async Factory
         # # Method 1.
         try:
-            self.__event_loop.run_until_complete(self.__async_factory.run_task())
+            self.__event_loop.run_until_complete(future=self.__async_factory.run_task())
         except Exception as e:
             print(f"Test for catch the coroutine exception.")
             print(f"exception: {e}")
