@@ -5,11 +5,11 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="pyocean",
-    version="0.14.2",
+    name="multirunnable",
+    version="0.15.0",
     author="Liu, Bryant",
     author_email="chi10211201@cycu.org.tw",
-    description="A Python framework integrate running multi-work simultaneously with different strategy.",
+    description="A Python framework integrate running multi-works simultaneously with different strategy.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(),
