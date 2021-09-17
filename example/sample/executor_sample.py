@@ -7,7 +7,7 @@ import sys
 package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute())
 sys.path.append(package_pyocean_path)
 
-from pyocean import SimpleExecutor, RunningMode
+from multirunnable import SimpleExecutor, RunningMode
 
 
 def function(index):

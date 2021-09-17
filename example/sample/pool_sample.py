@@ -7,7 +7,7 @@ import sys
 package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute())
 sys.path.append(package_pyocean_path)
 
-from pyocean import SimplePool, RunningMode
+from multirunnable import SimplePool, RunningMode
 
 
 def function(index):

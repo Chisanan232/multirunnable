@@ -8,12 +8,12 @@ package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute(
 sys.path.append(package_pyocean_path)
 
 # pyocean package
-from pyocean import SimpleExecutor, RunningMode, QueueTask
-from pyocean.api import ConditionOperator, ConditionAsyncOperator, QueueOperator
-from pyocean.adapter import Condition
-from pyocean.parallel import MultiProcessingQueueType
-from pyocean.concurrent import MultiThreadingQueueType
-from pyocean.coroutine import AsynchronousQueueType
+from multirunnable import SimpleExecutor, RunningMode, QueueTask
+from multirunnable.api import ConditionOperator, ConditionAsyncOperator, QueueOperator
+from multirunnable.adapter import Condition
+from multirunnable.parallel import MultiProcessingQueueType
+from multirunnable.concurrent import MultiThreadingQueueType
+from multirunnable.coroutine import AsynchronousQueueType
 import asyncio
 
 

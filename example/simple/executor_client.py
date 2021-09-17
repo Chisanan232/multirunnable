@@ -10,8 +10,8 @@ package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute(
 sys.path.append(package_pyocean_path)
 
 # pyocean package
-from pyocean import RunningMode, SimpleExecutor
-from pyocean.api import retry, async_retry
+from multirunnable import RunningMode, SimpleExecutor
+from multirunnable.api import retry, async_retry
 
 
 

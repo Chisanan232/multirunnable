@@ -8,9 +8,9 @@ package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute(
 sys.path.append(package_pyocean_path)
 
 # pyocean package
-from pyocean import OceanSystem, RunningMode
-from pyocean.api import EventOperator
-from pyocean.adapter import Event
+from multirunnable import OceanSystem, RunningMode
+from multirunnable.api import EventOperator
+from multirunnable.adapter import Event
 
 
 

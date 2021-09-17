@@ -11,13 +11,13 @@ package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute(
 sys.path.append(package_pyocean_path)
 
 # pyocean package
-from pyocean import RunningMode
-import pyocean
+from multirunnable import RunningMode
+import multirunnable
 import time
 
 
 
-@pyocean.multi_processes(processes=2)
+@multirunnable.multi_processes(processes=2)
 def target_function_with_parallel(*args, **kwargs) -> str:
     print("This is ExampleParallelClient.target_function in process.")
     time.sleep(3)
@@ -27,7 +27,7 @@ def target_function_with_parallel(*args, **kwargs) -> str:
     return "You are 87."
 
 
-@pyocean.multi_threads(threads=2)
+@multirunnable.multi_threads(threads=2)
 def target_function_with_concurrent(*args, **kwargs) -> str:
     print("This is ExampleParallelClient.target_function in process.")
     time.sleep(3)
@@ -37,7 +37,7 @@ def target_function_with_concurrent(*args, **kwargs) -> str:
     return "You are 87."
 
 
-@pyocean.multi_green_threads(gthreads=2)
+@multirunnable.multi_green_threads(gthreads=2)
 def target_function_with_green_thread(*args, **kwargs) -> str:
     print("This is ExampleParallelClient.target_function in process.")
     gevent.sleep(3)
@@ -49,7 +49,7 @@ def target_function_with_green_thread(*args, **kwargs) -> str:
 
 # @pyocean.multi_executors(mode=RunningMode.Parallel, executors=5)
 # @pyocean.multi_executors(mode=RunningMode.Concurrent, executors=5)
-@pyocean.multi_executors(mode=RunningMode.GreenThread, executors=5)
+@multirunnable.multi_executors(mode=RunningMode.GreenThread, executors=5)
 def target_function_with_ex_decorator(*args, **kwargs) -> str:
     print("This is ExampleParallelClient.target_function in process.")
     # time.sleep(3)
@@ -60,7 +60,7 @@ def target_function_with_ex_decorator(*args, **kwargs) -> str:
     return "You are 87."
 
 
-@pyocean.multi_executors(mode=RunningMode.Asynchronous, executors=5)
+@multirunnable.multi_executors(mode=RunningMode.Asynchronous, executors=5)
 async def async_target_function_with_ex_decorator(*args, **kwargs) -> str:
     print("This is ExampleParallelClient.target_function in process.")
     await asyncio.sleep(3)
