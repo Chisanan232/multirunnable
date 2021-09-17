@@ -1,4 +1,4 @@
-# pyocean
+# multirunnable
 
 A Python framework integrates building program multi-worker with different running strategy.
 It could very easily build a feature running multi-work simultaneously.
@@ -62,11 +62,12 @@ Currently, it has 4 options could use: Parallel, Concurrent, Greenlet and Asynch
 Here's an example to do the same thing with pyocean:
 
 ```python
-from pyocean import SimpleExecutor, RunningMode
+from multirunnable import SimpleExecutor, RunningMode
 import random
 import time
 
 Thread_Number = 5
+
 
 def function(index):
     print(f"This is function with index {index}")
@@ -74,7 +75,6 @@ def function(index):
 
 
 if __name__ == '__main__':
-    
     executor = SimpleExecutor(mode=RunningMode.Concurrent, executors=Thread_Number)
     executor.run(function=function, args={"index": f"test_{random.randrange(1, 10)}"})
 
@@ -143,8 +143,9 @@ With pyocean, it requires everyone should wrap the logic which needs to be run w
 and you just add a decorator on it.
 
 ```python
-from pyocean.api import RunWith
+from multirunnable.api import RunWith
 import time
+
 
 @RunWith.Lock
 def lock_function():
@@ -157,8 +158,9 @@ def lock_function():
 So is semaphore:
 
 ```python
-from pyocean.api import RunWith
+from multirunnable.api import RunWith
 import time
+
 
 @RunWith.Semaphore
 def lock_function():
@@ -171,12 +173,13 @@ def lock_function():
 Please remember: you still need to initial lock or semaphore object before you use it.
 
 ```python
-from pyocean import SimpleExecutor, RunningMode
-from pyocean.api import RunWith
-from pyocean.adapter import Lock
+from multirunnable import SimpleExecutor, RunningMode
+from multirunnable.api import RunWith
+from multirunnable.adapter import Lock
 import time
 
 Thread_Number = 5
+
 
 @RunWith.Lock
 def lock_function():
@@ -185,17 +188,16 @@ def lock_function():
 
 
 if __name__ == '__main__':
-    
-        # Initialize Lock object
-        __lock = Lock()
+    # Initialize Lock object
+    __lock = Lock()
 
-        # # # # Initial Executor object
-        __executor = SimpleExecutor(mode=RunningMode.Concurrent, executors=Thread_Number)
+    # # # # Initial Executor object
+    __executor = SimpleExecutor(mode=RunningMode.Concurrent, executors=Thread_Number)
 
-        # # # # Running the Executor
-        __executor.run(
-            function=lock_function,
-            features=__lock)
+    # # # # Running the Executor
+    __executor.run(
+        function=lock_function,
+        features=__lock)
 
 ```
 
