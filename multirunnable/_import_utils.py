@@ -6,7 +6,7 @@ import re
 
 class ImportPyocean:
 
-    _RootPackage = "pyocean"
+    _RootPackage = "multirunnable"
 
     @classmethod
     def get_class(cls, pkg_path: str, cls_name: str) -> Callable:
