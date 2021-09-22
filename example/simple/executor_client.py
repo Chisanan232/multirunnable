@@ -124,9 +124,9 @@ class ExampleOceanExecutor:
 
         # # # # Running the Executor
         # # # # Generally running
-        # __executor.run(
-        #     function=self.__example.async_target_function,
-        #     args=("index_1", "index_2.2"))
+        __executor.run(
+            function=self.__example.target_function,
+            args=("index_1", "index_2.2"))
 
         # # # # Generally running which will raise exception
         # __executor.run(
@@ -134,9 +134,9 @@ class ExampleOceanExecutor:
         #     args=("index_1", "index_2.2"))
 
         # # # # Asynchronous version of generally running which will raise exception
-        __executor.run(
-            function=self.__example.async_target_fail_function,
-            args=("index_1", "index_2.2"))
+        # __executor.run(
+        #     function=self.__example.async_target_fail_function,
+        #     args=("index_1", "index_2.2"))
 
         # # # # Map running which will raise exception
         # __executor.map(
