@@ -12,7 +12,6 @@ _Strategy_Package: str = "strategy"
 # # Feature class
 _Parallel_Class: str = "Process"
 _Concurrent_Class: str = "Thread"
-_Greenlet_Class: str = "Greenlet"
 _GreenThread_Class: str = "GreenThread"
 _Asynchronous_Class: str = "Asynchronous"
 
@@ -46,9 +45,9 @@ class FeatureMode(Enum):
 
     GreenThread = {
         "module": _Coroutine_Package + _Feature_Package,
-        "queue": _Greenlet_Class + _Queue_Class,
-        "lock": _Greenlet_Class + _Lock_Class,
-        "communication": _Greenlet_Class + _Communication_Class
+        "queue": _GreenThread_Class + _Queue_Class,
+        "lock": _GreenThread_Class + _Lock_Class,
+        "communication": _GreenThread_Class + _Communication_Class
     }
 
     Asynchronous = {

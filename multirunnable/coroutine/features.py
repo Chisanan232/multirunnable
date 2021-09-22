@@ -44,7 +44,7 @@ class GeventQueueType(_BaseQueueType):
 
 
 
-class GreenletLock(_PosixThreadLock):
+class GreenThreadLock(_PosixThreadLock):
 
     def get_lock(self) -> _Greenlet_Lock:
         return _Greenlet_Lock()
@@ -63,7 +63,7 @@ class GreenletLock(_PosixThreadLock):
 
 
 
-class GreenletCommunicationSpec(_PosixThreadCommunication):
+class GreenThreadCommunicationSpec(_PosixThreadCommunication):
 
     def get_event(self, *args, **kwargs) -> _OceanEvent:
         pass
@@ -74,7 +74,7 @@ class GreenletCommunicationSpec(_PosixThreadCommunication):
 
 
 
-class GreenletCommunication(GreenletCommunicationSpec):
+class GreenThreadCommunication(GreenThreadCommunicationSpec):
 
     def get_event(self, *args, **kwargs) -> _Greenlet_Event:
         return _Greenlet_Event()
