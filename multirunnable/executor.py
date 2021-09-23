@@ -45,12 +45,12 @@ class Executor(ABC, BaseExecutor):
             features=features)
 
 
-    def async_run(self,
-                  function: CallableType,
-                  args_iter: IterableType = [],
-                  queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
-                  features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
-        pass
+    # def async_run(self,
+    #               function: CallableType,
+    #               args_iter: IterableType = [],
+    #               queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+    #               features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
+    #     pass
 
 
     def map(self,
@@ -65,8 +65,8 @@ class Executor(ABC, BaseExecutor):
             features=features)
 
 
-    def async_map(self) -> None:
-        pass
+    # def async_map(self) -> None:
+    #     pass
 
 
     def map_with_function(self,

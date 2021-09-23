@@ -69,13 +69,13 @@ class BaseExecutor(metaclass=ABCMeta):
         pass
 
 
-    @abstractmethod
-    def async_run(self,
-                  function: CallableType,
-                  args_iter: IterableType = [],
-                  queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
-                  features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
-        pass
+    # @abstractmethod
+    # def async_run(self,
+    #               function: CallableType,
+    #               args_iter: IterableType = [],
+    #               queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+    #               features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
+    #     pass
 
 
     @abstractmethod
@@ -99,14 +99,14 @@ class BaseExecutor(metaclass=ABCMeta):
         pass
 
 
-    @abstractmethod
-    def async_map(self) -> None:
-        """
-        Description:
-            Asynchronous version of map.
-        :return:
-        """
-        pass
+    # @abstractmethod
+    # def async_map(self) -> None:
+    #     """
+    #     Description:
+    #         Asynchronous version of map.
+    #     :return:
+    #     """
+    #     pass
 
 
     @abstractmethod
