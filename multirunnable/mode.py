@@ -63,24 +63,28 @@ class RunningMode(Enum):
 
     Parallel = {
         "strategy_module": _Parallel_Package + _Strategy_Package,
+        "class_key": _Parallel_Class,
         "executor_strategy": _Parallel_Class + _Strategy_Class,
         "pool_strategy": _Parallel_Class + _Pool_Strategy_Class
     }
 
     Concurrent = {
         "strategy_module": _Concurrent_Package + _Strategy_Package,
+        "class_key": _Concurrent_Class,
         "executor_strategy": _Concurrent_Class + _Strategy_Class,
         "pool_strategy": _Concurrent_Class + _Pool_Strategy_Class
     }
 
     GreenThread = {
         "strategy_module": _Coroutine_Package + _Strategy_Package,
+        "class_key": _GreenThread_Class,
         "executor_strategy": _GreenThread_Class + _Strategy_Class,
         "pool_strategy": _GreenThread_Class + _Pool_Strategy_Class
     }
 
     Asynchronous = {
         "strategy_module": _Coroutine_Package + _Strategy_Package,
+        "class_key": _Asynchronous_Class,
         "executor_strategy": _Asynchronous_Class + _Strategy_Class,
         "pool_strategy": _Asynchronous_Class + _Pool_Strategy_Class
     }
