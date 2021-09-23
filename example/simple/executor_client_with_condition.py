@@ -1,20 +1,18 @@
 # Import package pyocean
 import pathlib
 import random
-import time
 import sys
 
 package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute())
 sys.path.append(package_pyocean_path)
 
 # pyocean package
-from multirunnable import SimpleExecutor, RunningMode, QueueTask
+from multirunnable import SimpleExecutor, RunningMode, QueueTask, sleep, async_sleep
 from multirunnable.api import ConditionOperator, ConditionAsyncOperator, QueueOperator
 from multirunnable.adapter import Condition
 from multirunnable.parallel import MultiProcessingQueueType
 from multirunnable.concurrent import MultiThreadingQueueType
 from multirunnable.coroutine import AsynchronousQueueType
-import asyncio
 
 
 
@@ -36,7 +34,7 @@ class ProducerProcess:
             __sleep_time = random.randrange(1, 10)
             print(f"[Producer] It will sleep for {__sleep_time} seconds.")
             test_queue.put(__sleep_time)
-            time.sleep(__sleep_time)
+            sleep(__sleep_time)
             # # # # # 1. Method
             # self.__condition_opt.acquire()
             # self.__condition_opt.notify_all()
@@ -67,7 +65,7 @@ class ProducerProcess:
             __sleep_time = random.randrange(1, 10)
             print(f"[Producer] It will sleep for {__sleep_time} seconds.")
             await test_queue.put(__sleep_time)
-            await asyncio.sleep(__sleep_time)
+            await async_sleep(__sleep_time)
             __condition = self.__async_condition_opt
             async with __condition:
                 self.__condition_opt.notify_all()
@@ -102,7 +100,7 @@ class ConsumerProcess:
             # # # # 2. Method
             __condition = self.__condition_opt
             with __condition:
-                time.sleep(1)
+                sleep(1)
                 print("[Consumer] ConsumerThread waiting ...")
                 self.__condition_opt.wait()
                 __sleep_time = test_queue.get()
@@ -128,7 +126,7 @@ class ConsumerProcess:
 
             # # Method 2
             async with __condition:
-                await asyncio.sleep(1)
+                await async_sleep(1)
                 print("[Consumer] ConsumerThread waiting ...")
                 await __condition.wait()
                 __sleep_time = await test_queue.get()

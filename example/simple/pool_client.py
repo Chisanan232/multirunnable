@@ -2,13 +2,11 @@
 import pathlib
 import sys
 
-import gevent
-
 package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute())
 sys.path.append(package_pyocean_path)
 
 # pyocean package
-from multirunnable import RunningMode, SimplePool
+from multirunnable import RunningMode, SimplePool, sleep, async_sleep
 
 
 
@@ -16,8 +14,7 @@ class ExampleTargetFunction:
 
     def target_function(self, *args, **kwargs) -> str:
         print("This is ExampleParallelClient.target_function in process.")
-        # time.sleep(3)
-        gevent.sleep(3)
+        sleep(3)
         print("This is target function args: ", args)
         print("This is target function kwargs: ", kwargs)
         # raise Exception("Test for error")
@@ -49,9 +46,9 @@ class ExampleOceanPool:
             # pool.map(function=cls.__example.target_function, args_iter=("index_1", "index_2.2", "index_3"))
             pool.map_by_args(function=self.__Example_Target.target_function, args_iter=[("index_1", "index_2.2"), ("index_3",), (1, 2, 3)])
 
-        # # # # Get result
-        __result = __pool.get_result()
-        print("Result: ", __result)
+            # # # # Get result
+            __result = pool.get_result()
+            print("Result: ", __result)
 
 
 

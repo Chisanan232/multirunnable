@@ -8,11 +8,9 @@ package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute(
 sys.path.append(package_pyocean_path)
 
 # pyocean package
-from multirunnable import SimpleExecutor, RunningMode
+from multirunnable import SimpleExecutor, RunningMode, sleep, async_sleep
 from multirunnable.api import EventOperator, EventAsyncOperator
 from multirunnable.adapter import Event
-import asyncio
-import gevent
 
 
 
@@ -27,8 +25,7 @@ class WakeupProcess:
         while True:
             __sleep_time = random.randrange(1, 10)
             print(f"[WakeupProcess] It will sleep for {__sleep_time} seconds.")
-            # time.sleep(__sleep_time)
-            gevent.sleep(__sleep_time)
+            sleep(__sleep_time)
             self.__event_opt.set()
 
 
@@ -38,7 +35,7 @@ class WakeupProcess:
         while True:
             __sleep_time = random.randrange(1, 10)
             print(f"[WakeupProcess] It will sleep for {__sleep_time} seconds.")
-            await asyncio.sleep(__sleep_time)
+            await async_sleep(__sleep_time)
             self.__async_event_opt.set()
 
 
@@ -52,8 +49,7 @@ class SleepProcess:
         print("[SleepProcess] args: ", args)
         print(f"[SleepProcess] It detects the message which be produced by ProducerThread.")
         while True:
-            # time.sleep(1)
-            gevent.sleep(1)
+            sleep(1)
             print("[SleepProcess] ConsumerThread waiting ...")
             self.__event_opt.wait()
             print("[SleepProcess] ConsumerThread wait up.")
@@ -64,7 +60,7 @@ class SleepProcess:
         print("[SleepProcess] args: ", args)
         print(f"[SleepProcess] It detects the message which be produced by ProducerThread.")
         while True:
-            await asyncio.sleep(1)
+            await async_sleep(1)
             print("[SleepProcess] ConsumerThread waiting ...")
             await self.__async_event_opt.wait()
             print("[SleepProcess] ConsumerThread wait up.")
