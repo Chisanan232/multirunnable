@@ -1,10 +1,6 @@
 # Import package pyocean
 import pathlib
-import time
 import sys
-
-import gevent
-import asyncio
 
 package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute())
 sys.path.append(package_pyocean_path)
@@ -12,6 +8,7 @@ sys.path.append(package_pyocean_path)
 # pyocean package
 from multirunnable import RunningMode, SimpleExecutor
 from multirunnable.api import retry, async_retry
+import multirunnable
 
 
 
@@ -19,8 +16,7 @@ class ExampleTargetFunction:
 
     def target_function(self, *args, **kwargs) -> str:
         print("This is ExampleTargetFunction.target_function.")
-        # time.sleep(3)
-        gevent.sleep(3)
+        multirunnable.sleep(3)
         print("This is target function args: ", args)
         print("This is target function kwargs: ", kwargs)
         # raise Exception("Test for error")
@@ -29,8 +25,7 @@ class ExampleTargetFunction:
 
     async def async_target_function(self, *args, **kwargs) -> str:
         print("This is ExampleTargetFunction.async_target_function.")
-        # time.sleep(3)
-        await asyncio.sleep(3)
+        await multirunnable.async_sleep(3)
         print("This is target function args: ", args)
         print("This is target function kwargs: ", kwargs)
         # raise Exception("Test for error")
@@ -43,8 +38,7 @@ class ExampleTargetFunction:
         print("This is target function args: ", args)
         print("This is target function kwargs: ", kwargs)
         print("It will raise exception after 3 seconds ...")
-        # time.sleep(3)
-        gevent.sleep(3)
+        multirunnable.sleep(3)
         raise Exception("Test for error")
 
 
@@ -76,9 +70,7 @@ class ExampleTargetFunction:
         print("This is target function args: ", args)
         print("This is target function kwargs: ", kwargs)
         print("It will raise exception after 3 seconds ...")
-        # time.sleep(3)
-        # gevent.sleep(3)
-        await asyncio.sleep(3)
+        await multirunnable.async_sleep(3)
         raise Exception("Test for error")
 
 
@@ -127,6 +119,11 @@ class ExampleOceanExecutor:
         __executor.run(
             function=self.__example.target_function,
             args=("index_1", "index_2.2"))
+
+        # # # # Asynchronous version of generally running
+        # __executor.run(
+        #     function=self.__example.async_target_function,
+        #     args=("index_1", "index_2.2"))
 
         # # # # Generally running which will raise exception
         # __executor.run(
