@@ -10,6 +10,7 @@ from multirunnable.mode import RunningMode as _RunningMode
 from multirunnable.task import OceanPersistenceTask as _OceanPersistenceTask
 from multirunnable.adapter.strategy import PoolStrategyAdapter as _PoolStrategyAdapter
 from multirunnable.persistence.interface import OceanPersistence as _OceanPersistence
+from multirunnable._config import set_mode
 
 from abc import ABC
 from typing import List, Tuple, Dict, Iterable, Callable, Optional, Union
@@ -26,6 +27,9 @@ class Pool(ABC, _BasePool):
     def __init__(self, mode: _RunningMode, pool_size: int):
         if mode is _RunningMode.Asynchronous:
             raise self.NotSupportError
+
+        set_mode(mode=mode)
+
         super(Pool, self).__init__(mode=mode, pool_size=pool_size)
         # self._initial_running_strategy()
 

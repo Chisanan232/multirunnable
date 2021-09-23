@@ -7,22 +7,18 @@ from logging import getLogger
 from typing import Tuple, Dict, Union
 from types import FunctionType, MethodType
 import getpass
-import pathlib
-import sys
-
-# # Import pyocean package
-__package_pyocean_path = str(pathlib.Path(__file__).parent.absolute())
-sys.path.append(__package_pyocean_path)
 
 # # Configure logging setting
 __user = getpass.getuser()
-PYOCEAN_LOGGER = getLogger(__user)
+_LOGGER = getLogger(__user)
 
 
 from multirunnable.mode import RunningMode, FeatureMode
 from multirunnable.task import OceanTask, QueueTask
 from multirunnable.executor import SimpleExecutor, PersistenceExecutor
 from multirunnable.pool import SimplePool, PersistencePool
+from multirunnable._import_utils import ImportPyocean as _ImportPyocean
+from multirunnable._config import set_mode, get_current_mode
 
 
 
@@ -117,5 +113,70 @@ def __running(mode: RunningMode, executors: int,
     __executor.run(function=function, args=__args)
     __result = __executor.result()
     return __result
+
+
+
+def sleep(seconds: float, mode: RunningMode = None, **kwargs) -> None:
+    if mode is None:
+        from multirunnable._config import RUNNING_MODE
+        mode = RUNNING_MODE
+
+    if mode is RunningMode.Asynchronous:
+        raise TypeError("It doesn't accept 'Asynchronous' running mode in this function.")
+
+    def __get_instn():
+        __cls = _ImportPyocean.get_class(pkg_path=".coroutine.utils", cls_name=f"{mode.value.get('class_key')}Waiter")
+        __instance = __cls()
+        return __instance
+
+    def __sleep(instance, param: Dict) -> None:
+        instance.sleep(**param)
+
+    async def __await_sleep(instance, param: Dict) -> None:
+        await instance.sleep(**param)
+
+    if mode is RunningMode.GreenThread:
+        __seconds = int(seconds)
+        __ref = kwargs.get("ref", True)
+        __param = {"seconds": __seconds, "ref": __ref}
+
+        __waiter_instance = __get_instn()
+        __sleep(instance=__waiter_instance, param=__param)
+    elif mode is RunningMode.Asynchronous:
+        __seconds = seconds
+        __result = kwargs.get("result", None)
+        __loop = kwargs.get("loop", None)
+        __param = {"delay": __seconds, "result": __result, "loop": __loop}
+
+        __waiter_instance = __get_instn()
+        __await_sleep(instance=__waiter_instance, param=__param)
+    else:
+        import time
+        time.sleep(seconds)
+
+
+
+async def async_sleep(seconds: float, **kwargs) -> None:
+    from multirunnable._config import RUNNING_MODE
+    mode = RUNNING_MODE
+
+    if mode is not RunningMode.Asynchronous:
+        raise TypeError("It only accept 'Asynchronous' running mode in async function.")
+
+    def __get_instn():
+        __cls = _ImportPyocean.get_class(pkg_path=".coroutine.utils", cls_name=f"{mode.value.get('class_key')}Waiter")
+        __instance = __cls()
+        return __instance
+
+    async def __await_sleep(instance, param: Dict) -> None:
+        await instance.sleep(**param)
+
+    __seconds = seconds
+    __result = kwargs.get("result", None)
+    __loop = kwargs.get("loop", None)
+    __param = {"delay": __seconds, "result": __result, "loop": __loop}
+
+    __waiter_instance = __get_instn()
+    await __await_sleep(instance=__waiter_instance, param=__param)
 
 

@@ -8,6 +8,7 @@ from multirunnable.mode import RunningMode as _RunningMode
 from multirunnable.adapter.strategy import ExecutorStrategyAdapter as _ExecutorStrategyAdapter
 from multirunnable.task import OceanPersistenceTask as _OceanPersistenceTask
 from multirunnable.persistence.interface import OceanPersistence as _OceanPersistence
+from multirunnable._config import set_mode
 
 from abc import ABC
 from typing import Tuple, Dict, Optional, Union, List, Callable as CallableType, Iterable as IterableType, NewType
@@ -25,6 +26,7 @@ class Executor(ABC, BaseExecutor):
 
     def __init__(self, mode: _RunningMode, executors: int):
         super(Executor, self).__init__(mode=mode, executors=executors)
+        set_mode(mode=mode)
 
 
     def start_new_worker(self, target: Callable, *args, **kwargs) -> None:
