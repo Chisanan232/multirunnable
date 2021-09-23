@@ -23,12 +23,6 @@ from multirunnable.mode import RunningMode, FeatureMode
 from multirunnable.task import OceanTask, QueueTask
 from multirunnable.executor import SimpleExecutor, PersistenceExecutor
 from multirunnable.pool import SimplePool, PersistencePool
-from multirunnable.manager import (
-    OceanSimpleManager,
-    OceanPersistenceManager,
-    OceanSimpleAsyncManager,
-    OceanPersistenceAsyncManager)
-from multirunnable.system import OceanSystem
 
 
 
