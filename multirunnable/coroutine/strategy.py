@@ -1,4 +1,3 @@
-from multirunnable.framework import OceanResult as _OceanResult
 from multirunnable.mode import FeatureMode as _FeatureMode
 from multirunnable.coroutine.result import (
     CoroutineResult as _CoroutineResult,
@@ -501,71 +500,6 @@ class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
             # __async_result.exception = __result.get("exceptions")
 
             __async_result.data = __result.get("result")
-
-            __async_results.append(__async_result)
-
-        return __async_results
-
-
-
-class OldAsynchronousStrategy(BaseAsyncStrategy, _Resultable):
-
-    def get_event_loop(self):
-        self._Async_Event_Loop = asyncio.get_event_loop()
-        return self._Async_Event_Loop
-
-
-    async def initialization(self,
-                             queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
-                             features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
-                             *args, **kwargs) -> None:
-        await super(AsynchronousStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
-
-        # # Persistence
-        if self._persistence_strategy is not None:
-            self._persistence_strategy.initialize(
-                db_conn_num=self.db_connection_pool_size,
-                event_loop=kwargs.get("event_loop"))
-
-
-    async def build_workers(self, function: Callable, *args, **kwargs) -> None:
-        self._Async_Task_List = [self._Async_Event_Loop.create_task(function(*args, **kwargs)) for _ in range(self.workers_number)]
-
-
-    async def activate_workers(self) -> None:
-        finished, unfinished = await asyncio.wait(self._Async_Task_List)
-        for finish in finished:
-            self._Async_Running_Result.append(
-                {"async_id": id,
-                 "event_loop": finish.get_loop(),
-                 # "done_flag": finish.close(),
-                 "result_data": finish.result(),
-                 "exceptions": finish.exception()}
-            )
-
-
-    def terminal(self) -> None:
-        pass
-
-
-    def close(self) -> None:
-        self._Async_Event_Loop.close()
-
-
-    def get_result(self) -> IterableType[object]:
-        __async_results = self._result_handling()
-        return __async_results
-
-
-    def _result_handling(self) -> List[_AsynchronousResult]:
-        __async_results = []
-        for __result in self._Async_Running_Result:
-            __async_result = _AsynchronousResult()
-
-            __async_result.worker_id = __result.get("async_id")
-            __async_result.event_loop = __result.get("event_loop")
-            __async_result.data = __result.get("result_data")
-            __async_result.exception = __result.get("exceptions")
 
             __async_results.append(__async_result)
 
