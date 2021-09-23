@@ -1,16 +1,12 @@
 # Import package pyocean
 import pathlib
-import time
 import sys
-
-import gevent
-import asyncio
 
 package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute())
 sys.path.append(package_pyocean_path)
 
 # pyocean package
-from multirunnable import RunningMode, SimpleExecutor
+from multirunnable import RunningMode, SimpleExecutor, sleep, async_sleep
 from multirunnable.api import retry, async_retry, RunWith, AsyncRunWith
 from multirunnable.adapter import Lock
 
@@ -21,8 +17,7 @@ class ExampleTargetFunction:
     def target_function(self, *args, **kwargs) -> str:
         print("This is ExampleTargetFunction.target_function.")
         "multi"
-        time.sleep(3)
-        # gevent.sleep(3)
+        sleep(3)
         print("This is target function args: ", args)
         print("This is target function kwargs: ", kwargs)
         self.lock_function()
@@ -34,7 +29,7 @@ class ExampleTargetFunction:
     @RunWith.Lock
     def lock_function(self):
         print("This is testing process with Lock and sleep for 3 seconds.")
-        time.sleep(3)
+        sleep(3)
         print("Wake up and raise an exception ...")
         raise RuntimeError("Test for error")
 
@@ -79,7 +74,7 @@ class ExampleAsyncTargetFunction:
     @AsyncRunWith.Lock
     async def lock_function(self):
         print("This is testing process with Lock and sleep for 3 seconds.")
-        await asyncio.sleep(3)
+        await async_sleep(3)
         print("Wake up and raise an exception ...")
         raise RuntimeError("Test for error")
 
