@@ -1,5 +1,5 @@
 from multirunnable.coroutine.features import (
-    GeventQueueType, GreenletLock, GreenletCommunication,
+    GeventQueueType, GreenThreadLock, GreenThreadCommunication,
     AsynchronousQueueType, AsynchronousLock, AsynchronousCommunication)
 from multirunnable.coroutine.strategy import (
     CoroutineStrategy,
