@@ -140,12 +140,6 @@ class ThreadPoolStrategy(ConcurrentStrategy, _PoolRunnableStrategy, _Resultable)
 
     def __init__(self, pool_size: int, tasks_size: int, persistence: _BasePersistenceTask = None):
         super().__init__(pool_size=pool_size, tasks_size=tasks_size, persistence=persistence)
-        # self._init_namespace_obj()
-        # if persistence is not None:
-        #     namespace_persistence = cast(_BasePersistenceTask, self.namespacing_obj(obj=persistence))
-        #     # super().__init__(persistence=namespace_persistence)
-        #     self._persistence = namespace_persistence
-        # self._Processors_Running_Result = self._Manager.list()
 
 
     def initialization(self,
@@ -216,7 +210,8 @@ class ThreadPoolStrategy(ConcurrentStrategy, _PoolRunnableStrategy, _Resultable)
             __process_run_successful = False
 
         # Save Running result state and Running result value as dict
-        self._result_saving(successful=__process_run_successful, result=__process_running_result)
+        for __result in __process_running_result:
+            self._result_saving(successful=__process_run_successful, result=__result)
 
 
     def async_map(self,
@@ -235,7 +230,8 @@ class ThreadPoolStrategy(ConcurrentStrategy, _PoolRunnableStrategy, _Resultable)
         __process_run_successful = __map_result.successful()
 
         # Save Running result state and Running result value as dict
-        self._result_saving(successful=__process_run_successful, result=__process_running_result)
+        for __result in __process_running_result:
+            self._result_saving(successful=__process_run_successful, result=__result)
 
 
     def map_by_args(self, function: Callable, args_iter: IterableType[IterableType] = (), chunksize: int = None) -> None:
@@ -251,7 +247,8 @@ class ThreadPoolStrategy(ConcurrentStrategy, _PoolRunnableStrategy, _Resultable)
             __process_run_successful = False
 
         # Save Running result state and Running result value as dict
-        self._result_saving(successful=__process_run_successful, result=__process_running_result)
+        for __result in __process_running_result:
+            self._result_saving(successful=__process_run_successful, result=__result)
 
 
     def async_map_by_args(self,
@@ -270,7 +267,8 @@ class ThreadPoolStrategy(ConcurrentStrategy, _PoolRunnableStrategy, _Resultable)
         __process_run_successful = __map_result.successful()
 
         # Save Running result state and Running result value as dict
-        self._result_saving(successful=__process_run_successful, result=__process_running_result)
+        for __result in __process_running_result:
+            self._result_saving(successful=__process_run_successful, result=__result)
 
 
     def imap(self, function: Callable, args_iter: IterableType = (), chunksize: int = 1) -> None:
@@ -286,7 +284,8 @@ class ThreadPoolStrategy(ConcurrentStrategy, _PoolRunnableStrategy, _Resultable)
             __process_run_successful = False
 
         # Save Running result state and Running result value as dict
-        self._result_saving(successful=__process_run_successful, result=__process_running_result)
+        for __result in __process_running_result:
+            self._result_saving(successful=__process_run_successful, result=__result)
 
 
     def imap_unordered(self, function: Callable, args_iter: IterableType = (), chunksize: int = 1) -> None:
@@ -302,10 +301,11 @@ class ThreadPoolStrategy(ConcurrentStrategy, _PoolRunnableStrategy, _Resultable)
             __process_run_successful = False
 
         # Save Running result state and Running result value as dict
-        self._result_saving(successful=__process_run_successful, result=__process_running_result)
+        for __result in __process_running_result:
+            self._result_saving(successful=__process_run_successful, result=__result)
 
 
-    def _result_saving(self, successful: bool, result: List):
+    def _result_saving(self, successful: bool, result: List) -> None:
         process_result = {"successful": successful, "result": result}
         # Saving value into list
         self._Thread_Running_Result.append(process_result)

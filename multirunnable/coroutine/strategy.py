@@ -331,7 +331,7 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
         self._result_saving(successful=__process_run_successful, result=__process_running_result)
 
 
-    def _result_saving(self, successful: bool, result: List):
+    def _result_saving(self, successful: bool, result: List) -> None:
         process_result = {"successful": successful, "result": result}
         # Saving value into list
         self._GreenThread_Running_Result.append(process_result)
