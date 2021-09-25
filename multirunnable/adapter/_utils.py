@@ -3,7 +3,7 @@ from multirunnable.framework.features import (
     PosixThreadCommunication,
     BaseQueue)
 from multirunnable.mode import FeatureMode
-from multirunnable._import_utils import ImportPyocean
+from multirunnable._import_utils import ImportMultiRunnable
 
 from typing import Dict, Tuple
 
@@ -14,21 +14,21 @@ class _ModuleFactory:
     @staticmethod
     def get_lock_adapter(mode: FeatureMode) -> PosixThreadLock:
         __module, __lock_cls_name = _ModuleFactory.get_module(mode=mode, cls="lock")
-        lock_cls = ImportPyocean.get_class(pkg_path=__module, cls_name=__lock_cls_name)
+        lock_cls = ImportMultiRunnable.get_class(pkg_path=__module, cls_name=__lock_cls_name)
         return lock_cls()
 
 
     @staticmethod
     def get_communication_adapter(mode: FeatureMode) -> PosixThreadCommunication:
         __module, __communication_cls_name = _ModuleFactory.get_module(mode=mode, cls="communication")
-        communication_cls = ImportPyocean.get_class(pkg_path=__module, cls_name=__communication_cls_name)
+        communication_cls = ImportMultiRunnable.get_class(pkg_path=__module, cls_name=__communication_cls_name)
         return communication_cls()
 
 
     @staticmethod
     def get_queue_adapter(mode: FeatureMode) -> BaseQueue:
         __module, __queue_cls_name = _ModuleFactory.get_module(mode=mode, cls="queue")
-        queue_cls = ImportPyocean.get_class(pkg_path=__module, cls_name=__queue_cls_name)
+        queue_cls = ImportMultiRunnable.get_class(pkg_path=__module, cls_name=__queue_cls_name)
         return queue_cls()
 
 

@@ -4,7 +4,7 @@ import re
 
 
 
-class ImportPyocean:
+class ImportMultiRunnable:
 
     _RootPackage = "multirunnable"
 
