@@ -9,7 +9,7 @@ A Python framework integrates building program which could run multiple tasks wi
 
 ## Overview
 
-Python is a high level program language, but it's free to let anyone choose which running strategy you want to use.
+Python is a high level program language, but it's free to let anyone choose which running strategy you want to use (Parallel, Concurrent or Coroutine).
 For example, if you want a concurrent feature, it should be like below:
 
 ```python
@@ -62,17 +62,17 @@ However, you may change the way to do something for testing, for efficiency, for
 You need to change to use parallel or coroutine but business logic has been done. The only way is refactoring code. 
 It's not a problem if it has full-fledged testing code (TDD); if not, it must be an ordeal.
 
-Package 'pyocean' is a framework to build a program with different running strategy by mode option. 
-Currently, it has 4 options could use: Parallel, Concurrent, Greenlet and Asynchronous.
+Package 'multirunnable' is a framework which could build a program with different running strategy by mode option. 
+Currently, it has 4 options could use: Parallel, Concurrent, GreenThread and Asynchronous.
 
-Here's an example to do the same thing with pyocean:
+Here's an example to do the same thing with multirunnable:
 
 ```python
 from multirunnable import SimpleExecutor, RunningMode
 import random
 import time
 
-Thread_Number = 5
+Workers_Number = 5
 
 
 def function(index):
@@ -81,25 +81,23 @@ def function(index):
 
 
 if __name__ == '__main__':
-    executor = SimpleExecutor(mode=RunningMode.Concurrent, executors=Thread_Number)
+    executor = SimpleExecutor(mode=RunningMode.Concurrent, executors=Workers_Number)
     executor.run(function=function, args={"index": f"test_{random.randrange(1, 10)}"})
-
 ```
 
 How about Parallel? I want to let it be more fast. 
 Only one thing you need to do: change the mode.
 
 ```python
-
 ... # Any code is the same
 
-executor = SimpleExecutor(mode=RunningMode.Parallel, executors=Thread_Number)
+executor = SimpleExecutor(mode=RunningMode.Parallel, executors=Workers_Number)
 
 ... # Any code is the same
-
 ```
 
-Program still could run without any refactoring and doesn't need to modify anything.
+Program still could run without any refactoring and doesn't need to modify anything. <br>
+Want change to use other way to run? Change the Running Mode, that's all.
 
 
 ## Usage
