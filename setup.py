@@ -2,15 +2,15 @@ import setuptools
 
 
 with open("README.md", "r") as fh:
-    long_description = fh.read()
+    readme = fh.read()
 
 setuptools.setup(
     name="multirunnable",
     version="0.15.0",
     author="Liu, Bryant",
     author_email="chi10211201@cycu.org.tw",
-    description="A Python framework integrate running multi-works simultaneously with different strategy.",
-    long_description=long_description,
+    description="A Python framework integrates running multiple tasks simultaneously with different strategy.",
+    long_description=readme,
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(),
     classifiers=[
