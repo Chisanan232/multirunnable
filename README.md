@@ -1,7 +1,13 @@
 # multirunnable
 
-A Python framework integrates building program multi-worker with different running strategy.
-It could very easily build a feature running multi-work simultaneously.
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
+A Python framework integrates building program which could run multiple tasks with different running strategy.
+
+[Overview](#overview) | [Quickly Start](#quickly-start) | [Usage](#usage) | [Code Example](#code_example)
+<hr>
+
+## Overview
 
 Python is a high level program language, but it's free to let anyone choose which running strategy you want to use.
 For example, if you want a concurrent feature, it should be like below:
@@ -96,7 +102,57 @@ executor = SimpleExecutor(mode=RunningMode.Parallel, executors=Thread_Number)
 Program still could run without any refactoring and doesn't need to modify anything.
 
 
-## Lock & Semaphore
+## Usage
+
+This package classifies the runnable unit to be Executor and Pool.<br>
+It also supports something operator with running multi-works simultaneously 
+like Lock, Semaphore, Event, etc.
+
+* Runnable Components
+    * [Executor](#executor)
+    * [Pool](#pool)
+* Lock Features
+    * [Lock](#lock)
+    * [RLock](#rlock)
+    * [Semaphore](#semaphore)
+    * [Bounded Semaphore](#bounded-semaphore)
+* Communication Features
+    * [Event](#event)
+    * [Condition](#condition)
+* Queue
+    * [Queue](#queue)
+* Others
+    * [Retry Mechanism](#retry_mechanism)
+
+<br>
+
+### Runnable Components
+<hr>
+
+* ### Executor
+
+```python
+from multirunnable import SimpleExecutor, RunningMode
+
+executor = SimpleExecutor(mode=RunningMode.Parallel, executors=3)
+executor.run(function="Your target function", args="The arguments of target function")
+```
+
+* ### Pool
+
+```python
+from multirunnable import SimplePool, RunningMode
+
+pool = SimplePool(mode=RunningMode.Parallel, pool_size=3, tasks_size=10)
+pool.async_apply(function="Your target function", args="The arguments of target function")
+```
+
+<br>
+
+### Lock Features
+<hr>
+
+* ### Lock
 
 For Lock feature, the native library threading should call acquire and release to control how it runs like this:
 
@@ -155,6 +211,11 @@ def lock_function():
 
 ```
 
+* ### RLock
+
+
+* ### Semaphore
+
 So is semaphore:
 
 ```python
@@ -170,34 +231,153 @@ def lock_function():
 
 ```
 
-Please remember: you still need to initial lock or semaphore object before you use it.
+* ### Bounded Semaphore
 
 ```python
-from multirunnable import SimpleExecutor, RunningMode
 from multirunnable.api import RunWith
-from multirunnable.adapter import Lock
 import time
 
-Thread_Number = 5
 
-
-@RunWith.Lock
+@RunWith.Bounded_Semaphore
 def lock_function():
-    print("This is testing process with Lock and sleep for 3 seconds.")
-    time.sleep(3)
+    print("Running process in lock and will sleep 2 seconds.")
+    time.sleep(2)
+    print(f"Wake up process and release lock.")
+
+```
+
+<br>
+
+### Communication Features
+<hr>
+
+* ### Event
+
+```python
+from multirunnable import SimpleExecutor, RunningMode, sleep
+from multirunnable.api import EventOperator
+from multirunnable.adapter import Event
+import random
+
+
+
+class WakeupProcess:
+
+    __event_opt = EventOperator()
+
+    def wake_other_process(self, *args):
+        print(f"[WakeupProcess] It will keep producing something useless message.")
+        while True:
+            __sleep_time = random.randrange(1, 10)
+            print(f"[WakeupProcess] It will sleep for {__sleep_time} seconds.")
+            sleep(__sleep_time)
+            self.__event_opt.set()
+
+
+class SleepProcess:
+
+    __event_opt = EventOperator()
+
+    def go_sleep(self, *args):
+        print(f"[SleepProcess] It detects the message which be produced by ProducerThread.")
+        while True:
+            sleep(1)
+            print("[SleepProcess] ConsumerThread waiting ...")
+            self.__event_opt.wait()
+            print("[SleepProcess] ConsumerThread wait up.")
+            self.__event_opt.clear()
 
 
 if __name__ == '__main__':
-    # Initialize Lock object
-    __lock = Lock()
+    
+    __wakeup_p = WakeupProcess()
+    __sleep_p = SleepProcess()
+  
+    # Initialize Event object
+    __event = Event()
+    
+    # # # # Run without arguments
+    executor = SimpleExecutor(mode=RunningMode.Parallel, executors=3)
+    executor.map_with_function(
+        functions=[__wakeup_p.wake_other_process, __sleep_p.go_sleep],
+        features=__event)
+```
 
-    # # # # Initial Executor object
-    __executor = SimpleExecutor(mode=RunningMode.Concurrent, executors=Thread_Number)
+* ### Condition
 
-    # # # # Running the Executor
-    __executor.run(
-        function=lock_function,
-        features=__lock)
+```python
+import multirunnable as mr
 
+executor = mr.SimpleExecutor(mode=mr.RunningMode.Parallel, executors=3)
+executor.run(function="Your target function", args="The arguments of target function")
+```
+
+
+<br>
+
+### Queue
+<hr>
+
+* ### Queue
+
+```python
+import multirunnable as mr
+
+executor = mr.SimpleExecutor(mode=mr.RunningMode.Parallel, executors=3)
+executor.run(function="Your target function", args="The arguments of target function")
+```
+
+
+<br>
+
+### Others
+<hr>
+
+* ### Retry Mechanism
+
+```python
+from multirunnable.api import retry, async_retry
+import multirunnable
+
+
+@retry
+def target_fail_function(*args, **kwargs):
+    print("It will raise exception after 3 seconds ...")
+    multirunnable.sleep(3)
+    raise Exception("Test for error")
+```
+
+Initialization 
+
+```python
+@target_fail_function.initialization
+def initial():
+    print("This is testing initialization")
+```
+
+Done 
+
+```python
+@target_fail_function.done_handling
+def done(result):
+    print("This is testing done process")
+    print("Get something result: ", result)
+```
+
+Final 
+
+```python
+@target_fail_function.final_handling
+def final():
+    print("This is final process")
+```
+
+Error 
+
+```python
+@target_fail_function.error_handling
+def error(error):
+    print("This is error process")
+    print("Get something error: ", error)
 ```
 
