@@ -4,17 +4,39 @@
 
 A Python framework integrates building program which could run multiple tasks with different running strategy.
 
-[Overview](#overview) | [Quickly Start](#quickly-start) | [Usage](#usage) | [Code Example](#code_example)
+[Overview](#overview) | [Usage](#usage) | [Code Example](https://github.com/Chisanan232/multirunnable/tree/master/example)
 <hr>
 
 ## Overview
 
-Python is a high level program language, but it's free to let anyone choose which running strategy you want to use (Parallel, Concurrent or Coroutine).
-For example, if you want a concurrent feature, it should be like below:
+Python is a high level program language, but it's free to let anyone choose which running strategy you want to use (Parallel, Concurrent or Coroutine). <br>
+Below are some example for each strategy:
+
+* Parallel - with '**_multiprocessing_**':
+
+```python
+from multiprocessing import Process
+
+Process_Number = 5
+
+def function():
+    print("This is test process function.")
+
+
+if __name__ == '__main__':
+
+    __process_list = [Process(target=function)for _ in range(Process_Number)]
+    for __p in __process_list:
+        __p.start()
+
+    for __p in __process_list:
+        __p.join()
+```
+
+* Concurrent - with '**_threading_**':
 
 ```python
 import threading
-
 
 Thread_Number = 5
 
@@ -32,28 +54,43 @@ if __name__ == '__main__':
         __thread.join()
 ```
 
-Or you also could implement threading.Thread run method:
+* Coroutine - with '**_gevent_**' (Green Thread):
 
 ```python
-import threading
+from gevent import Greenlet
 
+Green_Thread_Number = 5
 
-Thread_Number = 5
-
-class SampleThread(threading.Thread):
-
-    def run(self):
-        print("This is function content which be run in the same time.")
+def function():
+    print("This is function content ...")
 
 
 if __name__ == '__main__':
-    
-    thread_list = [SampleThread() for _ in range(Thread_Number)]
-    for __thread in thread_list:
-        __thread.start()
 
-    for __thread in thread_list:
-        __thread.join()
+    greenlets_list = [Greenlet(function) for _ in range(Green_Thread_Number)]
+    for __greenlet in greenlets_list:
+        __greenlet.start()
+
+    for __greenlet in greenlets_list:
+        __greenlet.join()
+```
+
+* Coroutine - with '**_asyncio_**' (Asynchronous):
+
+```python
+import asyncio
+
+async def function():
+    print("This is function content ...")
+
+async def running_function():
+    task = asyncio.create_task(function())
+    await task
+
+
+if __name__ == '__main__':
+
+    asyncio.run(running_function())
 ```
 
 No matter which way you choose to implement, it's Python, it's easy.
@@ -65,7 +102,7 @@ It's not a problem if it has full-fledged testing code (TDD); if not, it must be
 Package 'multirunnable' is a framework which could build a program with different running strategy by mode option. 
 Currently, it has 4 options could use: Parallel, Concurrent, GreenThread and Asynchronous.
 
-Here's an example to do the same thing with multirunnable:
+Here's an example to do the same thing with it:
 
 ```python
 from multirunnable import SimpleExecutor, RunningMode
@@ -73,7 +110,6 @@ import random
 import time
 
 Workers_Number = 5
-
 
 def function(index):
     print(f"This is function with index {index}")
@@ -99,11 +135,16 @@ executor = SimpleExecutor(mode=RunningMode.Parallel, executors=Workers_Number)
 Program still could run without any refactoring and doesn't need to modify anything. <br>
 Want change to use other way to run? Change the Running Mode, that's all.
 
+    ⚠️ Parallel, Concurrent and GreenThread are in common but Asynchronous isn't.
+    From above all, we could change the mode to run the code as the running strategy we configure.
+    However, it only accepts 'awaitable' function to run asynchronously in Python. 
+    In the other word, you must remember add keyword 'async' before function which is the target 
+    to run with multirunnable.
 
 ## Usage
 
 This package classifies the runnable unit to be Executor and Pool.<br>
-It also supports something operator with running multi-works simultaneously 
+It also supports doing some operators with running multiple tasks simultaneously 
 like Lock, Semaphore, Event, etc.
 
 * Runnable Components
@@ -120,7 +161,7 @@ like Lock, Semaphore, Event, etc.
 * Queue
     * [Queue](#queue)
 * Others
-    * [Retry Mechanism](#retry_mechanism)
+    * [Retry Mechanism](#retry-mechanism)
 
 <br>
 
@@ -170,7 +211,6 @@ print(f"Wake up process and release lock.")
 lock.release()
 
 ... # Some logic
-
 ```
 
 It also could use wih keyword "with":
@@ -190,7 +230,6 @@ with lock:
     print(f"Wake up process and release lock.")
 
 ... # Some logic
-
 ```
 
 With pyocean, it requires everyone should wrap the logic which needs to be run with lock to be a function,
@@ -206,7 +245,6 @@ def lock_function():
     print("Running process in lock and will sleep 2 seconds.")
     time.sleep(2)
     print(f"Wake up process and release lock.")
-
 ```
 
 * ### RLock
@@ -226,7 +264,6 @@ def lock_function():
     print("Running process in lock and will sleep 2 seconds.")
     time.sleep(2)
     print(f"Wake up process and release lock.")
-
 ```
 
 * ### Bounded Semaphore
@@ -241,7 +278,6 @@ def lock_function():
     print("Running process in lock and will sleep 2 seconds.")
     time.sleep(2)
     print(f"Wake up process and release lock.")
-
 ```
 
 <br>
