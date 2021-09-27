@@ -137,8 +137,8 @@ Program still could run without any refactoring and doesn't need to modify anyth
 Want change to use other way to run? Change the Running Mode, that's all. <br>
 
 ⚠️ **Parallel, Concurrent and GreenThread are in common but Asynchronous isn't.** <br>
-From above all, we could change the mode to run the code as the running strategy we configure. <br>
-However, it only accepts 'awaitable' function to run asynchronously in Python.  <br>
+From above all, we could change the mode to run the code as the running strategy we configure. 
+However, it only accepts 'awaitable' function to run asynchronously in Python. 
 In the other word, you must remember add keyword 'async' before function which is the target to run with multirunnable.
 
 
@@ -171,20 +171,36 @@ like Lock, Semaphore, Event, etc.
 
 * ### Executor
 
+This is a basic unit for every running strategy.
+
+* Parallel -> Process
+* Concurrent -> Thread
+* Green Thread -> Greenlet object
+* Asynchronous -> Asynchronous task object
+
+We could run an easy Parallel, Concurrent or Coroutine code with it.
+
 ```python
 from multirunnable import SimpleExecutor, RunningMode
 
 executor = SimpleExecutor(mode=RunningMode.Parallel, executors=3)
-executor.run(function="Your target function", args="The arguments of target function")
+executor.run(function=<Your target function>, args=<The arguments of target function>)
 ```
 
 * ### Pool
+
+This Pool concept is same as below:
+
+* Parallel -> multiprocessing.Pool
+* Concurrent -> multiprocessing.ThreadPool
+* Green Thread -> gevent.pool.Pool
+* Asynchronous -> Doesn't support this feature
 
 ```python
 from multirunnable import SimplePool, RunningMode
 
 pool = SimplePool(mode=RunningMode.Parallel, pool_size=3, tasks_size=10)
-pool.async_apply(function="Your target function", args="The arguments of target function")
+pool.async_apply(function=<Your target function>, args=<The arguments of target function>)
 ```
 
 <br>
