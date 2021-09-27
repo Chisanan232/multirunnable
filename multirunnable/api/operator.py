@@ -47,7 +47,10 @@ class RLockOperator(_BaseLockAdapterOperator):
         # # # # Concurrent - threading has parameter 'blocking' and type is bool
         # # # # Coroutine - gevent (greenlet framework) has parameter 'blocking' and type is int
         # # # # Async - asyncio doesn't have any parameter
-        self._feature_instance.acquire(blocking=blocking, timeout=timeout)
+        __kwargs = {}
+        __kwargs.get("blocking", blocking)
+        __kwargs.get("timeout", timeout)
+        self._feature_instance.acquire(**__kwargs)
 
     # __enter__ = acquire
 
