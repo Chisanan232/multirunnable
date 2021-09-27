@@ -99,7 +99,7 @@ However, you may change the way to do something for testing, for efficiency, for
 You need to change to use parallel or coroutine but business logic has been done. The only way is refactoring code. 
 It's not a problem if it has full-fledged testing code (TDD); if not, it must be an ordeal.
 
-Package 'multirunnable' is a framework which could build a program with different running strategy by mode option. 
+Package '_multirunnable_' is a framework which could build a program with different running strategy by mode option. 
 Currently, it has 4 options could use: Parallel, Concurrent, GreenThread and Asynchronous.
 
 Here's an example to do the same thing with it:
@@ -139,7 +139,7 @@ Want change to use other way to run? Change the Running Mode, that's all. <br>
 ⚠️ **Parallel, Concurrent and GreenThread are in common but Asynchronous isn't.** <br>
 From above all, we could change the mode to run the code as the running strategy we configure. 
 However, it only accepts 'awaitable' function to run asynchronously in Python. 
-In the other word, you must remember add keyword 'async' before function which is the target to run with multirunnable.
+In the other word, you must remember add keyword 'async' before function which is the target to run with _multirunnable_.
 
 
 ## Usage
@@ -210,7 +210,7 @@ pool.async_apply(function=<Your target function>, args=<The arguments of target 
 
 * ### Lock
 
-For Lock feature, the native library threading should call acquire and release to control how it runs like this:
+For Lock feature, the native library _threading_ should call acquire and release to control how it runs like this:
 
 ```python
 import threading
@@ -230,7 +230,7 @@ lock.release()
 ... # Some logic
 ```
 
-It also could use wih keyword "with":
+It also could use wih keyword "_with_":
 
 ```python
 import threading
@@ -249,7 +249,7 @@ with lock:
 ... # Some logic
 ```
 
-With pyocean, it requires everyone should wrap the logic which needs to be run with lock to be a function,
+With _multirunnable_, it requires everyone should wrap the logic which needs to be run with lock to be a function,
 and you just add a decorator on it.
 
 ```python
@@ -266,6 +266,25 @@ def lock_function():
 
 * ### RLock
 
+```python
+from multirunnable.api import RLockOperator
+import time
+
+rlock = RLockOperator()
+
+def lock_function():
+    rlock.acquire()
+    print("Acquire RLock 1 time")
+    rlock.acquire()
+    print("Acquire RLock 2 time")
+    print("Running process in lock and will sleep 2 seconds.")
+    time.sleep(2)
+    print(f"Wake up process and release lock.")
+    rlock.release()
+    print("Acquire Release 1 time")
+    rlock.release()
+    print("Acquire Release 2 time")
+```
 
 * ### Semaphore
 
@@ -274,7 +293,6 @@ So is semaphore:
 ```python
 from multirunnable.api import RunWith
 import time
-
 
 @RunWith.Semaphore
 def lock_function():
@@ -285,17 +303,7 @@ def lock_function():
 
 * ### Bounded Semaphore
 
-```python
-from multirunnable.api import RunWith
-import time
-
-
-@RunWith.Bounded_Semaphore
-def lock_function():
-    print("Running process in lock and will sleep 2 seconds.")
-    time.sleep(2)
-    print(f"Wake up process and release lock.")
-```
+It's mostly same as _Semaphore_.
 
 <br>
 
@@ -309,7 +317,6 @@ from multirunnable import SimpleExecutor, RunningMode, sleep
 from multirunnable.api import EventOperator
 from multirunnable.adapter import Event
 import random
-
 
 
 class WakeupProcess:
@@ -387,9 +394,8 @@ executor.run(function="Your target function", args="The arguments of target func
 * ### Retry Mechanism
 
 ```python
-from multirunnable.api import retry, async_retry
+from multirunnable.api import retry
 import multirunnable
-
 
 @retry
 def target_fail_function(*args, **kwargs):
