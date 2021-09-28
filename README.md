@@ -576,7 +576,7 @@ def initial():
 It will return value after run completely target function. This feature argument 
 receives the result. You could do some result-handling here to reach your own target, 
 and it will return it out. <br>
-Default implementation is doing nothing.<br>
+Default implementation is doing nothing, just return the result it gets.<br>
 The usage is decorating as target function annotation name and call **.done_handling** method.
 
 ```python
