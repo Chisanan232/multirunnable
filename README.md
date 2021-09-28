@@ -210,7 +210,37 @@ pool.async_apply(function=<Your target function>, args=<The arguments of target 
 
 * ### Lock
 
-For Lock feature, the native library _threading_ should call acquire and release to control how it runs like this:
+With _multirunnable_, it should initial Lock objects before you use it.
+
+```python
+from multirunnable import SimpleExecutor, RunningMode
+from multirunnable.adapter import Lock
+
+# Initial Lock object
+lock = Lock()
+
+executor = SimpleExecutor(mode=RunningMode.Parallel, executors=3)
+# Pass into executor or pool via parameter 'features'
+executor.run(function=<Your target function>, features=lock)
+```
+
+It could use the Lock object via **LockOperator**.
+
+```python
+from multirunnable.api import LockOperator
+import time
+
+lock = LockOperator()
+
+def lock_function():
+    lock.acquire()
+    print("Running process in lock and will sleep 2 seconds.")
+    time.sleep(2)
+    print(f"Wake up process and release lock.")
+    lock.release()
+```
+
+Above code with Lock function is equal to below:
 
 ```python
 import threading
@@ -230,7 +260,7 @@ lock.release()
 ... # Some logic
 ```
 
-It also could use wih keyword "_with_":
+Or with keyword **with**:
 
 ```python
 import threading
@@ -249,13 +279,13 @@ with lock:
 ... # Some logic
 ```
 
-With _multirunnable_, it requires everyone should wrap the logic which needs to be run with lock to be a function,
-and you just add a decorator on it.
+✨👀 **Using features with Python decorator**
+
+It also could use Lock via decorator **RunWith** (it's **AsyncRunWith** with Asynchronous).
 
 ```python
 from multirunnable.api import RunWith
 import time
-
 
 @RunWith.Lock
 def lock_function():
@@ -263,6 +293,9 @@ def lock_function():
     time.sleep(2)
     print(f"Wake up process and release lock.")
 ```
+
+Only below features support decorator:
+Lock, Semaphore, Bounded Semaphore.
 
 * ### RLock
 
