@@ -528,7 +528,7 @@ finally and keep going run the code. That's the reason this feature exists.
 
 Below is the life cycle of runnable unit (worker):
 
-[](https://github.com/Chisanan232/multirunnable/blob/master/doc/imgs/PyOcean_Worker_Process_Thread_Greenlet_Life_Cycle.png)
+![image](https://github.com/Chisanan232/multirunnable/blob/master/doc/imgs/PyOcean_Worker_Process_Thread_Greenlet_Life_Cycle.png)
 
 ```python
 from multirunnable.api import retry
