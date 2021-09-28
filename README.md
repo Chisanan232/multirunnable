@@ -299,6 +299,8 @@ Only below features support decorator: <br>
 
 * ### RLock
 
+Lock only could acquire and release one time but RLock could acquire and release multiple times.
+
 ```python
 from multirunnable.api import RLockOperator
 import time
@@ -321,7 +323,7 @@ def lock_function():
 
 * ### Semaphore
 
-So is semaphore:
+Semaphore could accept multiple runnable unit in target function:
 
 ```python
 from multirunnable.api import RunWith
@@ -519,6 +521,14 @@ queue = QueueOperator.get_queue_with_name(name="test_queue")
 <hr>
 
 * ### Retry Mechanism
+
+It's possible that occur unexpected something when running. Sometimes, it needs 
+to catch that exceptions or errors to do some handling, it even needs to do something
+finally and keep going run the code. That's the reason this feature exists.
+
+Below is the life cycle of runnable unit (worker):
+
+[](https://github.com/Chisanan232/multirunnable/blob/master/doc/imgs/PyOcean_Worker_Process_Thread_Greenlet_Life_Cycle.png)
 
 ```python
 from multirunnable.api import retry
