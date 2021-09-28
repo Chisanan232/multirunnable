@@ -345,6 +345,9 @@ It's mostly same as _Semaphore_.
 ### Communication Features
 <hr>
 
+For features Event and Condition, they all don't support using with decorator. 
+So it must use it via operator object.
+
 * ### Event
 
 ```python
@@ -492,26 +495,41 @@ if __name__ == '__main__':
 ### Queue
 <hr>
 
+The Queue in _multirunnable_ classify to different type by running strategy.
+For usage, it should do 2 things: initial and get.
+
 * ### Queue
 
-Initial
+It must use Queue feature with object **QueueTask**. It could configure some info like name, type and value.
+Name is a key of the queue object. Type means which one Queue object type you want to use.
+
+For example, we want to set a Queue with name "test_queue", type is **multiprocessing.Queue**:
 
 ```python
 from multirunnable import QueueTask
 from multirunnable.parallel import MultiProcessingQueueType
 
-queue_task = QueueTask()
-queue_task.name = "test_queue"
-queue_task.queue_type = MultiProcessingQueueType.Queue
-queue_task.value = [f"value_{i}" for i in range(20)]
+test_queue_task = QueueTask()
+test_queue_task.name = "test_queue"
+test_queue_task.queue_type = MultiProcessingQueueType.Queue
+test_queue_task.value = [f"value_{i}" for i in range(20)]
 ```
 
-Use it
+We could get the queue object via **QueueOperator**:
 
 ```python
 from multirunnable.api import QueueOperator
 
 queue = QueueOperator.get_queue_with_name(name="test_queue")
+```
+
+Also, we need to pass it by parameter '_queue_task_' before we use it.
+
+```python
+from multirunnable import SimpleExecutor, RunningMode
+
+executor = SimpleExecutor(mode=RunningMode.Parallel, executors=3)
+executor.run(function=<Your target function>, queue_tasks=test_queue_task)
 ```
 
 
