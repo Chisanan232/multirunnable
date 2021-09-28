@@ -1,6 +1,9 @@
 # multirunnable
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Release](https://img.shields.io/github/release/Chisanan232/multirunnable.svg?label=Release&sort=semver)](https://github.com/Chisanan232/multirunnable/releases)
+[![PyPI version](https://badge.fury.io/py/multirunnable.svg)](https://badge.fury.io/py/multirunnable)
+[![Supported Versions](https://img.shields.io/pypi/pyversions/multirunnable.svg)](https://pypi.org/project/multirunnable)
 
 A Python framework integrates building program which could run multiple tasks with different running strategy.
 
