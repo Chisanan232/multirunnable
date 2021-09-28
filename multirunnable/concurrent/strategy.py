@@ -210,7 +210,7 @@ class ThreadPoolStrategy(ConcurrentStrategy, _PoolRunnableStrategy, _Resultable)
             __process_run_successful = False
 
         # Save Running result state and Running result value as dict
-        for __result in __process_running_result:
+        for __result in (__process_running_result, []):
             self._result_saving(successful=__process_run_successful, result=__result)
 
 
@@ -230,7 +230,7 @@ class ThreadPoolStrategy(ConcurrentStrategy, _PoolRunnableStrategy, _Resultable)
         __process_run_successful = __map_result.successful()
 
         # Save Running result state and Running result value as dict
-        for __result in __process_running_result:
+        for __result in (__process_running_result, []):
             self._result_saving(successful=__process_run_successful, result=__result)
 
 
@@ -247,7 +247,7 @@ class ThreadPoolStrategy(ConcurrentStrategy, _PoolRunnableStrategy, _Resultable)
             __process_run_successful = False
 
         # Save Running result state and Running result value as dict
-        for __result in __process_running_result:
+        for __result in (__process_running_result, []):
             self._result_saving(successful=__process_run_successful, result=__result)
 
 
@@ -267,7 +267,7 @@ class ThreadPoolStrategy(ConcurrentStrategy, _PoolRunnableStrategy, _Resultable)
         __process_run_successful = __map_result.successful()
 
         # Save Running result state and Running result value as dict
-        for __result in __process_running_result:
+        for __result in (__process_running_result, []):
             self._result_saving(successful=__process_run_successful, result=__result)
 
 
@@ -284,7 +284,7 @@ class ThreadPoolStrategy(ConcurrentStrategy, _PoolRunnableStrategy, _Resultable)
             __process_run_successful = False
 
         # Save Running result state and Running result value as dict
-        for __result in __process_running_result:
+        for __result in (__process_running_result, []):
             self._result_saving(successful=__process_run_successful, result=__result)
 
 
@@ -301,7 +301,7 @@ class ThreadPoolStrategy(ConcurrentStrategy, _PoolRunnableStrategy, _Resultable)
             __process_run_successful = False
 
         # Save Running result state and Running result value as dict
-        for __result in __process_running_result:
+        for __result in (__process_running_result, []):
             self._result_saving(successful=__process_run_successful, result=__result)
 
 
