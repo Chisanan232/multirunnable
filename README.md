@@ -522,13 +522,15 @@ queue = QueueOperator.get_queue_with_name(name="test_queue")
 
 * ### Retry Mechanism
 
-It's possible that occur unexpected something when running. Sometimes, it needs 
+It's possible that occurs unexpected something when running. Sometimes, it needs 
 to catch that exceptions or errors to do some handling, it even needs to do something
 finally and keep going run the code. That's the reason this feature exists.
 
 Below is the life cycle of runnable unit (worker):
 
 ![image](https://github.com/Chisanan232/multirunnable/blob/master/doc/imgs/PyOcean_Worker_Process_Thread_Greenlet_Life_Cycle.png)
+
+It could use the feature via Python decorator **retry** (It's **async_retry** with Asynchronous).
 
 ```python
 from multirunnable.api import retry
@@ -541,7 +543,27 @@ def target_fail_function(*args, **kwargs):
     raise Exception("Test for error")
 ```
 
-Initialization 
+It absolutely could configure timeout time (Default value is 1).
+
+```python
+from multirunnable.api import retry
+import multirunnable
+
+@retry(timeout=3)
+def target_fail_function(*args, **kwargs):
+    print("It will raise exception after 3 seconds ...")
+    multirunnable.sleep(3)
+    raise Exception("Test for error")
+```
+
+It would be decorated as a 'retry' object after adds decorator on it. 
+So we could add some features you need.
+
+* Initialization 
+
+The function which should be run first before run target function. <br>
+Default implementation is doing nothing.<br>
+The usage is decorating as target function annotation name and call **.initialization** method.
 
 ```python
 @target_fail_function.initialization
@@ -549,7 +571,13 @@ def initial():
     print("This is testing initialization")
 ```
 
-Done 
+* Done Handling
+
+It will return value after run completely target function. This feature argument 
+receives the result. You could do some result-handling here to reach your own target, 
+and it will return it out. <br>
+Default implementation is doing nothing.<br>
+The usage is decorating as target function annotation name and call **.done_handling** method.
 
 ```python
 @target_fail_function.done_handling
@@ -558,7 +586,11 @@ def done(result):
     print("Get something result: ", result)
 ```
 
-Final 
+* Final Handling
+
+It's the feature run something which MUST to do. For example, close IO.  <br>
+Default implementation is doing nothing. <br>
+The usage is decorating as target function annotation name and call **.final_handling** method.
 
 ```python
 @target_fail_function.final_handling
@@ -566,7 +598,11 @@ def final():
     print("This is final process")
 ```
 
-Error 
+* Exception & Error - Handling 
+
+Target to handle every exception or error. So the function argument absolutely receives exception or error. <br>
+Default implementation is raising any exception or error it gets. <br>
+The usage is decorating as target function annotation name and call **.error_handling** method.
 
 ```python
 @target_fail_function.error_handling
