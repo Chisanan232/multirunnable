@@ -93,6 +93,7 @@ class _Retry:
 
     def __call__(self, instance, *args, **kwargs):
         __running_counter = 0
+        __running_success_flag = None
         __result = None
 
         while __running_counter < self.__Running_Timeout:
@@ -100,15 +101,19 @@ class _Retry:
                 self.__Initial_Function(*self.__Initial_Args, **self.__Initial_Kwargs)
                 __result = self.__Target_Function(instance, *args, **kwargs)
             except Exception as e:
+                __running_success_flag = False
                 __error_handling_result = self.__Exception_Handling_Function(e)
                 if __error_handling_result:
                     __result = __error_handling_result
                 else:
                     __result = e
             else:
+                __running_success_flag = True
                 __result = self.__Done_Handling_Function(__result)
             finally:
                 self.__Final_Handling_Function()
+                if __running_success_flag is True:
+                    return __result
                 __running_counter += 1
         else:
             __result = TimeoutError("The target function running timeout.")
@@ -224,6 +229,7 @@ class _AsyncRetry:
 
     async def __call__(self, instance, *args, **kwargs):
         __running_counter = 0
+        __running_success_flag = None
         __result = None
 
         while __running_counter < self.__Running_Timeout:
@@ -231,15 +237,19 @@ class _AsyncRetry:
                 await self.__Initial_Function(*self.__Initial_Args, **self.__Initial_Kwargs)
                 __result = await self.__Target_Function(instance, *args, **kwargs)
             except Exception as e:
+                __running_success_flag = False
                 __error_handling_result = await self.__Exception_Handling_Function(e)
                 if __error_handling_result:
                     __result = __error_handling_result
                 else:
                     __result = e
             else:
+                __running_success_flag = True
                 __result = await self.__Done_Handling_Function(__result)
             finally:
                 await self.__Final_Handling_Function()
+                if __running_success_flag is True:
+                    return __result
                 __running_counter += 1
         else:
             __result = TimeoutError("The target function running timeout.")
