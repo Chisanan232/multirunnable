@@ -294,8 +294,8 @@ def lock_function():
     print(f"Wake up process and release lock.")
 ```
 
-Only below features support decorator:
-Lock, Semaphore, Bounded Semaphore.
+Only below features support decorator: <br>
+**Lock**, **Semaphore**, **Bounded Semaphore**.
 
 * ### RLock
 
@@ -397,10 +397,91 @@ if __name__ == '__main__':
 * ### Condition
 
 ```python
-import multirunnable as mr
+from multirunnable import SimpleExecutor, RunningMode, QueueTask, sleep
+from multirunnable.api import ConditionOperator, QueueOperator
+from multirunnable.adapter import Condition
+from multirunnable.concurrent import MultiThreadingQueueType
+import random
 
-executor = mr.SimpleExecutor(mode=mr.RunningMode.Parallel, executors=3)
-executor.run(function="Your target function", args="The arguments of target function")
+
+class ProducerProcess:
+
+    __Queue_Name = "test_queue"
+
+    def __init__(self):
+        self.__condition_opt = ConditionOperator()
+        self.__queue_opt = QueueOperator()
+
+    def send_process(self, *args):
+        print("[Producer] args: ", args)
+        test_queue = self.__queue_opt.get_queue_with_name(name=self.__Queue_Name)
+        print(f"[Producer] It will keep producing something useless message.")
+        while True:
+            __sleep_time = random.randrange(1, 10)
+            print(f"[Producer] It will sleep for {__sleep_time} seconds.")
+            test_queue.put(__sleep_time)
+            sleep(__sleep_time)
+            __condition = self.__condition_opt
+            with __condition:
+                self.__condition_opt.notify_all()
+
+
+class ConsumerProcess:
+
+    __Queue_Name = "test_queue"
+
+    def __init__(self):
+        self.__condition_opt = ConditionOperator()
+        self.__queue_opt = QueueOperator()
+
+    def receive_process(self, *args):
+        print("[Consumer] args: ", args)
+        test_queue = self.__queue_opt.get_queue_with_name(name=self.__Queue_Name)
+        print(f"[Consumer] It detects the message which be produced by ProducerThread.")
+        while True:
+            __condition = self.__condition_opt
+            with __condition:
+                sleep(1)
+                print("[Consumer] ConsumerThread waiting ...")
+                self.__condition_opt.wait()
+                __sleep_time = test_queue.get()
+                print("[Consumer] ConsumerThread re-start.")
+                print(f"[Consumer] ProducerThread sleep {__sleep_time} seconds.")
+
+
+class ExampleOceanSystem:
+
+    __Executor_Number = 1
+
+    __producer_p = ProducerProcess()
+    __consumer_p = ConsumerProcess()
+
+    @classmethod
+    def main_run(cls):
+        # Initialize Condition object
+        __condition = Condition()
+
+        # Initialize Queue object
+        __task = QueueTask()
+        __task.name = "test_queue"
+        __task.queue_type = MultiThreadingQueueType.Queue
+        __task.value = []
+
+        # Initialize and run ocean-simple-executor
+        __exe = SimpleExecutor(mode=RunningMode.Concurrent, executors=cls.__Executor_Number)
+        # # # # Run without arguments
+        __exe.map_with_function(
+            functions=[cls.__producer_p.send_process, cls.__consumer_p.receive_process],
+            queue_tasks=__task,
+            features=__condition)
+
+        
+if __name__ == '__main__':
+
+    print("[MainProcess] This is system client: ")
+    system = ExampleOceanSystem()
+    system.main_run()
+    print("[MainProcess] Finish. ")
 ```
 
 
@@ -411,11 +492,24 @@ executor.run(function="Your target function", args="The arguments of target func
 
 * ### Queue
 
-```python
-import multirunnable as mr
+Initial
 
-executor = mr.SimpleExecutor(mode=mr.RunningMode.Parallel, executors=3)
-executor.run(function="Your target function", args="The arguments of target function")
+```python
+from multirunnable import QueueTask
+from multirunnable.parallel import MultiProcessingQueueType
+
+queue_task = QueueTask()
+queue_task.name = "test_queue"
+queue_task.queue_type = MultiProcessingQueueType.Queue
+queue_task.value = [f"value_{i}" for i in range(20)]
+```
+
+Use it
+
+```python
+from multirunnable.api import QueueOperator
+
+queue = QueueOperator.get_queue_with_name(name="test_queue")
 ```
 
 
