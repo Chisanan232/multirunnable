@@ -1,10 +1,14 @@
-# Import package pyocean
-import pathlib
-import sys
 import time
+import os
 
-package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute())
-sys.path.append(package_pyocean_path)
+DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", True)
+
+if DEVELOPMENT_MODE:
+    # Import package pyocean
+    import pathlib
+    import sys
+    package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute())
+    sys.path.append(package_pyocean_path)
 
 # pyocean package
 from multirunnable import RunningMode, SimpleExecutor, sleep

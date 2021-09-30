@@ -1,14 +1,17 @@
-# Import package pyocean
-import pathlib
+import asyncio
+import gevent
 import random
 import time
-import sys
+import os
 
-import gevent
-import asyncio
+DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", True)
 
-package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute())
-sys.path.append(package_pyocean_path)
+if DEVELOPMENT_MODE:
+    # Import package pyocean
+    import pathlib
+    import sys
+    package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute())
+    sys.path.append(package_pyocean_path)
 
 # pyocean package
 from multirunnable import RunningMode
