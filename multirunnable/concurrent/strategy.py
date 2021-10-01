@@ -11,6 +11,7 @@ from multirunnable.framework.strategy import (
     GeneralRunnableStrategy as _GeneralRunnableStrategy,
     PoolRunnableStrategy as _PoolRunnableStrategy,
     Resultable as _Resultable)
+from multirunnable.framework.result import ResultState as _ResultState
 
 from types import MethodType
 from typing import List, Dict, Callable, Iterable as IterableType, Optional, Union, Tuple, cast
@@ -50,7 +51,13 @@ class ConcurrentStrategy:
         __concurrent_results = []
         for __result in self._Thread_Running_Result:
             __concurrent_result = _ConcurrentResult()
-            __concurrent_result.data = __result.get("result")
+            __concurrent_successful = __result.get("successful", None)
+            if __concurrent_successful is True:
+                __concurrent_result.state = _ResultState.SUCCESS.value
+            else:
+                __concurrent_result.state = _ResultState.FAIL.value
+
+            __concurrent_result.data = __result.get("result", None)
 
             __concurrent_results.append(__concurrent_result)
 

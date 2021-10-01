@@ -12,6 +12,7 @@ from multirunnable.framework.strategy import (
     PoolRunnableStrategy as _PoolRunnableStrategy,
     AsyncRunnableStrategy as _AsyncRunnableStrategy,
     Resultable as _Resultable)
+from multirunnable.framework.result import ResultState as _ResultState
 
 from abc import ABCMeta, ABC
 from types import FunctionType, MethodType
@@ -54,7 +55,13 @@ class BaseGreenThreadStrategy(CoroutineStrategy):
         __coroutine_results = []
         for __result in self._GreenThread_Running_Result:
             __coroutine_result = _CoroutineResult()
-            __coroutine_result.data = __result
+            __coroutine_successful = __result.get("successful", None)
+            if __coroutine_successful is True:
+                __coroutine_result.state = _ResultState.SUCCESS.value
+            else:
+                __coroutine_result.state = _ResultState.FAIL.value
+
+            __coroutine_result.data = __result.get("result", None)
             __coroutine_results.append(__coroutine_result)
 
         return __coroutine_results
