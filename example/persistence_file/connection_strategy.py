@@ -1,6 +1,6 @@
-from pyocean.persistence.configuration import BaseDatabaseConfiguration
-from pyocean.persistence.database import SingleConnection, MultiConnections
-from pyocean.logger import ocean_logger
+from multirunnable.persistence.configuration import BaseDatabaseConfiguration
+from multirunnable.persistence.database import SingleConnection, MultiConnections
+from multirunnable.logger import ocean_logger
 
 from mysql.connector.connection import MySQLConnection
 from mysql.connector.pooling import MySQLConnectionPool, PooledMySQLConnection
