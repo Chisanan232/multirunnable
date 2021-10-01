@@ -1,4 +1,4 @@
-from pyocean.persistence.file import SimpleFileFao, SimpleArchiverFao
+from multirunnable.persistence.file import SimpleFileFao, SimpleArchiverFao
 
 from typing import Iterable, List, Union, Tuple
 
@@ -6,11 +6,7 @@ from typing import Iterable, List, Union, Tuple
 
 class ExampleFao:
 
-    # __Config_Path = "The .properties configuration file path."
-    __Config_Path = "/Users/bryantliu/DevelopProject/" \
-                    "KobeDevelopProject/Crawler-PyFrameworok/" \
-                    "apache-pyocean/sources/config/file/" \
-                    "file_config.properties"
+    __Config_Path = "The .properties configuration file path."
 
     def __init__(self):
         self.__file_fao = SimpleFileFao(config=self.__Config_Path)
