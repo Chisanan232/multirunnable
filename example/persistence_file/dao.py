@@ -1,7 +1,7 @@
-from pyocean.api import RunWith, AsyncRunWith, QueueOperator
-from pyocean.persistence import OceanPersistence
-from pyocean.persistence.database import BaseDao, SingleConnection, MultiConnections
-from pyocean.logger import ocean_logger
+from multirunnable.api import RunWith, AsyncRunWith, QueueOperator
+from multirunnable.persistence import OceanPersistence
+from multirunnable.persistence.database import BaseDao, SingleConnection, MultiConnections
+from multirunnable.logger import ocean_logger
 
 from mysql.connector import Error
 from mysql.connector.cursor import MySQLCursor
