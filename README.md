@@ -7,7 +7,7 @@
 
 A Python framework integrates building program which could run multiple tasks with different running strategy.
 
-[Overview](#overview) | [Usage](#usage) | [Code Example](https://github.com/Chisanan232/multirunnable/tree/master/example)
+[Overview](#overview) | [Quickly Start](#quickly-start) | [Usage](#usage) | [Code Example](https://github.com/Chisanan232/multirunnable/tree/master/example)
 <hr>
 
 ## Overview
@@ -143,6 +143,26 @@ Want change to use other way to run? Change the Running Mode, that's all. <br>
 From above all, we could change the mode to run the code as the running strategy we configure. 
 However, it only accepts 'awaitable' function to run asynchronously in Python. 
 In the other word, you must remember add keyword 'async' before function which is the target to run with _multirunnable_.
+
+
+## Quickly Start
+
+Install this package by pip:
+
+    pip install multirunnable
+
+Write a simple code to run it.
+
+    >>> from multirunnable import SimpleExecutor, RunningMode
+    >>> executor = SimpleExecutor(mode=RunningMode.Parallel, executors=3)
+    >>> def function(index):
+    ...     print(f"This is function with index {index}")
+    ... 
+    >>> executor.run(function=function, args={"index": f"test_param"})
+    This is function with index test_param
+    This is function with index test_param
+    This is function with index test_param
+    >>> 
 
 
 ## Usage
