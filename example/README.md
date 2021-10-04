@@ -43,7 +43,7 @@ First of all, make sure that Docker has already:
 
     docker --version
 
-⚠️ Remember: It's not necessary about preparing Python environment with Docker.
+> ⚠️ Remember: It's not necessary about preparing Python environment with Docker.
 
 You also could verify its brief:
 

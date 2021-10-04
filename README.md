@@ -139,7 +139,7 @@ executor = SimpleExecutor(mode=RunningMode.Parallel, executors=Workers_Number)
 Program still could run without any refactoring and doesn't need to modify anything. <br>
 Want change to use other way to run? Change the Running Mode, that's all. <br>
 
-⚠️ **Parallel, Concurrent and GreenThread are in common but Asynchronous isn't.** <br>
+> ⚠️ **Parallel, Concurrent and GreenThread are in common but Asynchronous isn't.** <br>
 From above all, we could change the mode to run the code as the running strategy we configure. 
 However, it only accepts 'awaitable' function to run asynchronously in Python. 
 In the other word, you must remember add keyword 'async' before function which is the target to run with _multirunnable_.
