@@ -137,3 +137,16 @@ class PersistenceExecutor(Executor):
         General_Runnable_Strategy = __running_strategy_adapter.get_persistence(persistence=__persistence_task)
 
 
+
+class AdapterExecutor(Executor):
+
+    def __init__(self, strategy: _General_Runnable_Type = None):
+        super().__init__(mode=None, executors=strategy.executors_number)
+        self.__strategy = strategy
+        self._initial_running_strategy()
+
+
+    def _initial_running_strategy(self) -> None:
+        global General_Runnable_Strategy
+        General_Runnable_Strategy = self.__strategy
+
