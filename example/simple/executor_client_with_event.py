@@ -5,13 +5,13 @@ import os
 DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", True)
 
 if DEVELOPMENT_MODE:
-    # Import package pyocean
+    # Import package multirunnable
     import pathlib
     import sys
-    package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute())
-    sys.path.append(package_pyocean_path)
+    package_path = str(pathlib.Path(__file__).parent.parent.parent.absolute())
+    sys.path.append(package_path)
 
-# pyocean package
+# multirunnable package
 from multirunnable import SimpleExecutor, RunningMode, sleep, async_sleep
 from multirunnable.api import EventOperator, EventAsyncOperator
 from multirunnable.adapter import Event
@@ -76,7 +76,7 @@ class SleepProcess:
 
 
 
-class ExampleOceanSystem:
+class ExampleExecutor:
 
     __Executor_Number = 1
 
@@ -115,7 +115,7 @@ class ExampleOceanSystem:
 if __name__ == '__main__':
 
     print("[MainProcess] This is system client: ")
-    system = ExampleOceanSystem()
+    system = ExampleExecutor()
     system.main_run()
     print("[MainProcess] Finish. ")
 

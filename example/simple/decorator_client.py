@@ -7,13 +7,13 @@ import os
 DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", True)
 
 if DEVELOPMENT_MODE:
-    # Import package pyocean
+    # Import package multirunnable
     import pathlib
     import sys
-    package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute())
-    sys.path.append(package_pyocean_path)
+    package_path = str(pathlib.Path(__file__).parent.parent.parent.absolute())
+    sys.path.append(package_path)
 
-# pyocean package
+# multirunnable package
 from multirunnable import RunningMode
 import multirunnable
 import time

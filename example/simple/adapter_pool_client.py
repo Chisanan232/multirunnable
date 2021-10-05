@@ -6,8 +6,8 @@ if DEVELOPMENT_MODE:
     # Import package multirunnable
     import pathlib
     import sys
-    package_pyocean_path = str(pathlib.Path(__file__).absolute().parent.parent.parent)
-    sys.path.append(package_pyocean_path)
+    package_path = str(pathlib.Path(__file__).absolute().parent.parent.parent)
+    sys.path.append(package_path)
 
 # multirunnable package
 from multirunnable import RunningMode, sleep

@@ -3,13 +3,13 @@ import os
 DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", True)
 
 if DEVELOPMENT_MODE:
-    # Import package pyocean
+    # Import package multirunnable
     import pathlib
     import sys
-    package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute())
-    sys.path.append(package_pyocean_path)
+    package_path = str(pathlib.Path(__file__).parent.parent.parent.absolute())
+    sys.path.append(package_path)
 
-# pyocean package
+# multirunnable package
 from multirunnable import RunningMode, SimpleExecutor
 from multirunnable.api import async_retry
 import multirunnable
@@ -60,7 +60,7 @@ class ExampleTargetFunction:
 
 
 
-class ExampleOceanExecutor:
+class ExampleExecutor:
 
     __Executor_Number = 0
 
@@ -105,6 +105,6 @@ if __name__ == '__main__':
 
     print("This is executor client: ")
     __executor_number = 3
-    o_executor = ExampleOceanExecutor(executors=__executor_number)
+    o_executor = ExampleExecutor(executors=__executor_number)
     o_executor.main_run()
 
