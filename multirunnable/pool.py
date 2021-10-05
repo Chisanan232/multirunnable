@@ -174,3 +174,17 @@ class PersistencePool(Pool):
         global Pool_Runnable_Strategy
         Pool_Runnable_Strategy = __running_strategy_adapter.get_persistence(persistence=__persistence_task)
 
+
+
+class AdapterPool(Pool):
+
+    def __init__(self, strategy: _Pool_Runnable_Type = None):
+        super().__init__(mode=None, pool_size=strategy.pool_size)
+        self.__strategy = strategy
+        self._initial_running_strategy()
+
+
+    def _initial_running_strategy(self) -> None:
+        global Pool_Runnable_Strategy
+        Pool_Runnable_Strategy = self.__strategy
+
