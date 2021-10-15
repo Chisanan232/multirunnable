@@ -97,6 +97,7 @@ class ThreadStrategy(ConcurrentStrategy, _GeneralRunnableStrategy, _Resultable):
 
     def generate_worker(self, target: Callable, *args, **kwargs) -> _OceanTasks:
 
+        @wraps(target)
         @ConcurrentStrategy.save_return_value
         def _target_function(*_args, **_kwargs):
             result_value = target(*_args, **_kwargs)

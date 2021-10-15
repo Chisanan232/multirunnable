@@ -28,6 +28,9 @@ class ParallelStrategy:
     _Manager: Manager = Manager()
     _Namespace_Object: Namespace = _Manager.Namespace()
     _Processors_Running_Result: List[Dict] = _Manager.list()
+    # _Manager: Manager = None
+    # _Namespace_Object: Namespace = None
+    # _Processors_Running_Result: List[Dict] = None
 
     # def _init_namespace_obj(self) -> None:
     #     self._Manager = Manager()
@@ -54,6 +57,7 @@ class ParallelStrategy:
 
     def result(self) -> List[_ParallelResult]:
         __parallel_result = self._result_handling()
+        self._Processors_Running_Result = []
         return __parallel_result
 
 
@@ -124,6 +128,7 @@ class ProcessStrategy(ParallelStrategy, _GeneralRunnableStrategy, _Resultable):
 
     def generate_worker(self, target: Callable, *args, **kwargs) -> Process:
 
+        @wraps(target)
         @ParallelStrategy.save_return_value
         def _target_function(*_args, **_kwargs):
             result_value = target(*_args, **_kwargs)
