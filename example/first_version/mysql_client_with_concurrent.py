@@ -6,12 +6,12 @@ package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute(
 sys.path.append(package_pyocean_path)
 
 # pyocean package
-from pyocean.framework import PersistenceRunnableTask
-from pyocean.concurrent import ConcurrentSimpleFactory, ConcurrentPersistenceFactory
-from pyocean.persistence import OceanPersistence
-from pyocean.persistence.database import BaseDao
-from pyocean.persistence.database.configuration import DatabaseConfig, DatabaseDriver
-from pyocean.logger import ocean_logger
+from multirunnable.framework import PersistenceRunnableTask
+from multirunnable.concurrent import ConcurrentSimpleFactory, ConcurrentPersistenceFactory
+from multirunnable.persistence import OceanPersistence
+from multirunnable.persistence.database import BaseDao
+from multirunnable.persistence.database.configuration import DatabaseConfig, DatabaseDriver
+from multirunnable.logger import ocean_logger
 
 # code component
 from connection_strategy import SingleTestConnectionStrategy, MultiTestConnectionStrategy
