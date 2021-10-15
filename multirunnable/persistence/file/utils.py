@@ -8,7 +8,7 @@ from importlib import import_module
 
 class FileImportUtils:
 
-    _RootPackage = "pyocean"
+    _RootPackage = "multirunnable"
     _FormatterPackage = ".persistence.file.file"
     _CompressPackage = ".persistence.file.compress"
 
