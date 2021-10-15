@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="multirunnable",
-    version="0.15.0",
+    version="0.15.1",
     author="Liu, Bryant",
     author_email="chi10211201@cycu.org.tw",
     description="A Python framework integrates running multiple tasks simultaneously with different strategy.",
@@ -22,11 +22,14 @@ setuptools.setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
     ],
     keyword="multirunnable parallel concurrent coroutine",
     python_requires='>=3.6',
     install_requires=[
-        "gevent==1.4.0",
+        "gevent",
         "multipledispatch==0.6.0",
         "colorama==0.4.1",
         "kafka-python==2.0.2",
