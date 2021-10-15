@@ -1,4 +1,4 @@
-gevent==1.4.0
+gevent
 multipledispatch==0.6.0
 colorama==0.4.1
 kafka-python==2.0.2
