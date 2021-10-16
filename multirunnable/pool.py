@@ -11,7 +11,7 @@ from .framework import (
     OceanResult as _OceanResult
 )
 from .mode import RunningMode as _RunningMode
-from .task import OceanPersistenceTask as _OceanPersistenceTask
+from .tasks import OceanPersistenceTask as _OceanPersistenceTask
 from .adapter.strategy import PoolStrategyAdapter as _PoolStrategyAdapter
 from .persistence.interface import OceanPersistence as _OceanPersistence
 from ._config import set_mode

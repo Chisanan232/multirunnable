@@ -14,7 +14,7 @@ _LOGGER = getLogger(__user)
 
 
 from multirunnable.mode import RunningMode, FeatureMode
-from multirunnable.task import OceanTask, QueueTask
+from multirunnable.tasks import OceanTask, QueueTask
 from multirunnable.executor import SimpleExecutor, PersistenceExecutor
 from multirunnable.pool import SimplePool, PersistencePool
 from multirunnable._import_utils import ImportMultiRunnable as _ImportMultiRunnable
@@ -26,6 +26,7 @@ def multi_processes(processes: int):
 
     def __target(function: Union[FunctionType, MethodType]):
 
+        @wraps(function)
         def _(*args, **kwargs):
             __result = __running(
                 mode=RunningMode.Parallel,
@@ -45,6 +46,7 @@ def multi_threads(threads: int):
 
     def __target(function: Union[FunctionType, MethodType]):
 
+        @wraps(function)
         def _(*args, **kwargs):
             __result = __running(
                 mode=RunningMode.Concurrent,
@@ -64,6 +66,7 @@ def multi_green_threads(gthreads: int):
 
     def __target(function: Union[FunctionType, MethodType]):
 
+        @wraps(function)
         def _(*args, **kwargs):
             __result = __running(
                 mode=RunningMode.GreenThread,
@@ -83,6 +86,7 @@ def multi_executors(mode: RunningMode, executors: int):
 
     def __target(function: Union[FunctionType, MethodType]):
 
+        @wraps(function)
         def _(*args, **kwargs):
             __result = __running(
                 mode=mode,
@@ -116,12 +120,23 @@ def __running(mode: RunningMode, executors: int,
 
 
 
+def asynchronize(function: Union[FunctionType, MethodType]):
+
+    @wraps(function)
+    async def _(*args, **kwargs):
+        value = function(*args, **kwargs)
+        return value
+
+    return _
+
+
+
 def sleep(seconds: float, mode: RunningMode = None, **kwargs) -> None:
     import asyncio
 
     if mode is None:
-        from multirunnable._config import RUNNING_MODE
-        mode = RUNNING_MODE
+        from multirunnable._config import get_current_mode
+        mode = get_current_mode()
 
     if mode is RunningMode.Asynchronous:
         raise TypeError("It doesn't accept 'Asynchronous' running mode in this function.")
