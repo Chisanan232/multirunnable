@@ -25,16 +25,16 @@ let it work around.
 """
 
 from multiprocessing import set_start_method as set_multiprocessing_start_method
-from sys import version_info
+from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 import logging
 
-python_major_version = version_info[0]
-python_minor_version = version_info[1]
-python_version = f"{python_major_version}.{python_minor_version}"
-if int(python_major_version) == 3:
-    if int(python_minor_version) >= 9:
+if PYTHON_MAJOR_VERSION == 3:
+    if PYTHON_MINOR_VERSION >= 9:
         logging.info("Force 'multiprocessing' to use 'fork'.")
         set_multiprocessing_start_method('fork')
+else:
+    from ..exceptions import VersionError
+    raise VersionError
 
 from multirunnable.parallel.features import MultiProcessingQueueType, ProcessLock, ProcessCommunication
 from multirunnable.parallel.strategy import ParallelStrategy, ProcessStrategy, ProcessPoolStrategy

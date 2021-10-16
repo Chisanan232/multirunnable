@@ -2,11 +2,16 @@
 Set the customized Python package to Python Interpreter Environment Variable Path  so that we could import it if we need.
 """
 
-from functools import wraps
-from logging import getLogger
-from typing import Tuple, Dict, Union
+from sys import version_info
 from types import FunctionType, MethodType
+from typing import Tuple, Dict, Union
+from logging import getLogger
+from functools import wraps
 import getpass
+
+PYTHON_MAJOR_VERSION = int(version_info[0])
+PYTHON_MINOR_VERSION = int(version_info[1])
+PYTHON_VERSION = f"{PYTHON_MAJOR_VERSION}.{PYTHON_MINOR_VERSION}"
 
 # # Configure logging setting
 __user = getpass.getuser()
