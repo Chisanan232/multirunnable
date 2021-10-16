@@ -1,14 +1,14 @@
-from multirunnable.framework.task import BaseQueueTask as _BaseQueueTask
-from multirunnable.framework.features import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
-from multirunnable.framework.adapter.collection import BaseList as _BaseList
-from multirunnable.framework.result import OceanResult as _OceanResult
-from multirunnable.mode import RunningMode as _RunningMode
+from .task import BaseQueueTask as _BaseQueueTask
+from .features import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
+from .adapter.collection import BaseList as _BaseList
+from .result import OceanResult as _OceanResult
+from ..mode import RunningMode as _RunningMode
 import multirunnable._utils as _utils
 
 from abc import ABCMeta, abstractmethod
 from typing import List, Tuple, Dict, Optional, Union, Callable as CallableType, Iterable as IterableType
 from types import MethodType, FunctionType
-from collections import Iterable, Callable
+from collections.abc import Callable
 
 
 

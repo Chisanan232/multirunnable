@@ -1,12 +1,13 @@
-from multirunnable.types import (
+from abc import ABCMeta, abstractmethod
+from enum import Enum
+
+from ..types import (
     OceanLock as _OceanLock, OceanRLock as _OceanRLock,
     OceanSemaphore as _OceanSemaphore, OceanBoundedSemaphore as _OceanBoundedSemaphore,
     OceanEvent as _OceanEvent, OceanCondition as _OceanCondition,
-    OceanQueue as _OceanQueue)
+    OceanQueue as _OceanQueue
+)
 import multirunnable._utils as _utils
-
-from abc import ABCMeta, abstractmethod
-from enum import Enum
 
 
 

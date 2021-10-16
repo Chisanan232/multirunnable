@@ -32,19 +32,29 @@ The framework section code:
 
 """
 
-from multirunnable.framework.task import BaseTask, BaseQueueTask
+from .task import (
+    BaseTask,
+    BaseQueueTask,
+    BasePersistenceTask)
 
-from multirunnable.framework.strategy import RunnableStrategy, AsyncRunnableStrategy, Resultable
-from multirunnable.framework.features import (
+from .executor import BaseExecutor
+from .pool import BasePool
+from .strategy import (
+    RunnableStrategy,
+    AsyncRunnableStrategy,
+    GeneralRunnableStrategy,
+    PoolRunnableStrategy,
+    Resultable)
+from .features import (
     BaseQueueType,
     PosixThread,
     PosixThreadCommunication,
     BaseFeatureAdapterFactory,
     BaseGlobalizeAPI)
-from multirunnable.framework.result import OceanResult
+from .result import OceanResult, ResultState
 
-from multirunnable.framework.api import (
+from .api import (
     AdapterOperator, BaseLockAdapterOperator,
     AsyncAdapterOperator, BaseAsyncLockAdapterOperator)
 
-from multirunnable.framework.adapter import BaseIterator, BaseList
+from .adapter import BaseIterator, BaseList

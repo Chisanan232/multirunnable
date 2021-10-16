@@ -1,26 +1,26 @@
-from multirunnable.mode import FeatureMode as _FeatureMode
-from multirunnable.types import OceanTasks as _OceanTasks
-from multirunnable.concurrent.result import ConcurrentResult as _ConcurrentResult
-from multirunnable.framework import OceanResult as _OceanResult
-from multirunnable.framework.task import (
-    BaseQueueTask as _BaseQueueTask,
-    BasePersistenceTask as _BasePersistenceTask)
-from multirunnable.framework.features import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
-from multirunnable.framework.adapter.collection import BaseList as _BaseList
-from multirunnable.framework.strategy import (
-    GeneralRunnableStrategy as _GeneralRunnableStrategy,
-    PoolRunnableStrategy as _PoolRunnableStrategy,
-    Resultable as _Resultable)
-from multirunnable.framework.result import ResultState as _ResultState
-
 from types import MethodType
 from typing import List, Dict, Callable, Iterable as IterableType, Optional, Union, Tuple, cast
 from functools import wraps
-from collections import Iterable
+from collections.abc import Iterable
 from multipledispatch import dispatch
 from threading import Thread
 from multiprocessing.pool import ThreadPool
 from multiprocessing.pool import AsyncResult, ApplyResult
+
+from multirunnable.mode import FeatureMode as _FeatureMode
+from multirunnable.types import OceanTasks as _OceanTasks
+from multirunnable.concurrent.result import ConcurrentResult as _ConcurrentResult
+from multirunnable.framework import (
+    OceanResult as _OceanResult,
+    BaseQueueTask as _BaseQueueTask,
+    BasePersistenceTask as _BasePersistenceTask,
+    BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory,
+    BaseList as _BaseList,
+    GeneralRunnableStrategy as _GeneralRunnableStrategy,
+    PoolRunnableStrategy as _PoolRunnableStrategy,
+    Resultable as _Resultable,
+    ResultState as _ResultState
+)
 
 
 

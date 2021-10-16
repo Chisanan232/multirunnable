@@ -1,6 +1,6 @@
-from multirunnable.framework.result import OceanResult as _OceanResult
-from multirunnable.mode import RunningMode as _RunningMode
-from multirunnable.types import OceanTasks as _OceanTasks
+from .result import OceanResult as _OceanResult
+from ..mode import RunningMode as _RunningMode
+from ..types import OceanTasks as _OceanTasks
 import multirunnable._utils as _utils
 
 from abc import ABCMeta, abstractmethod

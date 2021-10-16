@@ -1,3 +1,6 @@
+from abc import ABCMeta, abstractmethod
+from typing import Union, NewType
+
 from multirunnable.types import (
     OceanLock as _OceanLock,
     OceanRLock as _OceanRLock,
@@ -5,10 +8,8 @@ from multirunnable.types import (
     OceanBoundedSemaphore as _OceanBoundedSemaphore,
     OceanEvent as _OceanEvent,
     OceanCondition as _OceanCondition,
-    OceanQueue as _OceanQueue)
-
-from abc import ABCMeta, abstractmethod
-from typing import Union, NewType
+    OceanQueue as _OceanQueue
+)
 
 
 __OceanFeature = Union[_OceanLock, _OceanRLock, _OceanSemaphore, _OceanBoundedSemaphore, _OceanEvent, _OceanCondition, _OceanQueue]

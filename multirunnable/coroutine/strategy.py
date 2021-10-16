@@ -1,23 +1,7 @@
-from multirunnable.mode import FeatureMode as _FeatureMode
-from multirunnable.coroutine.result import (
-    CoroutineResult as _CoroutineResult,
-    AsynchronousResult as _AsynchronousResult)
-from multirunnable.framework.task import (
-    BaseQueueTask as _BaseQueueTask,
-    BasePersistenceTask as _BasePersistenceTask)
-from multirunnable.framework.features import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
-from multirunnable.framework.adapter.collection import BaseList as _BaseList
-from multirunnable.framework.strategy import (
-    GeneralRunnableStrategy as _GeneralRunnableStrategy,
-    PoolRunnableStrategy as _PoolRunnableStrategy,
-    AsyncRunnableStrategy as _AsyncRunnableStrategy,
-    Resultable as _Resultable)
-from multirunnable.framework.result import ResultState as _ResultState
-
 from abc import ABCMeta, ABC
 from types import FunctionType, MethodType
 from typing import List, Iterable as IterableType, Callable, Optional, Union, Tuple, Dict
-from collections import Iterable
+from collections.abc import Iterable
 from multipledispatch import dispatch
 from gevent.greenlet import Greenlet
 from gevent.pool import Pool
@@ -26,6 +10,22 @@ import functools
 import itertools
 import asyncio
 import gevent
+
+from multirunnable.mode import FeatureMode as _FeatureMode
+from multirunnable.coroutine.result import (
+    CoroutineResult as _CoroutineResult,
+    AsynchronousResult as _AsynchronousResult)
+from multirunnable.framework import (
+    BaseQueueTask as _BaseQueueTask,
+    BasePersistenceTask as _BasePersistenceTask,
+    BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory,
+    BaseList as _BaseList,
+    GeneralRunnableStrategy as _GeneralRunnableStrategy,
+    PoolRunnableStrategy as _PoolRunnableStrategy,
+    AsyncRunnableStrategy as _AsyncRunnableStrategy,
+    Resultable as _Resultable,
+    ResultState as _ResultState
+)
 
 
 

@@ -1,25 +1,27 @@
-from multirunnable.framework.task import BaseQueueTask as _BaseQueueTask
-from multirunnable.framework.features import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
-from multirunnable.framework.adapter.collection import BaseList as _BaseList
-from multirunnable.framework.executor import BaseExecutor
-from multirunnable.framework.strategy import GeneralRunnableStrategy as _GeneralRunnableStrategy
-from multirunnable.framework.result import OceanResult as _OceanResult
-from multirunnable.mode import RunningMode as _RunningMode
-from multirunnable.adapter.strategy import ExecutorStrategyAdapter as _ExecutorStrategyAdapter
-from multirunnable.task import OceanPersistenceTask as _OceanPersistenceTask
-from multirunnable.persistence.interface import OceanPersistence as _OceanPersistence
-from multirunnable._config import set_mode
-
 from abc import ABC
 from typing import Tuple, Dict, Optional, Union, List, Callable as CallableType, Iterable as IterableType, NewType
-from collections import Iterable, Callable
+from collections.abc import Callable
+
+from .framework import (
+    BaseList as _BaseList,
+    BaseQueueTask as _BaseQueueTask,
+    BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory,
+    BaseExecutor as _BaseExecutor,
+    GeneralRunnableStrategy as _GeneralRunnableStrategy,
+    OceanResult as _OceanResult
+)
+from .mode import RunningMode as _RunningMode
+from .adapter.strategy import ExecutorStrategyAdapter as _ExecutorStrategyAdapter
+from .task import OceanPersistenceTask as _OceanPersistenceTask
+from .persistence.interface import OceanPersistence as _OceanPersistence
+from ._config import set_mode
 
 
 _General_Runnable_Type = Union[_GeneralRunnableStrategy]
 General_Runnable_Strategy: _General_Runnable_Type = None
 
 
-class Executor(ABC, BaseExecutor):
+class Executor(ABC, _BaseExecutor):
 
     ParameterCannotBeNoneError = TypeError("It should not pass 'None' value parameter(s).")
     InvalidParameterBePass = TypeError("The parameters data type is invalid. It should all be tuple or dict.")

@@ -1,19 +1,20 @@
-from multirunnable.framework.task import BaseQueueTask as _BaseQueueTask
-from multirunnable.framework.pool import BasePool as _BasePool
-from multirunnable.framework.features import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
-from multirunnable.framework.adapter.collection import BaseList as _BaseList
-from multirunnable.framework.strategy import (
-    PoolRunnableStrategy as _PoolRunnableStrategy,
-    Resultable as _Resultable)
-from multirunnable.framework.result import OceanResult as _OceanResult
-from multirunnable.mode import RunningMode as _RunningMode
-from multirunnable.task import OceanPersistenceTask as _OceanPersistenceTask
-from multirunnable.adapter.strategy import PoolStrategyAdapter as _PoolStrategyAdapter
-from multirunnable.persistence.interface import OceanPersistence as _OceanPersistence
-from multirunnable._config import set_mode
-
 from abc import ABC
 from typing import List, Tuple, Dict, Iterable, Callable, Optional, Union
+
+from .framework import (
+    BaseList as _BaseList,
+    BaseQueueTask as _BaseQueueTask,
+    BasePool as _BasePool,
+    BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory,
+    PoolRunnableStrategy as _PoolRunnableStrategy,
+    Resultable as _Resultable,
+    OceanResult as _OceanResult
+)
+from .mode import RunningMode as _RunningMode
+from .task import OceanPersistenceTask as _OceanPersistenceTask
+from .adapter.strategy import PoolStrategyAdapter as _PoolStrategyAdapter
+from .persistence.interface import OceanPersistence as _OceanPersistence
+from ._config import set_mode
 
 
 _Pool_Runnable_Type = Union[_PoolRunnableStrategy, _Resultable]

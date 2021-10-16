@@ -1,8 +1,8 @@
-from multirunnable.framework.features import BaseQueueType as _BaseQueueType
-from multirunnable.framework.result import OceanResult as _OceanResult
-from multirunnable.mode import RunningMode as _RunningMode
-from multirunnable.types import OceanQueue as _OceanQueue
-from multirunnable.persistence.interface import OceanPersistence as _OceanPersistence
+from .features import BaseQueueType as _BaseQueueType
+from .result import OceanResult as _OceanResult
+from ..mode import RunningMode as _RunningMode
+from ..types import OceanQueue as _OceanQueue
+from ..persistence.interface import OceanPersistence as _OceanPersistence
 import multirunnable._utils as _utils
 
 from abc import ABCMeta, abstractmethod

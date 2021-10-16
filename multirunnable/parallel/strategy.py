@@ -1,24 +1,24 @@
-from multirunnable.mode import FeatureMode as _FeatureMode
-from multirunnable.parallel.result import ParallelResult as _ParallelResult
-from multirunnable.framework.task import (
-    BaseQueueTask as _BaseQueueTask,
-    BasePersistenceTask as _BasePersistenceTask)
-from multirunnable.framework.features import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
-from multirunnable.framework.adapter.collection import BaseList as _BaseList
-from multirunnable.framework.strategy import (
-    GeneralRunnableStrategy as _GeneralRunnableStrategy,
-    PoolRunnableStrategy as _PoolRunnableStrategy,
-    Resultable as _Resultable)
-from multirunnable.framework.result import ResultState as _ResultState
-
 from types import FunctionType, MethodType
 from typing import List, Tuple, Dict, Iterable as IterableType, Union, Callable, Optional, cast
 from functools import wraps, partial as PartialFunction
-from collections import Iterable
+from collections.abc import Iterable
 from multipledispatch import dispatch
 from multiprocessing import Process, Manager
 from multiprocessing.pool import Pool, AsyncResult, ApplyResult
 from multiprocessing.managers import Namespace
+
+from multirunnable.mode import FeatureMode as _FeatureMode
+from multirunnable.parallel.result import ParallelResult as _ParallelResult
+from multirunnable.framework import (
+    BaseList as _BaseList,
+    BaseQueueTask as _BaseQueueTask,
+    BasePersistenceTask as _BasePersistenceTask,
+    BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory,
+    GeneralRunnableStrategy as _GeneralRunnableStrategy,
+    PoolRunnableStrategy as _PoolRunnableStrategy,
+    Resultable as _Resultable,
+    ResultState as _ResultState
+)
 
 
 

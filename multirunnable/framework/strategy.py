@@ -1,11 +1,11 @@
-from multirunnable.framework.adapter.collection import BaseList as _BaseList
-from multirunnable.framework.task import (
+from .adapter.collection import BaseList as _BaseList
+from .task import (
     BaseQueueTask as _BaseQueueTask,
     BasePersistenceTask as _BasePersistenceTask)
-from multirunnable.framework.features import BaseFeatureAdapterFactory as  _BaseFeatureAdapterFactory
-from multirunnable.framework.result import OceanResult as _OceanResult
-from multirunnable.mode import FeatureMode as _FeatureMode
-from multirunnable.types import OceanTasks as _OceanTasks
+from .features import BaseFeatureAdapterFactory as  _BaseFeatureAdapterFactory
+from .result import OceanResult as _OceanResult
+from ..mode import FeatureMode as _FeatureMode
+from ..types import OceanTasks as _OceanTasks
 import multirunnable._utils as _utils
 
 from abc import ABCMeta, ABC, abstractmethod
