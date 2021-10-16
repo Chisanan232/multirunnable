@@ -1,3 +1,6 @@
+import logging
+
+from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 from multirunnable.framework.features import (
     PosixThreadLock as _PosixThreadLock,
     PosixThreadCommunication as _PosixThreadCommunication,
@@ -6,6 +9,7 @@ from multirunnable.types import (
     OceanCondition as _OceanCondition,
     OceanEvent as _OceanEvent
 )
+from multirunnable.exceptions import VersionError
 
 from gevent.queue import (
     Queue as _Greenlet_Queue,
@@ -30,7 +34,7 @@ from asyncio.locks import (
     BoundedSemaphore as _Async_BoundedSemaphore)
 from asyncio import Event as _Async_Event, Condition as _Async_Condition
 
-from typing import Optional, Union
+from typing import Dict, Optional, Union
 
 
 
@@ -92,65 +96,69 @@ class AsynchronousQueueType(_BaseQueueType):
 class AsynchronousLock(_PosixThreadLock):
 
     def get_lock(self, **kwargs) -> _Async_Lock:
-        __loop = _AsyncUtils.chk_loop(loop=kwargs.get("loop", None))
-        return _Async_Lock(loop=__loop)
+        __param = _AsyncUtils.chk_loop(loop=kwargs.get("loop", None))
+        return _Async_Lock(**__param)
 
 
     def get_rlock(self, **kwargs) -> _Async_Lock:
-        __loop = _AsyncUtils.chk_loop(loop=kwargs.get("loop", None))
-        return _Async_Lock(loop=__loop)
+        __param = _AsyncUtils.chk_loop(loop=kwargs.get("loop", None))
+        return _Async_Lock(**__param)
 
 
     def get_semaphore(self, value: int, **kwargs) -> _Async_Semaphore:
-        __loop = _AsyncUtils.chk_loop(loop=kwargs.get("loop", None))
-        return _Async_Semaphore(value=value, loop=__loop)
+        __param = _AsyncUtils.chk_loop(loop=kwargs.get("loop", None))
+        __param["value"] = value
+        return _Async_Semaphore(**__param)
 
 
     def get_bounded_semaphore(self, value: int, **kwargs) -> _Async_BoundedSemaphore:
-        __loop = _AsyncUtils.chk_loop(loop=kwargs.get("loop", None))
-        return _Async_BoundedSemaphore(value=value, loop=__loop)
+        __param = _AsyncUtils.chk_loop(loop=kwargs.get("loop", None))
+        __param["value"] = value
+        return _Async_BoundedSemaphore(**__param)
 
 
 
 class AsynchronousCommunication(_PosixThreadCommunication):
 
     def get_event(self, *args, **kwargs) -> _Async_Event:
-        __loop = _AsyncUtils.chk_loop(loop=kwargs.get("loop", None))
-        return _Async_Event(loop=__loop)
+        __param = _AsyncUtils.chk_loop(loop=kwargs.get("loop", None))
+        return _Async_Event(**__param)
 
 
     def get_condition(self, *args, **kwargs) -> _Async_Condition:
         # __lock = _AsyncUtils.chk_lock(lock=kwargs.get("lock", None))
         __lock = kwargs.get("lock", None)
-        __loop = _AsyncUtils.chk_loop(loop=kwargs.get("loop", None))
-        return _Async_Condition(lock=__lock, loop=__loop)
+        __param = _AsyncUtils.chk_loop(loop=kwargs.get("loop", None))
+        __param["lock"] = __lock
+        return _Async_Condition(**__param)
 
 
 
 class _AsyncUtils:
 
     @classmethod
-    def chk_lock(cls, **kwargs) -> Optional[_Async_Lock]:
+    def chk_lock(cls, **kwargs) -> Dict[str, Optional[_Async_Lock]]:
         __lock = kwargs.get("lock", None)
         if __lock is not None and isinstance(__lock, _Async_Lock):
             raise TypeError("Lock type is incorrect.")
         elif __lock is None:
             raise Exception("Async Lock object cannot be empty.")
         else:
-            return __lock
+            return {"lock": __lock}
 
 
     @classmethod
-    def chk_loop(cls, **kwargs):
+    def chk_loop(cls, **kwargs) -> Dict:
         __loop = kwargs.get("loop", None)
-        # if __loop is not None and isinstance(__loop, SelectorEventLoop):
-        #     raise TypeError("Event loop type is incorrect.")
-        # elif __loop is None:
-        #     raise Exception("Async Event Loop object cannot be empty.")
-        # else:
-        #     return __loop
-        if __loop is not None:
-            return __loop
+        if PYTHON_MAJOR_VERSION == 3:
+            if PYTHON_MINOR_VERSION >= 10:
+                logging.info("Doesn't pass parameter 'loop' in Python 3.10.")
+                return {}
+            else:
+                if __loop is not None:
+                    return {"loop": __loop}
+                else:
+                    raise Exception("Async Event Loop object cannot be empty.")
         else:
-            raise Exception("Async Event Loop object cannot be empty.")
+            raise VersionError
 
