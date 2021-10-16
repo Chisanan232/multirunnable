@@ -1,5 +1,5 @@
-from pyocean.framework.api.operator import BaseRunnableProcedure, RunnableStrategy
-from pyocean.persistence.interface import OceanPersistence, OceanDao, OceanFao
+from multirunnable.framework.api.operator import BaseRunnableProcedure, RunnableStrategy
+from multirunnable.persistence.interface import OceanPersistence, OceanDao, OceanFao
 
 from abc import ABCMeta, abstractmethod
 
