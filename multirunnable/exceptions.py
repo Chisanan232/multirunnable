@@ -1,4 +1,11 @@
 
+class VersionError(Exception):
+
+    def __str__(self):
+        return "Package 'multirunnable' doesn't support Python 2."
+
+
+
 class GlobalizeObjectError(Exception):
 
     def __str__(self):
