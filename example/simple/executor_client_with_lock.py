@@ -6,7 +6,7 @@ if DEVELOPMENT_MODE:
     # Import package multirunnable
     import pathlib
     import sys
-    package_path = str(pathlib.Path(__file__).parent.parent.parent.absolute())
+    package_path = str(pathlib.Path(__file__).absolute().parent.parent.parent)
     sys.path.append(package_path)
 
 # multirunnable package
