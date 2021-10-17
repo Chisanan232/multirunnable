@@ -1,3 +1,4 @@
+import random
 import os
 
 DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", True)
@@ -6,7 +7,7 @@ if DEVELOPMENT_MODE:
     # Import package multirunnable
     import pathlib
     import sys
-    package_path = str(pathlib.Path(__file__).parent.parent.parent.absolute())
+    package_path = str(pathlib.Path(__file__).absolute().parent.parent.parent)
     sys.path.append(package_path)
 
 # multirunnable package
@@ -47,7 +48,7 @@ class ExamplePool:
         with __pool as pool:
             # # # # Running Pool
             # pool.apply(function=self.__Example_Target.target_function, index=f"test_{random.randrange(10,20)}")
-            # pool.async_apply(function=self.__Example_Target.target_function, kwargs={"index": f"test_{random.randrange(10,20)}"})
+            pool.async_apply(function=self.__Example_Target.target_function, kwargs={"index": f"test_{random.randrange(10,20)}"})
             pool.map(function=self.__Example_Target.target_function, args_iter=("index_1", "index_2.2", "index_3"))
             # pool.map_by_args(function=self.__Example_Target.target_function, args_iter=[("index_1", "index_2.2"), ("index_3",), (1, 2, 3)])
 
