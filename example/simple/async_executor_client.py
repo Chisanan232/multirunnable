@@ -6,7 +6,7 @@ if DEVELOPMENT_MODE:
     # Import package multirunnable
     import pathlib
     import sys
-    package_path = str(pathlib.Path(__file__).parent.parent.parent.absolute())
+    package_path = str(pathlib.Path(__file__).absolute().parent.parent.parent)
     sys.path.append(package_path)
 
 # multirunnable package
@@ -19,6 +19,23 @@ import multirunnable
 class ExampleTargetFunction:
 
     async def async_target_function(self, *args, **kwargs) -> str:
+        print("This is ExampleTargetFunction.async_target_function.")
+        await multirunnable.async_sleep(3)
+        print("This is target function args: ", args)
+        print("This is target function kwargs: ", kwargs)
+        # raise Exception("Test for error")
+        return "You are 87."
+
+
+    @multirunnable.asynchronize
+    def target_function(self, *args, **kwargs) -> str:
+        """
+        Comment:
+            The feature 'multirunnable.asynchronize' still be under test.
+        :param args:
+        :param kwargs:
+        :return:
+        """
         print("This is ExampleTargetFunction.async_target_function.")
         await multirunnable.async_sleep(3)
         print("This is target function args: ", args)
@@ -78,6 +95,7 @@ class ExampleExecutor:
         # # # # Asynchronous version of generally running
         __executor.run(
             function=self.__example.async_target_function,
+            # function=self.__example.target_function,
             args=("index_1", "index_2.2"))
 
         # # # # Asynchronous version of generally running which will raise exception
