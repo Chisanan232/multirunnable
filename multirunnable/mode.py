@@ -1,7 +1,6 @@
 from enum import Enum
 
 
-_Package: str = "pyocean"
 _Parallel_Package: str = ".parallel."
 _Concurrent_Package: str = ".concurrent."
 _Coroutine_Package: str = ".coroutine."
