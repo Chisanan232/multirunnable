@@ -15,7 +15,7 @@ from typing import Union
 ThreadQueueDataType = Union[Thread_Queue, Thread_SimpleQueue, Thread_LifoQueue, Thread_PriorityQueue]
 
 
-class MultiThreadingQueueType(_BaseQueueType):
+class ThreadQueueType(_BaseQueueType):
 
     Queue = Thread_Queue()
     SimpleQueue = Thread_SimpleQueue()

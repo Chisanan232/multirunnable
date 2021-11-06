@@ -14,7 +14,7 @@ from typing import Union
 ProcessQueueDataType = Union[Process_Queue, Process_SimpleQueue, Process_JoinableQueue]
 
 
-class MultiProcessingQueueType(_BaseQueueType):
+class ProcessQueueType(_BaseQueueType):
 
     Queue = Process_Queue()
     SimpleQueue = Process_SimpleQueue()
