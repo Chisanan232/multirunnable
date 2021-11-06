@@ -33,7 +33,6 @@ The framework section code:
 """
 
 from .task import (
-    BaseTask,
     BaseQueueTask,
     BasePersistenceTask)
 

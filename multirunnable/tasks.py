@@ -1,5 +1,4 @@
 from multirunnable.framework.task import (
-    BaseTask as _BaseTask,
     BaseQueueTask as _BaseQueueTask,
     BasePersistenceTask as _BasePersistenceTask)
 from multirunnable.framework.features import BaseQueueType as _BaseQueueType
@@ -9,112 +8,7 @@ from multirunnable.adapter.queue import Queue as _Queue
 from multirunnable.adapter.collection import QueueTaskList as _QueueTaskList
 from multirunnable.persistence.interface import OceanPersistence as _OceanPersistence
 
-from typing import Tuple, Dict, Iterable, Callable
-
-
-
-class OceanTask(_BaseTask):
-
-    @property
-    def function(self) -> Callable:
-        return self._Function
-
-
-    def set_function(self, function: Callable) -> _BaseTask:
-        self._Function = function
-        return self
-
-
-    @property
-    def func_args(self) -> Tuple:
-        return self._Fun_Args
-
-
-    def set_func_args(self, args: Tuple) -> _BaseTask:
-        self._Fun_Args = args
-        return self
-
-
-    @property
-    def func_kwargs(self) -> Dict:
-        return self._Fun_Kwargs
-
-
-    def set_func_kwargs(self, kwargs: Dict) -> _BaseTask:
-        for key, value in kwargs.items():
-            self._Fun_Kwargs[key] = value
-        return self
-
-
-    @property
-    def initialization(self) -> Callable:
-        return self._Initialization
-
-
-    def set_initialization(self, init: Callable) -> _BaseTask:
-        self._Initialization = init
-        return self
-
-
-    @property
-    def init_args(self) -> Tuple:
-        return self._Init_Args
-
-
-    def set_init_args(self, args: Tuple) -> _BaseTask:
-        self._Init_Args = args
-        return self
-
-
-    @property
-    def init_kwargs(self) -> Dict:
-        return self._Init_Kwargs
-
-
-    def set_init_kwargs(self, kwargs: Dict) -> _BaseTask:
-        for key, value in kwargs.items():
-            self._Init_Kwargs[key] = value
-        return self
-
-
-    @property
-    def group(self) -> str:
-        return self._Group
-
-
-    def set_group(self, group: str) -> _BaseTask:
-        self._Group = group
-        return self
-
-
-    @property
-    def done_handler(self) -> Callable:
-        return self._Done_Handler
-
-
-    def set_done_handler(self, hdlr: Callable) -> _BaseTask:
-        self._Done_Handler = hdlr
-        return self
-
-
-    @property
-    def error_handler(self) -> Callable:
-        return self._Error_Handler
-
-
-    def set_error_handler(self, hdlr: Callable) -> _BaseTask:
-        self._Error_Handler = hdlr
-        return self
-
-
-    @property
-    def running_timeout(self) -> int:
-        return self._Running_Timeout
-
-
-    def set_running_timeout(self, timeout: int) -> _BaseTask:
-        self._Running_Timeout = timeout
-        return self
+from typing import Iterable
 
 
 
