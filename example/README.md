@@ -7,7 +7,7 @@ Here are some example code about how to use this package.
 ## Environment
 <hr>
 
-[![Supported Versions](https://img.shields.io/pypi/pyversions/multirunnable.svg)](https://pypi.org/project/multirunnable)
+[![Supported Versions](https://img.shields.io/pypi/pyversions/multirunnable.svg?logo=python&logoColor=FBE072)](https://pypi.org/project/multirunnable)
 
 Installation by pip:
 
