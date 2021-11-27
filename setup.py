@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="multirunnable",
-    version="0.15.2rc1",
+    version="0.15.2",
     author="Liu, Bryant",
     author_email="chi10211201@cycu.org.tw",
     description="A Python framework integrates running multiple tasks simultaneously with different strategy.",
