@@ -250,8 +250,8 @@ class BaseSingleConnection(BaseDatabaseConnection, ABC):
         # global Database_Connection, Database_Cursor
         # Database_Connection = self.connect_database(**kwargs)
         # Database_Cursor = self.build_cursor()
-        # # # # Current
-        print(f"[DEBUG] BaseSingleConnection database config: {self.database_config}")
+
+        # # # # New version
         if kwargs:
             self._database_connection = self.connect_database(**kwargs)
         else:
