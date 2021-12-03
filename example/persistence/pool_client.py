@@ -12,15 +12,14 @@ if DEVELOPMENT_MODE:
     sys.path.append(package_pyocean_path)
 
 # multirunnable package
-from multirunnable import PersistencePool, QueueTask, RunningMode
+from multirunnable import SimplePool, PersistencePool, QueueTask, RunningMode
 from multirunnable.adapter import Lock, BoundedSemaphore
-from multirunnable.parallel import MultiProcessingQueueType, ParallelResult
-from multirunnable.persistence import OceanPersistence, DatabaseDriver
+from multirunnable.parallel import ProcessQueueType, ParallelResult
+from multirunnable.persistence import BasePersistence, DatabaseDriver
 from multirunnable.persistence.database import DatabaseConfig
 from multirunnable.logger import ocean_logger
 
 # code component
-from connection_strategy import SingleTestConnectionStrategy, MultiTestConnectionStrategy
 from dao import TestDao
 from fao import ExampleFao
 
@@ -38,13 +37,21 @@ class ExamplePoolClient:
         self.__DB_CONNECTION_Number = db_conn_num
         self.__logger = ocean_logger
 
+        self._database_config = {
+            "host": "Your database IPv4 address",
+            "port": "Your database port",
+            "user": "Your database user name",
+            "password": "Your database password",
+            "database": "Your database name"
+        }
+
 
     def main_run(self):
-        test_dao = TestDao(connection_strategy=self.persistence_strategy())
+        test_dao = TestDao(db_driver="mysql", use_pool=False)
 
         __queue_task = QueueTask()
         __queue_task.name = "test_sql_task"
-        __queue_task.queue_type = MultiProcessingQueueType.Queue
+        __queue_task.queue_type = ProcessQueueType.Queue
         sql_query = "select * from stock_data_2330 limit 3;"
         __queue_task.value = [sql_query for _ in range(20)]
 
@@ -54,14 +61,21 @@ class ExamplePoolClient:
         __features = __lock + __bounded_semaphore
 
         # # # # Initial and instantiate pool object with persistence strategy
-        __pool = PersistencePool(
-            # mode=RunningMode.Parallel,
+        # __pool = PersistencePool(
+        #     mode=RunningMode.Parallel,
+        #     # mode=RunningMode.Concurrent,
+        #     # mode=RunningMode.GreenThread,
+        #     pool_size=self.__Pool_Size,
+        #     tasks_size=self.__Pool_Size,
+        #     persistence_strategy=self.persistence_strategy(),
+        #     db_connection_pool_size=self.__DB_CONNECTION_Number)
+
+        __pool = SimplePool(
+            mode=RunningMode.Parallel,
             # mode=RunningMode.Concurrent,
-            mode=RunningMode.GreenThread,
+            # mode=RunningMode.GreenThread,
             pool_size=self.__Pool_Size,
-            tasks_size=self.__Pool_Size,
-            persistence_strategy=self.persistence_strategy(),
-            db_connection_pool_size=self.__DB_CONNECTION_Number)
+            tasks_size=self.__Pool_Size)
 
         __pool.initial(queue_tasks=__queue_task, features=__features)
         __pool.async_apply(function=test_dao.get_test_data)
@@ -77,21 +91,13 @@ class ExamplePoolClient:
             print("Result.exception: ", r.exception)
             print("+====================================+\n")
 
-        __fao = ExampleFao()
-        self.__logger.debug(f"Start to save data to file ....")
-        format_data = self.__only_data(result=result)
-        print("[FINAL] format_data: ", format_data)
-        __fao.all_thread_one_file(data=format_data)
-        __fao.all_thread_one_file_in_archiver(data=format_data)
-        self.__logger.debug(f"Saving successfully!")
-
-
-    def persistence_strategy(self) -> OceanPersistence:
-        connection_strategy = MultiTestConnectionStrategy(
-            configuration=DatabaseConfig(config_path=self.__Database_Config_Path, database_driver=DatabaseDriver.MySQL))
-        # connection_strategy = SingleTestConnectionStrategy(
-        #     configuration=DatabaseConfig(config_path=self.__Database_Config_Path, database_driver=DatabaseDriver.MySQL))
-        return connection_strategy
+        # __fao = ExampleFao()
+        # self.__logger.debug(f"Start to save data to file ....")
+        # format_data = self.__only_data(result=result)
+        # print("[FINAL] format_data: ", format_data)
+        # __fao.all_thread_one_file(data=format_data)
+        # __fao.all_thread_one_file_in_archiver(data=format_data)
+        # self.__logger.debug(f"Saving successfully!")
 
 
     def __only_data(self, result: List[ParallelResult]):
