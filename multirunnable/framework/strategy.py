@@ -2,7 +2,7 @@ from .adapter.collection import BaseList as _BaseList
 from .task import (
     BaseQueueTask as _BaseQueueTask,
     BasePersistenceTask as _BasePersistenceTask)
-from .features import BaseFeatureAdapterFactory as  _BaseFeatureAdapterFactory
+from .features import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
 from .result import OceanResult as _OceanResult
 from ..mode import FeatureMode as _FeatureMode
 from ..types import OceanTasks as _OceanTasks
