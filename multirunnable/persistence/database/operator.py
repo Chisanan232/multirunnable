@@ -1,3 +1,4 @@
+from multirunnable.persistence.interface import BasePersistence
 from multirunnable.persistence.database.strategy import BaseDatabaseConnection as _BaseDataBaseConnection
 
 from abc import ABCMeta, ABC, abstractmethod
@@ -7,7 +8,7 @@ from typing import Tuple, Type, TypeVar, Generic, Any, Union, Optional
 T = TypeVar("T")
 
 
-class BaseDatabaseOperator(metaclass=ABCMeta):
+class BaseDatabaseOperator(BasePersistence):
 
     def __init__(self, conn_strategy: _BaseDataBaseConnection):
         self._conn_strategy = conn_strategy
