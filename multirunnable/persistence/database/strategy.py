@@ -1,15 +1,9 @@
-import logging
-
 from multirunnable.persistence.interface import BasePersistence
-# from multirunnable.persistence.configuration import BaseDatabaseConfiguration
-# from multirunnable.persistence.database.configuration import ConfigKey, DefaultConfig
 from multirunnable.exceptions import GlobalizeObjectError
-from multirunnable._singletons import NamedSingletonMeta
 from multirunnable._utils import get_cls_name as _get_cls_name
 
 from abc import ABC, abstractmethod
 from typing import List, Tuple, Dict, Any, TypeVar, Generic, cast, Union
-from collections import defaultdict
 from multiprocessing import cpu_count
 
 
@@ -49,6 +43,7 @@ class BaseDatabaseConnection(BasePersistence):
 
     # def __init__(self, configuration: BaseDatabaseConfiguration = None, **kwargs):
     def __init__(self, **kwargs):
+        # # # # Just comment out temporary.
         self._database_connection: Generic[T] = None
         self._database_cursor: Generic[T] = None
 
@@ -78,13 +73,13 @@ class BaseDatabaseConnection(BasePersistence):
         _password = kwargs.get("password", self.__Default_Password)
         _database = kwargs.get("database", self.__Default_Database)
 
-        self._Database_Config.update({
+        self.database_config = {
             "host": _host,
             "port": _port,
             "user": _user,
             "password": _password,
             "database": _database
-        })
+        }
 
 
     def __str__(self):
@@ -120,6 +115,7 @@ class BaseDatabaseConnection(BasePersistence):
             Get all database configuration content.
         :return:
         """
+        print(f"[DEBUG] update config: {config}")
         self._Database_Config.update(config)
 
 
@@ -133,23 +129,27 @@ class BaseDatabaseConnection(BasePersistence):
 
 
     @property
+    @abstractmethod
     def connection(self) -> Generic[T]:
-        return self._database_connection
+        pass
 
 
     @connection.setter
+    @abstractmethod
     def connection(self, conn: Generic[T]) -> None:
-        self._database_connection = conn
+        pass
 
 
     @property
+    @abstractmethod
     def cursor(self) -> Generic[T]:
-        return self._database_cursor
+        pass
 
 
     @cursor.setter
+    @abstractmethod
     def cursor(self, cur: Generic[T]) -> None:
-        self._database_cursor = cur
+        pass
 
 
     @abstractmethod
@@ -214,10 +214,12 @@ class BaseDatabaseConnection(BasePersistence):
 
 
 
-class BaseSingleConnection(BaseDatabaseConnection, ABC, metaclass=NamedSingletonMeta):
+class BaseSingleConnection(BaseDatabaseConnection, ABC):
 
     def __init__(self, **kwargs):
         super(BaseSingleConnection, self).__init__(**kwargs)
+        # self._database_connection: Generic[T] = None
+        # self._database_cursor: Generic[T] = None
         self.initial(**self._Database_Config)
 
 
@@ -244,14 +246,16 @@ class BaseSingleConnection(BaseDatabaseConnection, ABC, metaclass=NamedSingleton
         :param kwargs:
         :return:
         """
-        self.database_config = kwargs
         # # # # Global version
         # global Database_Connection, Database_Cursor
         # Database_Connection = self.connect_database(**kwargs)
         # Database_Cursor = self.build_cursor()
         # # # # Current
-        print(f"[DEBUG] database config: {self.database_config}")
-        self._database_connection = self.connect_database(**self.database_config)
+        print(f"[DEBUG] BaseSingleConnection database config: {self.database_config}")
+        if kwargs:
+            self._database_connection = self.connect_database(**kwargs)
+        else:
+            self._database_connection = self.connect_database(**self.database_config)
         self._database_cursor = self.build_cursor()
 
 
@@ -272,12 +276,12 @@ class BaseConnectionPool(BaseDatabaseConnection):
         _pool_name = cast(str, kwargs.get("pool_name", self.__Default_Pool_Name))
         _pool_size = cast(int, kwargs.get("pool_size", cpu_count()))
 
-        self._Database_Config.update({
+        self.database_config.update({
             "pool_name": _pool_name,
             "pool_size": _pool_size
         })
 
-        self.initial(**self._Database_Config)
+        self.initial(**self.database_config)
 
 
     def initial(self, **kwargs) -> None:
