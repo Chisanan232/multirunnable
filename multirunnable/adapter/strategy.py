@@ -4,7 +4,7 @@ from multirunnable.framework.strategy import (
     GeneralRunnableStrategy as _GeneralRunnableStrategy,
     PoolRunnableStrategy as _PoolRunnableStrategy,
     AsyncRunnableStrategy as _AsyncRunnableStrategy)
-from multirunnable.persistence.interface import OceanPersistence as _OceanPersistence
+from multirunnable.persistence.interface import BasePersistence as _OceanPersistence
 from multirunnable.mode import RunningMode as _RunningMode
 from multirunnable._import_utils import ImportMultiRunnable as _ImportMultiRunnable
 
