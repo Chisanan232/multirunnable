@@ -93,11 +93,12 @@ class ProcessStrategy(ParallelStrategy, _GeneralRunnableStrategy, _Resultable):
         :param persistence:
         """
         super().__init__(executors=executors, persistence=persistence)
+        # # # # Deprecated logic
         # self._init_namespace_obj()
-        if persistence is not None:
-            namespace_persistence = cast(_BasePersistenceTask, self.namespacing_obj(obj=persistence))
+        # if persistence is not None:
+        #     namespace_persistence = cast(_BasePersistenceTask, self.namespacing_obj(obj=persistence))
             # super().__init__(persistence=namespace_persistence)
-            self._persistence = namespace_persistence
+            # self._persistence = namespace_persistence
         # self._Processors_Running_Result = self._Manager.list()
 
 
@@ -108,8 +109,9 @@ class ProcessStrategy(ParallelStrategy, _GeneralRunnableStrategy, _Resultable):
         super(ProcessStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
 
         # # Persistence
-        if self._persistence_strategy is not None:
-            self._persistence_strategy.initialize(db_conn_num=self.db_connection_pool_size)
+        # if self._persistence_strategy is not None:
+        #     # self._persistence_strategy.initialize(db_conn_num=self.db_connection_pool_size)
+        #     self._persistence_strategy._initial(db_conn_num=self.db_connection_pool_size)
 
 
     @dispatch((FunctionType, MethodType, PartialFunction), tuple, dict)
@@ -181,11 +183,12 @@ class ProcessPoolStrategy(ParallelStrategy, _PoolRunnableStrategy, _Resultable):
 
     def __init__(self, pool_size: int, tasks_size: int, persistence: _BasePersistenceTask = None):
         super().__init__(pool_size=pool_size, tasks_size=tasks_size, persistence=persistence)
+        # # # # Deprecated logic
         # self._init_namespace_obj()
-        if persistence is not None:
-            namespace_persistence = cast(_BasePersistenceTask, self.namespacing_obj(obj=persistence))
+        # if persistence is not None:
+        #     namespace_persistence = cast(_BasePersistenceTask, self.namespacing_obj(obj=persistence))
             # super().__init__(persistence=namespace_persistence)
-            self._persistence = namespace_persistence
+            # self._persistence = namespace_persistence
         # self._Processors_Running_Result = self._Manager.list()
 
 
@@ -195,9 +198,11 @@ class ProcessPoolStrategy(ParallelStrategy, _PoolRunnableStrategy, _Resultable):
                        *args, **kwargs) -> None:
         super(ProcessPoolStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
 
+        # # # # Deprecated logic
         # # Persistence
-        if self._persistence_strategy is not None:
-            self._persistence_strategy.initialize(db_conn_num=self.db_connection_pool_size)
+        # if self._persistence_strategy is not None:
+        #     # self._persistence_strategy.initialize(db_conn_num=self.db_connection_pool_size)
+        #     self._persistence_strategy._initial(db_conn_num=self.db_connection_pool_size)
 
         # Initialize and build the Processes Pool.
         __pool_initializer: Callable = kwargs.get("pool_initializer", None)
