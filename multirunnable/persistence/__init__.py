@@ -1,2 +1,3 @@
-from multirunnable.persistence.interface import OceanPersistence
-from multirunnable.persistence.mode import PersistenceMode, DatabaseDriver
+from .interface import BasePersistence
+from .mode import PersistenceMode, DatabaseDriver
+from .database import (BaseSingleConnection, BaseConnectionPool, DatabaseOperator, BaseDao)
