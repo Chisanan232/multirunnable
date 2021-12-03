@@ -1,8 +1,10 @@
+from multirunnable._singletons import NamedSingletonABCMeta
+
 from abc import ABCMeta, abstractmethod
 
 
 
-class BasePersistence(metaclass=ABCMeta):
+class BasePersistence(metaclass=NamedSingletonABCMeta):
     pass
 
 
