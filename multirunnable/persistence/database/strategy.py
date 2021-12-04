@@ -5,6 +5,7 @@ from multirunnable._utils import get_cls_name as _get_cls_name
 from abc import ABC, abstractmethod
 from typing import List, Tuple, Dict, Any, TypeVar, Generic, cast, Union
 from multiprocessing import cpu_count
+import logging
 
 
 T = TypeVar("T")
@@ -324,9 +325,26 @@ class BaseConnectionPool(BaseDatabaseConnection):
         """
         Description:
             Set the database connection pool size.
+            The number of the connection instances which target to do something operators with database.
+        Note:
+            The number be suggested to be roughly equal to the CPUs amount of host which the program be run.
         :return:
         """
-        return self._Database_Config["pool_size"]
+        from multiprocessing import cpu_count
+
+        _db_conn_num = self._Database_Config["pool_size"]
+        if _db_conn_num < 0:
+            raise ValueError("The database connection pool size cannot less than 0.")
+
+        if _db_conn_num is None or _db_conn_num == 0:
+            self._Database_Config["pool_size"] = cpu_count()
+            return self._Database_Config["pool_size"]
+        else:
+            if _db_conn_num > cpu_count():
+                logging.warning("Warning about suggestion is the best "
+                                "configuration of database connection instance "
+                                "should be less than CPU amounts.")
+            return _db_conn_num
 
 
     @pool_size.setter
