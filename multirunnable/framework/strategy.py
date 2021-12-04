@@ -19,13 +19,8 @@ import logging
 
 class BaseRunnableStrategy(metaclass=ABCMeta):
 
-    def __init__(self, persistence: _BasePersistenceTask = None):
-        self._persistence_strategy = None
-        self._db_conn_num = None
-        if persistence is not None:
-            self.__persistence = persistence
-            self._persistence_strategy = persistence.strategy
-            self._db_conn_num = persistence.connection_pool_size
+    def __init__(self):
+        pass
 
 
     def __str__(self):
@@ -51,7 +46,7 @@ class BaseRunnableStrategy(metaclass=ABCMeta):
         __cls_str = str(self.__class__)
         __cls_name = _utils.get_cls_name(cls_str=__cls_str)
         if __cls_name != "":
-            __instance_brief = f"{__cls_name}(persistence={self.__persistence}) "
+            __instance_brief = f"{__cls_name}() "
         else:
             __instance_brief = __cls_str
         return __instance_brief
@@ -185,33 +180,9 @@ class RunnableStrategy(BaseRunnableStrategy, ABC):
     _Strategy_Feature_Mode: _FeatureMode = None
     __Initialization = None
 
-    def __init__(self, persistence: _BasePersistenceTask = None):
-        super().__init__(persistence=persistence)
+    def __init__(self):
+        super().__init__()
         self.__Initialization = RunnableInitialization(mode=self._Strategy_Feature_Mode)
-
-
-    @property
-    def db_connection_pool_size(self) -> int:
-        """
-        Description:
-            The number of the connection instances which target to do something operators with database.
-        Note:
-            The number be suggested to be roughly equal to the CPUs amount of host which the program be run.
-        :return:
-        """
-        from multiprocessing import cpu_count
-
-        if self._db_conn_num < 0:
-            raise ValueError("The database connection pool size cannot less than 0.")
-
-        if self._db_conn_num is None or self._db_conn_num == 0:
-            return cpu_count()
-        else:
-            if self._db_conn_num > cpu_count():
-                logging.warning("Warning about suggestion is the best "
-                                "configuration of database connection instance "
-                                "should be less than CPU amounts.")
-            return self._db_conn_num
 
 
     def initialization(self,
@@ -251,8 +222,8 @@ class RunnableStrategy(BaseRunnableStrategy, ABC):
 
 class GeneralRunnableStrategy(RunnableStrategy):
     
-    def __init__(self, executors: int, persistence: _BasePersistenceTask = None):
-        super(GeneralRunnableStrategy, self).__init__(persistence=persistence)
+    def __init__(self, executors: int):
+        super(GeneralRunnableStrategy, self).__init__()
         self._executors_num = executors
 
 
@@ -402,8 +373,8 @@ class GeneralRunnableStrategy(RunnableStrategy):
 
 class PoolRunnableStrategy(RunnableStrategy):
 
-    def __init__(self, pool_size: int, tasks_size: int, persistence: _BasePersistenceTask = None):
-        super(PoolRunnableStrategy, self).__init__(persistence=persistence)
+    def __init__(self, pool_size: int, tasks_size: int):
+        super(PoolRunnableStrategy, self).__init__()
         self._pool_size = pool_size
         self._tasks_size = tasks_size
 
