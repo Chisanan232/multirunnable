@@ -12,7 +12,6 @@ from multirunnable.parallel.result import ParallelResult as _ParallelResult
 from multirunnable.framework import (
     BaseList as _BaseList,
     BaseQueueTask as _BaseQueueTask,
-    BasePersistenceTask as _BasePersistenceTask,
     BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory,
     GeneralRunnableStrategy as _GeneralRunnableStrategy,
     PoolRunnableStrategy as _PoolRunnableStrategy,

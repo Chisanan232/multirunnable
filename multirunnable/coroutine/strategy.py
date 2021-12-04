@@ -17,7 +17,6 @@ from multirunnable.coroutine.result import (
     AsynchronousResult as _AsynchronousResult)
 from multirunnable.framework import (
     BaseQueueTask as _BaseQueueTask,
-    BasePersistenceTask as _BasePersistenceTask,
     BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory,
     BaseList as _BaseList,
     GeneralRunnableStrategy as _GeneralRunnableStrategy,
@@ -158,7 +157,7 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
     _GreenThread_List: List[Greenlet] = []
     # _GreenThread_Running_Result: List = []
 
-    def __init__(self, pool_size: int, tasks_size: int, persistence: _BasePersistenceTask = None):
+    def __init__(self, pool_size: int, tasks_size: int):
         super().__init__(pool_size=pool_size, tasks_size=tasks_size)
 
 

@@ -13,7 +13,6 @@ from multirunnable.concurrent.result import ConcurrentResult as _ConcurrentResul
 from multirunnable.framework import (
     OceanResult as _OceanResult,
     BaseQueueTask as _BaseQueueTask,
-    BasePersistenceTask as _BasePersistenceTask,
     BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory,
     BaseList as _BaseList,
     GeneralRunnableStrategy as _GeneralRunnableStrategy,
@@ -142,7 +141,7 @@ class ThreadPoolStrategy(ConcurrentStrategy, _PoolRunnableStrategy, _Resultable)
     _Thread_Pool: ThreadPool = None
     _Thread_List: List[Union[ApplyResult, AsyncResult]] = None
 
-    def __init__(self, pool_size: int, tasks_size: int, persistence: _BasePersistenceTask = None):
+    def __init__(self, pool_size: int, tasks_size: int):
         super().__init__(pool_size=pool_size, tasks_size=tasks_size)
 
 
