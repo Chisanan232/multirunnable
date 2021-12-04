@@ -76,10 +76,6 @@ class ThreadStrategy(ConcurrentStrategy, _GeneralRunnableStrategy, _Resultable):
                        *args, **kwargs) -> None:
         super(ThreadStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
 
-        # # Persistence
-        if self._persistence_strategy is not None:
-            self._persistence_strategy.initialize(db_conn_num=self.db_connection_pool_size)
-
 
     @dispatch(MethodType, tuple, dict)
     def start_new_worker(self, target: Callable, args: Tuple = (), kwargs: Dict = {}) -> Thread:
@@ -147,7 +143,7 @@ class ThreadPoolStrategy(ConcurrentStrategy, _PoolRunnableStrategy, _Resultable)
     _Thread_List: List[Union[ApplyResult, AsyncResult]] = None
 
     def __init__(self, pool_size: int, tasks_size: int, persistence: _BasePersistenceTask = None):
-        super().__init__(pool_size=pool_size, tasks_size=tasks_size, persistence=persistence)
+        super().__init__(pool_size=pool_size, tasks_size=tasks_size)
 
 
     def initialization(self,
@@ -155,10 +151,6 @@ class ThreadPoolStrategy(ConcurrentStrategy, _PoolRunnableStrategy, _Resultable)
                        features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
                        *args, **kwargs) -> None:
         super(ThreadPoolStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
-
-        # # Persistence
-        if self._persistence_strategy is not None:
-            self._persistence_strategy.initialize(db_conn_num=self.db_connection_pool_size)
 
         # Initialize and build the Processes Pool.
         __pool_initializer: Callable = kwargs.get("pool_initializer", None)

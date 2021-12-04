@@ -78,10 +78,6 @@ class GreenThreadStrategy(BaseGreenThreadStrategy, _GeneralRunnableStrategy, _Re
                        *args, **kwargs) -> None:
         super(GreenThreadStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
 
-        # # Persistence
-        if self._persistence_strategy is not None:
-            self._persistence_strategy.initialize(db_conn_num=self.db_connection_pool_size)
-
 
     @dispatch(MethodType, tuple, dict)
     def start_new_worker(self, target: Callable, args: Tuple = (), kwargs: Dict = {}) -> Greenlet:
@@ -163,7 +159,7 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
     # _GreenThread_Running_Result: List = []
 
     def __init__(self, pool_size: int, tasks_size: int, persistence: _BasePersistenceTask = None):
-        super().__init__(pool_size=pool_size, tasks_size=tasks_size, persistence=persistence)
+        super().__init__(pool_size=pool_size, tasks_size=tasks_size)
 
 
     def initialization(self,
@@ -171,10 +167,6 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
                        features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
                        *args, **kwargs) -> None:
         super(GreenThreadPoolStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
-
-        # # Persistence
-        if self._persistence_strategy is not None:
-            self._persistence_strategy.initialize(db_conn_num=self.db_connection_pool_size)
 
         # Initialize and build the Processes Pool.
         # self._GreenThread_Pool = Pool(size=self.pool_size, greenlet_class=greenlet_class)
@@ -447,12 +439,6 @@ class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
         _running_event_loop = asyncio.get_running_loop()
         kwargs["event_loop"] = _running_event_loop
         await super(AsynchronousStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
-
-        # # Persistence
-        if self._persistence_strategy is not None:
-            self._persistence_strategy.initialize(
-                db_conn_num=self.db_connection_pool_size,
-                event_loop=kwargs.get("event_loop"))
 
 
     def generate_worker(self, target: Callable, *args, **kwargs) -> Task:
