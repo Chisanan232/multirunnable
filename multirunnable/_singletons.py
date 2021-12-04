@@ -120,35 +120,13 @@ class NamedSingletonMeta(type):
 
 class NamedSingletonABCMeta(ABCMeta):
 
-    # # # # Method 1. not work, it will raise exception about _pickleError
-    # import multiprocessing as mp
-    # _Instances: Dict[str, Any] = mp.Manager().dict()
-
-    # # # # Method 2. not work, it doesn't share this attribute
-    _Instances: Dict[str, Any] = {}
-
-    # # # # Method 3.
-    from ._g import get_instances, set_instances
-    # _Instances = _NamedInstance
+    _NamedInstances: Dict[str, Any] = {}
 
     def __call__(cls, *args, **kwargs):
-        print(f"[DEBUG] Current NamedSingletonABCMeta._Instances: {cls._Instances}")
-        # print(f"[DEBUG] Current NamedSingletonABCMeta._Instances: {_NamedInstances}")
         _cls_name = cls.__name__
-        print(f"[DEBUG] NamedSingletonABCMeta:: class name: {_cls_name}")
-        if _cls_name not in cls._Instances:
-        # if _cls_name not in _NamedInstances.keys():
-            print(f"[DEBUG] NamedSingletonABCMeta:: It doesn't have this instance by the class name '{_cls_name}'.")
+        if _cls_name not in cls._NamedInstances:
             __super_cls = super(NamedSingletonABCMeta, cls).__call__(*args, **kwargs)
-            cls._Instances[_cls_name] = __super_cls
-            # _NamedInstances[_cls_name] = __super_cls
-            # _cls_info = {_cls_name: __super_cls}
-            # print(f"[DEBUG] _cls_info: {_cls_info}")
-            # set_instances(_cls_info)
-        print(f"[DEBUG] Now NamedSingletonABCMeta._Instances: {cls._Instances}")
-        # print(f"[DEBUG] Now NamedSingletonABCMeta._Instances: {get_instances()}")
-        return cls._Instances[_cls_name]
-        # return _NamedInstances[_cls_name]
-        # return get_instances_by_key(_cls_name)
+            cls._NamedInstances[_cls_name] = __super_cls
+        return cls._NamedInstances[_cls_name]
 
 
