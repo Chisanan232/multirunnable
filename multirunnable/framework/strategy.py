@@ -1,7 +1,5 @@
 from .adapter.collection import BaseList as _BaseList
-from .task import (
-    BaseQueueTask as _BaseQueueTask,
-    BasePersistenceTask as _BasePersistenceTask)
+from .task import BaseQueueTask as _BaseQueueTask
 from .features import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
 from .result import OceanResult as _OceanResult
 from ..mode import FeatureMode as _FeatureMode
@@ -50,19 +48,6 @@ class BaseRunnableStrategy(metaclass=ABCMeta):
         else:
             __instance_brief = __cls_str
         return __instance_brief
-
-
-    @property
-    @abstractmethod
-    def db_connection_pool_size(self) -> int:
-        """
-        Description:
-            The number of the connection instances which target to do something operators with database.
-        Note:
-            The number be suggested to be roughly equal to the CPUs amount of host which the program be run.
-        :return:
-        """
-        pass
 
 
     def initialization(
