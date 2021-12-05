@@ -247,12 +247,6 @@ class BaseSingleConnection(BaseDatabaseConnection, ABC):
         :param kwargs:
         :return:
         """
-        # # # # Global version
-        # global Database_Connection, Database_Cursor
-        # Database_Connection = self.connect_database(**kwargs)
-        # Database_Cursor = self.build_cursor()
-
-        # # # # New version
         if kwargs:
             self._database_connection = self.connect_database(**kwargs)
         else:
@@ -300,18 +294,6 @@ class BaseConnectionPool(BaseDatabaseConnection):
         :param kwargs:
         :return:
         """
-        # # # # Old version
-        # # Get value
-        # __db_connection_number = cast(int, kwargs["db_conn_num"])
-        # __pool_name = kwargs.get("pool_name", self.__Default_Pool_Name)
-        #
-        # # # Database Connections Pool part
-        # # Initialize the Database Connection Instances Pool.
-        # database_connections_pool = self.connect_database(pool_name=__pool_name, pool_size=__db_connection_number)
-        # # Globalize object to share between different multiple processes
-        # Globalize.connection_pool(pool=database_connections_pool)
-
-        # # # # New version
         self.database_config = kwargs
         # Initialize the Database Connection Instances Pool.
         _db_pool = self.connect_database(**self.database_config)
@@ -330,8 +312,6 @@ class BaseConnectionPool(BaseDatabaseConnection):
             The number be suggested to be roughly equal to the CPUs amount of host which the program be run.
         :return:
         """
-        from multiprocessing import cpu_count
-
         _db_conn_num = self._Database_Config["pool_size"]
         if _db_conn_num < 0:
             raise ValueError("The database connection pool size cannot less than 0.")
