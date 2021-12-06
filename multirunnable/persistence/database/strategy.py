@@ -175,6 +175,16 @@ class BaseDatabaseConnection(BasePersistence):
 
 
     @abstractmethod
+    def reconnect(self, timeout: int = 3) -> Generic[T]:
+        """
+        Description:
+            Reconnection to database and return the connection or connection pool instance.
+        :return:
+        """
+        pass
+
+
+    @abstractmethod
     def get_one_connection(self) -> Generic[T]:
         """
         Description:
@@ -252,6 +262,18 @@ class BaseSingleConnection(BaseDatabaseConnection, ABC):
         else:
             self._database_connection = self.connect_database(**self.database_config)
         self._database_cursor = self.build_cursor()
+
+
+    def reconnect(self, timeout: int = 3) -> Generic[T]:
+        _running_time = 0
+        while _running_time <= timeout:
+            self._database_connection = self.connect_database(**self.database_config)
+            if self._database_connection is not None:
+                return self._database_connection
+
+            _running_time += 1
+        else:
+            raise ConnectionError("Cannot reconnect to database.")
 
 
     def get_one_connection(self) -> Generic[T]:
@@ -359,6 +381,20 @@ class BaseConnectionPool(BaseDatabaseConnection):
             return None
         else:
             return _db_conn_pool
+
+
+    def reconnect(self, timeout: int = 3) -> Generic[T]:
+        _running_time = 0
+        while _running_time <= timeout:
+            _db_pool = self.connect_database(**self.database_config)
+            if _db_pool is not None:
+                _pool_name = self.database_config.get("pool_name", "")
+                Globalize.connection_pool(name=_pool_name, pool=_db_pool)
+                return self.get_one_connection()
+
+            _running_time += 1
+        else:
+            raise ConnectionError("Cannot reconnect to database.")
 
 
     @abstractmethod
