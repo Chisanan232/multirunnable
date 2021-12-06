@@ -2,7 +2,7 @@
 A unittest for pyocean.mode module
 """
 
-from pyocean.mode import RunningMode, FeatureMode
+from multirunnable.mode import RunningMode, FeatureMode
 from abc import ABCMeta, abstractmethod
 
 

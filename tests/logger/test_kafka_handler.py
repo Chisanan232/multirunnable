@@ -5,10 +5,10 @@ __package_pyocean = str(pathlib.Path(__file__).parent.parent.parent.absolute())
 print("Package path: ", __package_pyocean)
 sys.path.append(__package_pyocean)
 
-from pyocean.logging.level import OceanLogger
-from pyocean.logging.config import LogLevel
-from pyocean.logging.kafka import KafkaProducerConfig, KafkaMsgSenderConfig, KafkaHandler
-from pyocean.logging.config import LoggingConfig
+from multirunnable.logging.level import OceanLogger
+from multirunnable.logging.config import LogLevel
+from multirunnable.logging.kafka import KafkaProducerConfig, KafkaMsgSenderConfig, KafkaHandler
+from multirunnable.logging.config import LoggingConfig
 
 __logging_config = LoggingConfig()
 
