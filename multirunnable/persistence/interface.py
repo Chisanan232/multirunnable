@@ -14,8 +14,3 @@ class DataPersistenceLayer(metaclass=ABCMeta):
     def __init__(self, **kwargs):
         pass
 
-
-
-class OceanFao(metaclass=ABCMeta):
-    pass
-
