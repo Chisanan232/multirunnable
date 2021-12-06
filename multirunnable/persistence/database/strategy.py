@@ -10,10 +10,52 @@ import logging
 
 T = TypeVar("T")
 
-Database_Connection_Pools: Dict[str, Any] = {}
-Database_Connection: Generic[T] = None
-Database_Session: Generic[T] = None
-Database_Cursor: Generic[T] = None
+_Database_Connection_Pools: Dict[str, Any] = {}
+_Database_Connection: Generic[T] = None
+_Database_Session: Generic[T] = None
+_Database_Cursor: Generic[T] = None
+
+_Query_State = None
+
+
+class G:
+    """
+    Description:
+        Some operations about getting or setting global variable like connection, cursor or something else.
+    """
+
+    @classmethod
+    def get_connection(cls) -> Generic[T]:
+        return _Database_Connection
+
+
+    @classmethod
+    def set_connection(cls, conn: Generic[T]) -> None:
+        global _Database_Connection
+        _Database_Connection = conn
+
+
+    @classmethod
+    def get_session(cls) -> Generic[T]:
+        return _Database_Session
+
+
+    @classmethod
+    def set_session(cls, conn: Generic[T]) -> None:
+        global _Database_Session
+        _Database_Session = conn
+
+
+    @classmethod
+    def get_cursor(cls) -> Generic[T]:
+        return _Database_Cursor
+
+
+    @classmethod
+    def set_cursor(cls, conn: Generic[T]) -> None:
+        global _Database_Cursor
+        _Database_Cursor = conn
+
 
 
 class BaseDatabaseConnection(BasePersistence):
@@ -116,7 +158,6 @@ class BaseDatabaseConnection(BasePersistence):
             Get all database configuration content.
         :return:
         """
-        print(f"[DEBUG] update config: {config}")
         self._Database_Config.update(config)
 
 
@@ -273,7 +314,8 @@ class BaseSingleConnection(BaseDatabaseConnection, ABC):
 
             _running_time += 1
         else:
-            raise ConnectionError("Cannot reconnect to database.")
+            raise ConnectionError(f"It's timeout to retry (Retry value is {timeout}). "
+                                  f"Cannot reconnect to database.")
 
 
     def get_one_connection(self) -> Generic[T]:
@@ -292,6 +334,8 @@ class BaseConnectionPool(BaseDatabaseConnection):
         super().__init__(**kwargs)
         _pool_name = cast(str, kwargs.get("pool_name", self.__Default_Pool_Name))
         _pool_size = cast(int, kwargs.get("pool_size", cpu_count()))
+        if _pool_size < 0:
+            raise ValueError("The database connection pool size cannot less than 0.")
 
         self.database_config.update({
             "pool_name": _pool_name,
@@ -366,7 +410,7 @@ class BaseConnectionPool(BaseDatabaseConnection):
             Get the database connection pool which has been globalized.
         :return:
         """
-        return Database_Connection_Pools
+        return _Database_Connection_Pools
 
 
     def get_connection_pool(self, pool_name: str) -> Generic[T]:
@@ -376,7 +420,7 @@ class BaseConnectionPool(BaseDatabaseConnection):
         :return:
         """
         try:
-            _db_conn_pool = Database_Connection_Pools[pool_name]
+            _db_conn_pool = _Database_Connection_Pools[pool_name]
         except KeyError as e:
             return None
         else:
@@ -413,8 +457,8 @@ class Globalize:
     @staticmethod
     def connection(conn: Generic[T]) -> None:
         if conn is not None:
-            global Database_Connection
-            Database_Connection = conn
+            global _Database_Connection
+            _Database_Connection = conn
         else:
             raise GlobalizeObjectError
 
@@ -422,8 +466,8 @@ class Globalize:
     @staticmethod
     def session(session: Generic[T]) -> None:
         if session is not None:
-            global Database_Session
-            Database_Session = session
+            global _Database_Session
+            _Database_Session = session
         else:
             raise GlobalizeObjectError
 
@@ -431,8 +475,8 @@ class Globalize:
     @staticmethod
     def cursor(cursor: Generic[T]) -> None:
         if cursor is not None:
-            global Database_Cursor
-            Database_Cursor = cursor
+            global _Database_Cursor
+            _Database_Cursor = cursor
         else:
             raise GlobalizeObjectError
 
@@ -440,8 +484,8 @@ class Globalize:
     @staticmethod
     def connection_pool(name: str, pool: Generic[T]) -> None:
         if pool is not None:
-            global Database_Connection_Pools
-            Database_Connection_Pools[name] = pool
+            global _Database_Connection_Pools
+            _Database_Connection_Pools[name] = pool
         else:
             raise GlobalizeObjectError
 
