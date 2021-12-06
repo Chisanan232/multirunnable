@@ -1,6 +1,30 @@
 from multiprocessing.managers import BaseManager
+from multiprocessing import managers
 from inspect import isclass as inspect_isclass
 from typing import Dict, Any
+
+"""
+Note:
+    It raises exception about "TypeError: AutoProxy() got an unexpected 
+    keyword argument 'manager_owned'" when it has nested manager scenario. 
+    
+    It's a bug of Python native package --- multiprocessing. Please refer to the URL below: 
+    * Stackoverflow discussion: https://stackoverflow.com/questions/46779860/multiprocessing-managers-and-custom-classes
+    * Python Bug record: https://bugs.python.org/issue30256
+"""
+
+# Backup original AutoProxy function
+backup_autoproxy = managers.AutoProxy
+
+
+# Defining a new AutoProxy that handles unwanted key argument 'manager_owned'
+def redefined_autoproxy(token, serializer, manager=None, authkey=None, exposed=None, incref=True, manager_owned=True):
+    # Calling original AutoProxy without the unwanted key argument
+    return backup_autoproxy(token, serializer, manager, authkey, exposed, incref)
+
+
+# Updating AutoProxy definition in multiprocessing.managers package
+managers.AutoProxy = redefined_autoproxy
 
 
 _Assign_Manager_Flag: Dict[str, bool] = {}
@@ -27,10 +51,11 @@ def get_manager_attr(attr: str) -> Any:
     return getattr(_Current_Sharing_Manager, attr)
 
 
-def assign_to_manager(target_cls) -> None:
+def register_to_manager(target_cls: Any, proxytype: Any = None) -> None:
     """
     Description:
         Register the target class to sub-class of 'multiprocessing.managers.BaseManager'.
+    :param proxytype:
     :param target_cls:
     :return:
     """
@@ -39,7 +64,7 @@ def assign_to_manager(target_cls) -> None:
     _chk_cls(target_cls)
 
     def _assign() -> None:
-        _SharingManager.register(typeid=str(_cls_name), callable=target_cls)
+        _SharingManager.register(typeid=str(_cls_name), callable=target_cls, proxytype=proxytype)
         _Assign_Manager_Flag[_cls_name] = True
 
     _cls_name = target_cls.__name__
@@ -65,7 +90,7 @@ def SharingManager() -> _SharingManager:
     return _Current_Sharing_Manager
 
 
-def sharing_in_processes(_class):
+def sharing_in_processes(proxytype: Any = None):
     """
     Description:
         This is a decorator which could register target class into sub-class of
@@ -80,22 +105,24 @@ def sharing_in_processes(_class):
 
         _foo = Foo()    # It could be used and shared in each different processes.
 
+    :param proxytype:
     :param _class: A class.
     :return: The instance which could be used and shared in each different processes.
     """
 
-    _chk_cls(_class)
+    def _sharing(_class):
 
-    def _(*args, **kwargs) -> Any:
-        _cls_name = _class.__name__
-        _cls = get_manager_attr(_cls_name)
-        print(f"[DEBUG] sharing_in_processes._cls: {_cls}")
-        print(f"[DEBUG] sharing_in_processes.args: {args}")
-        print(f"[DEBUG] sharing_in_processes.kwargs: {kwargs}")
-        return _cls(*args, **kwargs)
+        _chk_cls(_class)
 
-    assign_to_manager(_class)
-    return _
+        def _(*args, **kwargs) -> Any:
+            _cls_name = _class.__name__
+            _cls = get_manager_attr(_cls_name)
+            return _cls(*args, **kwargs)
+
+        register_to_manager(target_cls=_class, proxytype=proxytype)
+        return _
+
+    return _sharing
 
 
 def _chk_cls(_cls) -> None:
