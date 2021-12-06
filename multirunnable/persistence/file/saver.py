@@ -1,148 +1,150 @@
-from multirunnable.persistence.interface import OceanPersistence
-from multirunnable.persistence.file.file import BaseFileFormatter, BaseDataFormatterString
-from multirunnable.persistence.file.compress import BaseArchiver
-from multirunnable.persistence.file.utils import FileImportUtils
-from multirunnable.persistence.file.exceptions import FilePathCannotBeEmpty, ClassNotInstanceOfBaseFileFormatter, NotSupportHandlingFileType
+from multirunnable.persistence.file import (
+    SavingStrategy as _SavingStrategy,
+    _Super_Worker_Saving_File_Key,
+    _Sub_Worker_Saving_File_Key,
+    _Activate_Compress_Key
+)
+from .files import BaseFile as _BaseFile
+from .archivers import BaseArchiver as _BaseArchiver
+from .mediator import BaseMediator as _BaseMediator
 
 from abc import ABCMeta, abstractmethod
-from typing import List, Callable, Iterable, Union
-import re
+from typing import List, Union, Optional
+from collections import namedtuple
+import logging
 
 
-
-class BaseFileSaver(OceanPersistence):
-
-    _File_Formatter: BaseFileFormatter = None
-    __File_Formatter_Supper: List[str] = ["json", "csv", "xlsx"]
-
-    _File_Path: str = ""
-    _File_Opening_Mode: str = "a+"
-    _File_Encoding: str = "UTF-8"
-
-    def __init__(self, file_path: str, file_format: BaseFileFormatter):
-        if len(file_path) != 0:
-            self.__chk_file_is_valid(file_path)
-        else:
-            raise FilePathCannotBeEmpty
-
-        if isinstance(file_format, BaseFileFormatter):
-            self._File_Formatter = file_format
-        else:
-            raise ClassNotInstanceOfBaseFileFormatter
+_Done_Flag = 1
+_Do_Nothing_Flag = 0
+_Error_Flag = -1
 
 
-    def __chk_file_is_valid(self, file_path: str) -> None:
-        file_type = self.__get_file_type(file_path)
-        if self.__file_type_is_valid(file_type):
-            self._File_Path = file_path
-        else:
-            raise NotSupportHandlingFileType
-
-
-    def __get_file_type(self, file_path: str) -> str:
-        return str(file_path).split(".")[-1]
-
-
-    def __file_type_is_valid(self, file_type: str) -> bool:
-        for file_format in self.__File_Formatter_Supper:
-            if re.search(re.escape(file_format), file_type) is not None:
-                return True
-        else:
-            return False
-
-
-    @property
-    def file_path(self) -> str:
-        return self._File_Path
-
-
-    @file_path.setter
-    def file_path(self, path: str) -> None:
-        self._File_Path = path
-
-
-    @property
-    def file_open_mode(self) -> str:
-        return self._File_Opening_Mode
-
-
-    @file_open_mode.setter
-    def file_open_mode(self, mode: str) -> None:
-        self._File_Opening_Mode = mode
-
-
-    @property
-    def file_encoding(self) -> str:
-        return self._File_Encoding
-
-
-    @file_encoding.setter
-    def file_encoding(self, encoding: str) -> None:
-        self._File_Encoding = encoding
-
+class BaseSaver(metaclass=ABCMeta):
 
     @abstractmethod
-    def save(self, data: list) -> None:
+    def register(self, mediator: _BaseMediator, strategy: _SavingStrategy) -> None:
         pass
 
 
 
-class SingleFileSaver(BaseFileSaver):
+class FileSaver(BaseSaver):
 
-    def save(self, data: list) -> None:
-        self._File_Formatter.open(file_path=self._File_Path, open_mode=self._File_Opening_Mode, encoding=self._File_Encoding)
-        fin_data = self._File_Formatter.data_handling(data=data)
-        self._File_Formatter.write(data=fin_data)
-        self._File_Formatter.done()
+    __File: _BaseFile = None
+    __Mediator: _BaseMediator = None
+    __Has_Data: bool = None
 
-
-
-class BaseArchiverSaver(metaclass=ABCMeta):
-
-    def __init__(self, archiver: BaseArchiver):
-        self._archiver = archiver
+    def __init__(self, file: _BaseFile):
+        if not isinstance(file, _BaseFile):
+            raise TypeError("Parameter *file* should be one of smoothcrawler.persistence.(CSVFormatter, XLSXFormatter, JSONFormatter).")
+        self.__File = file
 
 
-    def save(self, file_path: List[str], data: List):
-        data_string = self.data_handling(file_path=file_path, data=data)
-        self.compress(data=data_string)
+    def register(self, mediator: _BaseMediator, strategy: _SavingStrategy) -> None:
+        self.__Mediator = mediator
+        self.__Mediator.super_worker_running = strategy.value[_Super_Worker_Saving_File_Key]
+        self.__Mediator.child_worker_running = strategy.value[_Sub_Worker_Saving_File_Key]
+        self.__Mediator.enable_compress = strategy.value[_Activate_Compress_Key]
 
 
-    @abstractmethod
-    def data_handling(self, file_path: List[str], data: List) -> List[BaseDataFormatterString]:
-        pass
+    def save(self, file: str, mode: str, data: List[list], encoding: str = "UTF-8"):
+        if self.__Mediator is None:
+            self.__saving_process(file=file, mode=mode, encoding=encoding, data=data)
+        else:
+            if self.__Mediator.super_worker_running is True:
+                if self.__Mediator.child_worker_running is True:
+                    # 'ONE_THREAD_ONE_FILE_AND_COMPRESS_ALL' strategy.
+                    if self.__Mediator.is_super_worker():
+                        # This's super worker and its responsibility is compressing all files
+                        # This process should not handle and run here. It's Archiver's responsibility.
+                        logging.warning(f"This's main worker (thread, process, etc) so that it doesn't do anything here.")
+                        self.__Has_Data = False
+                        return _Do_Nothing_Flag
+                    else:
+                        # This's child worker and its responsibility is generating data stream with one specific file format
+                        data_stream = self.__saving_stream(file=file, data=data)
+                        self.__Has_Data = True
+                        return data_stream
+                else:
+                    # 'ALL_THREADS_ONE_FILE' strategy.
+                    if self.__Mediator.is_super_worker():
+                        # This's super worker and its responsibility is saving data as file
+                        self.__saving_process(file=file, mode=mode, encoding=encoding, data=data)
+                        self.__Has_Data = False
+                        return _Done_Flag
+                    else:
+                        # This's child worker and its responsibility is compressing all files
+                        self.__Has_Data = True
+                        return data
+            else:
+                if self.__Mediator.is_super_worker():
+                    logging.warning(f"This's main worker (thread, process, etc) so that it doesn't do anything here.")
+                    self.__Has_Data = False
+                    return _Do_Nothing_Flag
+                else:
+                    # It must to be 'One Thread One File' strategy.
+                    self.__saving_process(file=file, mode=mode, encoding=encoding, data=data)
+                    self.__Has_Data = False
+                    return _Done_Flag
 
 
-    @abstractmethod
-    def compress(self, data: List[BaseDataFormatterString]) -> None:
-        """
-        Description:
-            Compress file(s) which saving target data with specific file format.
-        :param data:
-        :return:
-        """
-        pass
+    def has_data(self) -> bool:
+        return self.__Has_Data
+
+
+    def __saving_process(self, file: str, mode: str, encoding: str, data: List[list]):
+        self.__File.file_path = file
+        self.__File.mode = mode
+        self.__File.encoding = encoding
+        self.__File.open()
+        self.__File.write(data=data)
+        self.__File.close()
+
+
+    def __saving_stream(self, file: str, data: List):
+        data = self.__File.stream(data=data)
+        DataStream = namedtuple("DataStream", ("file_path", "data"))
+        DataStream.file_path = file
+        DataStream.data = data
+        return DataStream
 
 
 
-class ArchiverSaver(BaseArchiverSaver):
+class ArchiverSaver:
 
-    def data_handling(self, file_path: List[str], data: List) -> List[BaseDataFormatterString]:
-        _util = FileImportUtils()
-        __data_string = []
+    __Archiver: _BaseArchiver = None
+    __Mediator: _BaseMediator = None
 
-        for __file_path in file_path:
-            __file_type = __file_path.split(sep=".")[-1]
-            data_formatter: BaseDataFormatterString = _util.get_data_formatter_instance(file_type=__file_type)
-            data_formatter.file_path = __file_path
-            data_formatter.data_string(data=data)
-            __data_string.append(data_formatter)
-
-        return __data_string
+    def __init__(self, archiver: _BaseArchiver):
+        if not isinstance(archiver, _BaseArchiver):
+            raise TypeError("Parameter *file* should be one of smoothcrawler.persistence.(ZIPArchiver).")
+        self.__Archiver = archiver
 
 
-    def compress(self, data: List[BaseDataFormatterString]) -> None:
-        self._archiver.init()
-        self._archiver.write(data=data)
-        self._archiver.close()
+    def register(self, mediator: _BaseMediator, strategy: _SavingStrategy) -> None:
+        self.__Mediator = mediator
+        self.__Mediator.super_worker_running = strategy.value[_Super_Worker_Saving_File_Key]
+        self.__Mediator.child_worker_running = strategy.value[_Sub_Worker_Saving_File_Key]
+        self.__Mediator.enable_compress = strategy.value[_Activate_Compress_Key]
+
+
+    def compress(self, file: str, mode: str, data: List[namedtuple]) -> None:
+        if self.__Mediator is None:
+            self.__compress_process(file=file, mode=mode, data=data)
+        else:
+            if self.__Mediator.super_worker_running is True:
+                if self.__Mediator.child_worker_running is True:
+                    # 'ONE_THREAD_ONE_FILE_AND_COMPRESS_ALL' strategy.
+                    if self.__Mediator.is_super_worker():
+                        # This's super worker and its responsibility is compressing all files
+                        # This process should not handle and run here. It's Archiver's responsibility.
+                        self.__compress_process(file=file, mode=mode, data=data)
+
+
+    def __compress_process(self, file: str, mode: str, data: List):
+        self.__Archiver.file_path = file
+        self.__Archiver.mode = mode
+        self.__Archiver.init()
+        self.__Archiver.compress(data_map_list=data)
+        self.__Archiver.close()
+
 
