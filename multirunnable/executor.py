@@ -8,7 +8,7 @@ from .framework import (
     BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory,
     BaseExecutor as _BaseExecutor,
     GeneralRunnableStrategy as _GeneralRunnableStrategy,
-    OceanResult as _OceanResult
+    MRResult as _MRResult
 )
 from .mode import RunningMode as _RunningMode
 from .adapter.strategy import ExecutorStrategyAdapter as _ExecutorStrategyAdapter
@@ -91,7 +91,7 @@ class Executor(ABC, _BaseExecutor):
         General_Runnable_Strategy.kill()
 
 
-    def result(self) -> List[_OceanResult]:
+    def result(self) -> List[_MRResult]:
         return General_Runnable_Strategy.get_result()
 
 

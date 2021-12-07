@@ -6,8 +6,8 @@ from multirunnable.framework.features import (
     PosixThreadCommunication as _PosixThreadCommunication,
     BaseQueueType as _BaseQueueType)
 from multirunnable.types import (
-    OceanCondition as _OceanCondition,
-    OceanEvent as _OceanEvent
+    MRCondition as _MRCondition,
+    MREvent as _MREvent
 )
 from multirunnable.exceptions import VersionError
 
@@ -69,11 +69,11 @@ class GreenThreadLock(_PosixThreadLock):
 
 class GreenThreadCommunicationSpec(_PosixThreadCommunication):
 
-    def get_event(self, *args, **kwargs) -> _OceanEvent:
+    def get_event(self, *args, **kwargs) -> _MREvent:
         pass
 
 
-    def get_condition(self, *args, **kwargs) -> _OceanCondition:
+    def get_condition(self, *args, **kwargs) -> _MRCondition:
         raise RuntimeError("Greenlet doesn't have condition attribute.")
 
 

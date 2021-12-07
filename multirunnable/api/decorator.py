@@ -3,7 +3,7 @@ from typing import List, Tuple, Dict, Callable, Type, Any, Union
 from abc import ABCMeta, abstractmethod
 import inspect
 
-from multirunnable.framework.result import OceanResult as _OceanResult
+from multirunnable.framework.result import MRResult as _MRResult
 from multirunnable.api.operator import (
     LockAdapterOperator as _LockOperator,
     SemaphoreOperator as _SemaphoreOperator,
@@ -320,7 +320,7 @@ class _AsyncRetry:
 class RunWith:
 
     @staticmethod
-    def Lock(function: Callable[[Any, Any], List[Type[_OceanResult]]]):
+    def Lock(function: Callable[[Any, Any], List[Type[_MRResult]]]):
         """
         Description:
             A decorator which would add lock mechanism around the target
@@ -329,7 +329,7 @@ class RunWith:
         """
 
         @wraps(function)
-        def __lock_process(*args, **kwargs) -> List[Type[_OceanResult]]:
+        def __lock_process(*args, **kwargs) -> List[Type[_MRResult]]:
             __lock = _LockOperator()
 
             with __lock:
@@ -340,7 +340,7 @@ class RunWith:
 
 
     @staticmethod
-    def Semaphore(function: Callable[[Any, Any], List[Type[_OceanResult]]]):
+    def Semaphore(function: Callable[[Any, Any], List[Type[_MRResult]]]):
         """
         Description:
             A decorator which would add semaphore mechanism around the
@@ -349,7 +349,7 @@ class RunWith:
         """
 
         @wraps(function)
-        def __semaphore_process(*args, **kwargs) -> List[Type[_OceanResult]]:
+        def __semaphore_process(*args, **kwargs) -> List[Type[_MRResult]]:
             __semaphore = _SemaphoreOperator()
 
             with __semaphore:
@@ -360,7 +360,7 @@ class RunWith:
 
 
     @staticmethod
-    def Bounded_Semaphore(function: Callable[[Any, Any], List[Type[_OceanResult]]]):
+    def Bounded_Semaphore(function: Callable[[Any, Any], List[Type[_MRResult]]]):
         """
         Description:
             A decorator which would add bounded semaphore mechanism
@@ -369,7 +369,7 @@ class RunWith:
         """
 
         @wraps(function)
-        def __bounded_semaphore_process(*args, **kwargs) -> List[Type[_OceanResult]]:
+        def __bounded_semaphore_process(*args, **kwargs) -> List[Type[_MRResult]]:
             __bounded_semaphore = _BoundedSemaphoreOperator()
 
             with __bounded_semaphore:
@@ -391,7 +391,7 @@ class AsyncRunWith:
         """
 
         @wraps(function)
-        async def __lock_process(*args, **kwargs) -> List[Type[_OceanResult]]:
+        async def __lock_process(*args, **kwargs) -> List[Type[_MRResult]]:
             __lock = _LockAsyncOperator()
 
             async with __lock:
@@ -410,7 +410,7 @@ class AsyncRunWith:
         """
 
         @wraps(function)
-        async def __semaphore_process(*args, **kwargs) -> List[Type[_OceanResult]]:
+        async def __semaphore_process(*args, **kwargs) -> List[Type[_MRResult]]:
             __semaphore = _SemaphoreAsyncOperator()
 
             async with __semaphore:
@@ -429,7 +429,7 @@ class AsyncRunWith:
         """
 
         @wraps(function)
-        async def __bounded_semaphore_process(*args, **kwargs) -> List[Type[_OceanResult]]:
+        async def __bounded_semaphore_process(*args, **kwargs) -> List[Type[_MRResult]]:
             __bounded_semaphore = _BoundedSemaphoreAsyncOperator()
 
             async with __bounded_semaphore:

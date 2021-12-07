@@ -8,14 +8,14 @@ from .framework import (
     BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory,
     PoolRunnableStrategy as _PoolRunnableStrategy,
     Resultable as _Resultable,
-    OceanResult as _OceanResult
+    MRResult as _MRResult
 )
 from .mode import RunningMode as _RunningMode
 from .tasks import OceanPersistenceTask as _OceanPersistenceTask
 from .adapter.strategy import PoolStrategyAdapter as _PoolStrategyAdapter
 from .persistence.interface import BasePersistence as _BasePersistence
 from ._config import set_mode
-
+s
 
 _Pool_Runnable_Type = Union[_PoolRunnableStrategy, _Resultable]
 Pool_Runnable_Strategy: _Pool_Runnable_Type = None
@@ -122,7 +122,7 @@ class Pool(ABC, _BasePool):
         Pool_Runnable_Strategy.terminal()
 
 
-    def get_result(self) -> List[_OceanResult]:
+    def get_result(self) -> List[_MRResult]:
         __result = Pool_Runnable_Strategy.get_result()
         return __result
 

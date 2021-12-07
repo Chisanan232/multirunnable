@@ -46,7 +46,7 @@ class BaseResult(metaclass=ABCMeta):
 
 
 
-class OceanResult(BaseResult):
+class MRResult(BaseResult):
 
     _PID: str = ""
     _Worker_ID: str = ""

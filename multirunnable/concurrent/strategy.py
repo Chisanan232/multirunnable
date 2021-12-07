@@ -11,7 +11,7 @@ from multirunnable.mode import FeatureMode as _FeatureMode
 from multirunnable.types import MRTasks as _MRTasks
 from multirunnable.concurrent.result import ConcurrentResult as _ConcurrentResult
 from multirunnable.framework import (
-    OceanResult as _OceanResult,
+    MRResult as _MRResult,
     BaseQueueTask as _BaseQueueTask,
     BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory,
     BaseList as _BaseList,
@@ -131,7 +131,7 @@ class ThreadStrategy(ConcurrentStrategy, _GeneralRunnableStrategy, _Resultable):
         pass
 
 
-    def get_result(self) -> List[_OceanResult]:
+    def get_result(self) -> List[_MRResult]:
         return self.result()
 
 

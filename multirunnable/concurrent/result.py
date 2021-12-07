@@ -1,7 +1,7 @@
-from multirunnable.framework.result import OceanResult as _OceanResult
+from multirunnable.framework.result import MRResult as _MRResult
 
 
 
-class ConcurrentResult(_OceanResult):
+class ConcurrentResult(_MRResult):
 
     pass

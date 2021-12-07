@@ -1,7 +1,7 @@
 from .task import BaseQueueTask as _BaseQueueTask
 from .features import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
 from .adapter.collection import BaseList as _BaseList
-from .result import OceanResult as _OceanResult
+from .result import MRResult as _MRResult
 from ..mode import RunningMode as _RunningMode
 import multirunnable._utils as _utils
 
@@ -151,7 +151,7 @@ class BaseExecutor(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def result(self) -> List[_OceanResult]:
+    def result(self) -> List[_MRResult]:
         """
         Description:
             Get the running result.

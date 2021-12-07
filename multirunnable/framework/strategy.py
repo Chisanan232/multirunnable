@@ -1,7 +1,7 @@
 from .adapter.collection import BaseList as _BaseList
 from .task import BaseQueueTask as _BaseQueueTask
 from .features import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
-from .result import OceanResult as _OceanResult
+from .result import MRResult as _MRResult
 from ..mode import FeatureMode as _FeatureMode
 from ..types import MRTasks as _MRTasks
 import multirunnable._utils as _utils
@@ -577,7 +577,7 @@ class AsyncRunnableStrategy(GeneralRunnableStrategy, ABC):
 class Resultable(metaclass=ABCMeta):
 
     @abstractmethod
-    def get_result(self) -> List[_OceanResult]:
+    def get_result(self) -> List[_MRResult]:
         """
         Description:
             Return the result of every tasks done.

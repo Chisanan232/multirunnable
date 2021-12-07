@@ -1,13 +1,13 @@
-from multirunnable.framework.result import OceanResult as _OceanResult
+from multirunnable.framework.result import MRResult as _MRResult
 
 
 
-class CoroutineResult(_OceanResult):
+class CoroutineResult(_MRResult):
     pass
 
 
 
-class AsynchronousResult(_OceanResult):
+class AsynchronousResult(_MRResult):
 
     _Event_Loop = None
 

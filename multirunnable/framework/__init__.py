@@ -50,7 +50,7 @@ from .features import (
     PosixThreadCommunication,
     BaseFeatureAdapterFactory,
     BaseGlobalizeAPI)
-from .result import OceanResult, ResultState
+from .result import MRResult, ResultState
 
 from .api import (
     AdapterOperator, BaseLockAdapterOperator,

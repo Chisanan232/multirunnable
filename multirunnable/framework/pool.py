@@ -1,4 +1,4 @@
-from .result import OceanResult as _OceanResult
+from .result import MRResult as _MRResult
 from ..mode import RunningMode as _RunningMode
 from ..types import MRTasks as _MRTasks
 import multirunnable._utils as _utils
@@ -210,7 +210,7 @@ class BasePool(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def get_result(self) -> List[_OceanResult]:
+    def get_result(self) -> List[_MRResult]:
         """
         Description:
             Get the running result.
