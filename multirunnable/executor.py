@@ -13,7 +13,7 @@ from .framework import (
 from .mode import RunningMode as _RunningMode
 from .adapter.strategy import ExecutorStrategyAdapter as _ExecutorStrategyAdapter
 from .tasks import OceanPersistenceTask as _OceanPersistenceTask
-from .persistence.interface import OceanPersistence as _OceanPersistence
+from .persistence.interface import BasePersistence as _BasePersistence
 from ._config import set_mode
 
 
@@ -118,7 +118,7 @@ class PersistenceExecutor(Executor):
     def __init__(self,
                  mode: _RunningMode,
                  executors: int,
-                 persistence_strategy: _OceanPersistence,
+                 persistence_strategy: _BasePersistence,
                  db_connection_pool_size: int):
         super().__init__(mode=mode, executors=executors)
         self.persistence_strategy = persistence_strategy

@@ -13,7 +13,7 @@ from .framework import (
 from .mode import RunningMode as _RunningMode
 from .tasks import OceanPersistenceTask as _OceanPersistenceTask
 from .adapter.strategy import PoolStrategyAdapter as _PoolStrategyAdapter
-from .persistence.interface import OceanPersistence as _OceanPersistence
+from .persistence.interface import BasePersistence as _BasePersistence
 from ._config import set_mode
 
 
@@ -153,7 +153,7 @@ class PersistencePool(Pool):
                  mode: _RunningMode,
                  pool_size: int,
                  tasks_size: int,
-                 persistence_strategy: _OceanPersistence,
+                 persistence_strategy: _BasePersistence,
                  db_connection_pool_size: int):
         super().__init__(mode=mode, pool_size=pool_size)
         self.tasks_size = tasks_size
