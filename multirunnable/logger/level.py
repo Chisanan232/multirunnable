@@ -11,7 +11,7 @@ import getpass
 
 
 
-class OceanLogger:
+class MRLogger:
 
     __Logger_Instance = None
     __New_Flag: bool = False
@@ -26,7 +26,7 @@ class OceanLogger:
             import os
             if cls.__Logger_Instance is None:
                 print("[DEBUG] new the class Logger. pid: ", os.getpid())
-                cls.__Logger_Instance = super(OceanLogger, cls).__new__(cls)
+                cls.__Logger_Instance = super(MRLogger, cls).__new__(cls)
                 cls.__New_Flag = True
             else:
                 cls.__New_Flag = False

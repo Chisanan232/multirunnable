@@ -1,7 +1,7 @@
 import logging as Ocean_Logging
 from multirunnable.logger.config import LogLevel, LoggingConfigDefaultValue, LoggingConfig
 from multirunnable.logger.color import TerminalColor
-from multirunnable.logger.level import OceanLogger
+from multirunnable.logger.level import MRLogger
 from multirunnable.logger.kafka import KafkaMsgSenderConfig, KafkaProducerConfig, KafkaHandler
 from logging import StreamHandler, FileHandler
 
@@ -18,6 +18,6 @@ __sender_config = {"topic": "logging_test", "key": "test"}
 # kafka_stream_hdlr = KafkaHandler(producer_configs=__producer_config, sender_configs=__sender_config)
 
 # # Initialize Logger instance
-ocean_logger = OceanLogger(config=__logging_config, handlers=[sys_stream_hdlr])
+ocean_logger = MRLogger(config=__logging_config, handlers=[sys_stream_hdlr])
 ocean_logger.debug(f"Initialize logging at concurrent.__init__. Level is {__logging_config.level}")
 
