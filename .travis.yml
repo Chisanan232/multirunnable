@@ -1,0 +1,31 @@
+language: python
+python:
+  - 3.6
+  - 3.7
+  - 3.8
+  - 3.9
+  - 3.10
+
+notifications:
+  email:
+   recipients:
+      - bulls23mj1991@gmail.com
+
+before_install:
+  - python --version
+  - pip install -U pip
+  - pip install -U pytest
+  - pip install -U pytest-cov
+  - pip install codecov
+
+install:
+  - pip install -r requirements.txt    # install package + test dependencies
+
+script:
+  - pytest    # run tests
+
+after_success:
+#  - codecov    # submit coverage
+#  - coveralls    # submit coverage to coveralls
+  - codecov -t $CODECOV_TOKEN    # submit coverage to codecov
+
