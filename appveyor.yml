@@ -3,6 +3,9 @@
 #image: Visual Studio 2022
 
 environment:
+  COVERALLS_TOKEN:
+    secure: h786ees4CgDHkZVV0Kzx+TYLptmDPMc5RGHUxJQ1Lv4/6DUho9O68FEMGXulw/1f
+
   matrix:
 
     # Pre-installed Python versions, which Appveyor may upgrade to
