@@ -5,7 +5,7 @@ from enum import Enum
 
 
 
-class BaseConfigurationKey(Enum):
+class ConfigKey(Enum):
 
     USERNAME = "user"
     PASSWORD = "password"
@@ -16,7 +16,7 @@ class BaseConfigurationKey(Enum):
 
 
 
-class BaseConfigDefaultValue(Enum):
+class DefaultConfig(Enum):
 
     USERNAME = "username"
     PASSWORD = "password"
