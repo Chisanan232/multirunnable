@@ -1,4 +1,4 @@
-from multirunnable.persistence.file import (
+from . import (
     SavingStrategy as _SavingStrategy,
     _Super_Worker_Saving_File_Key,
     _Sub_Worker_Saving_File_Key,
