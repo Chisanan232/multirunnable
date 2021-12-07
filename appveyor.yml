@@ -1,0 +1,122 @@
+# The VS 2019 image doesn't have
+# the MSVC needed for Python 2.7.
+#image: Visual Studio 2022
+
+environment:
+  matrix:
+
+    # Pre-installed Python versions, which Appveyor may upgrade to
+    # a later point release.
+
+    # 64-bit
+    - PYTHON: "C:\\Python310-x64"
+      PYTHON_VERSION: "3.10.0rc1"
+      PYTHON_ARCH: "64"
+      PYTHON_EXE: python
+
+
+    - PYTHON: "C:\\Python39-x64"
+      PYTHON_VERSION: "3.9.x"
+      PYTHON_ARCH: "64"
+      PYTHON_EXE: python
+
+    - PYTHON: "C:\\Python38-x64"
+      PYTHON_VERSION: "3.8.x"
+      PYTHON_ARCH: "64"
+      PYTHON_EXE: python
+
+    - PYTHON: "C:\\Python37-x64"
+      PYTHON_VERSION: "3.7.x"
+      PYTHON_ARCH: "64"
+      PYTHON_EXE: python
+
+    - PYTHON: "C:\\Python36-x64"
+      PYTHON_VERSION: "3.6.x" # currently 3.6.8
+      PYTHON_ARCH: "64"
+      PYTHON_EXE: python
+
+    # 32-bit, wheel only (no testing)
+    - PYTHON: "C:\\Python39"
+      PYTHON_VERSION: "3.9.x"
+      PYTHON_ARCH: "32"
+      PYTHON_EXE: python
+#      GWHEEL_ONLY: true
+
+    - PYTHON: "C:\\Python38"
+      PYTHON_VERSION: "3.8.x"
+      PYTHON_ARCH: "32"
+      PYTHON_EXE: python
+#      GWHEEL_ONLY: true
+
+    - PYTHON: "C:\\Python37"
+      PYTHON_VERSION: "3.7.x"
+      PYTHON_ARCH: "32"
+      PYTHON_EXE: python
+#      GWHEEL_ONLY: true
+
+    - PYTHON: "C:\\Python36"
+      PYTHON_VERSION: "3.6.x" # currently 3.6.3
+      PYTHON_ARCH: "32"
+      PYTHON_EXE: python
+#      GWHEEL_ONLY: true
+
+    # Also test a Python version not pre-installed
+    # See: https://github.com/ogrisel/python-appveyor-demo/issues/10
+
+    # - PYTHON: "C:\\Python266"
+    #   PYTHON_VERSION: "2.6.6"
+    #   PYTHON_ARCH: "32"
+    #   PYTHON_EXE: python
+
+# matrix:
+#   allow_failures:
+#     - PYTHON_ID: "pypy"
+
+skip_commits:
+  files:
+#    - "*.yml"
+    - "*.rst"
+    - "LICENSE"
+
+install:
+  - "%PYTHON%\\python.exe -m pip install pytest"
+  - "%PYTHON%\\python.exe -m pip install pytest-cov"
+  - "%PYTHON%\\python.exe -m pip install codecov"
+  - "%PYTHON%\\python.exe -m pip install -r requirements.txt"
+
+#cache:
+#  - "%TMP%\\py\\"
+#  - '%LOCALAPPDATA%\pip\Cache -> appveyor.yml,setup.py'
+
+#build_script:
+#  # Build the compiled extension
+#  # Try to get some things that don't wind up in the pip cache as
+#  # built wheels if they're built during an isolated build.
+#  - "%CMD_IN_ENV% %PYEXE% -m pip install -U wheel cython setuptools cffi"
+#  - if not "%GWHEEL_ONLY%"=="true" %PYEXE% -m pip install -U -e .[test]
+
+build:
+  off
+
+test_script:
+  # Run the project tests
+  - "%PYTHON%\\python.exe -m pytest"
+#  - if not "%GWHEEL_ONLY%"=="true" %PYEXE% -c "import greenlet; print(greenlet, greenlet.__version__)"
+#  - if not "%GWHEEL_ONLY%"=="true" %PYEXE% -c "import gevent.core; print(gevent.core.loop)"
+#  - if not "%GWHEEL_ONLY%"=="true" %PYEXE% -c "import gevent; print(gevent.config.settings['resolver'].get_options())"
+#  - if not "%GWHEEL_ONLY%"=="true" %PYEXE% -c "from gevent._compat import get_clock_info; print(get_clock_info('perf_counter'))"
+#  - if not "%GWHEEL_ONLY%"=="true" %PYEXE% -mgevent.tests --second-chance --config known_failures.py --quiet
+
+after_test:
+#  - "%PYTHON%\\python.exe -m codecov -t $CODECOV_TOKEN"
+  - "%PYTHON%\\python.exe -m coveralls"
+
+#artifacts:
+#  # Archive the generated wheel package in the ci.appveyor.com build report.
+#  - path: dist\gevent*whl
+
+
+#deploy_script:
+#  - ps: if ($env:APPVEYOR_REPO_TAG -eq $TRUE) { twine upload --skip-existing dist/gevent* }
+
+#deploy: on
