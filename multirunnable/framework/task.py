@@ -1,5 +1,5 @@
 from .features import BaseQueueType as _BaseQueueType
-from ..types import OceanQueue as _OceanQueue
+from ..types import MRQueue as _MRQueue
 from ..persistence.interface import BasePersistence as _BasePersistence
 import multirunnable._utils as _utils
 
@@ -58,7 +58,7 @@ class BaseQueueTask(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def get_queue(self) -> _OceanQueue:
+    def get_queue(self) -> _MRQueue:
         pass
 
 

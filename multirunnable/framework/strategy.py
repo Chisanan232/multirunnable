@@ -3,7 +3,7 @@ from .task import BaseQueueTask as _BaseQueueTask
 from .features import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
 from .result import OceanResult as _OceanResult
 from ..mode import FeatureMode as _FeatureMode
-from ..types import OceanTasks as _OceanTasks
+from ..types import MRTasks as _MRTasks
 import multirunnable._utils as _utils
 
 from abc import ABCMeta, ABC, abstractmethod
@@ -288,25 +288,25 @@ class GeneralRunnableStrategy(RunnableStrategy):
 
 
     @dispatch((FunctionType, MethodType, PartialFunctionType), type(None))
-    def _generate_worker(self, function: Callable, args) -> _OceanTasks:
+    def _generate_worker(self, function: Callable, args) -> _MRTasks:
         __worker = self.generate_worker(function)
         return __worker
 
 
     @dispatch((FunctionType, MethodType, PartialFunctionType), tuple)
-    def _generate_worker(self, function: Callable, args) -> _OceanTasks:
+    def _generate_worker(self, function: Callable, args) -> _MRTasks:
         __worker = self.generate_worker(function, *args)
         return __worker
 
 
     @dispatch((FunctionType, MethodType, PartialFunctionType), dict)
-    def _generate_worker(self, function: Callable, args) -> _OceanTasks:
+    def _generate_worker(self, function: Callable, args) -> _MRTasks:
         __worker = self.generate_worker(function, **args)
         return __worker
 
 
     @abstractmethod
-    def generate_worker(self, target: Callable, *args, **kwargs) -> _OceanTasks:
+    def generate_worker(self, target: Callable, *args, **kwargs) -> _MRTasks:
         """
         Description:
             Initial and instantiate multiple executors (processes, threads, etc).
@@ -316,7 +316,7 @@ class GeneralRunnableStrategy(RunnableStrategy):
 
 
     @abstractmethod
-    def activate_workers(self, workers: Union[_OceanTasks, List[_OceanTasks]]) -> None:
+    def activate_workers(self, workers: Union[_MRTasks, List[_MRTasks]]) -> None:
         """
         Description:
             Activate multiple executors (processes, threads, etc) to run target task(s).
@@ -336,7 +336,7 @@ class GeneralRunnableStrategy(RunnableStrategy):
 
 
     @abstractmethod
-    def close(self, workers: Union[_OceanTasks, List[_OceanTasks]]) -> None:
+    def close(self, workers: Union[_MRTasks, List[_MRTasks]]) -> None:
         """
         Description:
             Close and join executor.
@@ -544,7 +544,7 @@ class AsyncRunnableStrategy(GeneralRunnableStrategy, ABC):
 
 
     @abstractmethod
-    async def activate_workers(self, workers: Union[_OceanTasks, List[_OceanTasks]]) -> None:
+    async def activate_workers(self, workers: Union[_MRTasks, List[_MRTasks]]) -> None:
         """
         Description:
             Activate multiple executors (processes, threads, etc) to run target task(s).
@@ -564,7 +564,7 @@ class AsyncRunnableStrategy(GeneralRunnableStrategy, ABC):
 
 
     @abstractmethod
-    async def close(self, workers: Union[_OceanTasks, List[_OceanTasks]]) -> None:
+    async def close(self, workers: Union[_MRTasks, List[_MRTasks]]) -> None:
         """
         Description:
             Asynchronous version of method 'close'.

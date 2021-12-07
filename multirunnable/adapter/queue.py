@@ -1,5 +1,5 @@
 from multirunnable.api.manage import Globalize as _Globalize
-from multirunnable.types import OceanQueue as _OceanQueue
+from multirunnable.types import MRQueue as _MRQueue
 from multirunnable.adapter.base import QueueAdapterFactory as _QueueAdapterFactory
 from multirunnable.adapter._utils import _ModuleFactory
 
@@ -11,7 +11,7 @@ class Queue(_QueueAdapterFactory):
         return f"<Queue Object(name={self._name}, qtype=Queue) ar {id(self)}>"
 
 
-    def get_instance(self) -> _OceanQueue:
+    def get_instance(self) -> _MRQueue:
         queue_instance = _ModuleFactory.get_queue_adapter(mode=self.feature_mode)
         __queue = queue_instance.value
         return __queue
@@ -37,7 +37,7 @@ class QueueAdapter(_QueueAdapterFactory):
         return f"<Queue Object(name={self._name}, qtype={self._qtype}) ar {id(self)}>"
 
 
-    def get_instance(self) -> _OceanQueue:
+    def get_instance(self) -> _MRQueue:
         __queue = self._qtype.value
         return __queue
 

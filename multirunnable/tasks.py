@@ -3,7 +3,7 @@ from multirunnable.framework.task import (
     BasePersistenceTask as _BasePersistenceTask)
 from multirunnable.framework.features import BaseQueueType as _BaseQueueType
 from multirunnable.framework.adapter.collection import BaseList as _BaseList
-from multirunnable.types import OceanQueue as _OceanQueue
+from multirunnable.types import MRQueue as _MRQueue
 from multirunnable.adapter.queue import Queue as _Queue, QueueAdapter as _QueueAdapter
 from multirunnable.adapter.collection import QueueTaskList as _QueueTaskList
 from multirunnable.persistence.interface import BasePersistence as _OceanPersistence
@@ -59,7 +59,7 @@ class QueueTask(_BaseQueueTask):
         self._Value = val
 
 
-    def get_queue(self) -> _OceanQueue:
+    def get_queue(self) -> _MRQueue:
         self.__Queue_Adapter = _QueueAdapter(name=self.name, qtype=self.queue_type)
         __queue_obj = self.__Queue_Adapter.get_instance()
         return __queue_obj

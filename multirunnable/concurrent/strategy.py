@@ -8,7 +8,7 @@ from multiprocessing.pool import ThreadPool
 from multiprocessing.pool import AsyncResult, ApplyResult
 
 from multirunnable.mode import FeatureMode as _FeatureMode
-from multirunnable.types import OceanTasks as _OceanTasks
+from multirunnable.types import MRTasks as _MRTasks
 from multirunnable.concurrent.result import ConcurrentResult as _ConcurrentResult
 from multirunnable.framework import (
     OceanResult as _OceanResult,
@@ -90,7 +90,7 @@ class ThreadStrategy(ConcurrentStrategy, _GeneralRunnableStrategy, _Resultable):
         return __workers
 
 
-    def generate_worker(self, target: Callable, *args, **kwargs) -> _OceanTasks:
+    def generate_worker(self, target: Callable, *args, **kwargs) -> _MRTasks:
 
         @wraps(target)
         @ConcurrentStrategy.save_return_value

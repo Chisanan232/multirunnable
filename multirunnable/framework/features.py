@@ -2,10 +2,10 @@ from abc import ABCMeta, abstractmethod
 from enum import Enum
 
 from ..types import (
-    OceanLock as _OceanLock, OceanRLock as _OceanRLock,
-    OceanSemaphore as _OceanSemaphore, OceanBoundedSemaphore as _OceanBoundedSemaphore,
-    OceanEvent as _OceanEvent, OceanCondition as _OceanCondition,
-    OceanQueue as _OceanQueue
+    MRLock as _MRLock, MRRLock as _MRRLock,
+    MRSemaphore as _MRSemaphore, MRBoundedSemaphore as _MRBoundedSemaphore,
+    MREvent as _MREvent, MRCondition as _MRCondition,
+    MRQueue as _MRQueue
 )
 import multirunnable._utils as _utils
 
@@ -20,7 +20,7 @@ class BaseQueueType(Enum):
 class BaseQueue(metaclass=ABCMeta):
 
     @abstractmethod
-    def get_queue(self, qtype: BaseQueueType) -> _OceanQueue:
+    def get_queue(self, qtype: BaseQueueType) -> _MRQueue:
         pass
 
 
@@ -90,7 +90,7 @@ class PosixThread(metaclass=ABCMeta):
 class PosixThreadLock(PosixThread):
 
     @abstractmethod
-    def get_lock(self, **kwargs) -> _OceanLock:
+    def get_lock(self, **kwargs) -> _MRLock:
         """
         Description:
             Get Lock object.
@@ -100,7 +100,7 @@ class PosixThreadLock(PosixThread):
 
 
     @abstractmethod
-    def get_rlock(self, **kwargs) -> _OceanRLock:
+    def get_rlock(self, **kwargs) -> _MRRLock:
         """
         Description:
             Get RLock object.
@@ -110,7 +110,7 @@ class PosixThreadLock(PosixThread):
 
 
     @abstractmethod
-    def get_semaphore(self, value: int, **kwargs) -> _OceanSemaphore:
+    def get_semaphore(self, value: int, **kwargs) -> _MRSemaphore:
         """
         Description:
             Get Semaphore object.
@@ -121,7 +121,7 @@ class PosixThreadLock(PosixThread):
 
 
     @abstractmethod
-    def get_bounded_semaphore(self, value: int, **kwargs) -> _OceanBoundedSemaphore:
+    def get_bounded_semaphore(self, value: int, **kwargs) -> _MRBoundedSemaphore:
         """
         Description:
             Get Bounded Semaphore object.
@@ -135,7 +135,7 @@ class PosixThreadLock(PosixThread):
 class PosixThreadCommunication(PosixThread):
 
     @abstractmethod
-    def get_event(self, *args, **kwargs) -> _OceanEvent:
+    def get_event(self, *args, **kwargs) -> _MREvent:
         """
         Description:
             Get Event object.
@@ -146,7 +146,7 @@ class PosixThreadCommunication(PosixThread):
 
 
     @abstractmethod
-    def get_condition(self, *args, **kwargs) -> _OceanCondition:
+    def get_condition(self, *args, **kwargs) -> _MRCondition:
         """
         Description:
             Get Condition object.

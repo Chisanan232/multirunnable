@@ -1,7 +1,7 @@
 from multirunnable.framework.features import PosixThreadCommunication as _PosixThreadCommunication
 from multirunnable.mode import FeatureMode as _FeatureMode
 from multirunnable.api.manage import Globalize as _Globalize
-from multirunnable.types import OceanEvent as _OceanEvent, OceanCondition as _OceanCondition
+from multirunnable.types import MREvent as _MREvent, MRCondition as _MRCondition
 from multirunnable.adapter.base import FeatureAdapterFactory as _FeatureAdapterFactory
 from multirunnable.adapter._utils import _ModuleFactory, _AsyncUtils
 
@@ -17,7 +17,7 @@ class Event(_FeatureAdapterFactory):
         return super(Event, self).__repr__().replace("TargetObject", "Event")
 
 
-    def get_instance(self, **kwargs) -> _OceanEvent:
+    def get_instance(self, **kwargs) -> _MREvent:
         self._chk_param_by_mode(**kwargs)
         communication_instance: _PosixThreadCommunication = _ModuleFactory.get_communication_adapter(mode=self.feature_mode)
         return communication_instance.get_event(**self._kwargs)
@@ -44,7 +44,7 @@ class Condition(_FeatureAdapterFactory):
             return self.__str__()
 
 
-    def get_instance(self, **kwargs) -> _OceanCondition:
+    def get_instance(self, **kwargs) -> _MRCondition:
         self._chk_param_by_mode(**kwargs)
         if self._Mode is _FeatureMode.Asynchronous:
             self._kwargs["lock"] = _AsyncUtils.check_lock(lock=kwargs.get("lock", None))

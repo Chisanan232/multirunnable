@@ -63,16 +63,16 @@ def register_to_manager(target_cls: Any, proxytype: Any = None) -> None:
     global _Assign_Manager_Flag
     _chk_cls(target_cls)
 
-    def _assign() -> None:
+    def _register() -> None:
         _SharingManager.register(typeid=str(_cls_name), callable=target_cls, proxytype=proxytype)
         _Assign_Manager_Flag[_cls_name] = True
 
     _cls_name = target_cls.__name__
     if _cls_name in _Assign_Manager_Flag.keys():
         if _Assign_Manager_Flag[_cls_name] is False:
-            _assign()
+            _register()
     else:
-        _assign()
+        _register()
 
 
 def SharingManager() -> _SharingManager:

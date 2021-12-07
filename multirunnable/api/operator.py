@@ -4,13 +4,13 @@ from multirunnable.framework.api.operator import (
     AsyncAdapterOperator as _AsyncAdapterOperator,
     BaseAsyncLockAdapterOperator as _BaseAsyncLockOperator)
 from multirunnable.types import (
-    OceanLock as _OceanLock,
-    OceanRLock as _OceanRLock,
-    OceanSemaphore as _OceanSemaphore,
-    OceanBoundedSemaphore as _OceanBoundedSemaphore,
-    OceanEvent as _OceanEvent,
-    OceanCondition as _OceanCondition,
-    OceanQueue as _OceanQueue)
+    MRLock as _MRLock,
+    MRRLock as _MRRLock,
+    MRSemaphore as _MRSemaphore,
+    MRBoundedSemaphore as _MRBoundedSemaphore,
+    MREvent as _MREvent,
+    MRCondition as _MRCondition,
+    MRQueue as _MRQueue)
 from multirunnable.exceptions import GlobalObjectIsNoneError as _GlobalObjectIsNoneError
 from multirunnable.api.exceptions import QueueNotExistWithName as _QueueNotExistWithName
 
@@ -20,7 +20,7 @@ from typing import Dict, Optional
 
 class LockAdapterOperator(_BaseLockAdapterOperator):
 
-    def _get_feature_instance(self) -> _OceanLock:
+    def _get_feature_instance(self) -> _MRLock:
         from .manage import Running_Lock
         return Running_Lock
 
@@ -36,7 +36,7 @@ class LockAdapterOperator(_BaseLockAdapterOperator):
 
 class RLockOperator(_BaseLockAdapterOperator):
 
-    def _get_feature_instance(self) -> _OceanRLock:
+    def _get_feature_instance(self) -> _MRRLock:
         from .manage import Running_RLock
         return Running_RLock
 
@@ -61,7 +61,7 @@ class RLockOperator(_BaseLockAdapterOperator):
 
 class SemaphoreOperator(_BaseLockAdapterOperator):
 
-    def _get_feature_instance(self) -> _OceanSemaphore:
+    def _get_feature_instance(self) -> _MRSemaphore:
         from .manage import Running_Semaphore
         return Running_Semaphore
 
@@ -94,7 +94,7 @@ class SemaphoreOperator(_BaseLockAdapterOperator):
 
 class BoundedSemaphoreOperator(SemaphoreOperator):
 
-    def _get_feature_instance(self) -> _OceanBoundedSemaphore:
+    def _get_feature_instance(self) -> _MRBoundedSemaphore:
         from .manage import Running_Bounded_Semaphore
         return Running_Bounded_Semaphore
 
@@ -107,14 +107,14 @@ class BoundedSemaphoreOperator(SemaphoreOperator):
 
 class EventOperator(_AdapterOperator):
 
-    _Event_Instance: _OceanEvent = None
+    _Event_Instance: _MREvent = None
 
     def __repr__(self):
         return f"<Operator object for {repr(self._event_instance)}>"
 
 
     @property
-    def _event_instance(self) -> _OceanEvent:
+    def _event_instance(self) -> _MREvent:
         if self._Event_Instance is None:
             self._Event_Instance = self._get_feature_instance()
             if self._Event_Instance is None:
@@ -123,11 +123,11 @@ class EventOperator(_AdapterOperator):
 
 
     @_event_instance.setter
-    def _event_instance(self, event: _OceanEvent) -> None:
+    def _event_instance(self, event: _MREvent) -> None:
         self._Event_Instance = event
 
 
-    def _get_feature_instance(self) -> _OceanEvent:
+    def _get_feature_instance(self) -> _MREvent:
         from .manage import Running_Event
         return Running_Event
 
@@ -160,7 +160,7 @@ class EventOperator(_AdapterOperator):
 
 class ConditionOperator(_BaseLockAdapterOperator):
 
-    def _get_feature_instance(self) -> _OceanCondition:
+    def _get_feature_instance(self) -> _MRCondition:
         from .manage import Running_Condition
         return Running_Condition
 
@@ -214,7 +214,7 @@ class ConditionOperator(_BaseLockAdapterOperator):
 
 class LockAsyncOperator(_BaseAsyncLockOperator):
 
-    def _get_feature_instance(self) -> _OceanLock:
+    def _get_feature_instance(self) -> _MRLock:
         from .manage import Running_Lock
         return Running_Lock
 
@@ -230,7 +230,7 @@ class LockAsyncOperator(_BaseAsyncLockOperator):
 
 class SemaphoreAsyncOperator(_BaseAsyncLockOperator):
 
-    def _get_feature_instance(self) -> _OceanSemaphore:
+    def _get_feature_instance(self) -> _MRSemaphore:
         from .manage import Running_Semaphore
         return Running_Semaphore
 
@@ -246,7 +246,7 @@ class SemaphoreAsyncOperator(_BaseAsyncLockOperator):
 
 class BoundedSemaphoreAsyncOperator(SemaphoreAsyncOperator):
 
-    def _get_feature_instance(self) -> _OceanBoundedSemaphore:
+    def _get_feature_instance(self) -> _MRBoundedSemaphore:
         from .manage import Running_Bounded_Semaphore
         return Running_Bounded_Semaphore
 
@@ -258,14 +258,14 @@ class BoundedSemaphoreAsyncOperator(SemaphoreAsyncOperator):
 
 class EventAsyncOperator(_AsyncAdapterOperator):
 
-    _Event_Instance: _OceanEvent = None
+    _Event_Instance: _MREvent = None
 
     def __repr__(self):
         return f"<AsyncOperator object for {repr(self._event_instance)}>"
 
 
     @property
-    def _event_instance(self) -> _OceanEvent:
+    def _event_instance(self) -> _MREvent:
         if self._Event_Instance is None:
             self._Event_Instance = self._get_feature_instance()
             if self._Event_Instance is None:
@@ -274,11 +274,11 @@ class EventAsyncOperator(_AsyncAdapterOperator):
 
 
     @_event_instance.setter
-    def _event_instance(self, event: _OceanEvent) -> None:
+    def _event_instance(self, event: _MREvent) -> None:
         self._Event_Instance = event
 
 
-    def _get_feature_instance(self) -> _OceanEvent:
+    def _get_feature_instance(self) -> _MREvent:
         from .manage import Running_Event
         return Running_Event
 
@@ -304,7 +304,7 @@ class EventAsyncOperator(_AsyncAdapterOperator):
 
 class ConditionAsyncOperator(_BaseAsyncLockOperator):
 
-    def _get_feature_instance(self) -> _OceanCondition:
+    def _get_feature_instance(self) -> _MRCondition:
         from .manage import Running_Condition
         return Running_Condition
 
@@ -358,7 +358,7 @@ class QueueOperator(_AdapterOperator):
 
 
     @classmethod
-    def get_queue(cls) -> Optional[Dict[str, _OceanQueue]]:
+    def get_queue(cls) -> Optional[Dict[str, _MRQueue]]:
         from .manage import Running_Queue
 
         cls._checking_init(target_obj=Running_Queue)
@@ -366,7 +366,7 @@ class QueueOperator(_AdapterOperator):
 
 
     @classmethod
-    def get_queue_with_name(cls, name: str) -> _OceanQueue:
+    def get_queue_with_name(cls, name: str) -> _MRQueue:
         from .manage import Running_Queue
 
         cls._checking_init(target_obj=Running_Queue)

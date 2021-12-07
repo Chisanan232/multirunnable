@@ -1,6 +1,6 @@
 from .result import OceanResult as _OceanResult
 from ..mode import RunningMode as _RunningMode
-from ..types import OceanTasks as _OceanTasks
+from ..types import MRTasks as _MRTasks
 import multirunnable._utils as _utils
 
 from abc import ABCMeta, abstractmethod
@@ -11,7 +11,7 @@ from typing import List, Tuple, Dict, Iterable, Callable
 class BasePool(metaclass=ABCMeta):
 
     _Worker_Timeout = 3
-    _Ocean_Tasks_List: List[_OceanTasks] = []
+    _Ocean_Tasks_List: List[_MRTasks] = []
 
     def __init__(self, mode: _RunningMode, pool_size: int):
         self._mode = mode

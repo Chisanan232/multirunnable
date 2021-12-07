@@ -77,30 +77,30 @@ from asyncio.locks import (Lock as AsyncIOLock,
 from typing import Union, NewType
 
 
-__OceanTasks = Union[Thread, AsyncResult, ApplyResult, Greenlet, Task]
-OceanTasks = NewType("OceanTasks", __OceanTasks)
+__MRTasks = Union[Thread, AsyncResult, ApplyResult, Greenlet, Task]
+MRTasks = NewType("MRTasks", __MRTasks)
 
-__OceanQueue = Union[Queue, MultiProcessingQueue, GeventQueue, AsyncIOQueue]
-OceanQueue = NewType("OceanQueue", __OceanQueue)
+__MRQueue = Union[Queue, MultiProcessingQueue, GeventQueue, AsyncIOQueue]
+MRQueue = NewType("MRQueue", __MRQueue)
 
-__OceanLock = Union[ThreadingLock, MultiProcessingLock, AsyncIOLock]
-OceanLock = NewType("OceanLock", __OceanLock)
+__MRLock = Union[ThreadingLock, MultiProcessingLock, AsyncIOLock]
+MRLock = NewType("MRLock", __MRLock)
 
-__OceanRLock = Union[ThreadingRLock, MultiProcessingRLock, GeventRLock]
-OceanRLock = NewType("OceanRLock", __OceanRLock)
+__MRRLock = Union[ThreadingRLock, MultiProcessingRLock, GeventRLock]
+MRRLock = NewType("MRRLock", __MRRLock)
 
-__OceanSemaphore = Union[ThreadingSemaphore, MultiProcessingSemaphore, GeventSemaphore, AsyncIOSemaphore]
-OceanSemaphore = NewType("OceanSemaphore", __OceanSemaphore)
+__MRSemaphore = Union[ThreadingSemaphore, MultiProcessingSemaphore, GeventSemaphore, AsyncIOSemaphore]
+MRSemaphore = NewType("MRSemaphore", __MRSemaphore)
 
-__OceanBoundedSemaphore = Union[ThreadingBoundedSemaphore, MultiProcessingBoundedSemaphore, GeventBoundedSemaphore, AsyncIOBoundedSemaphore]
-OceanBoundedSemaphore = NewType("OceanBoundedSemaphore", __OceanBoundedSemaphore)
+__MRBoundedSemaphore = Union[ThreadingBoundedSemaphore, MultiProcessingBoundedSemaphore, GeventBoundedSemaphore, AsyncIOBoundedSemaphore]
+MRBoundedSemaphore = NewType("MRBoundedSemaphore", __MRBoundedSemaphore)
 
-__OceanEvent = Union[ThreadingEvent, MultiProcessingEvent, GeventEvent, AsyncIOEvent]
-OceanEvent = NewType("OceanEvent", __OceanEvent)
+__MREvent = Union[ThreadingEvent, MultiProcessingEvent, GeventEvent, AsyncIOEvent]
+MREvent = NewType("MREvent", __MREvent)
 
-__OceanCondition = Union[ThreadingCondition, MultiProcessingCondition, AsyncIOCondition]
-OceanCondition = NewType("OceanCondition", __OceanCondition)
+__MRCondition = Union[ThreadingCondition, MultiProcessingCondition, AsyncIOCondition]
+MRCondition = NewType("MRCondition", __MRCondition)
 
-__OceanFeature = Union[OceanLock, OceanRLock, OceanSemaphore, OceanBoundedSemaphore, OceanEvent, OceanCondition]
-OceanFeature = NewType("OceanFeature", __OceanFeature)
+__MRFeature = Union[MRLock, MRRLock, MRSemaphore, MRBoundedSemaphore, MREvent, MRCondition]
+MRFeature = NewType("MRFeature", __MRFeature)
 

@@ -9,6 +9,7 @@ from multiprocessing.managers import Namespace
 
 from multirunnable.mode import FeatureMode as _FeatureMode
 from multirunnable.parallel.result import ParallelResult as _ParallelResult
+from multirunnable.parallel.share import SharingManager
 from multirunnable.framework import (
     BaseList as _BaseList,
     BaseQueueTask as _BaseQueueTask,
@@ -27,13 +28,6 @@ class ParallelStrategy:
     _Manager: Manager = Manager()
     _Namespace_Object: Namespace = _Manager.Namespace()
     _Processors_Running_Result: List[Dict] = _Manager.list()
-    # _Manager: Manager = None
-    # _Namespace_Object: Namespace = None
-    # _Processors_Running_Result: List[Dict] = None
-
-    # def _init_namespace_obj(self) -> None:
-    #     self._Manager = Manager()
-    #     self._Namespace_Object = self._Manager.Namespace()
 
 
     def namespacing_obj(self, obj: object) -> object:
@@ -98,6 +92,13 @@ class ProcessStrategy(ParallelStrategy, _GeneralRunnableStrategy, _Resultable):
                        features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
                        *args, **kwargs) -> None:
         super(ProcessStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
+
+        # Initial sub-class of 'multiprocessing.managers.BaseManager'
+        # # **** Thinking ****
+        # Thinking about how to make sure that weather it needs to start
+        # multiprocessing.managers.BaseManager server or not.
+        # # *****************
+        SharingManager()
 
 
     @dispatch((FunctionType, MethodType, PartialFunction), tuple, dict)

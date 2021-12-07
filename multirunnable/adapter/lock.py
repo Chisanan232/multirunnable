@@ -2,10 +2,10 @@ from multirunnable.framework.features import PosixThreadLock as _PosixThreadLock
 from multirunnable.mode import FeatureMode as _FeatureMode
 from multirunnable.api.manage import Globalize as _Globalize
 from multirunnable.types import (
-    OceanLock as _OceanLock,
-    OceanRLock as _OceanRLock,
-    OceanSemaphore as _OceanSemaphore,
-    OceanBoundedSemaphore as _OceanBoundedSemaphore)
+    MRLock as _MRLock,
+    MRRLock as _MRRLock,
+    MRSemaphore as _MRSemaphore,
+    MRBoundedSemaphore as _MRBoundedSemaphore)
 from multirunnable.adapter.base import FeatureAdapterFactory as _FeatureAdapterFactory
 from multirunnable.adapter._utils import _ModuleFactory
 
@@ -21,7 +21,7 @@ class Lock(_FeatureAdapterFactory):
         return super(Lock, self).__repr__().replace("TargetObject", "Lock")
 
 
-    def get_instance(self, **kwargs) -> _OceanLock:
+    def get_instance(self, **kwargs) -> _MRLock:
         self._chk_param_by_mode(**kwargs)
         lock_instance: _PosixThreadLock = _ModuleFactory.get_lock_adapter(mode=self.feature_mode)
         return lock_instance.get_lock(**self._kwargs)
@@ -42,7 +42,7 @@ class RLock(_FeatureAdapterFactory):
         return super(RLock, self).__repr__().replace("TargetObject", "RLock")
 
 
-    def get_instance(self, **kwargs) -> _OceanRLock:
+    def get_instance(self, **kwargs) -> _MRRLock:
         self._chk_param_by_mode(**kwargs)
         lock_instance: _PosixThreadLock = _ModuleFactory.get_lock_adapter(mode=self.feature_mode)
         return lock_instance.get_rlock(**self._kwargs)
@@ -74,7 +74,7 @@ class Semaphore(_FeatureAdapterFactory):
             return f"<Semaphore(value={__value}) object with {__mode} mode at {id(self)}>"
 
 
-    def get_instance(self, **kwargs) -> _OceanSemaphore:
+    def get_instance(self, **kwargs) -> _MRSemaphore:
         self._chk_param_by_mode(**kwargs)
         lock_instance: _PosixThreadLock = _ModuleFactory.get_lock_adapter(mode=self.feature_mode)
         return lock_instance.get_semaphore(value=self.__semaphore_value, **self._kwargs)
@@ -106,7 +106,7 @@ class BoundedSemaphore(_FeatureAdapterFactory):
             return f"<BoundedSemaphore(value={__value}) object with {__mode} mode at {id(self)}>"
 
 
-    def get_instance(self, **kwargs) -> _OceanBoundedSemaphore:
+    def get_instance(self, **kwargs) -> _MRBoundedSemaphore:
         self._chk_param_by_mode(**kwargs)
         lock_instance: _PosixThreadLock = _ModuleFactory.get_lock_adapter(mode=self.feature_mode)
         return lock_instance.get_bounded_semaphore(value=self.__semaphore_value, **self._kwargs)
