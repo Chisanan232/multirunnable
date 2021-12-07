@@ -5,6 +5,11 @@
 [![PyPI version](https://badge.fury.io/py/multirunnable.svg)](https://badge.fury.io/py/multirunnable)
 [![Supported Versions](https://img.shields.io/pypi/pyversions/multirunnable.svg?logo=python&logoColor=FBE072)](https://pypi.org/project/multirunnable)
 
+| Linux/MacOS | Windows |
+|------------|--------|
+|[![Build Status](https://app.travis-ci.com/Chisanan232/multirunnable.svg?branch=master)](https://app.travis-ci.com/Chisanan232/multirunnable)|[![Build status](https://ci.appveyor.com/api/projects/status/v0nq38jtof6vcm23?svg=true)](https://ci.appveyor.com/project/Chisanan232/multirunnable)|
+|[![codecov](https://codecov.io/gh/Chisanan232/multirunnable/branch/master/graph/badge.svg?token=E2AGK1ZIDH)](https://codecov.io/gh/Chisanan232/multirunnable)|[![Coverage Status](https://coveralls.io/repos/github/Chisanan232/multirunnable/badge.svg?branch=master)](https://coveralls.io/github/Chisanan232/multirunnable?branch=master)|
+
 A Python framework integrates building program which could run multiple tasks with different running strategy.
 
 [Overview](#overview) | [Quickly Start](#quickly-start) | [Usage](#usage) | [Code Example](https://github.com/Chisanan232/multirunnable/tree/master/example)
@@ -428,88 +433,84 @@ if __name__ == '__main__':
 from multirunnable import SimpleExecutor, RunningMode, QueueTask, sleep
 from multirunnable.api import ConditionOperator, QueueOperator
 from multirunnable.adapter import Condition
-from multirunnable.concurrent import MultiThreadingQueueType
+from multirunnable.concurrent import ThreadQueueType
 import random
 
 
 class ProducerProcess:
+  __Queue_Name = "test_queue"
 
-    __Queue_Name = "test_queue"
+  def __init__(self):
+    self.__condition_opt = ConditionOperator()
+    self.__queue_opt = QueueOperator()
 
-    def __init__(self):
-        self.__condition_opt = ConditionOperator()
-        self.__queue_opt = QueueOperator()
-
-    def send_process(self, *args):
-        print("[Producer] args: ", args)
-        test_queue = self.__queue_opt.get_queue_with_name(name=self.__Queue_Name)
-        print(f"[Producer] It will keep producing something useless message.")
-        while True:
-            __sleep_time = random.randrange(1, 10)
-            print(f"[Producer] It will sleep for {__sleep_time} seconds.")
-            test_queue.put(__sleep_time)
-            sleep(__sleep_time)
-            __condition = self.__condition_opt
-            with __condition:
-                self.__condition_opt.notify_all()
+  def send_process(self, *args):
+    print("[Producer] args: ", args)
+    test_queue = self.__queue_opt.get_queue_with_name(name=self.__Queue_Name)
+    print(f"[Producer] It will keep producing something useless message.")
+    while True:
+      __sleep_time = random.randrange(1, 10)
+      print(f"[Producer] It will sleep for {__sleep_time} seconds.")
+      test_queue.put(__sleep_time)
+      sleep(__sleep_time)
+      __condition = self.__condition_opt
+      with __condition:
+        self.__condition_opt.notify_all()
 
 
 class ConsumerProcess:
+  __Queue_Name = "test_queue"
 
-    __Queue_Name = "test_queue"
+  def __init__(self):
+    self.__condition_opt = ConditionOperator()
+    self.__queue_opt = QueueOperator()
 
-    def __init__(self):
-        self.__condition_opt = ConditionOperator()
-        self.__queue_opt = QueueOperator()
-
-    def receive_process(self, *args):
-        print("[Consumer] args: ", args)
-        test_queue = self.__queue_opt.get_queue_with_name(name=self.__Queue_Name)
-        print(f"[Consumer] It detects the message which be produced by ProducerThread.")
-        while True:
-            __condition = self.__condition_opt
-            with __condition:
-                sleep(1)
-                print("[Consumer] ConsumerThread waiting ...")
-                self.__condition_opt.wait()
-                __sleep_time = test_queue.get()
-                print("[Consumer] ConsumerThread re-start.")
-                print(f"[Consumer] ProducerThread sleep {__sleep_time} seconds.")
+  def receive_process(self, *args):
+    print("[Consumer] args: ", args)
+    test_queue = self.__queue_opt.get_queue_with_name(name=self.__Queue_Name)
+    print(f"[Consumer] It detects the message which be produced by ProducerThread.")
+    while True:
+      __condition = self.__condition_opt
+      with __condition:
+        sleep(1)
+        print("[Consumer] ConsumerThread waiting ...")
+        self.__condition_opt.wait()
+        __sleep_time = test_queue.get()
+        print("[Consumer] ConsumerThread re-start.")
+        print(f"[Consumer] ProducerThread sleep {__sleep_time} seconds.")
 
 
 class ExampleOceanSystem:
+  __Executor_Number = 1
 
-    __Executor_Number = 1
+  __producer_p = ProducerProcess()
+  __consumer_p = ConsumerProcess()
 
-    __producer_p = ProducerProcess()
-    __consumer_p = ConsumerProcess()
+  @classmethod
+  def main_run(cls):
+    # Initialize Condition object
+    __condition = Condition()
 
-    @classmethod
-    def main_run(cls):
-        # Initialize Condition object
-        __condition = Condition()
+    # Initialize Queue object
+    __task = QueueTask()
+    __task.name = "test_queue"
+    __task.queue_type = ThreadQueueType.Queue
+    __task.value = []
 
-        # Initialize Queue object
-        __task = QueueTask()
-        __task.name = "test_queue"
-        __task.queue_type = MultiThreadingQueueType.Queue
-        __task.value = []
+    # Initialize and run ocean-simple-executor
+    __exe = SimpleExecutor(mode=RunningMode.Concurrent, executors=cls.__Executor_Number)
+    # # # # Run without arguments
+    __exe.map_with_function(
+      functions=[cls.__producer_p.send_process, cls.__consumer_p.receive_process],
+      queue_tasks=__task,
+      features=__condition)
 
-        # Initialize and run ocean-simple-executor
-        __exe = SimpleExecutor(mode=RunningMode.Concurrent, executors=cls.__Executor_Number)
-        # # # # Run without arguments
-        __exe.map_with_function(
-            functions=[cls.__producer_p.send_process, cls.__consumer_p.receive_process],
-            queue_tasks=__task,
-            features=__condition)
 
-        
 if __name__ == '__main__':
-
-    print("[MainProcess] This is system client: ")
-    system = ExampleOceanSystem()
-    system.main_run()
-    print("[MainProcess] Finish. ")
+  print("[MainProcess] This is system client: ")
+  system = ExampleOceanSystem()
+  system.main_run()
+  print("[MainProcess] Finish. ")
 ```
 
 
@@ -530,11 +531,11 @@ For example, we want to set a Queue with name "test_queue", type is **multiproce
 
 ```python
 from multirunnable import QueueTask
-from multirunnable.parallel import MultiProcessingQueueType
+from multirunnable.parallel import ProcessQueueType
 
 test_queue_task = QueueTask()
 test_queue_task.name = "test_queue"
-test_queue_task.queue_type = MultiProcessingQueueType.Queue
+test_queue_task.queue_type = ProcessQueueType.Queue
 test_queue_task.value = [f"value_{i}" for i in range(20)]
 ```
 
