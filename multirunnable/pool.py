@@ -15,7 +15,7 @@ from .tasks import OceanPersistenceTask as _OceanPersistenceTask
 from .adapter.strategy import PoolStrategyAdapter as _PoolStrategyAdapter
 from .persistence.interface import BasePersistence as _BasePersistence
 from ._config import set_mode
-s
+
 
 _Pool_Runnable_Type = Union[_PoolRunnableStrategy, _Resultable]
 Pool_Runnable_Strategy: _Pool_Runnable_Type = None
