@@ -1,6 +1,6 @@
 from .features import BaseQueueType as _BaseQueueType
 from ..types import OceanQueue as _OceanQueue
-from ..persistence.interface import OceanPersistence as _OceanPersistence
+from ..persistence.interface import BasePersistence as _BasePersistence
 import multirunnable._utils as _utils
 
 from abc import ABCMeta, abstractmethod
@@ -80,12 +80,12 @@ class BaseQueueTask(metaclass=ABCMeta):
 
 class BasePersistenceTask(metaclass=ABCMeta):
 
-    _Persistence_Strategy: _OceanPersistence = None
+    _Persistence_Strategy: _BasePersistence = None
     _Database_Connection_Number: int = 0
 
     @property
     @abstractmethod
-    def strategy(self) -> _OceanPersistence:
+    def strategy(self) -> _BasePersistence:
         pass
 
 
