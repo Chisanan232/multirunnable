@@ -29,7 +29,7 @@ class _ModuleFactory:
     def get_queue_adapter(mode: FeatureMode) -> BaseQueue:
         __module, __queue_cls_name = _ModuleFactory.get_module(mode=mode, cls="queue")
         queue_cls = ImportMultiRunnable.get_class(pkg_path=__module, cls_name=__queue_cls_name)
-        return queue_cls()
+        return queue_cls
 
 
     @staticmethod

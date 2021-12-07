@@ -49,6 +49,8 @@ class FeatureAdapterFactory(_BaseFeatureAdapterFactory, ABC):
 
     @feature_mode.setter
     def feature_mode(self, mode: _FeatureMode) -> None:
+        if type(mode) is not _FeatureMode:
+            raise ValueError("The mode type should be *FeatureMode*.")
         self._Mode = mode
 
 
@@ -60,22 +62,25 @@ class FeatureAdapterFactory(_BaseFeatureAdapterFactory, ABC):
 
 class QueueAdapterFactory(_BaseFeatureAdapterFactory, ABC):
 
+    _Mode: _FeatureMode = None
+
     def __init__(self, **kwargs):
         self._name = kwargs.get("name", None)
         if self._name is None:
             raise Exception("The name of Queue object shouldn't be None object. "
                             "It's the key of each Queue object you create.")
 
-        self._qtype = kwargs.get("qtype", None)
-        if self._qtype is None:
-            raise Exception("Queue type parameter shouldn't be None object. "
-                            "It must to choice a type of Queue object with mapping strategy.")
-
 
     def __str__(self):
         return f"<Queue Object at {id(self)}>"
 
 
-    def __repr__(self):
-        return f"<Queue Object(name={self._name}, qtype={self._qtype}) ar {id(self)}>"
+    @property
+    def feature_mode(self) -> _FeatureMode:
+        return self._Mode
+
+
+    @feature_mode.setter
+    def feature_mode(self, mode: _FeatureMode) -> None:
+        self._Mode = mode
 
