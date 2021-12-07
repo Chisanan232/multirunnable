@@ -1,5 +1,5 @@
 """
-A unittest for pyocean.mode module
+A unittest for multirunnable.mode module
 """
 
 from multirunnable.mode import RunningMode, FeatureMode
@@ -57,7 +57,7 @@ class FinalProveResult:
 
     @staticmethod
     def running_mode_key():
-        return "strategy_module", "strategy"
+        return "strategy_module", "class_key", "executor_strategy", "pool_strategy"
 
 
     @staticmethod
@@ -108,15 +108,15 @@ class TestRunningMode(RunningModeTestCases):
 class TestFeatureMode(FeatureModeTestCases):
 
     def test_parallel_mode(self):
-        self.__check_mechanism(mode=FeatureMode.MultiProcessing)
+        self.__check_mechanism(mode=FeatureMode.Parallel)
 
 
     def test_concurrent_mode(self):
-        self.__check_mechanism(mode=FeatureMode.MultiThreading)
+        self.__check_mechanism(mode=FeatureMode.Concurrent)
 
 
     def test_greenlet_mode(self):
-        self.__check_mechanism(mode=FeatureMode.MultiGreenlet)
+        self.__check_mechanism(mode=FeatureMode.GreenThread)
 
 
     def test_asynchronous_mode(self):
