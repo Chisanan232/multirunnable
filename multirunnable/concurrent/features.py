@@ -21,6 +21,8 @@ if PYTHON_MAJOR_VERSION == 3:
             LifoQueue = Thread_LifoQueue()
             PriorityQueue = Thread_PriorityQueue()
 
+        ThreadQueueDataType = Union[Thread_Queue, Thread_SimpleQueue, Thread_LifoQueue, Thread_PriorityQueue]
+
     else:
         from queue import (
             Queue as Thread_Queue,
@@ -32,8 +34,8 @@ if PYTHON_MAJOR_VERSION == 3:
             LifoQueue = Thread_LifoQueue()
             PriorityQueue = Thread_PriorityQueue()
 
+        ThreadQueueDataType = Union[Thread_Queue, Thread_LifoQueue, Thread_PriorityQueue]
 
-ThreadQueueDataType = Union[Thread_Queue, Thread_SimpleQueue, Thread_LifoQueue, Thread_PriorityQueue]
 
 
 class ThreadLock(_PosixThreadLock):
