@@ -3,9 +3,9 @@ from typing import List, Tuple, Dict, Iterable as IterableType, Union, Callable,
 from functools import wraps, partial as PartialFunction
 from collections.abc import Iterable
 from multipledispatch import dispatch
-from multiprocessing import Process, Manager
+from multiprocessing import Process #, Manager
 from multiprocessing.pool import Pool, AsyncResult, ApplyResult
-from multiprocessing.managers import Namespace
+# from multiprocessing.managers import Namespace
 
 from multirunnable.mode import FeatureMode as _FeatureMode
 from multirunnable.parallel.result import ParallelResult as _ParallelResult
@@ -25,14 +25,15 @@ from multirunnable.framework import (
 class ParallelStrategy:
 
     _Strategy_Feature_Mode = _FeatureMode.Parallel
-    _Manager: Manager = Manager()
-    _Namespace_Object: Namespace = _Manager.Namespace()
-    _Processors_Running_Result: List[Dict] = _Manager.list()
+    # _Manager: Manager = Manager()
+    # _Namespace_Object: Namespace = _Manager.Namespace()
+    # _Processors_Running_Result: List[Dict] = _Manager.list()
+    _Processors_Running_Result: List[Dict] = []
 
 
-    def namespacing_obj(self, obj: object) -> object:
-        setattr(self._Namespace_Object, repr(obj), obj)
-        return getattr(self._Namespace_Object, repr(obj))
+    # def namespacing_obj(self, obj: object) -> object:
+    #     setattr(self._Namespace_Object, repr(obj), obj)
+    #     return getattr(self._Namespace_Object, repr(obj))
 
 
     @classmethod
