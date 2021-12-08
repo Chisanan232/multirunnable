@@ -1,27 +1,39 @@
+from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 from multirunnable.framework.features import (
     PosixThreadLock as _PosixThreadLock,
     PosixThreadCommunication as _PosixThreadCommunication,
     BaseQueueType as _BaseQueueType)
 
 from threading import Lock, RLock, Event, Condition, Semaphore, BoundedSemaphore
-from queue import (
-    Queue as Thread_Queue,
-    SimpleQueue as Thread_SimpleQueue,
-    LifoQueue as Thread_LifoQueue,
-    PriorityQueue as Thread_PriorityQueue)
 from typing import Union
+
+if PYTHON_MAJOR_VERSION == 3:
+    if PYTHON_MINOR_VERSION > 6:
+        from queue import (
+            Queue as Thread_Queue,
+            SimpleQueue as Thread_SimpleQueue,
+            LifoQueue as Thread_LifoQueue,
+            PriorityQueue as Thread_PriorityQueue)
+
+        class ThreadQueueType(_BaseQueueType):
+            Queue = Thread_Queue()
+            SimpleQueue = Thread_SimpleQueue()
+            LifoQueue = Thread_LifoQueue()
+            PriorityQueue = Thread_PriorityQueue()
+
+else:
+        from queue import (
+            Queue as Thread_Queue,
+            LifoQueue as Thread_LifoQueue,
+            PriorityQueue as Thread_PriorityQueue)
+
+        class ThreadQueueType(_BaseQueueType):
+            Queue = Thread_Queue()
+            LifoQueue = Thread_LifoQueue()
+            PriorityQueue = Thread_PriorityQueue()
 
 
 ThreadQueueDataType = Union[Thread_Queue, Thread_SimpleQueue, Thread_LifoQueue, Thread_PriorityQueue]
-
-
-class ThreadQueueType(_BaseQueueType):
-
-    Queue = Thread_Queue()
-    SimpleQueue = Thread_SimpleQueue()
-    LifoQueue = Thread_LifoQueue()
-    PriorityQueue = Thread_PriorityQueue()
-
 
 
 class ThreadLock(_PosixThreadLock):
