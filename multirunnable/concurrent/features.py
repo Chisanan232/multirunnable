@@ -21,7 +21,7 @@ if PYTHON_MAJOR_VERSION == 3:
             LifoQueue = Thread_LifoQueue()
             PriorityQueue = Thread_PriorityQueue()
 
-else:
+    else:
         from queue import (
             Queue as Thread_Queue,
             LifoQueue as Thread_LifoQueue,
