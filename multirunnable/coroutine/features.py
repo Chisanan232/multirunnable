@@ -1,5 +1,4 @@
-import logging
-
+from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 from multirunnable.framework.features import (
     PosixThreadLock as _PosixThreadLock,
@@ -11,12 +10,35 @@ from multirunnable.types import (
 )
 from multirunnable.exceptions import VersionError
 
-from gevent.queue import (
-    Queue as _Greenlet_Queue,
-    SimpleQueue as _Greenlet_SimpleQueue,
-    JoinableQueue as _Greenlet_JoinableQueue,
-    PriorityQueue as _Greenlet_PriorityQueue,
-    LifoQueue as _Greenlet_LifoQueue)
+if PYTHON_MAJOR_VERSION == 3:
+    if PYTHON_MINOR_VERSION > 6:
+        from gevent.queue import (
+            Queue as _Greenlet_Queue,
+            SimpleQueue as _Greenlet_SimpleQueue,
+            JoinableQueue as _Greenlet_JoinableQueue,
+            PriorityQueue as _Greenlet_PriorityQueue,
+            LifoQueue as _Greenlet_LifoQueue)
+
+        class GeventQueueType(_BaseQueueType):
+            Queue = _Greenlet_Queue()
+            SimpleQueue = _Greenlet_SimpleQueue()
+            JoinableQueue = _Greenlet_JoinableQueue()
+            PriorityQueue = _Greenlet_PriorityQueue()
+            LifoQueue = _Greenlet_LifoQueue()
+
+    else:
+        from gevent.queue import (
+            Queue as _Greenlet_Queue,
+            JoinableQueue as _Greenlet_JoinableQueue,
+            PriorityQueue as _Greenlet_PriorityQueue,
+            LifoQueue as _Greenlet_LifoQueue)
+
+        class GeventQueueType(_BaseQueueType):
+            Queue = _Greenlet_Queue()
+            JoinableQueue = _Greenlet_JoinableQueue()
+            PriorityQueue = _Greenlet_PriorityQueue()
+            LifoQueue = _Greenlet_LifoQueue()
+
 from gevent.threading import Lock as _Greenlet_Lock
 from gevent.lock import (
     RLock as _Greenlet_RLock,
@@ -35,16 +57,7 @@ from asyncio.locks import (
 from asyncio import Event as _Async_Event, Condition as _Async_Condition
 
 from typing import Dict, Optional, Union
-
-
-
-class GeventQueueType(_BaseQueueType):
-
-    Queue = _Greenlet_Queue()
-    SimpleQueue = _Greenlet_SimpleQueue()
-    JoinableQueue = _Greenlet_JoinableQueue()
-    PriorityQueue = _Greenlet_PriorityQueue()
-    LifoQueue = _Greenlet_LifoQueue()
+import logging
 
 
 
