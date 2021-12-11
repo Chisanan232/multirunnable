@@ -54,6 +54,7 @@ def reset_running_timer() -> None:
 Test_Function_Sleep_Time = 7
 Test_Function_Args: Tuple = (1, 2, "test_value")
 Test_Function_Kwargs: Dict = {"param_1": 1, "param_2": 2, "test_param": "test_value"}
+Test_Function_Multiple_Args = (Test_Function_Args, Test_Function_Args, Test_Function_Args)
 
 
 def target_fun(*args, **kwargs) -> str:
@@ -94,6 +95,42 @@ def pool_target_fun(*args, **kwargs) -> str:
             assert args == Test_Function_Args, f"The argument *args* should be same as the input outside."
         if kwargs:
             assert kwargs == Test_Function_Kwargs, f"The argument *kwargs* should be same as the input outside."
+
+        _pid = os.getpid()
+        _ppid = os.getppid()
+        # _time = str(datetime.datetime.now())
+        _time = str(time.time())
+
+        Running_PIDs.append(_pid)
+        Running_PPIDs.append(_ppid)
+        Running_Current_Processes.append(_time)
+        Running_Finish_Timestamp.append(_time)
+
+    time.sleep(Test_Function_Sleep_Time)
+    return f"result_{mp.current_process()}"
+
+
+def map_target_fun(*args, **kwargs):
+    """
+    Description:
+        Test for 'map', 'starmap' methods.
+    :param args:
+    :param kwargs:
+    :return:
+    """
+
+    with _Process_Lock:
+        # Running_Count.value += 1
+        global Pool_Running_Count
+        Pool_Running_Count.value += 1
+        print(f"Pool_Running_Count: {Pool_Running_Count} - {mp.current_process()}")
+
+        if args:
+            assert set(args) <= set(Test_Function_Args), f"The argument *args* should be one of element of the input outside."
+            if len(args) > 1:
+                assert args == Test_Function_Args, f"The argument *args* should be same as the global variable 'Test_Function_Args'."
+        if kwargs:
+            assert kwargs is None or kwargs == {}, f"The argument *kwargs* should be empty or None value."
 
         _pid = os.getpid()
         _ppid = os.getppid()
@@ -578,36 +615,48 @@ class TestProcessPool(PoolRunningTestSpec):
 
 
     def test_map(self, process_pool_strategy: ProcessPoolStrategy):
-        pass
         # Test for no any parameters
-        # process_pool_strategy.map(function=target_fun)
+        TestProcessPool._initial()
+
+        process_pool_strategy.map(function=map_target_fun, args_iter=Test_Function_Args)
+
+        TestProcessPool._chk_process_record_map()
 
         # Test for parameters with '*args'
         # process_pool_strategy.map(function=target_fun, args_iter=Test_Function_Args)
 
 
     def test_async_map(self, process_pool_strategy: ProcessPoolStrategy):
-        pass
         # Test for no any parameters
-        # process_pool_strategy.async_map(function=target_fun)
+        TestProcessPool._initial()
+
+        process_pool_strategy.async_map(function=map_target_fun, args_iter=Test_Function_Args)
+
+        TestProcessPool._chk_process_record_map()
 
         # Test for parameters with '*args'
         # process_pool_strategy.async_map(function=target_fun, args_iter=Test_Function_Args)
 
 
     def test_map_by_args(self, process_pool_strategy: ProcessPoolStrategy):
-        pass
         # Test for no any parameters
-        # process_pool_strategy.map_by_args(function=target_fun)
+        TestProcessPool._initial()
+
+        process_pool_strategy.map_by_args(function=map_target_fun, args_iter=Test_Function_Multiple_Args)
+
+        TestProcessPool._chk_process_record_map()
 
         # Test for parameters with '*args'
         # process_pool_strategy.map_by_args(function=target_fun, args_iter=Test_Function_Args)
 
 
     def test_async_map_by_args(self, process_pool_strategy: ProcessPoolStrategy):
-        pass
         # Test for no any parameters
-        # process_pool_strategy.async_map_by_args(function=target_fun)
+        TestProcessPool._initial()
+
+        process_pool_strategy.async_map_by_args(function=map_target_fun, args_iter=Test_Function_Multiple_Args)
+
+        TestProcessPool._chk_process_record_map()
 
         # Test for parameters with '*args'
         # process_pool_strategy.async_map_by_args(function=target_fun, args_iter=Test_Function_Args)
@@ -660,7 +709,32 @@ class TestProcessPool(PoolRunningTestSpec):
         assert len(set(_pid_list)) == len(set(_current_process_list)), f"The count of current process name (de-duplicate) should be equal to count of PIDs."
 
 
+    @staticmethod
+    def _chk_process_record_map():
+        print(f"Pool_Running_Count: {Pool_Running_Count}")
+        print(f"Pool_Running_Count.value: {Pool_Running_Count.value}")
+        _argument_size = len(Test_Function_Args)
+        assert Pool_Running_Count.value == _argument_size, f"The running count should be the same as the process pool size."
+
+        _ppid_list = Running_PPIDs[:]
+        _pid_list = Running_PIDs[:]
+        _current_process_list = Running_Current_Processes[:]
+        _timestamp_list = Running_Finish_Timestamp[:]
+
+        assert len(set(_ppid_list)) == 1, f"The PPID of each process should be the same."
+        assert _ppid_list[0] == Running_Parent_PID, f"The PPID should equal to {Running_Parent_PID}. But it got {_ppid_list[0]}."
+        assert len(_pid_list) == _argument_size, f"The count of PID (no de-duplicate) should be the same as the count of processes."
+        assert len(set(_pid_list)) == _argument_size, f"The count of PID (de-duplicate) should be the same as the count of processes."
+        assert len(_pid_list) == len(_current_process_list), f"The count of current process name (no de-duplicate) should be equal to count of PIDs."
+        assert len(set(_pid_list)) == len(set(_current_process_list)), f"The count of current process name (de-duplicate) should be equal to count of PIDs."
+
+
     def test_close(self, process_pool_strategy: ProcessPoolStrategy):
+        """
+        ValueError: Pool not running
+        :param process_pool_strategy:
+        :return:
+        """
         pass
 
 
@@ -670,6 +744,4 @@ class TestProcessPool(PoolRunningTestSpec):
 
     def test_get_result(self, process_pool_strategy: ProcessPoolStrategy):
         pass
-
-
 
