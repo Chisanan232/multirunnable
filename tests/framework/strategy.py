@@ -1,5 +1,4 @@
-from abc import ABCMeta, abstractmethod
-
+from abc import ABCMeta, abstractmethod, ABC
 
 
 class RunningStrategyTestSpec(metaclass=ABCMeta):
@@ -32,14 +31,14 @@ class GeneralRunningTestSpec(RunningStrategyTestSpec):
         pass
 
 
-    @abstractmethod
-    def test_generate_worker(self, **kwargs):
-        pass
+    # @abstractmethod
+    # def test_generate_worker(self, **kwargs):
+    #     pass
 
 
-    @abstractmethod
-    def test_activate_workers(self, **kwargs):
-        pass
+    # @abstractmethod
+    # def test_activate_workers(self, **kwargs):
+    #     pass
 
 
     @abstractmethod
@@ -48,45 +47,47 @@ class GeneralRunningTestSpec(RunningStrategyTestSpec):
 
 
 
-class PoolRunningTestSpec(RunningStrategyTestSpec):
+class PoolRunningTestSpec(RunningStrategyTestSpec, ABC):
 
-    @abstractmethod
-    def test_apply(self, **kwargs):
-        pass
+    pass
 
-
-    @abstractmethod
-    def test_async_apply(self, **kwargs):
-        pass
-
-
-    @abstractmethod
-    def test_map(self, **kwargs):
-        pass
-
-
-    @abstractmethod
-    def test_async_map(self, **kwargs):
-        pass
-
-
-    @abstractmethod
-    def test_map_by_args(self, **kwargs):
-        pass
-
-
-    @abstractmethod
-    def test_async_map_by_args(self, **kwargs):
-        pass
-
-
-    @abstractmethod
-    def test_imap(self, **kwargs):
-        pass
-
-
-    @abstractmethod
-    def test_imap_unordered(self, **kwargs):
-        pass
+    # @abstractmethod
+    # def test_apply(self, **kwargs):
+    #     pass
+    #
+    #
+    # @abstractmethod
+    # def test_async_apply(self, **kwargs):
+    #     pass
+    #
+    #
+    # @abstractmethod
+    # def test_map(self, **kwargs):
+    #     pass
+    #
+    #
+    # @abstractmethod
+    # def test_async_map(self, **kwargs):
+    #     pass
+    #
+    #
+    # @abstractmethod
+    # def test_map_by_args(self, **kwargs):
+    #     pass
+    #
+    #
+    # @abstractmethod
+    # def test_async_map_by_args(self, **kwargs):
+    #     pass
+    #
+    #
+    # @abstractmethod
+    # def test_imap(self, **kwargs):
+    #     pass
+    #
+    #
+    # @abstractmethod
+    # def test_imap_unordered(self, **kwargs):
+    #     pass
 
 
