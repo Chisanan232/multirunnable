@@ -125,6 +125,22 @@ class TargetCls:
         target_fun(*args, **kwargs)
 
 
+class TargetPoolCls:
+
+    def method(self, *args, **kwargs) -> None:
+        pool_target_fun(*args, **kwargs)
+
+
+    @classmethod
+    def classmethod_fun(cls, *args, **kwargs) -> None:
+        pool_target_fun(*args, **kwargs)
+
+
+    @staticmethod
+    def staticmethod_fun(*args, **kwargs) -> None:
+        pool_target_fun(*args, **kwargs)
+
+
 @pytest.fixture(scope="class")
 def process_strategy():
     return ProcessStrategy(executors=Process_Size)
@@ -476,6 +492,87 @@ class TestProcessPool(PoolRunningTestSpec):
         TestProcessPool._initial()
 
         process_pool_strategy.async_apply(function=pool_target_fun, kwargs=Test_Function_Kwargs)
+
+        TestProcessPool._chk_process_record()
+
+
+    def test_async_apply_with_bounded_function_with_no_arguments(self, process_pool_strategy: ProcessPoolStrategy):
+        TestProcessPool._initial()
+
+        _tc = TargetPoolCls()
+        process_pool_strategy.async_apply(function=_tc.method)
+
+        TestProcessPool._chk_process_record()
+
+
+    def test_async_apply_with_bounded_function_with_args(self, process_pool_strategy: ProcessPoolStrategy):
+        # Test for parameters with '*args'
+        TestProcessPool._initial()
+
+        _tc = TargetPoolCls()
+        process_pool_strategy.async_apply(function=_tc.method, args=Test_Function_Args)
+
+        TestProcessPool._chk_process_record()
+
+
+    def test_async_apply_with_bounded_function_with_kwargs(self, process_pool_strategy: ProcessPoolStrategy):
+        # Test for parameters with '**kwargs'
+        TestProcessPool._initial()
+
+        _tc = TargetPoolCls()
+        process_pool_strategy.async_apply(function=_tc.method, kwargs=Test_Function_Kwargs)
+
+        TestProcessPool._chk_process_record()
+
+
+    def test_async_apply_with_classmethod_with_no_arguments(self, process_pool_strategy: ProcessPoolStrategy):
+        TestProcessPool._initial()
+
+        process_pool_strategy.async_apply(function=TargetPoolCls.classmethod_fun)
+
+        TestProcessPool._chk_process_record()
+
+
+    def test_async_apply_with_classmethod_with_args(self, process_pool_strategy: ProcessPoolStrategy):
+        # Test for parameters with '*args'
+        TestProcessPool._initial()
+
+        process_pool_strategy.async_apply(function=TargetPoolCls.classmethod_fun, args=Test_Function_Args)
+
+        TestProcessPool._chk_process_record()
+
+
+    def test_async_apply_with_classmethod_with_kwargs(self, process_pool_strategy: ProcessPoolStrategy):
+        # Test for parameters with '**kwargs'
+        TestProcessPool._initial()
+
+        process_pool_strategy.async_apply(function=TargetPoolCls.classmethod_fun, kwargs=Test_Function_Kwargs)
+
+        TestProcessPool._chk_process_record()
+
+
+    def test_async_apply_with_staticmethod_with_no_arguments(self, process_pool_strategy: ProcessPoolStrategy):
+        TestProcessPool._initial()
+
+        process_pool_strategy.async_apply(function=TargetPoolCls.staticmethod_fun)
+
+        TestProcessPool._chk_process_record()
+
+
+    def test_async_apply_with_staticmethod_with_args(self, process_pool_strategy: ProcessPoolStrategy):
+        # Test for parameters with '*args'
+        TestProcessPool._initial()
+
+        process_pool_strategy.async_apply(function=TargetPoolCls.staticmethod_fun, args=Test_Function_Args)
+
+        TestProcessPool._chk_process_record()
+
+
+    def test_async_apply_with_staticmethod_with_kwargs(self, process_pool_strategy: ProcessPoolStrategy):
+        # Test for parameters with '**kwargs'
+        TestProcessPool._initial()
+
+        process_pool_strategy.async_apply(function=TargetPoolCls.staticmethod_fun, kwargs=Test_Function_Kwargs)
 
         TestProcessPool._chk_process_record()
 
