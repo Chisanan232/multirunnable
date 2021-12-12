@@ -170,6 +170,22 @@ class TargetPoolCls:
         pool_target_fun(*args, **kwargs)
 
 
+class TargetPoolMapCls:
+
+    def method(self, *args, **kwargs) -> None:
+        map_target_fun(*args, **kwargs)
+
+
+    @classmethod
+    def classmethod_fun(cls, *args, **kwargs) -> None:
+        map_target_fun(*args, **kwargs)
+
+
+    @staticmethod
+    def staticmethod_fun(*args, **kwargs) -> None:
+        map_target_fun(*args, **kwargs)
+
+
 @pytest.fixture(scope="class")
 def process_strategy():
     return ProcessStrategy(executors=Process_Size)
@@ -559,7 +575,7 @@ class TestProcessPool(PoolRunningTestSpec):
         TestProcessPool._chk_process_record()
 
 
-    def test_async_apply_with_classmethod_with_no_arguments(self, process_pool_strategy: ProcessPoolStrategy):
+    def test_async_apply_with_classmethod_function_with_no_arguments(self, process_pool_strategy: ProcessPoolStrategy):
         TestProcessPool._initial()
 
         process_pool_strategy.async_apply(function=TargetPoolCls.classmethod_fun)
@@ -567,7 +583,7 @@ class TestProcessPool(PoolRunningTestSpec):
         TestProcessPool._chk_process_record()
 
 
-    def test_async_apply_with_classmethod_with_args(self, process_pool_strategy: ProcessPoolStrategy):
+    def test_async_apply_with_classmethod_function_with_args(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for parameters with '*args'
         TestProcessPool._initial()
 
@@ -576,7 +592,7 @@ class TestProcessPool(PoolRunningTestSpec):
         TestProcessPool._chk_process_record()
 
 
-    def test_async_apply_with_classmethod_with_kwargs(self, process_pool_strategy: ProcessPoolStrategy):
+    def test_async_apply_with_classmethod_function_with_kwargs(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for parameters with '**kwargs'
         TestProcessPool._initial()
 
@@ -585,7 +601,7 @@ class TestProcessPool(PoolRunningTestSpec):
         TestProcessPool._chk_process_record()
 
 
-    def test_async_apply_with_staticmethod_with_no_arguments(self, process_pool_strategy: ProcessPoolStrategy):
+    def test_async_apply_with_staticmethod_function_with_no_arguments(self, process_pool_strategy: ProcessPoolStrategy):
         TestProcessPool._initial()
 
         process_pool_strategy.async_apply(function=TargetPoolCls.staticmethod_fun)
@@ -593,7 +609,7 @@ class TestProcessPool(PoolRunningTestSpec):
         TestProcessPool._chk_process_record()
 
 
-    def test_async_apply_with_staticmethod_with_args(self, process_pool_strategy: ProcessPoolStrategy):
+    def test_async_apply_with_staticmethod_function_with_args(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for parameters with '*args'
         TestProcessPool._initial()
 
@@ -602,7 +618,7 @@ class TestProcessPool(PoolRunningTestSpec):
         TestProcessPool._chk_process_record()
 
 
-    def test_async_apply_with_staticmethod_with_kwargs(self, process_pool_strategy: ProcessPoolStrategy):
+    def test_async_apply_with_staticmethod_function_with_kwargs(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for parameters with '**kwargs'
         TestProcessPool._initial()
 
@@ -611,7 +627,7 @@ class TestProcessPool(PoolRunningTestSpec):
         TestProcessPool._chk_process_record()
 
 
-    def test_map(self, process_pool_strategy: ProcessPoolStrategy):
+    def test_map_with_function(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for no any parameters
         TestProcessPool._initial()
 
@@ -623,7 +639,35 @@ class TestProcessPool(PoolRunningTestSpec):
         # process_pool_strategy.map(function=target_fun, args_iter=Test_Function_Args)
 
 
-    def test_async_map(self, process_pool_strategy: ProcessPoolStrategy):
+    def test_map_with_bounded_function(self, process_pool_strategy: ProcessPoolStrategy):
+        # Test for no any parameters
+        TestProcessPool._initial()
+
+        _tc = TargetPoolMapCls()
+        process_pool_strategy.map(function=_tc.method, args_iter=Test_Function_Args)
+
+        TestProcessPool._chk_process_record_map()
+
+
+    def test_map_with_classmethod_function(self, process_pool_strategy: ProcessPoolStrategy):
+        # Test for no any parameters
+        TestProcessPool._initial()
+
+        process_pool_strategy.map(function=TargetPoolMapCls.classmethod_fun, args_iter=Test_Function_Args)
+
+        TestProcessPool._chk_process_record_map()
+
+
+    def test_map_with_staticmethod_function(self, process_pool_strategy: ProcessPoolStrategy):
+        # Test for no any parameters
+        TestProcessPool._initial()
+
+        process_pool_strategy.map(function=TargetPoolMapCls.staticmethod_fun, args_iter=Test_Function_Args)
+
+        TestProcessPool._chk_process_record_map()
+
+
+    def test_async_map_with_function(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for no any parameters
         TestProcessPool._initial()
 
@@ -635,7 +679,35 @@ class TestProcessPool(PoolRunningTestSpec):
         # process_pool_strategy.async_map(function=target_fun, args_iter=Test_Function_Args)
 
 
-    def test_map_by_args(self, process_pool_strategy: ProcessPoolStrategy):
+    def test_async_map_with_bounded_function(self, process_pool_strategy: ProcessPoolStrategy):
+        # Test for no any parameters
+        TestProcessPool._initial()
+
+        _tc = TargetPoolMapCls()
+        process_pool_strategy.async_map(function=_tc.method, args_iter=Test_Function_Args)
+
+        TestProcessPool._chk_process_record_map()
+
+
+    def test_async_map_with_classmethod_function(self, process_pool_strategy: ProcessPoolStrategy):
+        # Test for no any parameters
+        TestProcessPool._initial()
+
+        process_pool_strategy.async_map(function=TargetPoolMapCls.classmethod_fun, args_iter=Test_Function_Args)
+
+        TestProcessPool._chk_process_record_map()
+
+
+    def test_async_map_with_staticmethod_function(self, process_pool_strategy: ProcessPoolStrategy):
+        # Test for no any parameters
+        TestProcessPool._initial()
+
+        process_pool_strategy.async_map(function=TargetPoolMapCls.staticmethod_fun, args_iter=Test_Function_Args)
+
+        TestProcessPool._chk_process_record_map()
+
+
+    def test_map_by_args_with_function(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for no any parameters
         TestProcessPool._initial()
 
@@ -647,7 +719,35 @@ class TestProcessPool(PoolRunningTestSpec):
         # process_pool_strategy.map_by_args(function=target_fun, args_iter=Test_Function_Args)
 
 
-    def test_async_map_by_args(self, process_pool_strategy: ProcessPoolStrategy):
+    def test_map_by_args_with_bounded_function(self, process_pool_strategy: ProcessPoolStrategy):
+        # Test for no any parameters
+        TestProcessPool._initial()
+
+        _tc = TargetPoolMapCls()
+        process_pool_strategy.map_by_args(function=_tc.method, args_iter=Test_Function_Multiple_Args)
+
+        TestProcessPool._chk_process_record_map()
+
+
+    def test_map_by_args_with_classmethod_function(self, process_pool_strategy: ProcessPoolStrategy):
+        # Test for no any parameters
+        TestProcessPool._initial()
+
+        process_pool_strategy.map_by_args(function=TargetPoolMapCls.classmethod_fun, args_iter=Test_Function_Multiple_Args)
+
+        TestProcessPool._chk_process_record_map()
+
+
+    def test_map_by_args_with_staticmethod_function(self, process_pool_strategy: ProcessPoolStrategy):
+        # Test for no any parameters
+        TestProcessPool._initial()
+
+        process_pool_strategy.map_by_args(function=TargetPoolMapCls.staticmethod_fun, args_iter=Test_Function_Multiple_Args)
+
+        TestProcessPool._chk_process_record_map()
+
+
+    def test_async_map_by_args_with_function(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for no any parameters
         TestProcessPool._initial()
 
@@ -657,6 +757,34 @@ class TestProcessPool(PoolRunningTestSpec):
 
         # Test for parameters with '*args'
         # process_pool_strategy.async_map_by_args(function=target_fun, args_iter=Test_Function_Args)
+
+
+    def test_async_map_by_args_with_bounded_function(self, process_pool_strategy: ProcessPoolStrategy):
+        # Test for no any parameters
+        TestProcessPool._initial()
+
+        _tc = TargetPoolMapCls()
+        process_pool_strategy.async_map_by_args(function=_tc.method, args_iter=Test_Function_Multiple_Args)
+
+        TestProcessPool._chk_process_record_map()
+
+
+    def test_async_map_by_args_with_classmethod_function(self, process_pool_strategy: ProcessPoolStrategy):
+        # Test for no any parameters
+        TestProcessPool._initial()
+
+        process_pool_strategy.async_map_by_args(function=TargetPoolMapCls.classmethod_fun, args_iter=Test_Function_Multiple_Args)
+
+        TestProcessPool._chk_process_record_map()
+
+
+    def test_async_map_by_args_with_staticmethod_function(self, process_pool_strategy: ProcessPoolStrategy):
+        # Test for no any parameters
+        TestProcessPool._initial()
+
+        process_pool_strategy.async_map_by_args(function=TargetPoolMapCls.staticmethod_fun, args_iter=Test_Function_Multiple_Args)
+
+        TestProcessPool._chk_process_record_map()
 
 
     def test_imap(self, process_pool_strategy: ProcessPoolStrategy):
