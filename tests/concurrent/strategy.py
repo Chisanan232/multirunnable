@@ -872,11 +872,11 @@ class TestThreadPool(PoolRunningTestSpec):
         :param pool_strategy:
         :return:
         """
-        pass
+        pool_strategy.close()
 
 
     def test_terminal(self, pool_strategy: ThreadPoolStrategy):
-        pass
+        pool_strategy.terminal()
 
 
     def test_get_result(self, pool_strategy: ThreadPoolStrategy):

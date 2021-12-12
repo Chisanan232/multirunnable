@@ -866,11 +866,11 @@ class TestProcessPool(PoolRunningTestSpec):
         :param process_pool_strategy:
         :return:
         """
-        pass
+        process_pool_strategy.close()
 
 
     def test_terminal(self, process_pool_strategy: ProcessPoolStrategy):
-        pass
+        process_pool_strategy.terminal()
 
 
     def test_get_result(self, process_pool_strategy: ProcessPoolStrategy):
