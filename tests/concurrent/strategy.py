@@ -2,7 +2,6 @@ from multirunnable.concurrent.strategy import ConcurrentStrategy, ThreadStrategy
 
 from ..framework.strategy import GeneralRunningTestSpec, PoolRunningTestSpec
 from typing import List, Tuple, Dict
-import multiprocessing as mp
 import threading
 import datetime
 import pytest
