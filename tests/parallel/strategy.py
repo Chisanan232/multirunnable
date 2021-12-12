@@ -13,8 +13,9 @@ Process_Size: int = 10
 Pool_Size: int = 10
 Task_Size: int = 10
 
+Running_Diff_Time: int = 2
+
 _Manager = mp.Manager()
-# _Process_Lock = _Manager.Lock()
 _Process_Lock = mp.Lock()
 
 Running_Parent_PID = None
@@ -25,10 +26,6 @@ Running_Current_Processes: List = _Manager.list()
 Running_Finish_Timestamp: List = _Manager.list()
 
 Pool_Running_Count = mp.Value("i", 0)
-# Running_PIDs: List = []
-# Running_PPIDs: List = []
-# Running_Current_Processes: List = []
-# Running_Finish_Timestamp: List = []
 
 
 def reset_running_flag() -> None:
@@ -62,8 +59,6 @@ def target_fun(*args, **kwargs) -> str:
 
     with _Process_Lock:
         Running_Count.value += 1
-        # Running_Count += 1
-        print(f"Running_Count: {Running_Count} - {mp.current_process()}")
 
         if args:
             assert args == Test_Function_Args, f"The argument *args* should be same as the input outside."
@@ -73,11 +68,11 @@ def target_fun(*args, **kwargs) -> str:
         _pid = os.getpid()
         _ppid = os.getppid()
         # _time = str(datetime.datetime.now())
-        _time = str(time.time())
+        _time = int(time.time())
 
         Running_PIDs.append(_pid)
         Running_PPIDs.append(_ppid)
-        Running_Current_Processes.append(_time)
+        Running_Current_Processes.append(str(mp.current_process()))
         Running_Finish_Timestamp.append(_time)
 
     time.sleep(Test_Function_Sleep_Time)
@@ -85,11 +80,10 @@ def target_fun(*args, **kwargs) -> str:
 
 
 def pool_target_fun(*args, **kwargs) -> str:
+    global Pool_Running_Count
+
     with _Process_Lock:
-        # Running_Count.value += 1
-        global Pool_Running_Count
         Pool_Running_Count.value += 1
-        print(f"Pool_Running_Count: {Pool_Running_Count} - {mp.current_process()}")
 
         if args:
             assert args == Test_Function_Args, f"The argument *args* should be same as the input outside."
@@ -99,11 +93,11 @@ def pool_target_fun(*args, **kwargs) -> str:
         _pid = os.getpid()
         _ppid = os.getppid()
         # _time = str(datetime.datetime.now())
-        _time = str(time.time())
+        _time = int(time.time())
 
         Running_PIDs.append(_pid)
         Running_PPIDs.append(_ppid)
-        Running_Current_Processes.append(_time)
+        Running_Current_Processes.append(str(mp.current_process()))
         Running_Finish_Timestamp.append(_time)
 
     time.sleep(Test_Function_Sleep_Time)
@@ -118,12 +112,10 @@ def map_target_fun(*args, **kwargs):
     :param kwargs:
     :return:
     """
+    global Pool_Running_Count
 
     with _Process_Lock:
-        # Running_Count.value += 1
-        global Pool_Running_Count
         Pool_Running_Count.value += 1
-        print(f"Pool_Running_Count: {Pool_Running_Count} - {mp.current_process()}")
 
         if args:
             assert set(args) <= set(Test_Function_Args), f"The argument *args* should be one of element of the input outside."
@@ -135,11 +127,11 @@ def map_target_fun(*args, **kwargs):
         _pid = os.getpid()
         _ppid = os.getppid()
         # _time = str(datetime.datetime.now())
-        _time = str(time.time())
+        _time = int(time.time())
 
         Running_PIDs.append(_pid)
         Running_PPIDs.append(_ppid)
-        Running_Current_Processes.append(_time)
+        Running_Current_Processes.append(str(mp.current_process()))
         Running_Finish_Timestamp.append(_time)
 
     time.sleep(Test_Function_Sleep_Time)
@@ -462,6 +454,11 @@ class TestProcess(GeneralRunningTestSpec):
         assert len(_pid_list) == len(_current_process_list), f"The count of current process name (no de-duplicate) should be equal to count of PIDs."
         assert len(set(_pid_list)) == len(set(_current_process_list)), f"The count of current process name (de-duplicate) should be equal to count of PIDs."
 
+        _max_timestamp = max(_timestamp_list)
+        _min_timestamp = min(_timestamp_list)
+        _diff_timestamp = _max_timestamp - _min_timestamp
+        assert _diff_timestamp <= Running_Diff_Time, f"Processes should be run in the same time period."
+
 
     def test_close(self, process_strategy: ProcessStrategy):
         # Test for no any parameters
@@ -692,8 +689,6 @@ class TestProcessPool(PoolRunningTestSpec):
 
     @staticmethod
     def _chk_process_record():
-        print(f"Pool_Running_Count: {Pool_Running_Count}")
-        print(f"Pool_Running_Count.value: {Pool_Running_Count.value}")
         assert Pool_Running_Count.value == Pool_Size, f"The running count should be the same as the process pool size."
 
         _ppid_list = Running_PPIDs[:]
@@ -708,11 +703,14 @@ class TestProcessPool(PoolRunningTestSpec):
         assert len(_pid_list) == len(_current_process_list), f"The count of current process name (no de-duplicate) should be equal to count of PIDs."
         assert len(set(_pid_list)) == len(set(_current_process_list)), f"The count of current process name (de-duplicate) should be equal to count of PIDs."
 
+        _max_timestamp = max(_timestamp_list)
+        _min_timestamp = min(_timestamp_list)
+        _diff_timestamp = _max_timestamp - _min_timestamp
+        assert _diff_timestamp <= Running_Diff_Time, f"Processes should be run in the same time period."
+
 
     @staticmethod
     def _chk_process_record_map():
-        print(f"Pool_Running_Count: {Pool_Running_Count}")
-        print(f"Pool_Running_Count.value: {Pool_Running_Count.value}")
         _argument_size = len(Test_Function_Args)
         assert Pool_Running_Count.value == _argument_size, f"The running count should be the same as the process pool size."
 
@@ -727,6 +725,11 @@ class TestProcessPool(PoolRunningTestSpec):
         assert len(set(_pid_list)) == _argument_size, f"The count of PID (de-duplicate) should be the same as the count of processes."
         assert len(_pid_list) == len(_current_process_list), f"The count of current process name (no de-duplicate) should be equal to count of PIDs."
         assert len(set(_pid_list)) == len(set(_current_process_list)), f"The count of current process name (de-duplicate) should be equal to count of PIDs."
+
+        _max_timestamp = max(_timestamp_list)
+        _min_timestamp = min(_timestamp_list)
+        _diff_timestamp = _max_timestamp - _min_timestamp
+        assert _diff_timestamp <= Running_Diff_Time, f"Processes should be run in the same time period."
 
 
     def test_close(self, process_pool_strategy: ProcessPoolStrategy):
