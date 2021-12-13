@@ -2,8 +2,6 @@ from multirunnable.coroutine.strategy import CoroutineStrategy, GreenThreadStrat
 
 from ..framework.strategy import GeneralRunningTestSpec, PoolRunningTestSpec
 from typing import List, Tuple, Dict
-from gevent import monkey
-monkey.patch_all()
 
 import threading
 import datetime
@@ -69,17 +67,17 @@ def target_fun(*args, **kwargs) -> str:
 
         _pid = os.getpid()
         _ppid = os.getppid()
-        _ident = threading.get_ident()
+        _ident = __get_current_thread_ident()
         # _time = str(datetime.datetime.now())
         _time = int(time.time())
 
         Running_GreenThread_IDs.append(_ident)
         Running_PPIDs.append(_ppid)
-        Running_Current_Threads.append(str(threading.current_thread()))
+        Running_Current_Threads.append(__get_current_thread())
         Running_Finish_Timestamp.append(_time)
 
     time.sleep(Test_Function_Sleep_Time)
-    return f"result_{threading.current_thread()}"
+    return f"result_{__get_current_thread()}"
 
 
 def pool_target_fun(*args, **kwargs) -> str:
@@ -95,17 +93,17 @@ def pool_target_fun(*args, **kwargs) -> str:
 
         _pid = os.getpid()
         _ppid = os.getppid()
-        _ident = threading.get_ident()
+        _ident = __get_current_thread_ident()
         # _time = str(datetime.datetime.now())
         _time = int(time.time())
 
         Running_GreenThread_IDs.append(_ident)
         Running_PPIDs.append(_ppid)
-        Running_Current_Threads.append(str(threading.current_thread()))
+        Running_Current_Threads.append(__get_current_thread())
         Running_Finish_Timestamp.append(_time)
 
     time.sleep(Test_Function_Sleep_Time)
-    return f"result_{threading.current_thread()}"
+    return f"result_{__get_current_thread()}"
 
 
 def map_target_fun(*args, **kwargs):
@@ -130,17 +128,17 @@ def map_target_fun(*args, **kwargs):
 
         _pid = os.getpid()
         _ppid = os.getppid()
-        _ident = threading.get_ident()
+        _ident = __get_current_thread_ident()
         # _time = str(datetime.datetime.now())
         _time = int(time.time())
 
         Running_GreenThread_IDs.append(_ident)
         Running_PPIDs.append(_ppid)
-        Running_Current_Threads.append(str(threading.current_thread()))
+        Running_Current_Threads.append(__get_current_thread())
         Running_Finish_Timestamp.append(_time)
 
     time.sleep(Test_Function_Sleep_Time)
-    return f"result_{threading.current_thread()}"
+    return f"result_{__get_current_thread()}"
 
 
 def map_target_fun_with_diff_args(*args, **kwargs):
@@ -165,17 +163,31 @@ def map_target_fun_with_diff_args(*args, **kwargs):
 
         _pid = os.getpid()
         _ppid = os.getppid()
-        _ident = threading.get_ident()
+        _ident = __get_current_thread_ident()
         # _time = str(datetime.datetime.now())
         _time = int(time.time())
 
         Running_GreenThread_IDs.append(_ident)
         Running_PPIDs.append(_ppid)
-        Running_Current_Threads.append(str(threading.current_thread()))
+        Running_Current_Threads.append(__get_current_thread())
         Running_Finish_Timestamp.append(_time)
 
     time.sleep(Test_Function_Sleep_Time)
-    return f"result_{threading.current_thread()}"
+    return f"result_{__get_current_thread()}"
+
+
+def __get_current_thread_ident():
+    from gevent import monkey
+    monkey.patch_all()
+    import threading
+    return threading.get_ident()
+
+
+def __get_current_thread():
+    from gevent import monkey
+    monkey.patch_all()
+    import threading
+    return str(threading.current_thread())
 
 
 class TargetCls:
