@@ -255,8 +255,8 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
         """
         args_iter_set = set(args_iter)
         if len(args_iter_set) == 1:
-            _arguments = tuple(args_iter_set)[0]
-            self._map_with_args(function=function, args=_arguments)
+            _arguments = args_iter[0]
+            self._map_with_args(function=function, args=_arguments, size=len(args_iter), chunksize=chunksize)
         else:
             __results = []
             __process_run_successful = None
@@ -281,11 +281,21 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
             self._result_saving(successful=__process_run_successful, result=__results)
 
 
-    def _map_with_args(self, function: Callable, args: Iterable) -> None:
+    def _map_with_args(self, function: Callable, args: Iterable, size: int, chunksize: int) -> None:
+        """
+        Description:
+            For passing multiple arguments into target function.
+            That's the reason why initial a partial function first and then pass ONE parameter into it.
+        :param function:
+        :param args:
+        :param size:
+        :param chunksize:
+        :return:
+        """
         _args = args[:-1]
-        _last_args = args[-1:] * len(_args)
-        partial_function = functools.partial(func=function, *_args)
-        self.map(function=partial_function, args_iter=_last_args)
+        _last_args = args[-1:] * size
+        partial_function = functools.partial(function, *_args)
+        self.map(function=partial_function, args_iter=_last_args, chunksize=chunksize)
 
 
     def async_map_by_args(self,
@@ -294,7 +304,49 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
                           chunksize: int = None,
                           callback: Callable = None,
                           error_callback: Callable = None) -> None:
-        self.async_map(function=function, args_iter=args_iter, callback=callback)
+        args_iter_set = set(args_iter)
+        if len(args_iter_set) == 1:
+            _arguments = args_iter[0]
+            self._async_map_with_args(function=function, args=_arguments, size=len(args_iter), chunksize=chunksize, callback=callback)
+        else:
+            __results = []
+            __process_run_successful = None
+
+            try:
+                for _args in args_iter:
+                    _greenlet = self._GreenThread_Pool.spawn(function, *_args)
+                    self._GreenThread_List.append(_greenlet)
+
+                for _one_greenlet in self._GreenThread_List:
+                    _one_greenlet.join()
+                    _one_greenlet_value = _one_greenlet.value
+                    __results.append(_one_greenlet_value)
+
+                __process_run_successful = True
+                __exception = None
+            except Exception as e:
+                __process_run_successful = False
+                __exception = e
+
+            # Save Running result state and Running result value as dict
+            self._result_saving(successful=__process_run_successful, result=__results)
+
+
+    def _async_map_with_args(self, function: Callable, args: Iterable, size: int, chunksize: int, callback: Callable) -> None:
+        """
+        Description:
+            This is asynchronous version of function '_map_with_args'.
+        :param function:
+        :param args:
+        :param size:
+        :param chunksize:
+        :param callback:
+        :return:
+        """
+        _args = args[:-1]
+        _last_args = args[-1:] * size
+        partial_function = functools.partial(function, *_args)
+        self.async_map(function=partial_function, args_iter=_last_args, chunksize=chunksize, callback=callback)
 
 
     def imap(self, function: Callable, args_iter: IterableType = (), chunksize: int = 1) -> None:
