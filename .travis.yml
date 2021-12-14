@@ -4,12 +4,13 @@ python:
   - 3.7
   - 3.8
   - 3.9
-  - 3.10-dev
+#  - 3.10-dev
 
 notifications:
   email:
    recipients:
-      - bulls23mj1991@gmail.com
+#      - bulls23mj1991@gmail.com
+      - chi10211201@cycu.org.tw
 
 before_install:
   - python --version
