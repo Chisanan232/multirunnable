@@ -1,6 +1,12 @@
 from multirunnable.concurrent.strategy import ConcurrentStrategy, ThreadStrategy, ThreadPoolStrategy
 
 from ..framework.strategy import GeneralRunningTestSpec, PoolRunningTestSpec
+from ..test_config import (
+    Worker_Size, Worker_Pool_Size, Task_Size,
+    Running_Diff_Time,
+    Test_Function_Sleep_Time,
+    Test_Function_Args, Test_Function_Multiple_Args, Test_Function_Kwargs)
+
 from typing import List, Tuple, Dict
 import threading
 import datetime
@@ -9,11 +15,11 @@ import time
 import os
 
 
-Thread_Size: int = 10
-Pool_Size: int = 10
-Task_Size: int = 10
+Thread_Size: int = Worker_Size
+Pool_Size: int = Worker_Pool_Size
+Task_Size: int = Task_Size
 
-Running_Diff_Time: int = 2
+Running_Diff_Time: int = Running_Diff_Time
 
 _Thread_Lock = threading.Lock()
 
@@ -45,10 +51,10 @@ def reset_running_timer() -> None:
     Running_Finish_Timestamp[:] = []
 
 
-Test_Function_Sleep_Time = 7
-Test_Function_Args: Tuple = (1, 2, "test_value")
-Test_Function_Kwargs: Dict = {"param_1": 1, "param_2": 2, "test_param": "test_value"}
-Test_Function_Multiple_Args = (Test_Function_Args, Test_Function_Args, Test_Function_Args)
+Test_Function_Sleep_Time = Test_Function_Sleep_Time
+Test_Function_Args: Tuple = Test_Function_Args
+Test_Function_Kwargs: Dict = Test_Function_Kwargs
+Test_Function_Multiple_Args = Test_Function_Multiple_Args
 
 
 def target_fun(*args, **kwargs) -> str:
