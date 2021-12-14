@@ -20,11 +20,10 @@ before_install:
   - pip install codecov
 
 install:
-  - travis_wait 30 mvn install    # Testing code should be done in 30 minutes
   - pip install -r dev-requirements.txt    # install package + test dependencies
 
 script:
-  - pytest    # run tests
+  - travis_wait 30 pytest    # Run tests. Testing code should be done in 30 minutes
 
 after_success:
 #  - codecov    # submit coverage
