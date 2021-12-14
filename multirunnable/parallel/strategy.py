@@ -141,7 +141,10 @@ class ProcessStrategy(ParallelStrategy, _GeneralRunnableStrategy, _Resultable):
     @dispatch(Process)
     def close(self, workers: Process) -> None:
         workers.join()
-        workers.close()
+
+        from .. import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
+        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+            workers.close()
 
 
     @dispatch(Iterable)
