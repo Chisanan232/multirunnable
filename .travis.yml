@@ -23,7 +23,7 @@ install:
   - pip install -r dev-requirements.txt    # install package + test dependencies
 
 script:
-  - travis_wait 30 pytest    # Run tests. Testing code should be done in 30 minutes
+  - travis_wait 15 pytest    # Run tests. Testing code should be done in 30 minutes
 
 after_success:
 #  - codecov    # submit coverage
