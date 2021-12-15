@@ -81,7 +81,7 @@ def target_fun(*args, **kwargs) -> str:
         Running_Current_Threads.append(__get_current_thread())
         Running_Finish_Timestamp.append(_time)
 
-    time.sleep(Test_Function_Sleep_Time)
+    gevent.sleep(Test_Function_Sleep_Time)
     return f"result_{__get_current_thread()}"
 
 
@@ -107,7 +107,7 @@ def pool_target_fun(*args, **kwargs) -> str:
         Running_Current_Threads.append(__get_current_thread())
         Running_Finish_Timestamp.append(_time)
 
-    time.sleep(Test_Function_Sleep_Time)
+    gevent.sleep(Test_Function_Sleep_Time)
     return f"result_{__get_current_thread()}"
 
 
@@ -142,7 +142,7 @@ def map_target_fun(*args, **kwargs):
         Running_Current_Threads.append(__get_current_thread())
         Running_Finish_Timestamp.append(_time)
 
-    time.sleep(Test_Function_Sleep_Time)
+    gevent.sleep(Test_Function_Sleep_Time)
     return f"result_{__get_current_thread()}"
 
 
@@ -177,7 +177,7 @@ def map_target_fun_with_diff_args(*args, **kwargs):
         Running_Current_Threads.append(__get_current_thread())
         Running_Finish_Timestamp.append(_time)
 
-    time.sleep(Test_Function_Sleep_Time)
+    gevent.sleep(Test_Function_Sleep_Time)
     return f"result_{__get_current_thread()}"
 
 
@@ -366,20 +366,15 @@ class TestGreenThread(GeneralRunningTestSpec):
         return isinstance(_thread, gevent.Greenlet)
 
 
-    # def test_activate_workers_with_function_with_no_arguments(self, strategy: GreenThreadStrategy):
-    #     print("[DEBUG] Start to initial.")
-    #     TestGreenThread._initial()
-    #     print("[DEBUG] Initial done.")
-    #
-    #     print("[DEBUG] Initial threads.")
-    #     _threads = [strategy.generate_worker(target_fun) for _ in range(Green_Thread_Size)]
-    #     print("[DEBUG] Start to run threads.")
-    #     strategy.activate_workers(_threads)
-    #     print("[DEBUG] Finish to run and close it.")
-    #     strategy.close(_threads)
-    #
-    #     # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
-    #     TestGreenThread._chk_process_record()
+    def test_activate_workers_with_function_with_no_arguments(self, strategy: GreenThreadStrategy):
+        TestGreenThread._initial()
+
+        _threads = [strategy.generate_worker(target_fun) for _ in range(Green_Thread_Size)]
+        strategy.activate_workers(_threads)
+        strategy.close(_threads)
+
+        # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
+        TestGreenThread._chk_process_record()
 
 
     def test_activate_workers_with_function_with_args(self, strategy: GreenThreadStrategy):
