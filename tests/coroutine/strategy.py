@@ -8,7 +8,7 @@ from ..test_config import (
     Test_Function_Args, Test_Function_Multiple_Args, Test_Function_Kwargs)
 
 from typing import List, Tuple, Dict
-import threading
+from gevent.threading import Lock
 import datetime
 import gevent
 import pytest
@@ -22,7 +22,7 @@ Task_Size: int = Task_Size
 
 Running_Diff_Time: int = Running_Diff_Time
 
-_GreenThread_Lock = threading.Lock()
+_GreenThread_Lock = Lock()
 
 Running_Parent_PID = None
 Running_Count = 0
