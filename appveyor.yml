@@ -76,9 +76,17 @@ environment:
 
 skip_commits:
   files:
-#    - "*.yml"
+    - ".coveragerc"
+    - ".gitignore"
+    - ".travis.yml"
+#    - "codecov.yml"
+    - "dev-requirements.txt"
+    - "*Dockerfile*"
     - "*.rst"
+    - "setup.cnf"
+    - "setup.py"
     - "LICENSE"
+    - "README.md"
 
 install:
   - "%PYTHON%\\python.exe -m pip install pytest"
