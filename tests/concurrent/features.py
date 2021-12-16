@@ -1,11 +1,15 @@
 from multirunnable.framework.features import PosixThreadLock, PosixThreadCommunication
 from multirunnable.concurrent.features import ThreadLock, ThreadCommunication, ThreadQueueType
+from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 
 from ..test_config import Semaphore_Value
 
 from threading import Lock, RLock, Semaphore, BoundedSemaphore, Event, Condition
 # from _thread import allocate_lock
-from queue import Queue, SimpleQueue, LifoQueue, PriorityQueue
+if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION == 6:
+    from queue import Queue, SimpleQueue, LifoQueue, PriorityQueue
+else:
+    from queue import Queue, LifoQueue, PriorityQueue
 from typing import Type, TypeVar, NewType
 import pytest
 
