@@ -152,7 +152,7 @@ class TestAsynchronousLock:
     def test_get_lock(self, mr_async_lock: PosixThreadLock):
         try:
             _lock = mr_async_lock.get_lock()
-        except Exception as e:
+        except ValueError as e:
             assert "Async Event Loop object cannot be empty" in str(e), f"The exception error should be 'Async Event Loop object cannot be empty'."
 
         _event_loop = get_event_loop()
@@ -163,7 +163,7 @@ class TestAsynchronousLock:
     def test_get_rlock(self, mr_async_lock: PosixThreadLock):
         try:
             _rlock = mr_async_lock.get_rlock()
-        except Exception as e:
+        except ValueError as e:
             assert "Async Event Loop object cannot be empty" in str(e), f"The exception error should be 'Async Event Loop object cannot be empty'."
 
         _event_loop = get_event_loop()
@@ -174,7 +174,7 @@ class TestAsynchronousLock:
     def test_get_semaphore(self, mr_async_lock: PosixThreadLock):
         try:
             _semaphore = mr_async_lock.get_semaphore(value=_Semaphore_Value)
-        except Exception as e:
+        except ValueError as e:
             assert "Async Event Loop object cannot be empty" in str(e), f"The exception error should be 'Async Event Loop object cannot be empty'."
 
         _event_loop = get_event_loop()
@@ -185,7 +185,7 @@ class TestAsynchronousLock:
     def test_get_bounded_semaphore(self, mr_async_lock: PosixThreadLock):
         try:
             _bounded_semaphore = mr_async_lock.get_bounded_semaphore(value=_Semaphore_Value)
-        except Exception as e:
+        except ValueError as e:
             assert "Async Event Loop object cannot be empty" in str(e), f"The exception error should be 'Async Event Loop object cannot be empty'."
 
         _event_loop = get_event_loop()
@@ -199,7 +199,7 @@ class TestAsynchronousCommunication:
     def test_get_event(self, mr_async_communication: PosixThreadCommunication):
         try:
             _event = mr_async_communication.get_event()
-        except Exception as e:
+        except ValueError as e:
             assert "Async Event Loop object cannot be empty" in str(e), f"The exception error should be 'Async Event Loop object cannot be empty'."
 
         _event_loop = get_event_loop()
@@ -210,7 +210,7 @@ class TestAsynchronousCommunication:
     def test_get_communication(self, mr_async_communication: PosixThreadCommunication):
         try:
             _communication = mr_async_communication.get_condition()
-        except Exception as e:
+        except ValueError as e:
             assert "Async Event Loop object cannot be empty" in str(e), f"The exception error should be 'Async Event Loop object cannot be empty'."
 
         _event_loop = get_event_loop()
