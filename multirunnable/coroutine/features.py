@@ -155,7 +155,7 @@ class _AsyncUtils:
         if __lock is not None and isinstance(__lock, _Async_Lock):
             raise TypeError("Lock type is incorrect.")
         elif __lock is None:
-            raise Exception("Async Lock object cannot be empty.")
+            raise ValueError("Async Lock object cannot be empty.")
         else:
             return {"lock": __lock}
 
@@ -171,7 +171,7 @@ class _AsyncUtils:
                 if __loop is not None:
                     return {"loop": __loop}
                 else:
-                    raise Exception("Async Event Loop object cannot be empty.")
+                    raise ValueError("Async Event Loop object cannot be empty.")
         else:
             raise VersionError
 
