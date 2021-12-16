@@ -7,9 +7,9 @@ from ..test_config import Semaphore_Value
 from threading import Lock, RLock, Semaphore, BoundedSemaphore, Event, Condition
 # from _thread import allocate_lock
 if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION == 6:
-    from queue import Queue, SimpleQueue, LifoQueue, PriorityQueue
-else:
     from queue import Queue, LifoQueue, PriorityQueue
+else:
+    from queue import Queue, SimpleQueue, LifoQueue, PriorityQueue
 from typing import Type, TypeVar, NewType
 import pytest
 
