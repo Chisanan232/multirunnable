@@ -5,12 +5,10 @@ from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 from ..test_config import Semaphore_Value
 
 from threading import Lock, RLock, Semaphore, BoundedSemaphore, Event, Condition
-# from _thread import allocate_lock
 if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION == 6:
     from queue import Queue, LifoQueue, PriorityQueue
 else:
     from queue import Queue, SimpleQueue, LifoQueue, PriorityQueue
-from typing import Type, TypeVar, NewType
 import pytest
 
 
@@ -38,8 +36,9 @@ class TestThreadQueue:
         assert isinstance(mr_queue.Queue.value, Queue) is True, f"This type of instance should be 'queue.Queue'."
 
 
-    def test_simple_queue(self, mr_queue: ThreadQueueType):
-        assert isinstance(mr_queue.SimpleQueue.value, SimpleQueue) is True, f"This type of instance should be 'queue.SimpleQueue'."
+    if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+        def test_simple_queue(self, mr_queue: ThreadQueueType):
+            assert isinstance(mr_queue.SimpleQueue.value, SimpleQueue) is True, f"This type of instance should be 'queue.SimpleQueue'."
 
 
     def test_priority_queue(self, mr_queue: ThreadQueueType):

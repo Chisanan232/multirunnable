@@ -83,8 +83,9 @@ class TestGreenThreadQueue:
         assert isinstance(mr_gevent_queue.Queue.value, gevent_Queue) is True, f"This type of instance should be 'gevent.queue.Queue'."
 
 
-    def test_simple_queue(self, mr_gevent_queue: GeventQueueType):
-        assert isinstance(mr_gevent_queue.SimpleQueue.value, gevent_SimpleQueue) is True, f"This type of instance should be 'gevent.queue.SimpleQueue'."
+    if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+        def test_simple_queue(self, mr_gevent_queue: GeventQueueType):
+            assert isinstance(mr_gevent_queue.SimpleQueue.value, gevent_SimpleQueue) is True, f"This type of instance should be 'gevent.queue.SimpleQueue'."
 
 
     def test_priority_queue(self, mr_gevent_queue: GeventQueueType):
