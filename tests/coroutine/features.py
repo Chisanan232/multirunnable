@@ -3,6 +3,7 @@ from multirunnable.coroutine.features import (
     GreenThreadLock, GreenThreadCommunication, GeventQueueType,
     AsynchronousLock, AsynchronousCommunication, AsynchronousQueueType
 )
+from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 
 from ..test_config import Semaphore_Value
 
@@ -11,13 +12,23 @@ from gevent.lock import (
     RLock as gevent_RLock,
     Semaphore as gevent_Semaphore,
     BoundedSemaphore as gevent_BoundedSemaphore)
-from gevent.queue import (
-    Queue as gevent_Queue,
-    SimpleQueue as gevent_SimpleQueue,
-    LifoQueue as gevent_LifoQueue,
-    PriorityQueue as gevent_PriorityQueue,
-    JoinableQueue as gevent_JoinableQueue,
-    UnboundQueue as gevent_UnboundQueue)
+
+if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION == 6:
+    from gevent.queue import (
+        Queue as gevent_Queue,
+        LifoQueue as gevent_LifoQueue,
+        PriorityQueue as gevent_PriorityQueue,
+        JoinableQueue as gevent_JoinableQueue,
+        UnboundQueue as gevent_UnboundQueue)
+else:
+    from gevent.queue import (
+        Queue as gevent_Queue,
+        SimpleQueue as gevent_SimpleQueue,
+        LifoQueue as gevent_LifoQueue,
+        PriorityQueue as gevent_PriorityQueue,
+        JoinableQueue as gevent_JoinableQueue,
+        UnboundQueue as gevent_UnboundQueue)
+
 from asyncio import (
     Lock as async_Lock,
     Semaphore as async_Semaphore,
