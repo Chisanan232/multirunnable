@@ -23,6 +23,9 @@ class Lock(_FeatureAdapterFactory):
 
     def get_instance(self, **kwargs) -> _MRLock:
         self._chk_param_by_mode(**kwargs)
+        if self.feature_mode is None:
+            raise ValueError("FeatureMode is None. Please configure it as one of 'multirunnable.mode.FeatureMode'.")
+
         lock_instance: _PosixThreadLock = _ModuleFactory.get_lock_adapter(mode=self.feature_mode)
         return lock_instance.get_lock(**self._kwargs)
 
@@ -44,6 +47,9 @@ class RLock(_FeatureAdapterFactory):
 
     def get_instance(self, **kwargs) -> _MRRLock:
         self._chk_param_by_mode(**kwargs)
+        if self.feature_mode is None:
+            raise ValueError("FeatureMode is None. Please configure it as one of 'multirunnable.mode.FeatureMode'.")
+
         lock_instance: _PosixThreadLock = _ModuleFactory.get_lock_adapter(mode=self.feature_mode)
         return lock_instance.get_rlock(**self._kwargs)
 
@@ -76,6 +82,9 @@ class Semaphore(_FeatureAdapterFactory):
 
     def get_instance(self, **kwargs) -> _MRSemaphore:
         self._chk_param_by_mode(**kwargs)
+        if self.feature_mode is None:
+            raise ValueError("FeatureMode is None. Please configure it as one of 'multirunnable.mode.FeatureMode'.")
+
         lock_instance: _PosixThreadLock = _ModuleFactory.get_lock_adapter(mode=self.feature_mode)
         return lock_instance.get_semaphore(value=self.__semaphore_value, **self._kwargs)
 
@@ -108,6 +117,9 @@ class BoundedSemaphore(_FeatureAdapterFactory):
 
     def get_instance(self, **kwargs) -> _MRBoundedSemaphore:
         self._chk_param_by_mode(**kwargs)
+        if self.feature_mode is None:
+            raise ValueError("FeatureMode is None. Please configure it as one of 'multirunnable.mode.FeatureMode'.")
+
         lock_instance: _PosixThreadLock = _ModuleFactory.get_lock_adapter(mode=self.feature_mode)
         return lock_instance.get_bounded_semaphore(value=self.__semaphore_value, **self._kwargs)
 

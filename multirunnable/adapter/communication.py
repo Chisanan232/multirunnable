@@ -19,6 +19,9 @@ class Event(_FeatureAdapterFactory):
 
     def get_instance(self, **kwargs) -> _MREvent:
         self._chk_param_by_mode(**kwargs)
+        if self.feature_mode is None:
+            raise ValueError("FeatureMode is None. Please configure it as one of 'multirunnable.mode.FeatureMode'.")
+
         communication_instance: _PosixThreadCommunication = _ModuleFactory.get_communication_adapter(mode=self.feature_mode)
         return communication_instance.get_event(**self._kwargs)
 
@@ -46,8 +49,12 @@ class Condition(_FeatureAdapterFactory):
 
     def get_instance(self, **kwargs) -> _MRCondition:
         self._chk_param_by_mode(**kwargs)
+        if self.feature_mode is None:
+            raise ValueError("FeatureMode is None. Please configure it as one of 'multirunnable.mode.FeatureMode'.")
+
         if self._Mode is _FeatureMode.Asynchronous:
             self._kwargs["lock"] = _AsyncUtils.check_lock(lock=kwargs.get("lock", None))
+
         communication_instance: _PosixThreadCommunication = _ModuleFactory.get_communication_adapter(mode=self.feature_mode)
         return communication_instance.get_condition(**self._kwargs)
 
