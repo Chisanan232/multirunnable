@@ -20,7 +20,7 @@ class TestAdapterEvent:
 
     def test__str__(self, mr_event: Event):
         _lock_str = str(mr_event)
-        _chksum = re.search(r"<Event Adapter object with [a-zA-Z]{4,64} mode at [0-9]{10}>", _lock_str)
+        _chksum = re.search(r"<Event Adapter object with [a-zA-Z]{4,64} mode at [0-9]{10,30}>", _lock_str)
         assert _chksum is not None, f"The '__str__' format is incorrect. Please check its value. \n" \
                                     f"Its format should be like *<Event Adapter object with <Feature Mode> mode at <ID of instance>>*. \n" \
                                     f"But it got *{_lock_str}*."
@@ -28,7 +28,7 @@ class TestAdapterEvent:
 
     def test__repr__(self, mr_event: Event):
         _lock_repr = repr(mr_event)
-        _chksum = re.search(r"<Event\(\) Adapter object with [a-zA-Z]{4,64} mode at [0-9]{10}>", _lock_repr)
+        _chksum = re.search(r"<Event\(\) Adapter object with [a-zA-Z]{4,64} mode at [0-9]{10,30}>", _lock_repr)
         assert _chksum is not None, f"The '__repr__' format is incorrect. Please check its value. \n" \
                                     f"Its format should be like *<Event() Adapter object with <Feature Mode> mode at <ID of instance>>*. \n" \
                                     f"But it got *{_lock_repr}*."
@@ -121,7 +121,7 @@ class TestAdapterCondition:
 
     def test__str__(self, mr_condition: Condition):
         _lock_str = str(mr_condition)
-        _chksum = re.search(r"<Condition Adapter object with [a-zA-Z]{4,64} mode at [0-9]{10}>", _lock_str)
+        _chksum = re.search(r"<Condition Adapter object with [a-zA-Z]{4,64} mode at [0-9]{10,30}>", _lock_str)
         assert _chksum is not None, f"The '__str__' format is incorrect. Please check its value. \n" \
                                     f"Its format should be like *<Condition Adapter object with <Feature Mode> mode at <ID of instance>>*. \n" \
                                     f"But it got *{_lock_str}*."
@@ -129,7 +129,7 @@ class TestAdapterCondition:
 
     def test__repr__(self, mr_condition: Condition):
         _lock_repr = repr(mr_condition)
-        _chksum = re.search(r"<Condition Adapter object with [a-zA-Z]{4,64} mode at [0-9]{10}>", _lock_repr)
+        _chksum = re.search(r"<Condition Adapter object with [a-zA-Z]{4,64} mode at [0-9]{10,30}>", _lock_repr)
         assert _chksum is not None, f"The '__repr__' format is incorrect. Please check its value. \n" \
                                     f"Its format should be like *<Condition() Adapter object with <Feature Mode> mode at <ID of instance>>*. \n" \
                                     f"But it got *{_lock_repr}*."
