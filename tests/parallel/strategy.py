@@ -206,10 +206,12 @@ def process_pool_strategy():
 
 class TestProcess(GeneralRunningTestSpec):
 
+    @pytest.mark.skip(reason="Not implement testing logic.")
     def test_initialization(self, process_strategy: ProcessStrategy):
         pass
 
 
+    @pytest.mark.skip(reason="Not implement testing logic.")
     def test_start_new_worker(self, process_strategy: ProcessStrategy):
         pass
 
@@ -482,6 +484,7 @@ class TestProcess(GeneralRunningTestSpec):
         assert _diff_timestamp <= Running_Diff_Time, f"Processes should be run in the same time period."
 
 
+    @pytest.mark.skip(reason="Not implement testing logic.")
     def test_close(self, process_strategy: ProcessStrategy):
         # Test for no any parameters
         # process_strategy.close(self.__Processes)
@@ -503,14 +506,17 @@ class TestProcess(GeneralRunningTestSpec):
         pass
 
 
+    @pytest.mark.skip(reason="Not implement testing logic.")
     def test_terminal(self, process_strategy: ProcessStrategy):
         pass
 
 
+    @pytest.mark.skip(reason="Not implement testing logic.")
     def test_kill(self, process_strategy: ProcessStrategy):
         pass
 
 
+    @pytest.mark.skip(reason="Not implement. The result feature not finish.")
     def test_get_result(self, process_strategy: ProcessStrategy):
         pass
 
@@ -518,12 +524,50 @@ class TestProcess(GeneralRunningTestSpec):
 
 class TestProcessPool(PoolRunningTestSpec):
 
+    @pytest.mark.skip(reason="Not implement testing logic.")
     def test_initialization(self, process_pool_strategy: ProcessPoolStrategy):
         pass
 
 
-    def test_async_apply(self, process_pool_strategy: ProcessPoolStrategy):
+    @pytest.mark.skip(reason="Not implement testing logic.")
+    def test_async_apply_with_function(self, process_pool_strategy: ProcessPoolStrategy):
         pass
+        # TestProcessPool._initial()
+        #
+        # process_pool_strategy.apply(function=pool_target_fun)
+        #
+        # TestProcessPool._chk_process_record()
+
+
+    @pytest.mark.skip(reason="Not implement testing logic.")
+    def test_async_apply_with_bounded_function(self, process_pool_strategy: ProcessPoolStrategy):
+        pass
+        # TestProcessPool._initial()
+        #
+        # _tc = TargetCls()
+        # process_pool_strategy.apply(function=_tc.method)
+        #
+        # TestProcessPool._chk_process_record()
+
+
+    @pytest.mark.skip(reason="Not implement testing logic.")
+    def test_async_apply_with_classmethod_function(self, process_pool_strategy: ProcessPoolStrategy):
+        pass
+        # TestProcessPool._initial()
+        #
+        # process_pool_strategy.apply(function=TargetCls.classmethod_fun)
+        #
+        # TestProcessPool._chk_process_record()
+
+
+    @pytest.mark.skip(reason="Not implement testing logic.")
+    def test_async_apply_with_staticmethod_function(self, process_pool_strategy: ProcessPoolStrategy):
+        pass
+        # TestProcessPool._initial()
+        #
+        # process_pool_strategy.apply(function=TargetCls.staticmethod_fun)
+        #
+        # TestProcessPool._chk_process_record()
 
 
     def test_async_apply_with_function_with_no_arguments(self, process_pool_strategy: ProcessPoolStrategy):
@@ -793,22 +837,70 @@ class TestProcessPool(PoolRunningTestSpec):
         TestProcessPool._chk_process_record_map()
 
 
-    def test_imap(self, process_pool_strategy: ProcessPoolStrategy):
-        pass
-        # Test for no any parameters
-        # process_pool_strategy.imap(function=target_fun)
+    def test_imap_with_function(self, process_pool_strategy: ProcessPoolStrategy):
+        TestProcessPool._initial()
 
-        # Test for parameters with '*args'
-        # process_pool_strategy.imap(function=target_fun, args_iter=Test_Function_Args)
+        process_pool_strategy.imap(function=map_target_fun, args_iter=Test_Function_Args)
+
+        TestProcessPool._chk_process_record_map()
 
 
-    def test_imap_unordered(self, process_pool_strategy: ProcessPoolStrategy):
-        pass
-        # Test for no any parameters
-        # process_pool_strategy.imap_unordered(function=target_fun)
+    def test_imap_with_bounded_function(self, process_pool_strategy: ProcessPoolStrategy):
+        TestProcessPool._initial()
 
-        # Test for parameters with '*args'
-        # process_pool_strategy.imap_unordered(function=target_fun, args_iter=Test_Function_Args)
+        _tc = TargetPoolMapCls()
+        process_pool_strategy.imap(function=_tc.method, args_iter=Test_Function_Args)
+
+        TestProcessPool._chk_process_record_map()
+
+
+    def test_imap_with_classmethod_function(self, process_pool_strategy: ProcessPoolStrategy):
+        TestProcessPool._initial()
+
+        process_pool_strategy.imap(function=TargetPoolMapCls.classmethod_fun, args_iter=Test_Function_Args)
+
+        TestProcessPool._chk_process_record_map()
+
+
+    def test_imap_with_staticmethod_function(self, process_pool_strategy: ProcessPoolStrategy):
+        TestProcessPool._initial()
+
+        process_pool_strategy.imap(function=TargetPoolMapCls.staticmethod_fun, args_iter=Test_Function_Args)
+
+        TestProcessPool._chk_process_record_map()
+
+
+    def test_imap_unordered_with_function(self, process_pool_strategy: ProcessPoolStrategy):
+        TestProcessPool._initial()
+
+        process_pool_strategy.imap_unordered(function=map_target_fun, args_iter=Test_Function_Args)
+
+        TestProcessPool._chk_process_record_map()
+
+
+    def test_imap_unordered_with_bounded_function(self, process_pool_strategy: ProcessPoolStrategy):
+        TestProcessPool._initial()
+
+        _tc = TargetPoolMapCls()
+        process_pool_strategy.imap_unordered(function=_tc.method, args_iter=Test_Function_Args)
+
+        TestProcessPool._chk_process_record_map()
+
+
+    def test_imap_unordered_with_classmethod_function(self, process_pool_strategy: ProcessPoolStrategy):
+        TestProcessPool._initial()
+
+        process_pool_strategy.imap_unordered(function=TargetPoolMapCls.classmethod_fun, args_iter=Test_Function_Args)
+
+        TestProcessPool._chk_process_record_map()
+
+
+    def test_imap_unordered_with_staticmethod_function(self, process_pool_strategy: ProcessPoolStrategy):
+        TestProcessPool._initial()
+
+        process_pool_strategy.imap_unordered(function=TargetPoolMapCls.staticmethod_fun, args_iter=Test_Function_Args)
+
+        TestProcessPool._chk_process_record_map()
 
 
     @staticmethod
@@ -872,13 +964,24 @@ class TestProcessPool(PoolRunningTestSpec):
         :param process_pool_strategy:
         :return:
         """
-        process_pool_strategy.close()
+        try:
+            process_pool_strategy.close()
+        except Exception as e:
+            assert e is not None, f"It should work finely without any issue."
+        else:
+            assert True, f"It work finely."
 
 
     def test_terminal(self, process_pool_strategy: ProcessPoolStrategy):
-        process_pool_strategy.terminal()
+        try:
+            process_pool_strategy.terminal()
+        except Exception as e:
+            assert e is not None, f"It should work finely without any issue."
+        else:
+            assert True, f"It work finely."
 
 
+    @pytest.mark.skip(reason="Not implement. The result feature not finish.")
     def test_get_result(self, process_pool_strategy: ProcessPoolStrategy):
         pass
 
