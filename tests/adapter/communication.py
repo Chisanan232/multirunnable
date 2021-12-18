@@ -1,14 +1,8 @@
 from multirunnable.mode import FeatureMode
 from multirunnable.adapter.communication import Event, Condition
 
-from ..test_config import Event_Value, Condition_Value
-
 import pytest
 import re
-
-
-_Event_Value = Event_Value
-_Condition_Value = Condition_Value
 
 
 @pytest.fixture(scope="function")
