@@ -257,10 +257,12 @@ def pool_strategy():
 
 class TestGreenThread(GeneralRunningTestSpec):
 
+    @pytest.mark.skip(reason="Not implement testing logic.")
     def test_initialization(self, strategy: GreenThreadStrategy):
         pass
 
 
+    @pytest.mark.skip(reason="Not implement testing logic.")
     def test_start_new_worker(self, strategy: GreenThreadStrategy):
         pass
 
@@ -533,6 +535,7 @@ class TestGreenThread(GeneralRunningTestSpec):
         assert _diff_timestamp <= Running_Diff_Time, f"Processes should be run in the same time period."
 
 
+    @pytest.mark.skip(reason="Not implement testing logic.")
     def test_close(self, strategy: GreenThreadStrategy):
         # Test for no any parameters
         # process_strategy.close(self.__Processes)
@@ -554,14 +557,17 @@ class TestGreenThread(GeneralRunningTestSpec):
         pass
 
 
+    @pytest.mark.skip(reason="Not implement testing logic.")
     def test_terminal(self, strategy: GreenThreadStrategy):
         pass
 
 
+    @pytest.mark.skip(reason="Not implement testing logic.")
     def test_kill(self, strategy: GreenThreadStrategy):
         pass
 
 
+    @pytest.mark.skip(reason="Not implement testing logic.")
     def test_get_result(self, strategy: GreenThreadStrategy):
         pass
 
@@ -569,12 +575,19 @@ class TestGreenThread(GeneralRunningTestSpec):
 
 class TestGreenThreadPool(PoolRunningTestSpec):
 
+    @pytest.mark.skip(reason="Not implement testing logic.")
     def test_initialization(self, pool_strategy: GreenThreadPoolStrategy):
         pass
 
 
+    @pytest.mark.skip(reason="Not implement testing logic.")
     def test_async_apply(self, pool_strategy: GreenThreadPoolStrategy):
         pass
+        # TestGreenThreadPool._initial()
+        #
+        # pool_strategy.apply(function=pool_target_fun)
+        #
+        # TestGreenThreadPool._chk_process_record()
 
 
     def test_async_apply_with_function_with_no_arguments(self, pool_strategy: GreenThreadPoolStrategy):
@@ -856,22 +869,70 @@ class TestGreenThreadPool(PoolRunningTestSpec):
         TestGreenThreadPool._chk_process_record_map()
 
 
-    def test_imap(self, pool_strategy: GreenThreadPoolStrategy):
-        pass
-        # Test for no any parameters
-        # process_pool_strategy.imap(function=target_fun)
+    def test_imap_with_function(self, pool_strategy: GreenThreadPoolStrategy):
+        TestGreenThreadPool._initial()
 
-        # Test for parameters with '*args'
-        # process_pool_strategy.imap(function=target_fun, args_iter=Test_Function_Args)
+        pool_strategy.imap(function=map_target_fun, args_iter=Test_Function_Args)
+
+        TestGreenThreadPool._chk_process_record_map()
 
 
-    def test_imap_unordered(self, pool_strategy: GreenThreadPoolStrategy):
-        pass
-        # Test for no any parameters
-        # process_pool_strategy.imap_unordered(function=target_fun)
+    def test_imap_with_bounded_function(self, pool_strategy: GreenThreadPoolStrategy):
+        TestGreenThreadPool._initial()
 
-        # Test for parameters with '*args'
-        # process_pool_strategy.imap_unordered(function=target_fun, args_iter=Test_Function_Args)
+        _tc = TargetPoolMapCls()
+        pool_strategy.imap(function=_tc.method, args_iter=Test_Function_Args)
+
+        TestGreenThreadPool._chk_process_record_map()
+
+
+    def test_imap_with_classmethod_function(self, pool_strategy: GreenThreadPoolStrategy):
+        TestGreenThreadPool._initial()
+
+        pool_strategy.imap(function=TargetPoolMapCls.classmethod_fun, args_iter=Test_Function_Args)
+
+        TestGreenThreadPool._chk_process_record_map()
+
+
+    def test_imap_with_staticmethod_function(self, pool_strategy: GreenThreadPoolStrategy):
+        TestGreenThreadPool._initial()
+
+        pool_strategy.imap(function=TargetPoolMapCls.staticmethod_fun, args_iter=Test_Function_Args)
+
+        TestGreenThreadPool._chk_process_record_map()
+
+
+    def test_imap_unordered_with_function(self, pool_strategy: GreenThreadPoolStrategy):
+        TestGreenThreadPool._initial()
+
+        pool_strategy.imap_unordered(function=map_target_fun, args_iter=Test_Function_Args)
+
+        TestGreenThreadPool._chk_process_record_map()
+
+
+    def test_imap_unordered_with_bounded_function(self, pool_strategy: GreenThreadPoolStrategy):
+        TestGreenThreadPool._initial()
+
+        _tc = TargetPoolMapCls()
+        pool_strategy.imap_unordered(function=_tc.method, args_iter=Test_Function_Args)
+
+        TestGreenThreadPool._chk_process_record_map()
+
+
+    def test_imap_unordered_with_classmethod_function(self, pool_strategy: GreenThreadPoolStrategy):
+        TestGreenThreadPool._initial()
+
+        pool_strategy.imap_unordered(function=TargetPoolMapCls.classmethod_fun, args_iter=Test_Function_Args)
+
+        TestGreenThreadPool._chk_process_record_map()
+
+
+    def test_imap_unordered_with_staticmethod_function(self, pool_strategy: GreenThreadPoolStrategy):
+        TestGreenThreadPool._initial()
+
+        pool_strategy.imap_unordered(function=TargetPoolMapCls.staticmethod_fun, args_iter=Test_Function_Args)
+
+        TestGreenThreadPool._chk_process_record_map()
 
 
     @staticmethod
@@ -935,13 +996,24 @@ class TestGreenThreadPool(PoolRunningTestSpec):
         :param pool_strategy:
         :return:
         """
-        pool_strategy.close()
+        try:
+            pool_strategy.close()
+        except Exception as e:
+            assert e is not None, f"It should work finely without any issue."
+        else:
+            assert True, f"It work finely."
 
 
     def test_terminal(self, pool_strategy: GreenThreadPoolStrategy):
-        pool_strategy.terminal()
+        try:
+            pool_strategy.terminal()
+        except Exception as e:
+            assert e is not None, f"It should work finely without any issue."
+        else:
+            assert True, f"It work finely."
 
 
+    @pytest.mark.skip(reason="Not implement. The result feature not finish.")
     def test_get_result(self, pool_strategy: GreenThreadPoolStrategy):
         pass
 
