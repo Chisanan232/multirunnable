@@ -8,7 +8,7 @@ from ..test_config import (
     Test_Function_Args, Test_Function_Multiple_Args, Test_Function_Kwargs)
 
 from typing import List, Tuple, Dict
-from gevent.threading import Lock
+from gevent.threading import get_ident as get_green_thread_ident, getcurrent as get_current_green_thread, Lock
 import datetime
 import gevent
 import pytest
@@ -182,17 +182,15 @@ def map_target_fun_with_diff_args(*args, **kwargs):
 
 
 def __get_current_thread_ident():
-    from gevent import monkey
-    monkey.patch_all()
-    import threading
-    return threading.get_ident()
+    # import gevent.threading as gthreading
+    # return gthreading.get_ident()
+    return get_green_thread_ident()
 
 
 def __get_current_thread():
-    from gevent import monkey
-    monkey.patch_all()
-    import threading
-    return str(threading.current_thread())
+    # import gevent.threading as gthreading
+    # return str(gthreading.getcurrent())
+    return get_current_green_thread()
 
 
 class TargetCls:
