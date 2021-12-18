@@ -519,7 +519,7 @@ class TestThread(GeneralRunningTestSpec):
         pass
 
 
-    @pytest.mark.skip(reason="Not implement testing logic.")
+    @pytest.mark.skip(reason="Not implement. The result feature not finish.")
     def test_get_result(self, strategy: ThreadStrategy):
         pass
 
