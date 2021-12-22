@@ -31,8 +31,16 @@ class BaseDao(DatabaseAccessObject):
         return self.database_opt.execute_many(operator=operator, seq_params=seq_params)
 
 
+    def fetch_one(self) -> Generic[T]:
+        return self.database_opt.fetch_one()
+
+
     def fetch_many(self, size: int = None) -> Generic[T]:
         return self.database_opt.fetch_many(size=size)
+
+
+    def fetch_all(self) -> Generic[T]:
+        return self.database_opt.fetch_all()
 
 
     def close(self) -> Generic[T]:
