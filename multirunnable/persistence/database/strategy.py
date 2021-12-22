@@ -18,6 +18,29 @@ _Database_Cursor: Generic[T] = None
 _Query_State = None
 
 
+def database_connection_pools() -> Dict[str, Any]:
+    """
+    Description:
+        Get the database connection pool which has been globalized.
+    :return:
+    """
+    return _Database_Connection_Pools
+
+
+def get_connection_pool(pool_name: str) -> Generic[T]:
+    """
+    Description:
+        Get the database connection pool which has been globalized.
+    :return:
+    """
+    try:
+        _db_conn_pool = _Database_Connection_Pools[pool_name]
+    except KeyError as e:
+        return None
+    else:
+        return _db_conn_pool
+
+
 class G:
     """
     Description:
@@ -81,15 +104,8 @@ class BaseDatabaseConnection(BasePersistence):
     __Default_Password = "password"
     __Default_Database = "default"
 
-    # _Database_Connection: Generic[T] = None
-    # _Database_Cursor: Generic[T] = None
-
     # def __init__(self, configuration: BaseDatabaseConfiguration = None, **kwargs):
     def __init__(self, **kwargs):
-        # # # # Just comment out temporary.
-        self._database_connection: Generic[T] = None
-        self._database_cursor: Generic[T] = None
-
         # # # # Deprecated
         # if configuration is not None:
         #     __username_val = configuration.username
@@ -176,24 +192,6 @@ class BaseDatabaseConnection(BasePersistence):
         pass
 
 
-    @connection.setter
-    @abstractmethod
-    def connection(self, conn: Generic[T]) -> None:
-        pass
-
-
-    @property
-    @abstractmethod
-    def cursor(self) -> Generic[T]:
-        pass
-
-
-    @cursor.setter
-    @abstractmethod
-    def cursor(self, cur: Generic[T]) -> None:
-        pass
-
-
     @abstractmethod
     def initial(self, **kwargs) -> None:
         """
@@ -226,20 +224,10 @@ class BaseDatabaseConnection(BasePersistence):
 
 
     @abstractmethod
-    def get_one_connection(self) -> Generic[T]:
+    def get_one_connection(self, **kwargs) -> Generic[T]:
         """
         Description:
             Get one database connection instance.
-        :return:
-        """
-        pass
-
-
-    @abstractmethod
-    def build_cursor(self) -> Generic[T]:
-        """
-        Description:
-            Build cursor instance of one specific connection instance.
         :return:
         """
         pass
@@ -268,11 +256,12 @@ class BaseDatabaseConnection(BasePersistence):
 
 class BaseSingleConnection(BaseDatabaseConnection, ABC):
 
-    def __init__(self, **kwargs):
+    def __init__(self, initial: bool = True, **kwargs):
         super(BaseSingleConnection, self).__init__(**kwargs)
-        # self._database_connection: Generic[T] = None
-        # self._database_cursor: Generic[T] = None
-        self.initial(**self._Database_Config)
+        self._database_connection: Generic[T] = None
+        self._database_cursor: Generic[T] = None
+        if initial is True:
+            self.initial(**self._Database_Config)
 
 
     def initial(self, **kwargs) -> None:
@@ -302,35 +291,42 @@ class BaseSingleConnection(BaseDatabaseConnection, ABC):
             self._database_connection = self.connect_database(**kwargs)
         else:
             self._database_connection = self.connect_database(**self.database_config)
-        self._database_cursor = self.build_cursor()
 
 
     def reconnect(self, timeout: int = 3) -> Generic[T]:
         _running_time = 0
+        _db_connect_error = None
         while _running_time <= timeout:
-            self._database_connection = self.connect_database(**self.database_config)
-            if self._database_connection is not None:
+            try:
+                self._database_connection = self.connect_database(**self.database_config)
+            except Exception as e:
+                _db_connect_error = e
+                logging.error(e)
+            if _db_connect_error is None and self._database_connection is not None:
                 return self._database_connection
 
             _running_time += 1
         else:
+            if _db_connect_error is not None:
+                raise _db_connect_error
             raise ConnectionError(f"It's timeout to retry (Retry value is {timeout}). "
                                   f"Cannot reconnect to database.")
 
 
     def get_one_connection(self) -> Generic[T]:
-        if self.connection is not None:
-            return self.connection
-        self.connection = self.connect_database()
-        return self.connection
+        if self._database_connection is not None:
+            return self._database_connection
+        self._database_connection = self.connect_database()
+        return self._database_connection
 
 
 
 class BaseConnectionPool(BaseDatabaseConnection):
 
     __Default_Pool_Name: str = ""
+    __Current_Pool_Name: str = ""
 
-    def __init__(self, **kwargs):
+    def __init__(self, initial: bool = True, **kwargs):
         super().__init__(**kwargs)
         _pool_name = cast(str, kwargs.get("pool_name", self.__Default_Pool_Name))
         _pool_size = cast(int, kwargs.get("pool_size", cpu_count()))
@@ -341,8 +337,10 @@ class BaseConnectionPool(BaseDatabaseConnection):
             "pool_name": _pool_name,
             "pool_size": _pool_size
         })
+        self.__Current_Pool_Name = _pool_name
 
-        self.initial(**self.database_config)
+        if initial is True:
+            self.initial(**self.database_config)
 
 
     def initial(self, **kwargs) -> None:
@@ -366,6 +364,22 @@ class BaseConnectionPool(BaseDatabaseConnection):
         # Globalize object to share between different multiple processes
         _pool_name = kwargs.get("pool_name", "")
         Globalize.connection_pool(name=_pool_name, pool=_db_pool)
+
+
+    @property
+    def current_pool_name(self) -> str:
+        return self.__Current_Pool_Name
+
+
+    @current_pool_name.setter
+    def current_pool_name(self, pool_name: str) -> None:
+        self.__Current_Pool_Name = pool_name
+
+
+    @property
+    def connection(self) -> Generic[T]:
+        _connection = self.get_one_connection(pool_name=self.__Current_Pool_Name)
+        return _connection
 
 
     @property
@@ -400,45 +414,42 @@ class BaseConnectionPool(BaseDatabaseConnection):
             Set the database connection pool size.
         :return:
         """
+        if pool_size < 0:
+            raise ValueError("The database connection pool size cannot less than 0.")
+
         self._Database_Config["pool_size"] = pool_size
-
-
-    @property
-    def database_connection_pools(self) -> Dict[str, Any]:
-        """
-        Description:
-            Get the database connection pool which has been globalized.
-        :return:
-        """
-        return _Database_Connection_Pools
-
-
-    def get_connection_pool(self, pool_name: str) -> Generic[T]:
-        """
-        Description:
-            Get the database connection pool which has been globalized.
-        :return:
-        """
-        try:
-            _db_conn_pool = _Database_Connection_Pools[pool_name]
-        except KeyError as e:
-            return None
-        else:
-            return _db_conn_pool
 
 
     def reconnect(self, timeout: int = 3) -> Generic[T]:
         _running_time = 0
+        _db_connect_error = None
         while _running_time <= timeout:
-            _db_pool = self.connect_database(**self.database_config)
+            _db_pool = None
+            try:
+                _db_pool = self.connect_database(**self.database_config)
+            except Exception as e:
+                logging.error(e)
+                _db_connect_error = e
             if _db_pool is not None:
                 _pool_name = self.database_config.get("pool_name", "")
                 Globalize.connection_pool(name=_pool_name, pool=_db_pool)
-                return self.get_one_connection()
+                return self.get_one_connection(pool_name=_pool_name)
 
             _running_time += 1
         else:
+            if _db_connect_error is not None:
+                raise _db_connect_error
             raise ConnectionError("Cannot reconnect to database.")
+
+
+    @abstractmethod
+    def get_one_connection(self, pool_name: str = "", **kwargs) -> Generic[T]:
+        """
+        Description:
+            Get one database connection instance.
+        :return:
+        """
+        pass
 
 
     @abstractmethod
