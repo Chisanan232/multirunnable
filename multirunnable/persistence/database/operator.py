@@ -2,7 +2,7 @@ from multirunnable.persistence.interface import BasePersistence
 from multirunnable.persistence.database.strategy import BaseDatabaseConnection as _BaseDataBaseConnection
 
 from abc import ABCMeta, ABC, abstractmethod
-from typing import Tuple, Type, TypeVar, Generic, Any, Union, Optional
+from typing import Tuple, Dict, Type, TypeVar, Generic, Any, Union, Optional
 
 
 T = TypeVar("T")
@@ -10,26 +10,31 @@ T = TypeVar("T")
 
 class BaseDatabaseOperator(BasePersistence):
 
-    def __init__(self, conn_strategy: _BaseDataBaseConnection):
+    def __init__(self, conn_strategy: _BaseDataBaseConnection, db_config: Dict = {}):
         self._conn_strategy = conn_strategy
+        if self._conn_strategy.connection is None:
+            self._conn_strategy.initial(**db_config)
+        self._db_connection = self._conn_strategy.connection
+        self._db_cursor = self.initial_cursor(connection=self._db_connection)
 
 
-    def initial(self) -> Generic[T]:
+    @abstractmethod
+    def initial_cursor(self, connection: Generic[T]) -> Generic[T]:
         pass
 
 
-    @property
-    def column_names(self) -> Generic[T]:
-        raise NotImplementedError
+    # @property
+    # def column_names(self) -> Generic[T]:
+    #     raise NotImplementedError
 
 
-    @property
-    def row_count(self) -> Generic[T]:
-        raise NotImplementedError
+    # @property
+    # def row_count(self) -> Generic[T]:
+    #     raise NotImplementedError
 
 
-    def next(self) -> Generic[T]:
-        raise NotImplementedError
+    # def next(self) -> Generic[T]:
+    #     raise NotImplementedError
 
 
     @abstractmethod
@@ -58,8 +63,8 @@ class BaseDatabaseOperator(BasePersistence):
         raise NotImplementedError
 
 
-    def reset(self) -> None:
-        raise NotImplementedError
+    # def reset(self) -> None:
+    #     raise NotImplementedError
 
 
     @abstractmethod
@@ -69,14 +74,6 @@ class BaseDatabaseOperator(BasePersistence):
 
 
 class DatabaseOperator(BaseDatabaseOperator, ABC):
-
-    def initial(self, **kwargs) -> None:
-        # self._conn_strategy.database_config = kwargs
-        # self._conn_strategy.connection = self._conn_strategy.connect_database(**self._conn_strategy.database_config)
-        # self._conn_strategy.cursor = self._conn_strategy.build_cursor()
-        if self._conn_strategy.connection is None or self._conn_strategy.cursor is None:
-            self._conn_strategy.initial(**kwargs)
-
 
     def close(self) -> Generic[T]:
         return self._conn_strategy.close()
