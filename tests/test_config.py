@@ -18,3 +18,26 @@ Test_Function_Multiple_Args = (Test_Function_Args, Test_Function_Args, Test_Func
 Semaphore_Value = 2
 
 
+# # # # Persistence - Database setting
+Test_Pool_Name = "testing_pool"
+Test_Pool_Size = 2
+
+Database_Config = {
+    "host": "127.0.0.1",
+    "port": "3306",
+    "user": "root",
+    "password": "password",
+    "database": "tw_stock"
+}
+
+Database_Pool_Config = {
+    # "host": "127.0.0.1",
+    "host": "localhost",
+    "port": "3306",
+    "user": "root",
+    "password": "password",
+    "database": "tw_stock",
+    "pool_name": Test_Pool_Name,
+    "pool_size": Test_Pool_Size
+}
+
