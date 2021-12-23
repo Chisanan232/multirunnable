@@ -206,8 +206,7 @@ class JSONFormatter(File):
     def _data_handling(data: List[list]) -> str:
         import json
 
-        checking_data = Checking.data(data=data)
-        json_data = json.dumps(checking_data, ensure_ascii=False)
+        json_data = json.dumps(data, ensure_ascii=False)
         return json_data
 
 
@@ -244,7 +243,7 @@ class Checking:
         :param data_row:
         :return:
         """
-        if isinstance(data_row, List) or isinstance(data_row, Tuple):
+        if type(data_row) is list or type(data_row) is tuple:
             return cls.__is_data_content(data_row=data_row)
         else:
             return False
