@@ -23,8 +23,8 @@ install:
   - pip install -r dev-requirements.txt    # install package + test dependencies
 
 script:
-#  - travis_wait 15 pytest    # Run tests. Testing code should be done in 30 minutes
-  - pytest    # Run tests. Testing code should be done in 30 minutes
+  - travis_wait pytest    # Run tests. Travis-CI should wait for testing code util it done.
+#  - pytest    # Run tests.
 
 after_success:
 #  - codecov    # submit coverage
