@@ -3,7 +3,7 @@ from multirunnable.persistence.database.operator import DatabaseOperator
 from multirunnable.parallel.share import sharing_in_processes
 
 from multiprocessing.managers import NamespaceProxy
-from typing import Any, Tuple, Dict, Union
+from typing import Any, Tuple, Dict, Union, cast
 from mysql.connector.connection import MySQLConnection
 from mysql.connector.pooling import MySQLConnectionPool, PooledMySQLConnection
 from mysql.connector.errors import PoolError
@@ -110,33 +110,7 @@ class MySQLOperator(DatabaseOperator):
 
 
     def initial_cursor(self, connection: Union[MySQLConnection, PooledMySQLConnection]) -> MySQLCursor:
-        return self._db_connection.cursor(buffered=True)
-
-
-    @property
-    def _connection(self) -> MySQLConnection:
-        if self._db_connection is None:
-            print(f"[DEBUG] MySQLOperator._connection:: it lost instance...")
-            self._db_connection = self._conn_strategy.connection
-            if self._db_connection is None:
-                print(f"[DEBUG] the connection instance still be None so it will require to reconnect to database.")
-                self._db_connection = self._conn_strategy.reconnect(timeout=3)
-        print(f"[DEBUG] MySQLOperator._connection: {self._db_connection}")
-        print(f"[DEBUG] ID of MySQLOperator._connection: {id(self._db_connection)}")
-        return self._db_connection
-
-
-    @property
-    def _cursor(self) -> MySQLCursor:
-        if self._db_cursor is None:
-            print(f"[DEBUG] MySQLOperator._cursor:: it lost instance...")
-            # self._db_cursor = self._db_connection.cursor(buffered=True)
-            self._db_cursor = self._connection.cursor(buffered=True)
-            if self._db_cursor is None:
-                raise ConnectionError("Cannot instantiate database cursor object.")
-        print(f"[DEBUG] MySQLOperator._cursor: {self._db_cursor}")
-        print(f"[DEBUG] ID of MySQLOperator._cursor: {id(self._db_cursor)}")
-        return self._db_cursor
+        return connection.cursor(buffered=True)
 
 
     @property
