@@ -1,11 +1,13 @@
-from multirunnable.persistence.file.configuration import FileConfig, ArchiverConfig, DefaultConfig
-from multirunnable.persistence.file.saver import FileSaver, ArchiverSaver
-from multirunnable.persistence.file.files import (
+from .configuration import FileConfig, ArchiverConfig, DefaultConfig
+# from .saver import FileSaver, ArchiverSaver
+from .mediator import SavingMediator
+from .files import (
     JSONFormatter,
     CSVFormatter,
     XLSXFormatter
 )
-from multirunnable.persistence.file.layer import BaseFao
+from .archivers import ZIPArchiver
+# from .layer import BaseFao
 
 from enum import Enum
 
@@ -43,10 +45,12 @@ class FileFormat(Enum):
         "package": ".persistence.file",
         "formatter": "CSVFormatter"
     }
+
     XLSX = {
         "package": ".persistence.file",
         "formatter": "XLSXFormatter"
     }
+
     JSON = {
         "package": ".persistence.file",
         "formatter": "JSONFormatter"
