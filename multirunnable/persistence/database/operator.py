@@ -14,8 +14,26 @@ class BaseDatabaseOperator(BasePersistence):
         self._conn_strategy = conn_strategy
         if self._conn_strategy.connection is None:
             self._conn_strategy.initial(**db_config)
-        self._db_connection = self._conn_strategy.connection
-        self._db_cursor = self.initial_cursor(connection=self._db_connection)
+        self._db_connection: Generic[T] = self._conn_strategy.connection
+        self._db_cursor: Generic[T] = self.initial_cursor(connection=self._db_connection)
+
+
+    @property
+    def _connection(self) -> Generic[T]:
+        if self._db_connection is None:
+            self._db_connection = self._conn_strategy.connection
+            if self._db_connection is None:
+                self._db_connection = self._conn_strategy.reconnect(timeout=3)
+        return self._db_connection
+
+
+    @property
+    def _cursor(self) -> Generic[T]:
+        if self._db_cursor is None:
+            self._db_cursor = self.initial_cursor(connection=self._connection)
+            if self._db_cursor is None:
+                raise ConnectionError("Cannot instantiate database cursor object.")
+        return self._db_cursor
 
 
     @abstractmethod
