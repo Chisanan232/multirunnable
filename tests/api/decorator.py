@@ -3,6 +3,7 @@ from multirunnable.api.decorator import retry, async_retry, RunWith, AsyncRunWit
 from multirunnable.adapter.lock import Lock, RLock, Semaphore, BoundedSemaphore
 from multirunnable.adapter.communication import Event, Condition
 from multirunnable.adapter.strategy import ExecutorStrategyAdapter
+from multirunnable.coroutine.strategy import AsynchronousStrategy
 
 from ..test_config import Worker_Size, Worker_Pool_Size, Task_Size, Semaphore_Value
 
@@ -177,6 +178,41 @@ class TargetBoundedFunction:
 
 
 
+class TargetBoundedAsyncFunction:
+
+    @async_retry
+    async def target_method(self):
+        global Running_Target_Function_Counter
+        Running_Target_Function_Counter += 1
+
+
+    @target_method.initialization
+    async def initial_function(self, *args, **kwargs):
+        global Initial_Handling_Flag_Counter
+        Initial_Handling_Flag_Counter += 1
+
+
+    @target_method.done_handling
+    async def done_function(self, result):
+        global Done_Handling_Flag_Counter
+        Done_Handling_Flag_Counter += 1
+        return result
+
+
+    @target_method.final_handling
+    async def final_function(self):
+        global Final_Handling_Flag_Counter
+        Final_Handling_Flag_Counter += 1
+
+
+    @target_method.error_handling
+    async def error_function(self, e: Exception):
+        global Error_Handling_Flag_Counter
+        Error_Handling_Flag_Counter += 1
+        return e
+
+
+
 class JustTestException(Exception):
 
     def __str__(self):
@@ -228,6 +264,50 @@ class TargetErrorBoundedFunction:
 
 
 
+class TargetErrorBoundedAsyncFunction:
+
+    @async_retry
+    async def target_error_method_with_1_timeout(self):
+        global Running_Target_Function_Counter
+        Running_Target_Function_Counter += 1
+        raise JustTestException
+
+
+    @async_retry(timeout=3)
+    async def target_error_method(self):
+        global Running_Target_Function_Counter
+        Running_Target_Function_Counter += 1
+        raise JustTestException
+
+
+    @target_error_method.initialization
+    async def _initial(self, *args, **kwargs):
+        global Initial_Handling_Flag_Counter
+        Initial_Handling_Flag_Counter += 1
+
+
+    @target_error_method.done_handling
+    async def _done(self, result):
+        global Done_Handling_Flag_Counter
+        Done_Handling_Flag_Counter += 1
+        return result
+
+
+    @target_error_method.final_handling
+    async def _final(self):
+        global Final_Handling_Flag_Counter
+        Final_Handling_Flag_Counter += 1
+
+
+    @target_error_method.error_handling
+    async def _error(self, e: Exception):
+        global Error_Handling_Flag_Counter
+        Error_Handling_Flag_Counter += 1
+        assert isinstance(e, JustTestException), f""
+        return e
+
+
+
 @pytest.fixture(scope="class")
 def target_bounded_function() -> TargetBoundedFunction:
     return TargetBoundedFunction()
@@ -236,6 +316,21 @@ def target_bounded_function() -> TargetBoundedFunction:
 @pytest.fixture(scope="class")
 def target_error_bounded_function() -> TargetErrorBoundedFunction:
     return TargetErrorBoundedFunction()
+
+
+@pytest.fixture(scope="class")
+def target_bounded_async_function() -> TargetBoundedAsyncFunction:
+    return TargetBoundedAsyncFunction()
+
+
+@pytest.fixture(scope="class")
+def target_error_bounded_async_function() -> TargetErrorBoundedAsyncFunction:
+    return TargetErrorBoundedAsyncFunction()
+
+
+@pytest.fixture(scope="class")
+def async_strategy() -> AsynchronousStrategy:
+    return AsynchronousStrategy(executors=_Worker_Size)
 
 
 class TestRetryMechanism:
@@ -289,9 +384,24 @@ class TestAsyncRetryMechanism:
         pass
 
 
-    @pytest.mark.skip(reason="Not implement testing logic.")
-    def test_async_retry_decorating_at_bounded_function(self):
-        pass
+    def test_async_retry_decorating_at_bounded_function(self, async_strategy: AsynchronousStrategy, target_bounded_async_function: TargetBoundedAsyncFunction):
+        init_flag()
+
+        async_strategy.run(function=target_bounded_async_function.target_method)
+        assert Initial_Handling_Flag_Counter == _Worker_Size, F"The count of initial handling flag should be '{_Worker_Size}'."
+        assert Done_Handling_Flag_Counter == _Worker_Size, F"The count of done handling flag should be '{_Worker_Size}'"
+        assert Final_Handling_Flag_Counter == _Worker_Size, F"The count of final handling flag should be '{_Worker_Size}'"
+        assert Error_Handling_Flag_Counter == 0, F"The count of error handling flag should be '0'"
+
+
+    def test_async_retry_decorating_at_bounded_function_raising_an_exception(self, async_strategy: AsynchronousStrategy, target_error_bounded_async_function: TargetErrorBoundedAsyncFunction):
+        init_flag()
+
+        async_strategy.run(function=target_error_bounded_async_function.target_error_method)
+        assert Initial_Handling_Flag_Counter == 3 * _Worker_Size, F"The count of initial handling flag should be '{3 * _Worker_Size}'."
+        assert Done_Handling_Flag_Counter == 0, F"The count of done handling flag should be 'False'"
+        assert Final_Handling_Flag_Counter == 3 * _Worker_Size, F"The count of final handling flag should be '{3 * _Worker_Size}'"
+        assert Error_Handling_Flag_Counter == 3 * _Worker_Size, F"The count of error handling flag should be '{3 * _Worker_Size}'"
 
 
     @pytest.mark.skip(reason="Not implement testing logic.")
@@ -307,7 +417,28 @@ class TestAsyncRetryMechanism:
 
 class TestFeaturesDecorator:
 
-    def test_lock_decorator(self):
+    @pytest.mark.skip(reason="Not finish yet.")
+    def test_lock_decorator_in_parallel(self):
+
+        import os
+
+        _done_timestamp = {}
+        instantiate_lock(FeatureMode.Parallel)
+
+        @RunWith.Lock
+        def _target_testing():
+            # Save a timestamp into list
+            _process_id = os.getpid()
+            time.sleep(_Sleep_Time)
+            _time = float(time.time())
+            _done_timestamp[_process_id] = _time
+
+        # # # # Run multiple workers and save something info at the right time
+        run_multi_process(_function=_target_testing)
+        TestFeaturesDecorator._chk_done_timestamp_by_lock(_done_timestamp)
+
+
+    def test_lock_decorator_in_concurrent(self):
 
         import threading
 
@@ -327,7 +458,49 @@ class TestFeaturesDecorator:
         TestFeaturesDecorator._chk_done_timestamp_by_lock(_done_timestamp)
 
 
-    def test_semaphore_decorator(self):
+    def test_lock_decorator_in_green_thread(self):
+
+        from gevent.threading import get_ident
+        from gevent import sleep as gevent_sleep
+
+        _done_timestamp = {}
+        instantiate_lock(FeatureMode.GreenThread)
+
+        @RunWith.Lock
+        def _target_testing():
+            # Save a timestamp into list
+            _thread_id = get_ident()
+            gevent_sleep(_Sleep_Time)
+            _time = float(time.time())
+            _done_timestamp[_thread_id] = _time
+
+        # # # # Run multiple workers and save something info at the right time
+        run_multi_green_thread(_function=_target_testing)
+        TestFeaturesDecorator._chk_done_timestamp_by_lock(_done_timestamp)
+
+
+    @pytest.mark.skip(reason="Not finish yet.")
+    def test_semaphore_decorator_in_parallel(self):
+
+        import os
+
+        _done_timestamp = {}
+        instantiate_semaphore(FeatureMode.Parallel)
+
+        @RunWith.Semaphore
+        def _target_testing():
+            # Save a timestamp into list
+            _process_id = os.getpid()
+            time.sleep(_Sleep_Time)
+            _time = float(time.time())
+            _done_timestamp[_process_id] = _time
+
+        # # # # Run multiple workers and save something info at the right time
+        run_multi_threads(_function=_target_testing)
+        TestFeaturesDecorator._chk_done_timestamp_by_semaphore(_done_timestamp)
+
+
+    def test_semaphore_decorator_in_concurrent(self):
 
         import threading
 
@@ -347,7 +520,55 @@ class TestFeaturesDecorator:
         TestFeaturesDecorator._chk_done_timestamp_by_semaphore(_done_timestamp)
 
 
-    def test_bounded_semaphore_decorator(self):
+    def test_semaphore_decorator_in_green_thread(self):
+
+        from gevent.threading import get_ident
+        from gevent import sleep as gevent_sleep
+
+        _done_timestamp = {}
+        instantiate_semaphore(FeatureMode.GreenThread)
+
+        @RunWith.Semaphore
+        def _target_testing():
+            # Save a timestamp into list
+            _thread_id = get_ident()
+            gevent_sleep(_Sleep_Time)
+            _time = float(time.time())
+            _done_timestamp[_thread_id] = _time
+
+        # # # # Run multiple workers and save something info at the right time
+        run_multi_green_thread(_function=_target_testing)
+        TestFeaturesDecorator._chk_done_timestamp_by_semaphore(_done_timestamp)
+
+
+    @pytest.mark.skip(reason="Not finish yet.")
+    def test_bounded_semaphore_decorator_in_parallel(self):
+
+        import os
+
+        _done_timestamp = {}
+        instantiate_bounded_semaphore(FeatureMode.Concurrent)
+
+        @RunWith.Bounded_Semaphore
+        def _target_testing():
+            # Save a time stamp into list
+            try:
+                _process_id = os.getpid()
+                time.sleep(_Sleep_Time)
+                _time = float(time.time())
+                _done_timestamp[_process_id] = _time
+            except Exception as e:
+                assert False, f"Occur something unexpected issue. Please check it. \n" \
+                              f"Exception: {e}"
+            else:
+                assert True, f"Testing code successfully."
+
+        # # # # Run multiple workers and save something info at the right time
+        run_multi_process(_function=_target_testing)
+        TestFeaturesDecorator._chk_done_timestamp_by_semaphore(_done_timestamp)
+
+
+    def test_bounded_semaphore_decorator_in_concurrent(self):
 
         import threading
 
@@ -370,6 +591,33 @@ class TestFeaturesDecorator:
 
         # # # # Run multiple workers and save something info at the right time
         run_multi_threads(_function=_target_testing)
+        TestFeaturesDecorator._chk_done_timestamp_by_semaphore(_done_timestamp)
+
+
+    def test_bounded_semaphore_decorator_in_green_thread(self):
+
+        from gevent.threading import get_ident
+        from gevent import sleep as gevent_sleep
+
+        _done_timestamp = {}
+        instantiate_bounded_semaphore(FeatureMode.GreenThread)
+
+        @RunWith.Bounded_Semaphore
+        def _target_testing():
+            # Save a time stamp into list
+            try:
+                _thread_id = get_ident()
+                gevent_sleep(_Sleep_Time)
+                _time = float(time.time())
+                _done_timestamp[_thread_id] = _time
+            except Exception as e:
+                assert False, f"Occur something unexpected issue. Please check it. \n" \
+                              f"Exception: {e}"
+            else:
+                assert True, f"Testing code successfully."
+
+        # # # # Run multiple workers and save something info at the right time
+        run_multi_green_thread(_function=_target_testing)
         TestFeaturesDecorator._chk_done_timestamp_by_semaphore(_done_timestamp)
 
 
@@ -415,7 +663,7 @@ class TestAsyncFeaturesDecorator:
     @pytest.mark.skip(reason="Not finish yet.")
     def test_lock_decorator(self):
 
-        import threading
+        import asyncio
 
         _done_timestamp = {}
         instantiate_lock(FeatureMode.Concurrent)
@@ -429,14 +677,14 @@ class TestAsyncFeaturesDecorator:
             _done_timestamp[_thread_id] = _time
 
         # # # # Run multiple workers and save something info at the right time
-        run_multi_threads(_function=_target_testing)
+        run_async(_function=_target_testing)
         TestAsyncFeaturesDecorator._chk_done_timestamp_by_lock(_done_timestamp)
 
 
     @pytest.mark.skip(reason="Not finish yet.")
     def test_semaphore_decorator(self):
 
-        import threading
+        import asyncio
 
         _done_timestamp = {}
         instantiate_semaphore(FeatureMode.Concurrent)
@@ -450,14 +698,14 @@ class TestAsyncFeaturesDecorator:
             _done_timestamp[_thread_id] = _time
 
         # # # # Run multiple workers and save something info at the right time
-        run_multi_threads(_function=_target_testing)
+        run_async(_function=_target_testing)
         TestAsyncFeaturesDecorator._chk_done_timestamp_by_semaphore(_done_timestamp)
 
 
     @pytest.mark.skip(reason="Not finish yet.")
     def test_bounded_semaphore_decorator(self):
 
-        import threading
+        import asyncio
 
         _done_timestamp = {}
         instantiate_bounded_semaphore(FeatureMode.Concurrent)
@@ -477,7 +725,7 @@ class TestAsyncFeaturesDecorator:
                 assert True, f"Testing code successfully."
 
         # # # # Run multiple workers and save something info at the right time
-        run_multi_threads(_function=_target_testing)
+        run_async(_function=_target_testing)
         TestAsyncFeaturesDecorator._chk_done_timestamp_by_semaphore(_done_timestamp)
 
 
