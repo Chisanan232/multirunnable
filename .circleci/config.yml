@@ -6,11 +6,13 @@ jobs:
     docker:    # it uses the docker executor
       - image: circleci/mysql:8.0.23    # specifically, a docker image with mysql 8.0.3.
          environment:
-           - MYSQL_PASSWORD=passw23mr
-           - MYSQL_DATABASE=tw_stock
-           - MYSQL_ROOT_HOST=%
-           - DB_HOST=127.0.0.1
-           - DB_PORT=3306
+           MYSQL_ROOT_HOST: %
+           MYSQL_ROOT_PASSWORD: rootpw
+           MYSQL_DATABASE: tw_stock
+           MYSQL_USER: user
+           MYSQL_PASSWORD: passw23mr
+           DB_HOST: 127.0.0.1
+           DB_PORT: 3306
     # Steps are a list of commands to run inside the docker container above.
     steps:
       - checkout    # this pulls code down from GitHub
@@ -59,11 +61,11 @@ jobs:
     docker:    # it uses the docker executor
       - image: circleci/python:3.7    # specifically, a docker image with python 3.7
          environment:
-           - MYSQL_PASSWORD='passw23mr'
-           - MYSQL_DATABASE='tw_stock'
-           - MYSQL_ROOT_HOST=%
-           - DB_HOST=127.0.0.1
-           - DB_PORT=3306
+           MYSQL_PASSWORD: 'passw23mr'
+           MYSQL_DATABASE: 'tw_stock'
+           MYSQL_ROOT_HOST: %
+           DB_HOST: 127.0.0.1
+           DB_PORT: 3306
     # Steps are a list of commands to run inside the docker container above.
     steps:
       - checkout    # this pulls code down from GitHub
@@ -97,11 +99,11 @@ jobs:
     docker:
       - image: circleci/python:3.8    # specifically, a docker image with python 3.8
          environment:
-           - MYSQL_PASSWORD='passw23mr'
-           - MYSQL_DATABASE='tw_stock'
-           - MYSQL_ROOT_HOST=%
-           - DB_HOST=127.0.0.1
-           - DB_PORT=3306
+           MYSQL_PASSWORD: 'passw23mr'
+           MYSQL_DATABASE: 'tw_stock'
+           MYSQL_ROOT_HOST: %
+           DB_HOST: 127.0.0.1
+           DB_PORT: 3306
     steps:
       - checkout
       - run:
