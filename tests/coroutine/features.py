@@ -39,8 +39,8 @@ from asyncio.queues import (
     Queue as async_Queue,
     LifoQueue as async_LifoQueue,
     PriorityQueue as async_PriorityQueue)
-from asyncio import get_event_loop
-from typing import Type, TypeVar, NewType
+from asyncio import new_event_loop
+from typing import Type
 import pytest
 
 
@@ -167,7 +167,7 @@ class TestAsynchronousLock:
         except ValueError as e:
             assert "Async Event Loop object cannot be empty" in str(e), f"The exception error should be 'Async Event Loop object cannot be empty'."
 
-        _event_loop = get_event_loop()
+        _event_loop = new_event_loop()
         _lock = mr_async_lock.get_lock(loop=_event_loop)
         assert isinstance(_lock, async_Lock) is True, f"This type of instance should be 'asyncio.lock.RLock'."
 
@@ -178,7 +178,7 @@ class TestAsynchronousLock:
         except ValueError as e:
             assert "Async Event Loop object cannot be empty" in str(e), f"The exception error should be 'Async Event Loop object cannot be empty'."
 
-        _event_loop = get_event_loop()
+        _event_loop = new_event_loop()
         _rlock = mr_async_lock.get_rlock(loop=_event_loop)
         assert isinstance(_rlock, async_Lock) is True, f"This type of instance should be 'asyncio.lock.RLock'."
 
@@ -189,7 +189,7 @@ class TestAsynchronousLock:
         except ValueError as e:
             assert "Async Event Loop object cannot be empty" in str(e), f"The exception error should be 'Async Event Loop object cannot be empty'."
 
-        _event_loop = get_event_loop()
+        _event_loop = new_event_loop()
         _semaphore = mr_async_lock.get_semaphore(loop=_event_loop, value=_Semaphore_Value)
         assert isinstance(_semaphore, async_Semaphore) is True, f"This type of instance should be 'asyncio.lock.Semaphore'."
 
@@ -200,7 +200,7 @@ class TestAsynchronousLock:
         except ValueError as e:
             assert "Async Event Loop object cannot be empty" in str(e), f"The exception error should be 'Async Event Loop object cannot be empty'."
 
-        _event_loop = get_event_loop()
+        _event_loop = new_event_loop()
         _bounded_semaphore = mr_async_lock.get_bounded_semaphore(loop=_event_loop, value=_Semaphore_Value)
         assert isinstance(_bounded_semaphore, async_BoundedSemaphore) is True, f"This type of instance should be 'asyncio.lock.BoundedSemaphore'."
 
@@ -214,7 +214,7 @@ class TestAsynchronousCommunication:
         except ValueError as e:
             assert "Async Event Loop object cannot be empty" in str(e), f"The exception error should be 'Async Event Loop object cannot be empty'."
 
-        _event_loop = get_event_loop()
+        _event_loop = new_event_loop()
         _event = mr_async_communication.get_event(loop=_event_loop)
         assert isinstance(_event, async_Event) is True, f"This type of instance should be 'asyncio.Event'."
 
@@ -225,7 +225,7 @@ class TestAsynchronousCommunication:
         except ValueError as e:
             assert "Async Event Loop object cannot be empty" in str(e), f"The exception error should be 'Async Event Loop object cannot be empty'."
 
-        _event_loop = get_event_loop()
+        _event_loop = new_event_loop()
         _communication = mr_async_communication.get_condition(loop=_event_loop)
         assert isinstance(_communication, async_Condition) is True, f"This type of instance should be 'asyncio.Condition'."
 

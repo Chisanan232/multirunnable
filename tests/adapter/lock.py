@@ -105,7 +105,7 @@ class TestAdapterLock:
 
     def test_get_instance_with_asynchronous_mode(self, mr_lock: Lock):
         from asyncio.locks import Lock
-        from asyncio import get_event_loop
+        from asyncio import new_event_loop
 
         try:
             _lock = mr_lock.get_instance()
@@ -113,7 +113,7 @@ class TestAdapterLock:
             assert "FeatureMode is None. Please configure it as one of 'multirunnable.mode.FeatureMode'." in str(ve), f"It should set the FeatureMode first."
 
         mr_lock.feature_mode = FeatureMode.Asynchronous
-        _lock = mr_lock.get_instance(event_loop=get_event_loop())
+        _lock = mr_lock.get_instance(event_loop=new_event_loop())
         assert _lock is not None and isinstance(_lock, Lock) is True, f"This type of Lock instance should be 'asyncio.locks.Lock'."
 
 
@@ -204,7 +204,7 @@ class TestAdapterRLock:
 
     def test_get_instance_with_asynchronous_mode(self, mr_rlock: RLock):
         from asyncio.locks import Lock
-        from asyncio import get_event_loop
+        from asyncio import new_event_loop
 
         try:
             _rlock = mr_rlock.get_instance()
@@ -212,7 +212,7 @@ class TestAdapterRLock:
             assert "FeatureMode is None. Please configure it as one of 'multirunnable.mode.FeatureMode'." in str(ve), f"It should set the FeatureMode first."
 
         mr_rlock.feature_mode = FeatureMode.Asynchronous
-        _rlock = mr_rlock.get_instance(event_loop=get_event_loop())
+        _rlock = mr_rlock.get_instance(event_loop=new_event_loop())
         assert _rlock is not None and isinstance(_rlock, Lock) is True, f"This type of RLock instance should be 'asyncio.locks.Lock'."
 
 
@@ -303,7 +303,7 @@ class TestAdapterSemaphore:
 
     def test_get_instance_with_asynchronous_mode(self, mr_semaphore: Semaphore):
         from asyncio.locks import Semaphore
-        from asyncio import get_event_loop
+        from asyncio import new_event_loop
 
         try:
             _semaphore = mr_semaphore.get_instance()
@@ -311,7 +311,7 @@ class TestAdapterSemaphore:
             assert "FeatureMode is None. Please configure it as one of 'multirunnable.mode.FeatureMode'." in str(ve), f"It should set the FeatureMode first."
 
         mr_semaphore.feature_mode = FeatureMode.Asynchronous
-        _semaphore = mr_semaphore.get_instance(event_loop=get_event_loop())
+        _semaphore = mr_semaphore.get_instance(event_loop=new_event_loop())
         assert _semaphore is not None and isinstance(_semaphore, Semaphore) is True, f"This type of Semaphore instance should be 'asyncio.locks.Semaphore'."
 
 
@@ -402,7 +402,7 @@ class TestAdapterBoundedSemaphore:
 
     def test_get_instance_with_asynchronous_mode(self, mr_bounded_semaphore: BoundedSemaphore):
         from asyncio.locks import BoundedSemaphore
-        from asyncio import get_event_loop
+        from asyncio import new_event_loop
 
         try:
             _bounded_semaphore = mr_bounded_semaphore.get_instance()
@@ -410,7 +410,7 @@ class TestAdapterBoundedSemaphore:
             assert "FeatureMode is None. Please configure it as one of 'multirunnable.mode.FeatureMode'." in str(ve), f"It should set the FeatureMode first."
 
         mr_bounded_semaphore.feature_mode = FeatureMode.Asynchronous
-        _bounded_semaphore = mr_bounded_semaphore.get_instance(event_loop=get_event_loop())
+        _bounded_semaphore = mr_bounded_semaphore.get_instance(event_loop=new_event_loop())
         assert _bounded_semaphore is not None and isinstance(_bounded_semaphore, BoundedSemaphore) is True, f"This type of BoundedSemaphore instance should be 'asyncio.locks.BoundedSemaphore'."
 
 

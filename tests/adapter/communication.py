@@ -92,7 +92,7 @@ class TestAdapterEvent:
 
     def test_get_instance_with_asynchronous_mode(self, mr_event: Event):
         from asyncio.locks import Event
-        from asyncio import get_event_loop
+        from asyncio import new_event_loop
 
         try:
             _event = mr_event.get_instance()
@@ -100,7 +100,7 @@ class TestAdapterEvent:
             assert "FeatureMode is None. Please configure it as one of 'multirunnable.mode.FeatureMode'." in str(ve), f"It should set the FeatureMode first."
 
         mr_event.feature_mode = FeatureMode.Asynchronous
-        _event = mr_event.get_instance(event_loop=get_event_loop())
+        _event = mr_event.get_instance(event_loop=new_event_loop())
         assert _event is not None and isinstance(_event, Event) is True, f"This type of Event instance should be 'asyncio.locks.Event'."
 
 
@@ -193,7 +193,7 @@ class TestAdapterCondition:
 
     def test_get_instance_with_asynchronous_mode(self, mr_condition: Condition):
         from asyncio.locks import Condition
-        from asyncio import get_event_loop
+        from asyncio import new_event_loop
 
         try:
             _condition = mr_condition.get_instance()
@@ -201,7 +201,7 @@ class TestAdapterCondition:
             assert "FeatureMode is None. Please configure it as one of 'multirunnable.mode.FeatureMode'." in str(ve), f"It should set the FeatureMode first."
 
         mr_condition.feature_mode = FeatureMode.Asynchronous
-        _condition = mr_condition.get_instance(event_loop=get_event_loop())
+        _condition = mr_condition.get_instance(event_loop=new_event_loop())
         assert _condition is not None and isinstance(_condition, Condition) is True, f"This type of Condition instance should be 'asyncio.locks.Condition'."
 
 
