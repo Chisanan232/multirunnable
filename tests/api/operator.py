@@ -13,9 +13,14 @@ from multirunnable.api.operator import (
 from ..test_config import Worker_Size, Worker_Pool_Size, Task_Size, Semaphore_Value
 
 from typing import List
+from gevent.threading import get_ident as get_gevent_ident
+from gevent import sleep as gevent_sleep
+import threading
+import asyncio
 import pytest
 import random
 import time
+import os
 import re
 
 
@@ -30,45 +35,39 @@ _Random_Start_Time: int = 60
 _Random_End_Time: int = 80
 
 
-# @pytest.fixture(scope="function")
-def instantiate_lock(_mode):
+def instantiate_lock(_mode, **kwargs):
     _lock = Lock()
-    return _initial(_lock, _mode)
+    return _initial(_lock, _mode, **kwargs)
 
 
-# @pytest.fixture(scope="function", params=[RunningMode.Concurrent])
-def instantiate_rlock(_mode):
+def instantiate_rlock(_mode, **kwargs):
     _rlock = RLock()
-    return _initial(_rlock, _mode)
+    return _initial(_rlock, _mode, **kwargs)
 
 
-# @pytest.fixture(scope="function")
-def instantiate_semaphore(_mode):
+def instantiate_semaphore(_mode, **kwargs):
     _semaphore = Semaphore(value=_Semaphore_Value)
-    return _initial(_semaphore, _mode)
+    return _initial(_semaphore, _mode, **kwargs)
 
 
-# @pytest.fixture(scope="function")
-def instantiate_bounded_semaphore(_mode):
+def instantiate_bounded_semaphore(_mode, **kwargs):
     _bounded_semaphore = BoundedSemaphore(value=_Semaphore_Value)
-    return _initial(_bounded_semaphore, _mode)
+    return _initial(_bounded_semaphore, _mode, **kwargs)
 
 
-# @pytest.fixture(scope="function")
-def instantiate_event(_mode):
+def instantiate_event(_mode, **kwargs):
     _event = Event()
-    return _initial(_event, _mode)
+    return _initial(_event, _mode, **kwargs)
 
 
-# @pytest.fixture(scope="function")
-def instantiate_condition(_mode):
+def instantiate_condition(_mode, **kwargs):
     _condition = Condition()
-    return _initial(_condition, _mode)
+    return _initial(_condition, _mode, **kwargs)
 
 
-def _initial(_feature_factory, _mode):
+def _initial(_feature_factory, _mode, **kwargs):
     _feature_factory.feature_mode = _mode
-    _feature_instn = _feature_factory.get_instance()
+    _feature_instn = _feature_factory.get_instance(**kwargs)
     _feature_factory.globalize_instance(_feature_instn)
     return _feature_instn
 
@@ -124,11 +123,19 @@ def run_multi_green_thread(_function):
     _run_with_multiple_workers(_strategy, _function)
 
 
-def run_async(_function):
+def run_async(_function, _feature):
+
+    import asyncio
+
     _strategy_adapter = ExecutorStrategyAdapter(mode=RunningMode.Asynchronous, executors=_Worker_Size)
     _strategy = _strategy_adapter.get_simple()
 
-    _run_with_multiple_workers(_strategy, _function)
+    async def __process():
+        await _strategy.initialization(queue_tasks=None, features=_feature)
+        _ps = [_strategy.generate_worker(_function) for _ in range(Worker_Size)]
+        await _strategy.activate_workers(_ps)
+
+    asyncio.run(__process())
 
 
 def _run_with_multiple_workers(_strategy, _function):
@@ -158,11 +165,10 @@ def map_multi_green_thread(_functions: List):
     _map_with_multiple_workers(_strategy, _functions)
 
 
-def map_async(_functions: List):
+def map_async(_functions: List, _feature):
     _strategy_adapter = ExecutorStrategyAdapter(mode=RunningMode.Asynchronous, executors=_Worker_Size)
     _strategy = _strategy_adapter.get_simple()
-
-    _map_with_multiple_workers(_strategy, _functions)
+    _strategy.map_with_function(functions=_functions, features=_feature)
 
 
 def _map_with_multiple_workers(_strategy, _functions: List):
@@ -222,8 +228,6 @@ class TestLockAdapterOperator(TestOperator):
 
     def test_feature_in_concurrent(self, lock_opts: LockAdapterOperator):
 
-        import threading
-
         _done_timestamp = {}
         instantiate_lock(FeatureMode.Concurrent)
 
@@ -242,8 +246,6 @@ class TestLockAdapterOperator(TestOperator):
 
 
     def test_feature_by_pykeyword_with_in_concurrent(self, lock_opts: LockAdapterOperator):
-
-        import threading
 
         _done_timestamp = {}
         instantiate_lock(FeatureMode.Concurrent)
@@ -264,6 +266,102 @@ class TestLockAdapterOperator(TestOperator):
 
         # # # # Run multiple workers and save something info at the right time
         run_multi_threads(_function=_target_testing)
+        TestLockAdapterOperator._chk_done_timestamp(_done_timestamp)
+
+
+    def test_feature_in_green_thread(self):
+
+        _done_timestamp = {}
+        instantiate_lock(FeatureMode.GreenThread)
+
+        def _target_testing():
+            _lock_opts = LockAdapterOperator()
+            # Save a timestamp into list
+            _lock_opts.acquire()
+            _thread_id = get_gevent_ident()
+            gevent_sleep(_Sleep_Time)
+            _time = float(time.time())
+            _done_timestamp[_thread_id] = _time
+            _lock_opts.release()
+
+        # # # # Run multiple workers and save something info at the right time
+        run_multi_green_thread(_function=_target_testing)
+        TestLockAdapterOperator._chk_done_timestamp(_done_timestamp)
+
+
+    def test_feature_by_pykeyword_with_in_green_thread(self):
+
+        _done_timestamp = {}
+        instantiate_lock(FeatureMode.GreenThread)
+
+        def _target_testing():
+            # Save a time stamp into list
+            _lock_opts = LockAdapterOperator()
+            try:
+                with _lock_opts:
+                    _thread_id = get_gevent_ident()
+                    gevent_sleep(_Sleep_Time)
+                    _time = float(time.time())
+                    _done_timestamp[_thread_id] = _time
+            except Exception as e:
+                assert False, f"Occur something unexpected issue. Please check it. \n" \
+                              f"Exception: {e}"
+            else:
+                assert True, f"Testing code successfully."
+
+        # # # # Run multiple workers and save something info at the right time
+        run_multi_green_thread(_function=_target_testing)
+        TestLockAdapterOperator._chk_done_timestamp(_done_timestamp)
+
+
+    def test_feature_in_asynchronous_tasks(self):
+        _event_loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop=_event_loop)
+
+        _done_timestamp = {}
+
+        instantiate_lock(FeatureMode.Asynchronous, event_loop=_event_loop)
+
+        async def _target_testing():
+            _lock_async_opts = LockAsyncOperator()
+            # Save a timestamp into list
+            await _lock_async_opts.acquire()
+            await asyncio.sleep(_Sleep_Time)
+            _async_task = asyncio.current_task()
+            _async_task_id = id(_async_task)
+            _time = float(time.time())
+            _done_timestamp[_async_task_id] = _time
+            _lock_async_opts.release()
+
+        # # # # Run multiple workers and save something info at the right time
+        run_async(_function=_target_testing, _feature=Lock())
+        TestLockAdapterOperator._chk_done_timestamp(_done_timestamp)
+
+
+    def test_feature_by_pykeyword_with_in_asynchronous_task(self):
+        _event_loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop=_event_loop)
+
+        _done_timestamp = {}
+
+        async def _target_testing():
+            # Save a time stamp into list
+            _lock_async_opts = LockAsyncOperator()
+            try:
+                async with _lock_async_opts:
+                    await asyncio.sleep(_Sleep_Time)
+                    _async_task = asyncio.current_task()
+                    _async_task_id = id(_async_task)
+                    _time = float(time.time())
+                    _done_timestamp[_async_task_id] = _time
+            except Exception as e:
+                assert False, f"Occur something unexpected issue. Please check it. \n" \
+                              f"Exception: {e}"
+            else:
+                assert True, f"Testing code successfully."
+
+        # # # # Run multiple workers and save something info at the right time
+        run_async(_function=_target_testing, _feature=Lock())
         TestLockAdapterOperator._chk_done_timestamp(_done_timestamp)
 
 
@@ -302,8 +400,6 @@ class TestRLockAdapterOperator(TestOperator):
 
     def test_feature_in_concurrent(self, rlock_opts: RLockOperator):
 
-        import threading
-
         _done_timestamp = {}
         instantiate_rlock(FeatureMode.Concurrent)
 
@@ -325,8 +421,6 @@ class TestRLockAdapterOperator(TestOperator):
 
     def test_feature_by_pykeyword_with_in_concurrent(self, rlock_opts: RLockOperator):
 
-        import threading
-
         _done_timestamp = {}
         instantiate_rlock(FeatureMode.Concurrent)
 
@@ -346,6 +440,54 @@ class TestRLockAdapterOperator(TestOperator):
 
         # # # # Run multiple workers and save something info at the right time
         run_multi_threads(_function=_target_testing)
+        TestRLockAdapterOperator._chk_done_timestamp(_done_timestamp)
+
+
+    def test_feature_in_green_thread(self):
+
+        _done_timestamp = {}
+        instantiate_rlock(FeatureMode.GreenThread)
+
+        def _target_testing():
+            _rlock_opts = RLockOperator()
+            # Save a timestamp into list
+            _rlock_opts.acquire()
+            _rlock_opts.acquire()
+            _thread_id = get_gevent_ident()
+            gevent_sleep(_Sleep_Time)
+            _time = float(time.time())
+            _done_timestamp[_thread_id] = _time
+            _rlock_opts.release()
+            _rlock_opts.release()
+
+        # # # # Run multiple workers and save something info at the right time
+        run_multi_green_thread(_function=_target_testing)
+        TestRLockAdapterOperator._chk_done_timestamp(_done_timestamp)
+
+
+    @pytest.mark.skip(reason="The feature doesn't support with current version.")
+    def test_feature_by_pykeyword_with_in_green_thread(self):
+
+        _done_timestamp = {}
+        instantiate_rlock(FeatureMode.GreenThread)
+
+        def _target_testing():
+            # Save a time stamp into list
+            _lock_opts = RLockOperator()
+            try:
+                with _lock_opts:
+                    _thread_id = get_gevent_ident()
+                    gevent_sleep(_Sleep_Time)
+                    _time = float(time.time())
+                    _done_timestamp[_thread_id] = _time
+            except Exception as e:
+                assert False, f"Occur something unexpected issue. Please check it. \n" \
+                              f"Exception: {e}"
+            else:
+                assert True, f"Testing code successfully."
+
+        # # # # Run multiple workers and save something info at the right time
+        run_multi_green_thread(_function=_target_testing)
         TestRLockAdapterOperator._chk_done_timestamp(_done_timestamp)
 
 
@@ -427,6 +569,101 @@ class TestSemaphoreAdapterOperator(TestOperator):
 
         # # # # Run multiple workers and save something info at the right time
         run_multi_threads(_function=_target_testing)
+        TestSemaphoreAdapterOperator._chk_done_timestamp(_done_timestamp)
+
+
+    @pytest.mark.skip(reason="Has something issue in testing code.")
+    def test_feature_in_green_thread(self):
+
+        _done_timestamp = {}
+        instantiate_semaphore(FeatureMode.GreenThread)
+
+        def _target_testing():
+            _smp_opts = SemaphoreOperator()
+            # Save a timestamp into list
+            _smp_opts.acquire()
+            _thread_id = get_gevent_ident()
+            gevent_sleep(_Sleep_Time)
+            _time = float(time.time())
+            _done_timestamp[_thread_id] = _time
+            _smp_opts.release()
+
+        # # # # Run multiple workers and save something info at the right time
+        run_multi_green_thread(_function=_target_testing)
+        TestSemaphoreAdapterOperator._chk_done_timestamp(_done_timestamp)
+
+
+    def test_feature_by_pykeyword_with_in_green_thread(self):
+
+        _done_timestamp = {}
+        instantiate_semaphore(FeatureMode.GreenThread)
+
+        def _target_testing():
+            # Save a time stamp into list
+            _smp_opts = SemaphoreOperator()
+            try:
+                with _smp_opts:
+                    _thread_id = get_gevent_ident()
+                    gevent_sleep(_Sleep_Time)
+                    _time = float(time.time())
+                    _done_timestamp[_thread_id] = _time
+            except Exception as e:
+                assert False, f"Occur something unexpected issue. Please check it. \n" \
+                              f"Exception: {e}"
+            else:
+                assert True, f"Testing code successfully."
+
+        # # # # Run multiple workers and save something info at the right time
+        run_multi_green_thread(_function=_target_testing)
+        TestSemaphoreAdapterOperator._chk_done_timestamp(_done_timestamp)
+
+
+    def test_feature_in_asynchronous_tasks(self):
+        _event_loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop=_event_loop)
+
+        _done_timestamp = {}
+
+        async def _target_testing():
+            _smp_async_opts = SemaphoreAsyncOperator()
+            # Save a timestamp into list
+            await _smp_async_opts.acquire()
+            await asyncio.sleep(_Sleep_Time)
+            _async_task = asyncio.current_task()
+            _async_task_id = id(_async_task)
+            _time = float(time.time())
+            _done_timestamp[_async_task_id] = _time
+            _smp_async_opts.release()
+
+        # # # # Run multiple workers and save something info at the right time
+        run_async(_function=_target_testing, _feature=Semaphore(value=_Semaphore_Value))
+        TestSemaphoreAdapterOperator._chk_done_timestamp(_done_timestamp)
+
+
+    def test_feature_by_pykeyword_with_in_asynchronous_task(self):
+        _event_loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop=_event_loop)
+
+        _done_timestamp = {}
+
+        async def _target_testing():
+            # Save a time stamp into list
+            _smp_async_opts = SemaphoreAsyncOperator()
+            try:
+                async with _smp_async_opts:
+                    await asyncio.sleep(_Sleep_Time)
+                    _async_task = asyncio.current_task()
+                    _async_task_id = id(_async_task)
+                    _time = float(time.time())
+                    _done_timestamp[_async_task_id] = _time
+            except Exception as e:
+                assert False, f"Occur something unexpected issue. Please check it. \n" \
+                              f"Exception: {e}"
+            else:
+                assert True, f"Testing code successfully."
+
+        # # # # Run multiple workers and save something info at the right time
+        run_async(_function=_target_testing, _feature=Semaphore(value=_Semaphore_Value))
         TestSemaphoreAdapterOperator._chk_done_timestamp(_done_timestamp)
 
 
@@ -519,6 +756,100 @@ class TestBoundedSemaphoreAdapterOperator(TestOperator):
         TestSemaphoreAdapterOperator._chk_done_timestamp(_done_timestamp)
 
 
+    def test_feature_in_green_thread(self):
+
+        _done_timestamp = {}
+        instantiate_bounded_semaphore(FeatureMode.GreenThread)
+
+        def _target_testing():
+            _bsmp_opts = BoundedSemaphoreOperator()
+            # Save a timestamp into list
+            _bsmp_opts.acquire()
+            _thread_id = get_gevent_ident()
+            gevent_sleep(_Sleep_Time)
+            _time = float(time.time())
+            _done_timestamp[_thread_id] = _time
+            _bsmp_opts.release()
+
+        # # # # Run multiple workers and save something info at the right time
+        run_multi_green_thread(_function=_target_testing)
+        TestBoundedSemaphoreAdapterOperator._chk_done_timestamp(_done_timestamp)
+
+
+    def test_feature_by_pykeyword_with_in_green_thread(self):
+
+        _done_timestamp = {}
+        instantiate_bounded_semaphore(FeatureMode.GreenThread)
+
+        def _target_testing():
+            # Save a time stamp into list
+            _bsmp_opts = BoundedSemaphoreOperator()
+            try:
+                with _bsmp_opts:
+                    _thread_id = get_gevent_ident()
+                    gevent_sleep(_Sleep_Time)
+                    _time = float(time.time())
+                    _done_timestamp[_thread_id] = _time
+            except Exception as e:
+                assert False, f"Occur something unexpected issue. Please check it. \n" \
+                              f"Exception: {e}"
+            else:
+                assert True, f"Testing code successfully."
+
+        # # # # Run multiple workers and save something info at the right time
+        run_multi_green_thread(_function=_target_testing)
+        TestBoundedSemaphoreAdapterOperator._chk_done_timestamp(_done_timestamp)
+
+
+    def test_feature_in_asynchronous_tasks(self):
+        _event_loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop=_event_loop)
+
+        _done_timestamp = {}
+
+        async def _target_testing():
+            _bsmp_async_opts = BoundedSemaphoreAsyncOperator()
+            # Save a timestamp into list
+            await _bsmp_async_opts.acquire()
+            await asyncio.sleep(_Sleep_Time)
+            _async_task = asyncio.current_task()
+            _async_task_id = id(_async_task)
+            _time = float(time.time())
+            _done_timestamp[_async_task_id] = _time
+            _bsmp_async_opts.release()
+
+        # # # # Run multiple workers and save something info at the right time
+        run_async(_function=_target_testing, _feature=BoundedSemaphore(value=_Semaphore_Value))
+        TestBoundedSemaphoreAdapterOperator._chk_done_timestamp(_done_timestamp)
+
+
+    def test_feature_by_pykeyword_with_in_asynchronous_task(self):
+        _event_loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop=_event_loop)
+
+        _done_timestamp = {}
+
+        async def _target_testing():
+            # Save a time stamp into list
+            _bsmp_async_opts = BoundedSemaphoreAsyncOperator()
+            try:
+                async with _bsmp_async_opts:
+                    await asyncio.sleep(_Sleep_Time)
+                    _async_task = asyncio.current_task()
+                    _async_task_id = id(_async_task)
+                    _time = float(time.time())
+                    _done_timestamp[_async_task_id] = _time
+            except Exception as e:
+                assert False, f"Occur something unexpected issue. Please check it. \n" \
+                              f"Exception: {e}"
+            else:
+                assert True, f"Testing code successfully."
+
+        # # # # Run multiple workers and save something info at the right time
+        run_async(_function=_target_testing, _feature=BoundedSemaphore(value=_Semaphore_Value))
+        TestBoundedSemaphoreAdapterOperator._chk_done_timestamp(_done_timestamp)
+
+
     @staticmethod
     def _chk_done_timestamp(_done_timestamp: dict):
         assert len(_done_timestamp.keys()) == _Worker_Size, f"The amount of thread ID keys (no de-duplicate) should be equal to worker size '{_Worker_Size}'."
@@ -562,8 +893,6 @@ class TestEventAdapterOperator(TestOperator):
 
     def test_feature_in_concurrent(self, event_opts: EventOperator):
 
-        import threading
-
         _thread_ids = {"producer": "", "consumer": ""}
         _thread_flag = {"producer": [], "consumer": []}
         instantiate_event(FeatureMode.Concurrent)
@@ -588,6 +917,65 @@ class TestEventAdapterOperator(TestOperator):
         # # # # Run multiple workers and save something info at the right time
         map_multi_threads(_functions=[_target_producer, _target_consumer])
         TestEventAdapterOperator._chk_info(_thread_ids, _thread_flag)
+
+
+    def test_feature_in_green_thread(self):
+
+        _thread_ids = {"producer": "", "consumer": ""}
+        _thread_flag = {"producer": [], "consumer": []}
+        instantiate_event(FeatureMode.GreenThread)
+
+        def _target_producer():
+            _event_opts = EventOperator()
+            for _ in range(3):
+                gevent_sleep(_Sleep_Time)
+                _thread_index = random.randrange(_Random_Start_Time, _Random_End_Time)
+                _thread_flag["producer"].append(_thread_index)
+                _thread_ids["producer"] = str(get_gevent_ident())
+                _event_opts.set()
+
+        def _target_consumer():
+            _event_opts = EventOperator()
+            while True:
+                _event_opts.wait()
+                _event_opts.clear()
+                _thread_flag["consumer"].append(float(time.time()))
+                _thread_ids["consumer"] = str(get_gevent_ident())
+                if len(_thread_flag["producer"]) == 3:
+                    break
+
+        # # # # Run multiple workers and save something info at the right time
+        map_multi_green_thread(_functions=[_target_producer, _target_consumer])
+        TestEventAdapterOperator._chk_info(_thread_ids, _thread_flag)
+
+
+    def test_feature_in_asynchronous_task(self):
+
+        _async_task_ids = {"producer": "", "consumer": ""}
+        _async_task_flag = {"producer": [], "consumer": []}
+
+        async def _target_producer():
+            _event_opts = EventAsyncOperator()
+            for _ in range(3):
+                await asyncio.sleep(_Sleep_Time)
+                _thread_index = random.randrange(_Random_Start_Time, _Random_End_Time)
+                _async_task_flag["producer"].append(_thread_index)
+                _async_task_ids["producer"] = str(id(asyncio.current_task()))
+                _event_opts.set()
+
+        async def _target_consumer():
+            _event_opts = EventAsyncOperator()
+            while True:
+                await _event_opts.wait()
+                _event_opts.clear()
+                _async_task_flag["consumer"].append(float(time.time()))
+                _async_task_ids["consumer"] = str(threading.get_ident())
+                if len(_async_task_flag["producer"]) == 3:
+                    break
+
+        # # # # Run multiple workers and save something info at the right time
+        map_async(_functions=[_target_producer, _target_consumer], _feature=Event())
+        TestEventAdapterOperator._chk_info(_async_task_ids, _async_task_flag)
 
 
     @staticmethod
@@ -631,8 +1019,6 @@ class TestConditionAdapterOperator(TestOperator):
 
     def test_feature_in_concurrent(self, condition_opts: ConditionOperator):
 
-        import threading
-
         _thread_ids = {"producer": "", "consumer": ""}
         _thread_flag = {"producer": [], "consumer": []}
         instantiate_condition(FeatureMode.Concurrent)
@@ -664,8 +1050,6 @@ class TestConditionAdapterOperator(TestOperator):
 
     def test_feature_by_pykeyword_with_in_concurrent(self, condition_opts: ConditionOperator):
 
-        import threading
-
         _thread_ids = {"producer": "", "consumer": ""}
         _thread_flag = {"producer": [], "consumer": []}
         instantiate_condition(FeatureMode.Concurrent)
@@ -691,6 +1075,132 @@ class TestConditionAdapterOperator(TestOperator):
         # # # # Run multiple workers and save something info at the right time
         map_multi_threads(_functions=[_target_producer, _target_consumer])
         TestConditionAdapterOperator._chk_info(_thread_ids, _thread_flag)
+
+
+    @pytest.mark.skip(reason="With GreenThread strategy, it doesn't support feature 'Condition' in current version.")
+    def test_feature_in_green_thread(self):
+
+        _thread_ids = {"producer": "", "consumer": ""}
+        _thread_flag = {"producer": [], "consumer": []}
+        instantiate_condition(FeatureMode.GreenThread)
+
+        def _target_producer():
+            _condition_opts = ConditionOperator()
+            for _ in range(3):
+                gevent_sleep(_Sleep_Time)
+                _thread_index = random.randrange(_Random_Start_Time, _Random_End_Time)
+                _thread_flag["producer"].append(_thread_index)
+                _thread_ids["producer"] = str(get_gevent_ident())
+                _condition_opts.acquire()
+                _condition_opts.notify_all()
+                _condition_opts.release()
+
+        def _target_consumer():
+            _condition_opts = ConditionOperator()
+            while True:
+                _condition_opts.acquire()
+                _condition_opts.wait()
+                _thread_flag["consumer"].append(float(time.time()))
+                _thread_ids["consumer"] = str(get_gevent_ident())
+                _condition_opts.release()
+                if len(_thread_flag["producer"]) == 3:
+                    break
+
+        # # # # Run multiple workers and save something info at the right time
+        map_multi_green_thread(_functions=[_target_producer, _target_consumer])
+        TestConditionAdapterOperator._chk_info(_thread_ids, _thread_flag)
+
+
+    @pytest.mark.skip(reason="With GreenThread strategy, it doesn't support feature 'Condition' in current version.")
+    def test_feature_by_pykeyword_with_in_green_thread(self):
+
+        _thread_ids = {"producer": "", "consumer": ""}
+        _thread_flag = {"producer": [], "consumer": []}
+        instantiate_condition(FeatureMode.Concurrent)
+
+        def _target_producer():
+            _condition_opts = ConditionOperator()
+            for _ in range(3):
+                time.sleep(_Sleep_Time)
+                _thread_index = random.randrange(_Random_Start_Time, _Random_End_Time)
+                _thread_flag["producer"].append(_thread_index)
+                _thread_ids["producer"] = str(threading.get_ident())
+                with _condition_opts:
+                    _condition_opts.notify_all()
+
+        def _target_consumer():
+            _condition_opts = ConditionOperator()
+            while True:
+                with _condition_opts:
+                    _condition_opts.wait()
+                    _thread_flag["consumer"].append(float(time.time()))
+                    _thread_ids["consumer"] = str(threading.get_ident())
+                    if len(_thread_flag["producer"]) == 3:
+                        break
+
+        # # # # Run multiple workers and save something info at the right time
+        map_multi_green_thread(_functions=[_target_producer, _target_consumer])
+        TestConditionAdapterOperator._chk_info(_thread_ids, _thread_flag)
+
+
+    def test_feature_in_asynchronous_task(self):
+        _async_task_ids = {"producer": "", "consumer": ""}
+        _async_task_flag = {"producer": [], "consumer": []}
+
+        async def _target_producer():
+            _condition_opts = ConditionAsyncOperator()
+            for _ in range(3):
+                await asyncio.sleep(_Sleep_Time)
+                _thread_index = random.randrange(_Random_Start_Time, _Random_End_Time)
+                _async_task_flag["producer"].append(_thread_index)
+                _async_task_ids["producer"] = str(id(asyncio.current_task()))
+                await _condition_opts.acquire()
+                _condition_opts.notify_all()
+                _condition_opts.release()
+
+        async def _target_consumer():
+            _condition_opts = ConditionAsyncOperator()
+            while True:
+                await _condition_opts.acquire()
+                await _condition_opts.wait()
+                _async_task_flag["consumer"].append(float(time.time()))
+                _async_task_ids["consumer"] = str(threading.get_ident())
+                _condition_opts.release()
+                if len(_async_task_flag["producer"]) == 3:
+                    break
+
+        # # # # Run multiple workers and save something info at the right time
+        map_async(_functions=[_target_producer, _target_consumer], _feature=Condition())
+        TestConditionAdapterOperator._chk_info(_async_task_ids, _async_task_flag)
+
+
+    def test_feature_by_pykeyword_with_in_asynchronous_task(self):
+        _async_task_ids = {"producer": "", "consumer": ""}
+        _async_task_flag = {"producer": [], "consumer": []}
+
+        async def _target_producer():
+            _condition_opts = ConditionAsyncOperator()
+            for _ in range(3):
+                await asyncio.sleep(_Sleep_Time)
+                _thread_index = random.randrange(_Random_Start_Time, _Random_End_Time)
+                _async_task_flag["producer"].append(_thread_index)
+                _async_task_ids["producer"] = str(threading.get_ident())
+                async with _condition_opts:
+                    _condition_opts.notify_all()
+
+        async def _target_consumer():
+            _condition_opts = ConditionAsyncOperator()
+            while True:
+                async with _condition_opts:
+                    await _condition_opts.wait()
+                    _async_task_flag["consumer"].append(float(time.time()))
+                    _async_task_ids["consumer"] = str(id(asyncio.current_task()))
+                    if len(_async_task_flag["producer"]) == 3:
+                        break
+
+        # # # # Run multiple workers and save something info at the right time
+        map_async(_functions=[_target_producer, _target_consumer], _feature=Condition())
+        TestConditionAdapterOperator._chk_info(_async_task_ids, _async_task_flag)
 
 
     @staticmethod
