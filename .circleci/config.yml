@@ -9,10 +9,6 @@ jobs:
     steps:
       - checkout    # this pulls code down from GitHub
       - run:
-          name: Install MySQL CLI
-          command: |
-            sudo apt-get install default-mysql-client
-      - run:
           name: Create database
           command: |
             mysql -h 127.0.0.1 -u user -ppassw0rd --execute="CREATE DATABASE tw_stock;"
