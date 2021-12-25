@@ -18,6 +18,7 @@ before_install:
   - pip install -U pytest
   - pip install -U pytest-cov
   - pip install codecov
+  - pip install pytest-rerunfailures
 
 install:
   - pip install -r dev-requirements.txt    # install package + test dependencies
