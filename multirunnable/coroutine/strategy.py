@@ -487,8 +487,9 @@ class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
                              queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
                              features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
                              *args, **kwargs) -> None:
-        _running_event_loop = asyncio.get_running_loop()
-        kwargs["event_loop"] = _running_event_loop
+        if kwargs.get("event_loop") is None:
+            _running_event_loop = asyncio.get_running_loop()
+            kwargs["event_loop"] = _running_event_loop
         await super(AsynchronousStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
 
 
