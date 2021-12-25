@@ -7,11 +7,18 @@ from multirunnable.coroutine.strategy import AsynchronousStrategy
 
 from ..test_config import Worker_Size, Worker_Pool_Size, Task_Size, Semaphore_Value
 
+from gevent.threading import get_ident as get_gevent_ident
+from gevent import sleep as gevent_sleep
+import threading
+import asyncio
 import pytest
 import time
 import re
+import os
 
 
+_Retry_Time = 4
+_Default_Retry_Time = 1
 Running_Target_Function_Counter: int = 0
 Initial_Handling_Flag_Counter: int = 0
 Done_Handling_Flag_Counter: int = 0
@@ -38,39 +45,39 @@ def init_flag() -> None:
     Error_Handling_Flag_Counter = 0
 
 
-def instantiate_lock(_mode):
+def instantiate_lock(_mode, **kwargs):
     _lock = Lock()
-    return _initial(_lock, _mode)
+    return _initial(_lock, _mode, **kwargs)
 
 
-def instantiate_rlock(_mode):
+def instantiate_rlock(_mode, **kwargs):
     _rlock = RLock()
-    return _initial(_rlock, _mode)
+    return _initial(_rlock, _mode, **kwargs)
 
 
-def instantiate_semaphore(_mode):
+def instantiate_semaphore(_mode, **kwargs):
     _semaphore = Semaphore(value=_Semaphore_Value)
-    return _initial(_semaphore, _mode)
+    return _initial(_semaphore, _mode, **kwargs)
 
 
-def instantiate_bounded_semaphore(_mode):
+def instantiate_bounded_semaphore(_mode, **kwargs):
     _bounded_semaphore = BoundedSemaphore(value=_Semaphore_Value)
-    return _initial(_bounded_semaphore, _mode)
+    return _initial(_bounded_semaphore, _mode, **kwargs)
 
 
-def instantiate_event(_mode):
+def instantiate_event(_mode, **kwargs):
     _event = Event()
-    return _initial(_event, _mode)
+    return _initial(_event, _mode, **kwargs)
 
 
-def instantiate_condition(_mode):
+def instantiate_condition(_mode, **kwargs):
     _condition = Condition()
-    return _initial(_condition, _mode)
+    return _initial(_condition, _mode, **kwargs)
 
 
-def _initial(_feature_factory, _mode):
+def _initial(_feature_factory, _mode, **kwargs):
     _feature_factory.feature_mode = _mode
-    _feature_instn = _feature_factory.get_instance()
+    _feature_instn = _feature_factory.get_instance(**kwargs)
     _feature_factory.globalize_instance(_feature_instn)
     return _feature_instn
 
@@ -96,11 +103,16 @@ def run_multi_green_thread(_function):
     _run_with_multiple_workers(_strategy, _function)
 
 
-def run_async(_function):
+def run_async(_function, _feature):
     _strategy_adapter = ExecutorStrategyAdapter(mode=RunningMode.Asynchronous, executors=_Worker_Size)
     _strategy = _strategy_adapter.get_simple()
 
-    _run_with_multiple_workers(_strategy, _function)
+    async def __process():
+        await _strategy.initialization(queue_tasks=None, features=_feature)
+        _ps = [_strategy.generate_worker(_function) for _ in range(Worker_Size)]
+        await _strategy.activate_workers(_ps)
+
+    asyncio.run(__process(), debug=True)
 
 
 def _run_with_multiple_workers(_strategy, _function):
@@ -146,6 +158,13 @@ def _error_func(e: Exception):
 class TargetBoundedFunction:
 
     @retry
+    def target_method_with_default(self):
+        global Running_Target_Function_Counter
+        Running_Target_Function_Counter += 1
+        return "TestResult"
+
+
+    @retry
     def target_method(self):
         global Running_Target_Function_Counter
         Running_Target_Function_Counter += 1
@@ -179,6 +198,12 @@ class TargetBoundedFunction:
 
 
 class TargetBoundedAsyncFunction:
+
+    @async_retry
+    async def target_method_with_default(self):
+        global Running_Target_Function_Counter
+        Running_Target_Function_Counter += 1
+
 
     @async_retry
     async def target_method(self):
@@ -223,13 +248,13 @@ class JustTestException(Exception):
 class TargetErrorBoundedFunction:
 
     @retry
-    def target_error_method_with_1_timeout(self):
+    def target_error_method_with_default(self):
         global Running_Target_Function_Counter
         Running_Target_Function_Counter += 1
         raise JustTestException
 
 
-    @retry(timeout=3)
+    @retry(timeout=_Retry_Time)
     def target_error_method(self):
         global Running_Target_Function_Counter
         Running_Target_Function_Counter += 1
@@ -260,6 +285,7 @@ class TargetErrorBoundedFunction:
         global Error_Handling_Flag_Counter
         Error_Handling_Flag_Counter += 1
         assert isinstance(e, JustTestException), f""
+        print(f"[DEBUG] This is the customized error handling function.")
         return e
 
 
@@ -267,13 +293,13 @@ class TargetErrorBoundedFunction:
 class TargetErrorBoundedAsyncFunction:
 
     @async_retry
-    async def target_error_method_with_1_timeout(self):
+    async def target_error_method_with_default(self):
         global Running_Target_Function_Counter
         Running_Target_Function_Counter += 1
         raise JustTestException
 
 
-    @async_retry(timeout=3)
+    @async_retry(timeout=_Retry_Time)
     async def target_error_method(self):
         global Running_Target_Function_Counter
         Running_Target_Function_Counter += 1
@@ -346,24 +372,59 @@ class TestRetryMechanism:
         assert Error_Handling_Flag_Counter == 0, F"The error handling flag should be 'False'"
 
 
+    def test_retry_decorating_at_bounded_function_with_default(self, target_bounded_function: TargetBoundedFunction):
+        init_flag()
+
+        _result = target_bounded_function.target_method_with_default()
+        assert Initial_Handling_Flag_Counter == 1, F"The initial handling flag should be '1'."
+        assert Done_Handling_Flag_Counter == 1, F"The done handling flag should be '1'"
+        assert Final_Handling_Flag_Counter == 1, F"The final handling flag should be '1'"
+        assert Error_Handling_Flag_Counter == 0, F"The error handling flag should be '0'"
+        assert _result == "TestResult", f"The return value should be the same as 'TestResult'."
+
+
     def test_retry_decorating_at_bounded_function(self, target_bounded_function: TargetBoundedFunction):
         init_flag()
 
         target_bounded_function.target_method()
-        assert Initial_Handling_Flag_Counter == 1, F"The initial handling flag should be 'True'."
-        assert Done_Handling_Flag_Counter == 1, F"The done handling flag should be 'True'"
-        assert Final_Handling_Flag_Counter == 1, F"The final handling flag should be 'True'"
-        assert Error_Handling_Flag_Counter == 0, F"The error handling flag should be 'False'"
+        assert Initial_Handling_Flag_Counter == 1, F"The initial handling flag should be '1'."
+        assert Done_Handling_Flag_Counter == 1, F"The done handling flag should be '1'"
+        assert Final_Handling_Flag_Counter == 1, F"The final handling flag should be '1'"
+        assert Error_Handling_Flag_Counter == 0, F"The error handling flag should be '0'"
+
+
+    @pytest.mark.skip(reason="An issue. It will fix it in version 0.17.0.")
+    def test_retry_decorating_at_bounded_function_raising_an_exception_with_default(self):
+        # target_error_bounded_function = TargetErrorBoundedFunction()
+        _target_error_fun = TargetErrorBoundedFunction()
+
+        init_flag()
+
+        try:
+            # _result = target_error_bounded_function.target_error_method_with_default()
+            _result = _target_error_fun.target_error_method_with_default()
+        except Exception as e:
+            print(f"[DEBUG] this is except section code 1.")
+            assert e is JustTestException, f""
+            assert "Just for testing to raise an exception" in str(e), f""
+            print(f"[DEBUG] this is except section code.")
+        else:
+            assert False, f"It should doesn't handle the exception and raise it out again."
+
+        assert Initial_Handling_Flag_Counter == _Default_Retry_Time, F"The default timeout value is '{_Default_Retry_Time}' so that initial handling flag should be '{_Retry_Time}'."
+        assert Done_Handling_Flag_Counter == 0, F"The default timeout value is '{_Default_Retry_Time}' so that done handling flag should be '0'"
+        assert Final_Handling_Flag_Counter == _Default_Retry_Time, F"The default timeout value is '{_Default_Retry_Time}' so that final handling flag should be '{_Retry_Time}'"
+        assert Error_Handling_Flag_Counter == _Default_Retry_Time, F"The default timeout value is '{_Default_Retry_Time}' so that error handling flag should be '{_Retry_Time}'"
 
 
     def test_retry_decorating_at_bounded_function_raising_an_exception(self, target_error_bounded_function: TargetErrorBoundedFunction):
         init_flag()
 
         _result = target_error_bounded_function.target_error_method()
-        assert Initial_Handling_Flag_Counter == 3, F"The initial handling flag should be 'True'."
-        assert Done_Handling_Flag_Counter == 0, F"The done handling flag should be 'False'"
-        assert Final_Handling_Flag_Counter == 3, F"The final handling flag should be 'True'"
-        assert Error_Handling_Flag_Counter == 3, F"The error handling flag should be 'True'"
+        assert Initial_Handling_Flag_Counter == _Retry_Time, F"The initial handling flag should be '{_Retry_Time}'."
+        assert Done_Handling_Flag_Counter == 0, F"The done handling flag should be '0'"
+        assert Final_Handling_Flag_Counter == _Retry_Time, F"The final handling flag should be '{_Retry_Time}'"
+        assert Error_Handling_Flag_Counter == _Retry_Time, F"The error handling flag should be '{_Retry_Time}'"
 
 
     @pytest.mark.skip(reason="Not implement testing logic.")
@@ -384,6 +445,16 @@ class TestAsyncRetryMechanism:
         pass
 
 
+    def test_async_retry_decorating_at_bounded_function_with_default(self, async_strategy: AsynchronousStrategy, target_bounded_async_function: TargetBoundedAsyncFunction):
+        init_flag()
+
+        async_strategy.run(function=target_bounded_async_function.target_method_with_default)
+        assert Initial_Handling_Flag_Counter == _Worker_Size, F"The count of initial handling flag should be '{_Worker_Size}'."
+        assert Done_Handling_Flag_Counter == _Worker_Size, F"The count of done handling flag should be '{_Worker_Size}'"
+        assert Final_Handling_Flag_Counter == _Worker_Size, F"The count of final handling flag should be '{_Worker_Size}'"
+        assert Error_Handling_Flag_Counter == 0, F"The count of error handling flag should be '0'"
+
+
     def test_async_retry_decorating_at_bounded_function(self, async_strategy: AsynchronousStrategy, target_bounded_async_function: TargetBoundedAsyncFunction):
         init_flag()
 
@@ -394,14 +465,25 @@ class TestAsyncRetryMechanism:
         assert Error_Handling_Flag_Counter == 0, F"The count of error handling flag should be '0'"
 
 
+    def test_async_retry_decorating_at_bounded_function_raising_an_exception_with_default(self, async_strategy: AsynchronousStrategy, target_error_bounded_async_function: TargetErrorBoundedAsyncFunction):
+        init_flag()
+
+        async_strategy.run(function=target_error_bounded_async_function.target_error_method_with_default)
+
+        assert Initial_Handling_Flag_Counter == _Default_Retry_Time * _Worker_Size, F"The default timeout value is '{_Default_Retry_Time}' so that count of initial handling flag should be '{_Default_Retry_Time * _Worker_Size}'."
+        assert Done_Handling_Flag_Counter == 0, F"The default timeout value is '{_Default_Retry_Time}' so that count of done handling flag should be 'False'"
+        assert Final_Handling_Flag_Counter == _Default_Retry_Time * _Worker_Size, F"The default timeout value is '{_Default_Retry_Time}' so that count of final handling flag should be '{_Default_Retry_Time * _Worker_Size}'"
+        assert Error_Handling_Flag_Counter == _Default_Retry_Time * _Worker_Size, F"The default timeout value is '{_Default_Retry_Time}' so that count of error handling flag should be '{_Default_Retry_Time * _Worker_Size}'"
+
+
     def test_async_retry_decorating_at_bounded_function_raising_an_exception(self, async_strategy: AsynchronousStrategy, target_error_bounded_async_function: TargetErrorBoundedAsyncFunction):
         init_flag()
 
         async_strategy.run(function=target_error_bounded_async_function.target_error_method)
-        assert Initial_Handling_Flag_Counter == 3 * _Worker_Size, F"The count of initial handling flag should be '{3 * _Worker_Size}'."
+        assert Initial_Handling_Flag_Counter == _Retry_Time * _Worker_Size, F"The count of initial handling flag should be '{_Retry_Time * _Worker_Size}'."
         assert Done_Handling_Flag_Counter == 0, F"The count of done handling flag should be 'False'"
-        assert Final_Handling_Flag_Counter == 3 * _Worker_Size, F"The count of final handling flag should be '{3 * _Worker_Size}'"
-        assert Error_Handling_Flag_Counter == 3 * _Worker_Size, F"The count of error handling flag should be '{3 * _Worker_Size}'"
+        assert Final_Handling_Flag_Counter == _Retry_Time * _Worker_Size, F"The count of final handling flag should be '{_Retry_Time * _Worker_Size}'"
+        assert Error_Handling_Flag_Counter == _Retry_Time * _Worker_Size, F"The count of error handling flag should be '{_Retry_Time * _Worker_Size}'"
 
 
     @pytest.mark.skip(reason="Not implement testing logic.")
@@ -419,8 +501,6 @@ class TestFeaturesDecorator:
 
     @pytest.mark.skip(reason="Not finish yet.")
     def test_lock_decorator_in_parallel(self):
-
-        import os
 
         _done_timestamp = {}
         instantiate_lock(FeatureMode.Parallel)
@@ -440,8 +520,6 @@ class TestFeaturesDecorator:
 
     def test_lock_decorator_in_concurrent(self):
 
-        import threading
-
         _done_timestamp = {}
         instantiate_lock(FeatureMode.Concurrent)
 
@@ -460,16 +538,13 @@ class TestFeaturesDecorator:
 
     def test_lock_decorator_in_green_thread(self):
 
-        from gevent.threading import get_ident
-        from gevent import sleep as gevent_sleep
-
         _done_timestamp = {}
         instantiate_lock(FeatureMode.GreenThread)
 
         @RunWith.Lock
         def _target_testing():
             # Save a timestamp into list
-            _thread_id = get_ident()
+            _thread_id = get_gevent_ident()
             gevent_sleep(_Sleep_Time)
             _time = float(time.time())
             _done_timestamp[_thread_id] = _time
@@ -481,8 +556,6 @@ class TestFeaturesDecorator:
 
     @pytest.mark.skip(reason="Not finish yet.")
     def test_semaphore_decorator_in_parallel(self):
-
-        import os
 
         _done_timestamp = {}
         instantiate_semaphore(FeatureMode.Parallel)
@@ -502,8 +575,6 @@ class TestFeaturesDecorator:
 
     def test_semaphore_decorator_in_concurrent(self):
 
-        import threading
-
         _done_timestamp = {}
         instantiate_semaphore(FeatureMode.Concurrent)
 
@@ -522,16 +593,13 @@ class TestFeaturesDecorator:
 
     def test_semaphore_decorator_in_green_thread(self):
 
-        from gevent.threading import get_ident
-        from gevent import sleep as gevent_sleep
-
         _done_timestamp = {}
         instantiate_semaphore(FeatureMode.GreenThread)
 
         @RunWith.Semaphore
         def _target_testing():
             # Save a timestamp into list
-            _thread_id = get_ident()
+            _thread_id = get_gevent_ident()
             gevent_sleep(_Sleep_Time)
             _time = float(time.time())
             _done_timestamp[_thread_id] = _time
@@ -543,8 +611,6 @@ class TestFeaturesDecorator:
 
     @pytest.mark.skip(reason="Not finish yet.")
     def test_bounded_semaphore_decorator_in_parallel(self):
-
-        import os
 
         _done_timestamp = {}
         instantiate_bounded_semaphore(FeatureMode.Concurrent)
@@ -570,8 +636,6 @@ class TestFeaturesDecorator:
 
     def test_bounded_semaphore_decorator_in_concurrent(self):
 
-        import threading
-
         _done_timestamp = {}
         instantiate_bounded_semaphore(FeatureMode.Concurrent)
 
@@ -596,9 +660,6 @@ class TestFeaturesDecorator:
 
     def test_bounded_semaphore_decorator_in_green_thread(self):
 
-        from gevent.threading import get_ident
-        from gevent import sleep as gevent_sleep
-
         _done_timestamp = {}
         instantiate_bounded_semaphore(FeatureMode.GreenThread)
 
@@ -606,7 +667,7 @@ class TestFeaturesDecorator:
         def _target_testing():
             # Save a time stamp into list
             try:
-                _thread_id = get_ident()
+                _thread_id = get_gevent_ident()
                 gevent_sleep(_Sleep_Time)
                 _time = float(time.time())
                 _done_timestamp[_thread_id] = _time
@@ -660,64 +721,64 @@ class TestFeaturesDecorator:
 
 class TestAsyncFeaturesDecorator:
 
-    @pytest.mark.skip(reason="Not finish yet.")
     def test_lock_decorator(self):
-
-        import asyncio
+        _event_loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop=_event_loop)
 
         _done_timestamp = {}
-        instantiate_lock(FeatureMode.Concurrent)
+        instantiate_lock(FeatureMode.Asynchronous, event_loop=_event_loop)
 
         @AsyncRunWith.Lock
-        def _target_testing():
+        async def _target_testing():
             # Save a timestamp into list
-            _thread_id = threading.get_ident()
-            time.sleep(_Sleep_Time)
+            await asyncio.sleep(_Sleep_Time)
+            _current_task = asyncio.current_task()
+            _current_task_id = id(_current_task)
             _time = float(time.time())
-            _done_timestamp[_thread_id] = _time
+            _done_timestamp[_current_task_id] = _time
 
         # # # # Run multiple workers and save something info at the right time
-        run_async(_function=_target_testing)
+        run_async(_function=_target_testing, _feature=Lock())
         TestAsyncFeaturesDecorator._chk_done_timestamp_by_lock(_done_timestamp)
 
 
-    @pytest.mark.skip(reason="Not finish yet.")
     def test_semaphore_decorator(self):
-
-        import asyncio
+        _event_loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop=_event_loop)
 
         _done_timestamp = {}
-        instantiate_semaphore(FeatureMode.Concurrent)
+        instantiate_semaphore(FeatureMode.Asynchronous, event_loop=_event_loop)
 
         @AsyncRunWith.Semaphore
-        def _target_testing():
+        async def _target_testing():
             # Save a timestamp into list
-            _thread_id = threading.get_ident()
-            time.sleep(_Sleep_Time)
+            await asyncio.sleep(_Sleep_Time)
+            _current_task = asyncio.current_task()
+            _current_task_id = id(_current_task)
             _time = float(time.time())
-            _done_timestamp[_thread_id] = _time
+            _done_timestamp[_current_task_id] = _time
 
         # # # # Run multiple workers and save something info at the right time
-        run_async(_function=_target_testing)
+        run_async(_function=_target_testing, _feature=Semaphore(value=_Semaphore_Value))
         TestAsyncFeaturesDecorator._chk_done_timestamp_by_semaphore(_done_timestamp)
 
 
-    @pytest.mark.skip(reason="Not finish yet.")
     def test_bounded_semaphore_decorator(self):
-
-        import asyncio
+        _event_loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop=_event_loop)
 
         _done_timestamp = {}
-        instantiate_bounded_semaphore(FeatureMode.Concurrent)
+        instantiate_bounded_semaphore(FeatureMode.Asynchronous, event_loop=_event_loop)
 
         @AsyncRunWith.Bounded_Semaphore
-        def _target_testing():
+        async def _target_testing():
             # Save a time stamp into list
             try:
-                _thread_id = threading.get_ident()
-                time.sleep(_Sleep_Time)
+                await asyncio.sleep(_Sleep_Time)
+                _current_task = asyncio.current_task()
+                _current_task_id = id(_current_task)
                 _time = float(time.time())
-                _done_timestamp[_thread_id] = _time
+                _done_timestamp[_current_task_id] = _time
             except Exception as e:
                 assert False, f"Occur something unexpected issue. Please check it. \n" \
                               f"Exception: {e}"
@@ -725,7 +786,7 @@ class TestAsyncFeaturesDecorator:
                 assert True, f"Testing code successfully."
 
         # # # # Run multiple workers and save something info at the right time
-        run_async(_function=_target_testing)
+        run_async(_function=_target_testing, _feature=BoundedSemaphore(value=_Semaphore_Value))
         TestAsyncFeaturesDecorator._chk_done_timestamp_by_semaphore(_done_timestamp)
 
 
