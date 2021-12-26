@@ -60,7 +60,7 @@ commands:
             do
               nc -z 127.0.0.1 3306 && echo Success && exit 0
               echo -n .
-              sleep 6
+              sleep 5
             done
             echo Failed waiting for MySQL && exit 1
       - run:
@@ -112,8 +112,6 @@ commands:
   run_python_test:
     steps:
       - checkout    # this pulls code down from GitHub
-      - isntall_databade_driver_tool
-      - test_databade_connection
       - preparing_python_dependecies
       - run_pytest
       - submit_testing_coverage
@@ -172,6 +170,7 @@ jobs:
   test-linux-python37:
     executor: docker-py37
     steps:
+      - isntall_databade_driver_tool
       - test_databade_connection
       - prepare_testing_data
       - run_python_test
