@@ -60,7 +60,7 @@ commands:
             do
               nc -z 127.0.0.1 3306 && echo Success && exit 0
               echo -n .
-              sleep 4
+              sleep 5
             done
             echo Failed waiting for MySQL && exit 1
       - run:
