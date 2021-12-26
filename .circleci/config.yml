@@ -5,9 +5,9 @@ jobs:
   prepare-testing-database:    # This is job about database which saving the testing data for ensure the features work finely without any issue.
     docker:    # it uses the docker executor
       - image: circleci/mysql:8.0.23    # specifically, a docker image with mysql 8.0.3.
-          auth:
-            username: chisanan232
-            password: $DOCKERHUB_PASSWORD
+            auth:
+              username: chisanan232
+              password: $DOCKERHUB_PASSWORD
       environment:
         MYSQL_ROOT_HOST: %
         MYSQL_ROOT_PASSWORD: password
