@@ -1,25 +1,8 @@
 version: 2.1
 
-jobs:
-#  prepare-testing-database:    # This is job about database which saving the testing data for ensure the features work finely without any issue.
-  build:    # This is job about database which saving the testing data for ensure the features work finely without any issue.
-    docker:
-      # specifically, a docker image with mysql 8.0.3.
-      - image: circleci/mysql:8.0.23
-#          auth:
-#            username: chisanan232
-#            password: $DOCKERHUB_PASSWORD
-      - environment:
-           MYSQL_ROOT_HOST: 127.0.0.1
-           MYSQL_ROOT_PASSWORD: password
-           MYSQL_DATABASE: tw_stock
-           MYSQL_USER: user
-           MYSQL_PASSWORD: passw23mr
-           DB_HOST: 127.0.0.1
-           DB_PORT: 3306
-    # Steps are a list of commands to run inside the docker container above.
+commands:
+  prepare_testing_data:
     steps:
-      - checkout    # this pulls code down from GitHub
       - run:
          name: Create database
          command: |
@@ -61,25 +44,14 @@ jobs:
                 INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
                     VALUES ('0108-01-09 00:00:00' , 51255446 ,11006827093 ,212.0000 ,216.5000 , 211.0000 ,215.5000 ,+4.50 , 14098);"
 
-#  linux-python37:    # This is first job --- pytest task with Python 3.7.
-  test:    # This is first job --- pytest task with Python 3.7.
-    docker:
-      - image: circleci/python:3.7
-#         auth:
-#           username: chisanan232
-#           password: $DOCKERHUB_PASSWORD
-      - environment:
-          MYSQL_PASSWORD: 'password'
-          MYSQL_DATABASE: 'tw_stock'
-          MYSQL_ROOT_HOST: 127.0.0.1
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-    # Steps are a list of commands to run inside the docker container above.
+  test_databade_connection:
     steps:
-      - checkout    # this pulls code down from GitHub
       - run:
          name: Test MySQL connection
          command: mysql -u root -h 127.0.0.1 -ppassword
+
+  preparing_python_dependecies:
+    steps:
       - run:
          name: Check Python Version
          command: python --version
@@ -104,47 +76,147 @@ jobs:
          command: |
              codecov -t $CODECOV_TOKEN    # submit coverage to codecov
 
-#  linux-python38:    # This is second job --- pytest task with Python 3.8.
-#    docker:
-#      - image: circleci/python:3.8
-##         auth:
-##           username: chisanan232
-##           password: $DOCKERHUB_PASSWORD
-#      - environment:
-#          MYSQL_PASSWORD: 'password'
-#          MYSQL_DATABASE: 'tw_stock'
-#          MYSQL_ROOT_HOST: 127.0.0.1
-#          DB_HOST: 127.0.0.1
-#          DB_PORT: 3306
-#    # Steps are a list of commands to run inside the docker container above.
+  run_pytest:
+    steps:
+      - run:
+         name: Run PyTest command to test
+         command: |
+             pytest
+
+  submit_testing_coverage:
+    steps:
+      - run:
+         name: Submit calculation result of testing coverage of project code to codecov
+#         command: |
+#             coveralls    # submit coverage to coveralls
+         command: |
+             codecov -t $CODECOV_TOKEN    # submit coverage to codecov
+
+  run_python_test:
+    steps:
+      - checkout    # this pulls code down from GitHub
+      - test_databade_connection
+      - preparing_python_dependecies
+      - run_pytest
+      - submit_testing_coverage
+
+
+executors:
+  docker-mysql:
+    docker:
+      - image: circleci/mysql:8.0.23
+#          auth:
+#            username: chisanan232
+#            password: $DOCKERHUB_PASSWORD
+      - environment:
+           MYSQL_ROOT_HOST: 127.0.0.1
+           MYSQL_ROOT_PASSWORD: password
+           MYSQL_DATABASE: tw_stock
+           MYSQL_USER: user
+           MYSQL_PASSWORD: passw23mr
+           DB_HOST: 127.0.0.1
+           DB_PORT: 3306
+
+  docker-py36:
+    docker:
+      - image: circleci/python:3.6
+#         auth:
+#           username: chisanan232
+#           password: $DOCKERHUB_PASSWORD
+      - environment:
+          MYSQL_PASSWORD: 'password'
+          MYSQL_DATABASE: 'tw_stock'
+          MYSQL_ROOT_HOST: 127.0.0.1
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+
+  docker-py37:
+    docker:
+      - image: circleci/python:3.7
+      - image: circleci/mysql:8.0.23
+        auth:
+          username: chisanan232
+          password: $DOCKERHUB_PASSWORD
+        environment:
+          MYSQL_ROOT_HOST: 127.0.0.1
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: tw_stock
+          MYSQL_USER: user
+          MYSQL_PASSWORD: passw23mr
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+
+  docker-py38:
+    docker:
+      - image: circleci/python:3.8
+#         auth:
+#           username: chisanan232
+#           password: $DOCKERHUB_PASSWORD
+      - environment:
+          MYSQL_PASSWORD: 'password'
+          MYSQL_DATABASE: 'tw_stock'
+          MYSQL_ROOT_HOST: 127.0.0.1
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+
+  docker-py39:
+    docker:
+      - image: circleci/python:3.9
+#         auth:
+#           username: chisanan232
+#           password: $DOCKERHUB_PASSWORD
+      - environment:
+          MYSQL_PASSWORD: 'password'
+          MYSQL_DATABASE: 'tw_stock'
+          MYSQL_ROOT_HOST: 127.0.0.1
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+
+  docker-py310:
+    docker:
+      - image: circleci/python:3.10
+#         auth:
+#           username: chisanan232
+#           password: $DOCKERHUB_PASSWORD
+      - environment:
+          MYSQL_PASSWORD: 'password'
+          MYSQL_DATABASE: 'tw_stock'
+          MYSQL_ROOT_HOST: 127.0.0.1
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+
+
+jobs:
+  # This is job about database which saving the testing data for ensure the features work finely without any issue.
+#  build-testing-database:
+#    executor: docker-mysql
 #    steps:
-#      - checkout    # this pulls code down from GitHub
-#      - run:
-#         name: Test MySQL connection
-#         command: mysql -u root -h 127.0.0.1 -ppassword
-#      - run:
-#         name: Check Python Version
-#         command: python --version
-#      - run:
-#         name: Upgrade and install Python dependencies
-#         command: |
-#             pip install -U pip
-#             pip install -U pytest
-#             pip install -U pytest-cov
-#             pip install codecov
-#             pip install mysql-connector-python
-#             pip install pytest-rerunfailures
-#             pip install -r dev-requirements.txt
-#      - run:
-#         name: Run PyTest command to test
-#         command: |
-#             pytest
-#      - run:
-#         name: Submit calculation result of testing coverage of project code to codecov
-##         command: |
-##             coveralls    # submit coverage to coveralls
-#         command: |
-#             codecov -t $CODECOV_TOKEN    # submit coverage to codecov
+#      - prepare_testing_data
+
+#  test-linux-python36:
+#    executor: docker-py36
+#    steps:
+#      - run_python_test
+
+  test-linux-python37:
+    executor: docker-py37
+    steps:
+      - run_python_test
+
+#  test-linux-python38:
+#    executor: docker-py38
+#    steps:
+#      - run_python_test
+#
+#  test-linux-python39:
+#    executor: docker-py39
+#    steps:
+#      - run_python_test
+#
+#  test-linux-python310:
+#    executor: docker-py310
+#    steps:
+#      - run_python_test
 
 
 # Under the workflows: map, we can coordinate above jobs, defined above.
@@ -152,20 +224,14 @@ workflows:
   version: 2.1
   build_and_test:    # this is the name of our workflow
     jobs:    # and here we list the jobs we are going to run.
-      - build
-      - test
-
       # General work flow
-#      - prepare-testing-database
-#      - linux-python37
-#      - linux-python38
+#      - build-testing-database
+      - test-linux-python37
+#      - test-linux-python38
 
       # Sequence work flow
-#      - prepare-testing-database
-#      - linux-python37:
+#      - build-testing-database
+#      - test-linux-python37:
 #           requires:
-#             - prepare-testing-database
-#      - linux-python38:
-#           requires:
-#             - prepare-testing-database
+#             - build-testing-database
 
