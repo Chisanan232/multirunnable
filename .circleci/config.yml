@@ -60,12 +60,12 @@ commands:
             do
               nc -z 127.0.0.1 3306 && echo Success && exit 0
               echo -n .
-              sleep 5
+              sleep 4
             done
             echo Failed waiting for MySQL && exit 1
       - run:
          name: Test MySQL connection
-         command: mysql -u root -h 127.0.0.1 -ppassword
+         command: mysql -u root -h 127.0.0.1 -ppassword --execute="show databases;"
 
   preparing_python_dependecies:
     steps:
