@@ -1,23 +1,5 @@
 version: 2.1
 
-# Under the workflows: map, we can coordinate above jobs, defined above.
-workflows:
-  version: 2.1
-  build_and_test:    # this is the name of our workflow
-    jobs:    # and here we list the jobs we are going to run.
-      # General work flow
-#      - linux-python37
-#      - linux-python38
-
-      # Sequence work flow
-      - prepare-testing-database
-      - linux-python37:
-           requires:
-             - prepare-testing-database
-      - linux-python38:
-           requires:
-             - prepare-testing-database
-
 jobs:
   prepare-testing-database:    # This is job about database which saving the testing data for ensure the features work finely without any issue.
     docker:
@@ -161,4 +143,23 @@ jobs:
 #             coveralls    # submit coverage to coveralls
          command: |
              codecov -t $CODECOV_TOKEN    # submit coverage to codecov
+
+
+# Under the workflows: map, we can coordinate above jobs, defined above.
+workflows:
+  version: 2.1
+  build_and_test:    # this is the name of our workflow
+    jobs:    # and here we list the jobs we are going to run.
+      # General work flow
+#      - linux-python37
+#      - linux-python38
+
+      # Sequence work flow
+      - prepare-testing-database
+      - linux-python37:
+           requires:
+             - prepare-testing-database
+      - linux-python38:
+           requires:
+             - prepare-testing-database
 
