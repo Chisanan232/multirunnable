@@ -102,47 +102,47 @@ jobs:
          command: |
              codecov -t $CODECOV_TOKEN    # submit coverage to codecov
 
-  linux-python38:    # This is second job --- pytest task with Python 3.8.
-    docker:
-      - image: circleci/python:3.8
-#         auth:
-#           username: chisanan232
-#           password: $DOCKERHUB_PASSWORD
-      - environment:
-          MYSQL_PASSWORD: 'password'
-          MYSQL_DATABASE: 'tw_stock'
-          MYSQL_ROOT_HOST: 127.0.0.1
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-    # Steps are a list of commands to run inside the docker container above.
-    steps:
-      - checkout    # this pulls code down from GitHub
-      - run:
-         name: Test MySQL connection
-         command: mysql -u root -h 127.0.0.1 -ppassword
-      - run:
-         name: Check Python Version
-         command: python --version
-      - run:
-         name: Upgrade and install Python dependencies
-         command: |
-             pip install -U pip
-             pip install -U pytest
-             pip install -U pytest-cov
-             pip install codecov
-             pip install mysql-connector-python
-             pip install pytest-rerunfailures
-             pip install -r dev-requirements.txt
-      - run:
-         name: Run PyTest command to test
-         command: |
-             pytest
-      - run:
-         name: Submit calculation result of testing coverage of project code to codecov
+#  linux-python38:    # This is second job --- pytest task with Python 3.8.
+#    docker:
+#      - image: circleci/python:3.8
+##         auth:
+##           username: chisanan232
+##           password: $DOCKERHUB_PASSWORD
+#      - environment:
+#          MYSQL_PASSWORD: 'password'
+#          MYSQL_DATABASE: 'tw_stock'
+#          MYSQL_ROOT_HOST: 127.0.0.1
+#          DB_HOST: 127.0.0.1
+#          DB_PORT: 3306
+#    # Steps are a list of commands to run inside the docker container above.
+#    steps:
+#      - checkout    # this pulls code down from GitHub
+#      - run:
+#         name: Test MySQL connection
+#         command: mysql -u root -h 127.0.0.1 -ppassword
+#      - run:
+#         name: Check Python Version
+#         command: python --version
+#      - run:
+#         name: Upgrade and install Python dependencies
 #         command: |
-#             coveralls    # submit coverage to coveralls
-         command: |
-             codecov -t $CODECOV_TOKEN    # submit coverage to codecov
+#             pip install -U pip
+#             pip install -U pytest
+#             pip install -U pytest-cov
+#             pip install codecov
+#             pip install mysql-connector-python
+#             pip install pytest-rerunfailures
+#             pip install -r dev-requirements.txt
+#      - run:
+#         name: Run PyTest command to test
+#         command: |
+#             pytest
+#      - run:
+#         name: Submit calculation result of testing coverage of project code to codecov
+##         command: |
+##             coveralls    # submit coverage to coveralls
+#         command: |
+#             codecov -t $CODECOV_TOKEN    # submit coverage to codecov
 
 
 # Under the workflows: map, we can coordinate above jobs, defined above.
@@ -151,15 +151,16 @@ workflows:
   build_and_test:    # this is the name of our workflow
     jobs:    # and here we list the jobs we are going to run.
       # General work flow
-#      - linux-python37
+      - prepare-testing-database
+      - linux-python37
 #      - linux-python38
 
       # Sequence work flow
-      - prepare-testing-database
-      - linux-python37:
-           requires:
-             - prepare-testing-database
-      - linux-python38:
-           requires:
-             - prepare-testing-database
+#      - prepare-testing-database
+#      - linux-python37:
+#           requires:
+#             - prepare-testing-database
+#      - linux-python38:
+#           requires:
+#             - prepare-testing-database
 
