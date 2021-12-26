@@ -27,7 +27,7 @@ commands:
          command: |
             mysql -h 127.0.0.1 -u root -ppassword --execute="
                 INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
-                    VALUES ('0108-01-02 00:00:00' , 32900482 , 7276419230 ,226.5000 ,226.5000 , 219.0000, 219.5000 ,-6.00 , 12329);
+                    VALUES ('0108-01-02 00:00:00' , 32900482 , 7276419230 ,226.5000 ,226.5000 , 219.0000, 219.5000 ,-6.00 , 12329);"
       - run:
          name: Insert testing data
          command: |
