@@ -5,10 +5,12 @@
 [![PyPI version](https://badge.fury.io/py/multirunnable.svg)](https://badge.fury.io/py/multirunnable)
 [![Supported Versions](https://img.shields.io/pypi/pyversions/multirunnable.svg?logo=python&logoColor=FBE072)](https://pypi.org/project/multirunnable)
 
-| Linux / MacOS | Windows |
-|------------|--------|
-|[![CircleCI](https://circleci.com/gh/Chisanan232/multirunnable.svg?style=svg)](https://app.circleci.com/pipelines/github/Chisanan232/multirunnable)|[![Build status](https://ci.appveyor.com/api/projects/status/v0nq38jtof6vcm23?svg=true)](https://ci.appveyor.com/project/Chisanan232/multirunnable)|
-|[![codecov](https://codecov.io/gh/Chisanan232/multirunnable/branch/master/graph/badge.svg?token=E2AGK1ZIDH)](https://codecov.io/gh/Chisanan232/multirunnable)|[![Coverage Status](https://coveralls.io/repos/github/Chisanan232/multirunnable/badge.svg?branch=master)](https://coveralls.io/github/Chisanan232/multirunnable?branch=master)|
+| OS | Building Status | Coverage Status |
+|------------|------------|--------|
+| Linux |[![Build Status](https://app.travis-ci.com/Chisanan232/multirunnable.svg?branch=master)](https://app.travis-ci.com/Chisanan232/multirunnable)|[![codecov](https://codecov.io/gh/Chisanan232/multirunnable/branch/master/graph/badge.svg?token=E2AGK1ZIDH)](https://codecov.io/gh/Chisanan232/multirunnable)|
+| Linux |[![CircleCI](https://circleci.com/gh/Chisanan232/multirunnable.svg?style=svg)](https://app.circleci.com/pipelines/github/Chisanan232/multirunnable)|[![codecov](https://codecov.io/gh/Chisanan232/multirunnable/branch/master/graph/badge.svg?token=E2AGK1ZIDH)](https://codecov.io/gh/Chisanan232/multirunnable)|
+| Linux/MacOS |[![multirunnable testing](https://github.com/Chisanan232/multirunnable/actions/workflows/ci.yml/badge.svg)](https://github.com/Chisanan232/multirunnable/actions/workflows/ci.yml)|[![codecov](https://codecov.io/gh/Chisanan232/multirunnable/branch/master/graph/badge.svg?token=E2AGK1ZIDH)](https://codecov.io/gh/Chisanan232/multirunnable)|
+| Windows |[![Build status](https://ci.appveyor.com/api/projects/status/v0nq38jtof6vcm23?svg=true)](https://ci.appveyor.com/project/Chisanan232/multirunnable)|[![Coverage Status](https://coveralls.io/repos/github/Chisanan232/multirunnable/badge.svg?branch=master)](https://coveralls.io/github/Chisanan232/multirunnable?branch=master)|
 
 A Python framework integrates building program which could run multiple tasks with different running strategy.
 
@@ -570,7 +572,7 @@ finally and keep going run the code. That's the reason this feature exists.
 
 Below is the life cycle of runnable unit (worker):
 
-![image](https://github.com/Chisanan232/multirunnable/blob/master/doc/imgs/MultiRunnable-Worker_work_flow.png)
+![image](https://github.com/Chisanan232/multirunnable/blob/master/docs/imgs/MultiRunnable-Worker_work_flow.png)
 
 It could use the feature via Python decorator **retry** (It's **async_retry** with Asynchronous).
 
