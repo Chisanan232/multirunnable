@@ -45,13 +45,13 @@ jobs:
             python-version: 3.10
 
     steps:
-      - name: 🧾 Checkout
-       uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
 
-      - name: 🐬 Install MySQL driver connection tool
+      - name: Install MySQL driver connection tool
         run: sudo apt-get install default-mysql-client
 
-      - name: 🐬💦 Waiting for MySQL to be ready
+      - name: Waiting for MySQL to be ready
         run: |
             for i in `seq 1 10`;
             do
@@ -61,14 +61,14 @@ jobs:
             done
             echo Failed waiting for MySQL && exit 1
 
-      - name: 🐬🤖 Test MySQL connection
+      - name: Test MySQL connection
         run: mysql -u root -h 127.0.0.1 -ppassword --execute="show databases;"
 
-      - name: 🐬 Create database
+      - name: Create database
         run: |
             mysql -h 127.0.0.1 -u root -ppassword --execute="CREATE DATABASE tw_stock;"
 
-      - name: 🐬 Create table for saving testing data
+      - name: Create table for saving testing data
         run: |
             mysql -h 127.0.0.1 -u root -ppassword --execute="
                 CREATE TABLE IF NOT EXISTS tw_stock.stock_data_2330 (
@@ -83,7 +83,7 @@ jobs:
                                                                turnover_volume DECIMAL(12,4) NOT NULL,
                                                                PRIMARY KEY(stock_date)) DEFAULT CHARSET=utf8;"
 
-      - name: 🐬 Insert testing data
+      - name: Insert testing data
         run: |
             mysql -h 127.0.0.1 -u root -ppassword --execute="
                 INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
@@ -104,12 +104,12 @@ jobs:
                 INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
                     VALUES ('0108-01-09 00:00:00' , 51255446 ,11006827093 ,212.0000 ,216.5000 , 211.0000 ,215.5000 ,+4.50 , 14098);"
 
-      - name: 🐍 Install Python ${{ matrix.python-version }} in  ${{ matrix.os }}
+      - name: Install Python ${{ matrix.python-version }} in  ${{ matrix.os }}
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: 🐍 Install Python ${{ matrix.python-version }} dependencies
+      - name: Install Python ${{ matrix.python-version }} dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -U pip
@@ -120,16 +120,16 @@ jobs:
           pip install mysql-connector-python
           pip install -r dev-requirements.txt
 
-      - name: 🐍🤖 Run tests with pytest
+      - name: Run tests with pytest
         run: pytest
 
-      - name: 👮🏻‍♂️ Get secret token from Base64
+      - name: Get secret token from Base64
         env:
           KEYSTORE_BASE64: ${{ secrets.CODECOV_TOKEN }}
         run: |
           echo import certificate from secrets and regenerate the file
           echo $KEYSTORE_BASE64 | base64 -d > ./codecov.token
 
-      - name: ✨🎊🎉🍾🍻 Submit calculation result of testing coverage of project code to codecov
+      - name: Submit calculation result of testing coverage of project code to codecov
         run: codecov -f ./codecov.token    # submit coverage to codecov
 
