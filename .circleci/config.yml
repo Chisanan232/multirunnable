@@ -82,16 +82,6 @@ commands:
              pip install mysql-connector-python
              pip install pytest-rerunfailures
              pip install -r dev-requirements.txt
-      - run:
-         name: Run PyTest command to test
-         command: |
-             pytest
-      - run:
-         name: Submit calculation result of testing coverage of project code to codecov
-#         command: |
-#             coveralls    # submit coverage to coveralls
-         command: |
-             codecov -t $CODECOV_TOKEN    # submit coverage to codecov
 
   run_pytest:
     steps:
@@ -154,6 +144,69 @@ executors:
           MYSQL_ROOT_PASSWORD: password
           MYSQL_ALLOW_EMPTY_PASSWORD: true
 
+  docker-py38:
+    docker:
+      - image: circleci/python:3.8
+        auth:
+          username: chisanan232
+          password: $DOCKERHUB_PASSWORD
+        environment:
+          MYSQL_PASSWORD: 'password'
+          MYSQL_DATABASE: 'tw_stock'
+          MYSQL_ROOT_HOST: 127.0.0.1
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+
+      - image: circleci/mysql:8.0.23
+        auth:
+          username: chisanan232
+          password: $DOCKERHUB_PASSWORD
+        environment:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_ALLOW_EMPTY_PASSWORD: true
+
+  docker-py39:
+    docker:
+      - image: circleci/python:3.9
+        auth:
+          username: chisanan232
+          password: $DOCKERHUB_PASSWORD
+        environment:
+          MYSQL_PASSWORD: 'password'
+          MYSQL_DATABASE: 'tw_stock'
+          MYSQL_ROOT_HOST: 127.0.0.1
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+
+      - image: circleci/mysql:8.0.23
+        auth:
+          username: chisanan232
+          password: $DOCKERHUB_PASSWORD
+        environment:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_ALLOW_EMPTY_PASSWORD: true
+
+  docker-py310:
+    docker:
+      - image: circleci/python:3.10
+        auth:
+          username: chisanan232
+          password: $DOCKERHUB_PASSWORD
+        environment:
+          MYSQL_PASSWORD: 'password'
+          MYSQL_DATABASE: 'tw_stock'
+          MYSQL_ROOT_HOST: 127.0.0.1
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+
+      - image: circleci/mysql:8.0.23
+        auth:
+          username: chisanan232
+          password: $DOCKERHUB_PASSWORD
+        environment:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_ALLOW_EMPTY_PASSWORD: true
+
 
 jobs:
   # This is job about database which saving the testing data for ensure the features work finely without any issue.
@@ -175,20 +228,29 @@ jobs:
       - prepare_testing_data
       - run_python_test
 
-#  test-linux-python38:
-#    executor: docker-py38
-#    steps:
-#      - run_python_test
-#
-#  test-linux-python39:
-#    executor: docker-py39
-#    steps:
-#      - run_python_test
-#
-#  test-linux-python310:
-#    executor: docker-py310
-#    steps:
-#      - run_python_test
+  test-linux-python38:
+    executor: docker-py38
+    steps:
+      - isntall_databade_driver_tool
+      - test_databade_connection
+      - prepare_testing_data
+      - run_python_test
+
+  test-linux-python39:
+    executor: docker-py39
+    steps:
+      - isntall_databade_driver_tool
+      - test_databade_connection
+      - prepare_testing_data
+      - run_python_test
+
+  test-linux-python310:
+    executor: docker-py310
+    steps:
+      - isntall_databade_driver_tool
+      - test_databade_connection
+      - prepare_testing_data
+      - run_python_test
 
 
 # Under the workflows: map, we can coordinate above jobs, defined above.
@@ -199,7 +261,9 @@ workflows:
       # General work flow
 #      - build-testing-database
       - test-linux-python37
-#      - test-linux-python38
+      - test-linux-python38
+      - test-linux-python39
+      - test-linux-python310
 
       # Sequence work flow
 #      - build-testing-database
