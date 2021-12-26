@@ -1,5 +1,5 @@
 from multirunnable.coroutine.strategy import CoroutineStrategy, GreenThreadStrategy, GreenThreadPoolStrategy, AsynchronousStrategy
-from multirunnable import async_sleep
+from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 
 from ..framework.strategy import GeneralRunningTestSpec, PoolRunningTestSpec
 from ..test_config import (
@@ -16,6 +16,7 @@ import asyncio
 import gevent
 import pytest
 import time
+import sys
 import os
 
 
@@ -26,7 +27,10 @@ Task_Size: int = Task_Size
 Running_Diff_Time: int = Running_Diff_Time
 
 _GreenThread_Lock = GeventLock()
-_Async_Lock = AsyncLock(loop=asyncio.get_event_loop())
+if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION == 10:
+    _Async_Lock = AsyncLock()
+else:
+    _Async_Lock = AsyncLock(loop=asyncio.get_event_loop())
 
 Running_Parent_PID = None
 Running_Count = 0
