@@ -3,19 +3,20 @@ version: 2
 jobs:
 
   prepare-testing-database:    # This is job about database which saving the testing data for ensure the features work finely without any issue.
-    docker:    # it uses the docker executor
-      - image: circleci/mysql:8.0.23    # specifically, a docker image with mysql 8.0.3.
-            auth:
-              username: chisanan232
-              password: $DOCKERHUB_PASSWORD
-      environment:
-        MYSQL_ROOT_HOST: %
-        MYSQL_ROOT_PASSWORD: password
-        MYSQL_DATABASE: tw_stock
-        MYSQL_USER: user
-        MYSQL_PASSWORD: passw23mr
-        DB_HOST: 127.0.0.1
-        DB_PORT: 3306
+    docker:
+      # specifically, a docker image with mysql 8.0.3.
+      - image: circleci/mysql:8.0.23
+#          auth:
+#            username: chisanan232
+#            password: $DOCKERHUB_PASSWORD
+      - environment:
+           MYSQL_ROOT_HOST: 127.0.0.1
+           MYSQL_ROOT_PASSWORD: password
+           MYSQL_DATABASE: tw_stock
+           MYSQL_USER: user
+           MYSQL_PASSWORD: passw23mr
+           DB_HOST: 127.0.0.1
+           DB_PORT: 3306
     # Steps are a list of commands to run inside the docker container above.
     steps:
       - checkout    # this pulls code down from GitHub
@@ -61,15 +62,15 @@ jobs:
                     VALUES ('0108-01-09 00:00:00' , 51255446 ,11006827093 ,212.0000 ,216.5000 , 211.0000 ,215.5000 ,+4.50 , 14098);"
 
   linux_python37:    # This is first job --- pytest task with Python 3.7.
-    docker:    # it uses the docker executor
-      - image: circleci/python:3.7    # specifically, a docker image with python 3.7
-         auth:
-           username: chisanan232
-           password: $DOCKERHUB_PASSWORD
+    docker:
+      - image: circleci/python:3.7
+#         auth:
+#           username: chisanan232
+#           password: $DOCKERHUB_PASSWORD
       environment:
         MYSQL_PASSWORD: 'password'
         MYSQL_DATABASE: 'tw_stock'
-        MYSQL_ROOT_HOST: %
+        MYSQL_ROOT_HOST: 127.0.0.1
         DB_HOST: 127.0.0.1
         DB_PORT: 3306
     # Steps are a list of commands to run inside the docker container above.
@@ -102,15 +103,15 @@ jobs:
              codecov -t $CODECOV_TOKEN    # submit coverage to codecov
 
   linux_python38:    # This is second job --- pytest task with Python 3.8.
-    docker:    # it uses the docker executor
-      - image: circleci/python:3.8    # specifically, a docker image with python 3.8
-         auth:
-           username: chisanan232
-           password: $DOCKERHUB_PASSWORD
+    docker:
+      - image: circleci/python:3.8
+#         auth:
+#           username: chisanan232
+#           password: $DOCKERHUB_PASSWORD
       environment:
         MYSQL_PASSWORD: 'password'
         MYSQL_DATABASE: 'tw_stock'
-        MYSQL_ROOT_HOST: %
+        MYSQL_ROOT_HOST: 127.0.0.1
         DB_HOST: 127.0.0.1
         DB_PORT: 3306
     # Steps are a list of commands to run inside the docker container above.
