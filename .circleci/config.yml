@@ -136,18 +136,16 @@ executors:
           MYSQL_ROOT_HOST: 127.0.0.1
           DB_HOST: 127.0.0.1
           DB_PORT: 3306
+
       - image: circleci/mysql:8.0.23
         auth:
           username: chisanan232
           password: $DOCKERHUB_PASSWORD
         environment:
-          MYSQL_ROOT_HOST: 127.0.0.1
           MYSQL_ROOT_PASSWORD: password
           MYSQL_DATABASE: tw_stock
           MYSQL_USER: user
           MYSQL_PASSWORD: passw23mr
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
 
 
 jobs:
