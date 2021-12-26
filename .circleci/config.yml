@@ -8,14 +8,14 @@ jobs:
           auth:
             username: chisanan232
             password: $DOCKERHUB_PASSWORD
-         environment:
-           MYSQL_ROOT_HOST: %
-           MYSQL_ROOT_PASSWORD: password
-           MYSQL_DATABASE: tw_stock
-           MYSQL_USER: user
-           MYSQL_PASSWORD: passw23mr
-           DB_HOST: 127.0.0.1
-           DB_PORT: 3306
+      environment:
+        MYSQL_ROOT_HOST: %
+        MYSQL_ROOT_PASSWORD: password
+        MYSQL_DATABASE: tw_stock
+        MYSQL_USER: user
+        MYSQL_PASSWORD: passw23mr
+        DB_HOST: 127.0.0.1
+        DB_PORT: 3306
     # Steps are a list of commands to run inside the docker container above.
     steps:
       - checkout    # this pulls code down from GitHub
@@ -63,12 +63,15 @@ jobs:
   linux_python37:    # This is first job --- pytest task with Python 3.7.
     docker:    # it uses the docker executor
       - image: circleci/python:3.7    # specifically, a docker image with python 3.7
-         environment:
-           MYSQL_PASSWORD: 'password'
-           MYSQL_DATABASE: 'tw_stock'
-           MYSQL_ROOT_HOST: %
-           DB_HOST: 127.0.0.1
-           DB_PORT: 3306
+         auth:
+           username: chisanan232
+           password: $DOCKERHUB_PASSWORD
+      environment:
+        MYSQL_PASSWORD: 'password'
+        MYSQL_DATABASE: 'tw_stock'
+        MYSQL_ROOT_HOST: %
+        DB_HOST: 127.0.0.1
+        DB_PORT: 3306
     # Steps are a list of commands to run inside the docker container above.
     steps:
       - checkout    # this pulls code down from GitHub
@@ -101,12 +104,15 @@ jobs:
   linux_python38:    # This is second job --- pytest task with Python 3.8.
     docker:    # it uses the docker executor
       - image: circleci/python:3.8    # specifically, a docker image with python 3.8
-         environment:
-           MYSQL_PASSWORD: 'password'
-           MYSQL_DATABASE: 'tw_stock'
-           MYSQL_ROOT_HOST: %
-           DB_HOST: 127.0.0.1
-           DB_PORT: 3306
+         auth:
+           username: chisanan232
+           password: $DOCKERHUB_PASSWORD
+      environment:
+        MYSQL_PASSWORD: 'password'
+        MYSQL_DATABASE: 'tw_stock'
+        MYSQL_ROOT_HOST: %
+        DB_HOST: 127.0.0.1
+        DB_PORT: 3306
     # Steps are a list of commands to run inside the docker container above.
     steps:
       - checkout    # this pulls code down from GitHub
