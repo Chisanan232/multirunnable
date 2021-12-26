@@ -172,6 +172,8 @@ jobs:
   test-linux-python37:
     executor: docker-py37
     steps:
+      - test_databade_connection
+      - prepare_testing_data
       - run_python_test
 
 #  test-linux-python38:
