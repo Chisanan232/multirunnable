@@ -1,7 +1,24 @@
-version: 2
+version: 2.1
+
+# Under the workflows: map, we can coordinate above jobs, defined above.
+workflows:
+  version: 2.1
+  build_and_test:    # this is the name of our workflow
+    jobs:    # and here we list the jobs we are going to run.
+      # General work flow
+#      - linux-python37
+#      - linux-python38
+
+      # Sequence work flow
+      - prepare-testing-database
+      - linux-python37:
+           requires:
+             - prepare-testing-database
+      - linux-python38:
+           requires:
+             - prepare-testing-database
 
 jobs:
-
   prepare-testing-database:    # This is job about database which saving the testing data for ensure the features work finely without any issue.
     docker:
       # specifically, a docker image with mysql 8.0.3.
@@ -61,7 +78,7 @@ jobs:
                 INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
                     VALUES ('0108-01-09 00:00:00' , 51255446 ,11006827093 ,212.0000 ,216.5000 , 211.0000 ,215.5000 ,+4.50 , 14098);"
 
-  linux_python37:    # This is first job --- pytest task with Python 3.7.
+  linux-python37:    # This is first job --- pytest task with Python 3.7.
     docker:
       - image: circleci/python:3.7
 #         auth:
@@ -103,7 +120,7 @@ jobs:
          command: |
              codecov -t $CODECOV_TOKEN    # submit coverage to codecov
 
-  linux_python38:    # This is second job --- pytest task with Python 3.8.
+  linux-python38:    # This is second job --- pytest task with Python 3.8.
     docker:
       - image: circleci/python:3.8
 #         auth:
@@ -144,23 +161,4 @@ jobs:
 #             coveralls    # submit coverage to coveralls
          command: |
              codecov -t $CODECOV_TOKEN    # submit coverage to codecov
-
-
-# Under the workflows: map, we can coordinate above jobs, defined above.
-workflows:
-  version: 2
-  build_and_test:    # this is the name of our workflow
-    jobs:    # and here we list the jobs we are going to run.
-      # General work flow
-#      - linux_python37
-#      - linux_python38
-
-      # Sequence work flow
-      - prepare-testing-database
-      - linux_python37:
-           requires:
-             - prepare-testing-database
-      - linux_python38:
-           requires:
-             - prepare-testing-database
 
