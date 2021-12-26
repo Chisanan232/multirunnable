@@ -67,12 +67,12 @@ jobs:
 #         auth:
 #           username: chisanan232
 #           password: $DOCKERHUB_PASSWORD
-      environment:
-        MYSQL_PASSWORD: 'password'
-        MYSQL_DATABASE: 'tw_stock'
-        MYSQL_ROOT_HOST: 127.0.0.1
-        DB_HOST: 127.0.0.1
-        DB_PORT: 3306
+      - environment:
+          MYSQL_PASSWORD: 'password'
+          MYSQL_DATABASE: 'tw_stock'
+          MYSQL_ROOT_HOST: 127.0.0.1
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
     # Steps are a list of commands to run inside the docker container above.
     steps:
       - checkout    # this pulls code down from GitHub
@@ -96,10 +96,11 @@ jobs:
          name: Run PyTest command to test
          command: |
              pytest
-      - run: Submit calculation result of testing coverage of project code to codecov
-         name: Run PyTest command to test
-         command: |
+      - run:
+         name: Submit calculation result of testing coverage of project code to codecov
+#         command: |
 #             coveralls    # submit coverage to coveralls
+         command: |
              codecov -t $CODECOV_TOKEN    # submit coverage to codecov
 
   linux_python38:    # This is second job --- pytest task with Python 3.8.
@@ -108,12 +109,12 @@ jobs:
 #         auth:
 #           username: chisanan232
 #           password: $DOCKERHUB_PASSWORD
-      environment:
-        MYSQL_PASSWORD: 'password'
-        MYSQL_DATABASE: 'tw_stock'
-        MYSQL_ROOT_HOST: 127.0.0.1
-        DB_HOST: 127.0.0.1
-        DB_PORT: 3306
+      - environment:
+          MYSQL_PASSWORD: 'password'
+          MYSQL_DATABASE: 'tw_stock'
+          MYSQL_ROOT_HOST: 127.0.0.1
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
     # Steps are a list of commands to run inside the docker container above.
     steps:
       - checkout    # this pulls code down from GitHub
@@ -137,10 +138,11 @@ jobs:
          name: Run PyTest command to test
          command: |
              pytest
-      - run: Submit calculation result of testing coverage of project code to codecov
-         name: Run PyTest command to test
-         command: |
+      - run:
+         name: Submit calculation result of testing coverage of project code to codecov
+#         command: |
 #             coveralls    # submit coverage to coveralls
+         command: |
              codecov -t $CODECOV_TOKEN    # submit coverage to codecov
 
 
