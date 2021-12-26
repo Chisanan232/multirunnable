@@ -6,11 +6,11 @@ commands:
       - run:
          name: Create database
          command: |
-            mysql -h 127.0.0.1 -u user -ppassw23mr --execute="CREATE DATABASE tw_stock;"
+            mysql -h 127.0.0.1 -u root -ppassw23mr --execute="CREATE DATABASE tw_stock;"
       - run:
          name: Create table for saving testing data
          command: |
-            mysql -h 127.0.0.1 -u user -ppassw23mr --execute="
+            mysql -h 127.0.0.1 -u root -ppassw23mr --execute="
                 CREATE TABLE IF NOT EXISTS tw_stock.stock_data_2330 (
                                                                stock_date DATETIME NOT NULL,
                                                                trade_volume DECIMAL(12,4) NOT NULL,
@@ -25,22 +25,22 @@ commands:
       - run:
          name: Insert testing data
          command: |
-            mysql -h 127.0.0.1 -u user -ppassw23mr --execute="
+            mysql -h 127.0.0.1 -u root -ppassw23mr --execute="
                 INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
                     VALUES ('0108-01-02 00:00:00' , 32900482 , 7276419230 ,226.5000 ,226.5000 , 219.0000, 219.5000 ,-6.00 , 12329);
-            mysql -h 127.0.0.1 -u user -ppassw23mr --execute="
+            mysql -h 127.0.0.1 -u root -ppassw23mr --execute="
                 INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
                     VALUES ('0108-01-03 00:00:00' , 34615620 , 7459051790 ,214.0000 ,218.0000 , 214.0000 ,215.5000 ,-4.00 , 14549);
-            mysql -h 127.0.0.1 -u user -ppassw23mr --execute="
+            mysql -h 127.0.0.1 -u root -ppassw23mr --execute="
                 INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
                     VALUES ('0108-01-04 00:00:00' , 67043521 ,13987136785 ,211.5000 ,211.5000 , 206.5000 ,208.0000 ,-7.50 , 28786);
-            mysql -h 127.0.0.1 -u user -ppassw23mr --execute="
+            mysql -h 127.0.0.1 -u root -ppassw23mr --execute="
                 INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
                     VALUES ('0108-01-07 00:00:00' , 35695176 , 7591116569 ,212.0000 ,214.0000 , 211.0000 ,213.0000 ,+5.00 , 11224);
-            mysql -h 127.0.0.1 -u user -ppassw23mr --execute="
+            mysql -h 127.0.0.1 -u root -ppassw23mr --execute="
                 INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
                     VALUES ('0108-01-08 00:00:00' , 23794481 , 5019703557 ,212.0000 ,212.5000 , 210.0000 ,211.0000 ,-2.00 , 9377);
-            mysql -h 127.0.0.1 -u user -ppassw23mr --execute="
+            mysql -h 127.0.0.1 -u root -ppassw23mr --execute="
                 INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
                     VALUES ('0108-01-09 00:00:00' , 51255446 ,11006827093 ,212.0000 ,216.5000 , 211.0000 ,215.5000 ,+4.50 , 14098);"
 
