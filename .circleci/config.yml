@@ -143,9 +143,7 @@ executors:
           password: $DOCKERHUB_PASSWORD
         environment:
           MYSQL_ROOT_PASSWORD: password
-          MYSQL_DATABASE: tw_stock
-          MYSQL_USER: user
-          MYSQL_PASSWORD: passw23mr
+          MYSQL_ALLOW_EMPTY_PASSWORD: true
 
 
 jobs:
