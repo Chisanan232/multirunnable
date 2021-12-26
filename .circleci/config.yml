@@ -44,6 +44,12 @@ commands:
                 INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
                     VALUES ('0108-01-09 00:00:00' , 51255446 ,11006827093 ,212.0000 ,216.5000 , 211.0000 ,215.5000 ,+4.50 , 14098);"
 
+  isntall_databade_driver_tool:
+    steps:
+      - run:
+         name: Install MySQL driver connection tool
+         command: sudo apt-get install default-mysql-client
+
   test_databade_connection:
     steps:
       - run:
@@ -95,6 +101,7 @@ commands:
   run_python_test:
     steps:
       - checkout    # this pulls code down from GitHub
+      - isntall_databade_driver_tool
       - test_databade_connection
       - preparing_python_dependecies
       - run_pytest
