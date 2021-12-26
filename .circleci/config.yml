@@ -102,33 +102,20 @@ commands:
 
 
 executors:
-  docker-mysql:
-    docker:
-      - image: circleci/mysql:8.0.23
-#          auth:
-#            username: chisanan232
-#            password: $DOCKERHUB_PASSWORD
-      - environment:
-           MYSQL_ROOT_HOST: 127.0.0.1
-           MYSQL_ROOT_PASSWORD: password
-           MYSQL_DATABASE: tw_stock
-           MYSQL_USER: user
-           MYSQL_PASSWORD: passw23mr
-           DB_HOST: 127.0.0.1
-           DB_PORT: 3306
-
-  docker-py36:
-    docker:
-      - image: circleci/python:3.6
-#         auth:
-#           username: chisanan232
-#           password: $DOCKERHUB_PASSWORD
-      - environment:
-          MYSQL_PASSWORD: 'password'
-          MYSQL_DATABASE: 'tw_stock'
-          MYSQL_ROOT_HOST: 127.0.0.1
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
+#  docker-mysql:
+#    docker:
+#      - image: circleci/mysql:8.0.23
+##          auth:
+##            username: chisanan232
+##            password: $DOCKERHUB_PASSWORD
+#      - environment:
+#           MYSQL_ROOT_HOST: 127.0.0.1
+#           MYSQL_ROOT_PASSWORD: password
+#           MYSQL_DATABASE: tw_stock
+#           MYSQL_USER: user
+#           MYSQL_PASSWORD: passw23mr
+#           DB_HOST: 127.0.0.1
+#           DB_PORT: 3306
 
   docker-py37:
     docker:
@@ -143,45 +130,6 @@ executors:
           MYSQL_DATABASE: tw_stock
           MYSQL_USER: user
           MYSQL_PASSWORD: passw23mr
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-
-  docker-py38:
-    docker:
-      - image: circleci/python:3.8
-#         auth:
-#           username: chisanan232
-#           password: $DOCKERHUB_PASSWORD
-      - environment:
-          MYSQL_PASSWORD: 'password'
-          MYSQL_DATABASE: 'tw_stock'
-          MYSQL_ROOT_HOST: 127.0.0.1
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-
-  docker-py39:
-    docker:
-      - image: circleci/python:3.9
-#         auth:
-#           username: chisanan232
-#           password: $DOCKERHUB_PASSWORD
-      - environment:
-          MYSQL_PASSWORD: 'password'
-          MYSQL_DATABASE: 'tw_stock'
-          MYSQL_ROOT_HOST: 127.0.0.1
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-
-  docker-py310:
-    docker:
-      - image: circleci/python:3.10
-#         auth:
-#           username: chisanan232
-#           password: $DOCKERHUB_PASSWORD
-      - environment:
-          MYSQL_PASSWORD: 'password'
-          MYSQL_DATABASE: 'tw_stock'
-          MYSQL_ROOT_HOST: 127.0.0.1
           DB_HOST: 127.0.0.1
           DB_PORT: 3306
 
