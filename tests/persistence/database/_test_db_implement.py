@@ -41,7 +41,6 @@ class MySQLSingleConnection(BaseSingleConnection):
     def connect_database(self, **kwargs) -> MySQLConnection:
         # return mysql.connector.connect(**self._Database_Config)
         _connection = mysql.connector.connect(**kwargs)
-        print(f'[DEBUG] init MySQLSingleConnection.connection ping: {_connection}')
         return _connection
 
 
@@ -51,12 +50,7 @@ class MySQLSingleConnection(BaseSingleConnection):
 
     def close(self) -> None:
         if self.connection is not None and self.connection.is_connected():
-            # if self.cursor is not None:
-            #     self.cursor.close()
             self.connection.close()
-            print(f"MySQL connection is closed. - PID: {os.getpid()}")
-        else:
-            print("Connection has been disconnect or be killed before.")
 
 
 # @sharing_in_processes
@@ -73,11 +67,8 @@ class MySQLDriverConnectionPool(BaseConnectionPool):
             try:
                 # return self.database_connection_pool.get_connection()
                 __connection = get_connection_pool(pool_name=pool_name).get_connection()
-                print(f"Get a valid connection: {__connection}")
                 return __connection
             except PoolError as e:
-                print(f"Connection Pool: {get_connection_pool(pool_name=pool_name).pool_size} ")
-                print(f"Will sleep for 5 seconds to wait for connection is available.")
                 time.sleep(5)
             except AttributeError as ae:
                 raise ConnectionError(f"Cannot get the one connection instance from connection pool because it doesn't exist the connection pool with the name '{pool_name}'.")
