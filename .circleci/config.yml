@@ -2,12 +2,15 @@ version: 2
 
 jobs:
 
-  build_data:    # This is job about database which saving the testing data for ensure the features work finely without any issue.
+  prepare-testing-database:    # This is job about database which saving the testing data for ensure the features work finely without any issue.
     docker:    # it uses the docker executor
       - image: circleci/mysql:8.0.23    # specifically, a docker image with mysql 8.0.3.
+          auth:
+            username: chisanan232
+            password: $DOCKERHUB_PASSWORD
          environment:
            MYSQL_ROOT_HOST: %
-           MYSQL_ROOT_PASSWORD: rootpw
+           MYSQL_ROOT_PASSWORD: password
            MYSQL_DATABASE: tw_stock
            MYSQL_USER: user
            MYSQL_PASSWORD: passw23mr
@@ -61,7 +64,7 @@ jobs:
     docker:    # it uses the docker executor
       - image: circleci/python:3.7    # specifically, a docker image with python 3.7
          environment:
-           MYSQL_PASSWORD: 'passw23mr'
+           MYSQL_PASSWORD: 'password'
            MYSQL_DATABASE: 'tw_stock'
            MYSQL_ROOT_HOST: %
            DB_HOST: 127.0.0.1
@@ -71,12 +74,12 @@ jobs:
       - checkout    # this pulls code down from GitHub
       - run:
          name: Test MySQL connection
-         command: mysql -u root -h 127.0.0.1 -ptest_pw
+         command: mysql -u root -h 127.0.0.1 -ppassword
       - run:
          name: Check Python Version
          command: python --version
       - run:
-         name: Upgrade and install Python package which it needs
+         name: Upgrade and install Python dependencies
          command: |
              pip install -U pip
              pip install -U pytest
@@ -95,25 +98,26 @@ jobs:
 #             coveralls    # submit coverage to coveralls
              codecov -t $CODECOV_TOKEN    # submit coverage to codecov
 
-  linux_python38:    # This is first job --- pytest task with Python 3.8.
-    docker:
+  linux_python38:    # This is second job --- pytest task with Python 3.8.
+    docker:    # it uses the docker executor
       - image: circleci/python:3.8    # specifically, a docker image with python 3.8
          environment:
-           MYSQL_PASSWORD: 'passw23mr'
+           MYSQL_PASSWORD: 'password'
            MYSQL_DATABASE: 'tw_stock'
            MYSQL_ROOT_HOST: %
            DB_HOST: 127.0.0.1
            DB_PORT: 3306
+    # Steps are a list of commands to run inside the docker container above.
     steps:
-      - checkout
+      - checkout    # this pulls code down from GitHub
       - run:
          name: Test MySQL connection
-         command: mysql -u root -h 127.0.0.1 -ptest_pw
+         command: mysql -u root -h 127.0.0.1 -ppassword
       - run:
          name: Check Python Version
          command: python --version
       - run:
-         name: Upgrade and install Python package which it needs
+         name: Upgrade and install Python dependencies
          command: |
              pip install -U pip
              pip install -U pytest
@@ -136,18 +140,18 @@ jobs:
 # Under the workflows: map, we can coordinate above jobs, defined above.
 workflows:
   version: 2
-  build_and_test: # this is the name of our workflow
-    jobs: # and here we list the jobs we are going to run.
+  build_and_test:    # this is the name of our workflow
+    jobs:    # and here we list the jobs we are going to run.
       # General work flow
 #      - linux_python37
 #      - linux_python38
 
       # Sequence work flow
-      - build_data
+      - prepare-testing-database
       - linux_python37:
            requires:
-             - build_data
+             - prepare-testing-database
       - linux_python38:
            requires:
-             - build_data
+             - prepare-testing-database
 
