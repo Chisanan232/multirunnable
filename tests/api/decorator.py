@@ -554,6 +554,42 @@ class TestFeaturesDecorator:
         TestFeaturesDecorator._chk_done_timestamp_by_lock(_done_timestamp)
 
 
+    def test_rlock_decorator_in_concurrent(self):
+
+        _done_timestamp = {}
+        instantiate_rlock(FeatureMode.Concurrent)
+
+        @RunWith.RLock
+        def _target_testing():
+            # Save a timestamp into list
+            _thread_id = threading.get_ident()
+            time.sleep(_Sleep_Time)
+            _time = float(time.time())
+            _done_timestamp[_thread_id] = _time
+
+        # # # # Run multiple workers and save something info at the right time
+        run_multi_threads(_function=_target_testing)
+        TestFeaturesDecorator._chk_done_timestamp_by_lock(_done_timestamp)
+
+
+    def test_rlock_decorator_in_green_thread(self):
+
+        _done_timestamp = {}
+        instantiate_rlock(FeatureMode.GreenThread)
+
+        @RunWith.RLock
+        def _target_testing():
+            # Save a timestamp into list
+            _thread_id = get_gevent_ident()
+            gevent_sleep(_Sleep_Time)
+            _time = float(time.time())
+            _done_timestamp[_thread_id] = _time
+
+        # # # # Run multiple workers and save something info at the right time
+        run_multi_green_thread(_function=_target_testing)
+        TestFeaturesDecorator._chk_done_timestamp_by_lock(_done_timestamp)
+
+
     @pytest.mark.skip(reason="Not finish yet.")
     def test_semaphore_decorator_in_parallel(self):
 
