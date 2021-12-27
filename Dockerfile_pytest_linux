@@ -7,7 +7,9 @@ COPY . .
 RUN pip install -U pip
 RUN pip install -U pytest
 RUN pip install -U pytest-cov
+RUN pip install pytest-rerunfailures
 RUN pip install codecov
+RUN pip install mysql-connector-python
 RUN pip install -r dev-requirements.txt
 
 CMD ["pytest"]
