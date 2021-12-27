@@ -76,10 +76,16 @@ environment:
 
 skip_commits:
   files:
-    - ".coveragerc"
+    - ".circleci*"
+    - ".github*"
     - ".gitignore"
-    - ".travis.yml"
+    - ".gitignore"
+    - ".travis*.yml"
+    - ".coveragerc"
 #    - "codecov.yml"
+    - "docs/*"
+    - "example/*"
+    - "study/*"
     - "dev-requirements.txt"
     - "*Dockerfile*"
     - "*.rst"
