@@ -6,6 +6,7 @@ from typing import List, Callable, Type, Any
 from multirunnable.framework.result import MRResult as _MRResult
 from multirunnable.api.operator import (
     LockAdapterOperator as _LockOperator,
+    RLockOperator as _RLockOperator,
     SemaphoreOperator as _SemaphoreOperator,
     BoundedSemaphoreOperator as _BoundedSemaphoreOperator,
     LockAsyncOperator as _LockAsyncOperator,
@@ -59,6 +60,26 @@ class RunWith:
             return result
 
         return __lock_process
+
+
+    @staticmethod
+    def RLock(function: Callable[[Any, Any], List[Type[_MRResult]]]):
+        """
+        Description:
+            A decorator which would add rlock mechanism around the target
+            function for fixed time.
+        :return:
+        """
+
+        @wraps(function)
+        def __rlock_process(*args, **kwargs) -> List[Type[_MRResult]]:
+            __rlock = _RLockOperator()
+
+            with __rlock:
+                result = function(*args, **kwargs)
+            return result
+
+        return __rlock_process
 
 
     @staticmethod
