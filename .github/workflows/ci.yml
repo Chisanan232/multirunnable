@@ -22,6 +22,8 @@ jobs:
         os: [ubuntu-18.04,ubuntu-latest]
         exclude:
           - os: ubuntu-18.04
+            python-version: 3.7
+          - os: ubuntu-18.04
             python-version: 3.9
           - os: ubuntu-18.04
             python-version: 3.10
