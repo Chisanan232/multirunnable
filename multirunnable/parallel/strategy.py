@@ -1,15 +1,16 @@
+from abc import ABC
+from os import getpid, getppid
 from types import FunctionType, MethodType
 from typing import List, Tuple, Dict, Iterable as IterableType, Union, Callable, Optional, cast
 from functools import wraps, partial as PartialFunction
 from collections.abc import Iterable
 from multipledispatch import dispatch
-from multiprocessing import Process #, Manager
+from multiprocessing import Process, current_process
 from multiprocessing.pool import Pool, AsyncResult, ApplyResult
-# from multiprocessing.managers import Namespace
 
 from multirunnable.mode import FeatureMode as _FeatureMode
-from multirunnable.parallel.result import ParallelResult as _ParallelResult
-from multirunnable.parallel.share import SharingManager
+from multirunnable.parallel.result import ParallelResult as _ParallelResult, ProcessPoolResult as _ProcessPoolResult
+from multirunnable.parallel.share import Global_Manager, activate_manager_server
 from multirunnable.framework import (
     BaseList as _BaseList,
     BaseQueueTask as _BaseQueueTask,
@@ -22,18 +23,10 @@ from multirunnable.framework import (
 
 
 
-class ParallelStrategy:
+class ParallelStrategy(_Resultable, ABC):
 
     _Strategy_Feature_Mode = _FeatureMode.Parallel
-    # _Manager: Manager = Manager()
-    # _Namespace_Object: Namespace = _Manager.Namespace()
-    # _Processors_Running_Result: List[Dict] = _Manager.list()
-    _Processors_Running_Result: List[Dict] = []
-
-
-    # def namespacing_obj(self, obj: object) -> object:
-    #     setattr(self._Namespace_Object, repr(obj), obj)
-    #     return getattr(self._Namespace_Object, repr(obj))
+    _Processors_Running_Result: List[Dict] = Global_Manager.list()
 
 
     @classmethod
@@ -42,40 +35,47 @@ class ParallelStrategy:
 
         @wraps(function)
         def save_value_fun(*args, **kwargs) -> None:
-            value = function(*args, **kwargs)
-            __thread_result = {"result": value}
-            __self._Processors_Running_Result.append(__thread_result)
+            _current_process = current_process()
+
+            _process_result = {
+                "ppid": getppid(),
+                "pid": getpid(),
+                "name": _current_process.name,
+                "ident": _current_process.ident
+            }
+
+            try:
+                value = function(*args, **kwargs)
+            except Exception as e:
+                _process_result.update({
+                    "successful": False,
+                    "exception": e,
+                    "exitcode": _current_process.exitcode
+                })
+            else:
+                _process_result.update({
+                    "result": value,
+                    "successful": True,
+                    "exitcode": _current_process.exitcode
+                })
+            finally:
+                __self._Processors_Running_Result.append(_process_result)
 
         return save_value_fun
 
 
-    def result(self) -> List[_ParallelResult]:
-        __parallel_result = self._result_handling()
-        self._Processors_Running_Result = []
+    def result(self) -> List[Union[_ParallelResult, _ProcessPoolResult]]:
+        __parallel_result = self._saving_process()
+        self.reset_result()
         return __parallel_result
 
 
-    def _result_handling(self) -> List[_ParallelResult]:
-        __parallel_results = []
-        for __result in self._Processors_Running_Result:
-            __parallel_result = _ParallelResult()
-
-            __process_successful = __result.get("successful", None)
-            if __process_successful is True:
-                __parallel_result.state = _ResultState.SUCCESS.value
-            else:
-                __parallel_result.state = _ResultState.FAIL.value
-
-            __process_result = __result.get("result", None)
-            __parallel_result.data = __process_result
-
-            __parallel_results.append(__parallel_result)
-
-        return __parallel_results
+    def reset_result(self) -> None:
+        self._Processors_Running_Result[:] = []
 
 
 
-class ProcessStrategy(ParallelStrategy, _GeneralRunnableStrategy, _Resultable):
+class ProcessStrategy(ParallelStrategy, _GeneralRunnableStrategy):
 
     _Strategy_Feature_Mode: _FeatureMode = _FeatureMode.Parallel
     __Process_List: List[Process] = None
@@ -99,7 +99,7 @@ class ProcessStrategy(ParallelStrategy, _GeneralRunnableStrategy, _Resultable):
         # Thinking about how to make sure that weather it needs to start
         # multiprocessing.managers.BaseManager server or not.
         # # *****************
-        SharingManager()
+        activate_manager_server()
 
 
     @dispatch((FunctionType, MethodType, PartialFunction), tuple, dict)
@@ -163,8 +163,37 @@ class ProcessStrategy(ParallelStrategy, _GeneralRunnableStrategy, _Resultable):
             __process.kill()
 
 
-    def get_result(self) -> IterableType[object]:
+    def get_result(self) -> IterableType[_ParallelResult]:
         return self.result()
+
+
+    def _saving_process(self) -> List[_ParallelResult]:
+        __parallel_results = []
+        for __result in self._Processors_Running_Result:
+            _presult = _ParallelResult()
+
+            # # # # Save some basic info of Process
+            _presult.ppid = __result["ppid"]
+            _presult.pid = __result["pid"]
+            _presult.worker_name = __result["name"]
+            _presult.worker_ident = __result["ident"]
+
+            # # # # Save state of process
+            __process_successful = __result.get("successful", None)
+            if __process_successful is True:
+                _presult.state = _ResultState.SUCCESS.value
+            else:
+                _presult.state = _ResultState.FAIL.value
+
+            # # # # Save running result of process
+            __process_result = __result.get("result", None)
+            _presult.data = __process_result
+            _presult.exit_code = __result["exitcode"]
+            _presult.exception = __result.get("exception", None)
+
+            __parallel_results.append(_presult)
+
+        return __parallel_results
 
 
 
@@ -183,6 +212,9 @@ class ProcessPoolStrategy(ParallelStrategy, _PoolRunnableStrategy, _Resultable):
                        *args, **kwargs) -> None:
         super(ProcessPoolStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
 
+        # Activate multiprocessing.managers.BaseManager server
+        activate_manager_server()
+
         # Initialize and build the Processes Pool.
         __pool_initializer: Callable = kwargs.get("pool_initializer", None)
         __pool_initargs: IterableType = kwargs.get("pool_initargs", None)
@@ -190,6 +222,7 @@ class ProcessPoolStrategy(ParallelStrategy, _PoolRunnableStrategy, _Resultable):
 
 
     def apply(self, function: Callable, *args, **kwargs) -> None:
+        self.reset_result()
         __process_running_result = None
 
         try:
@@ -212,6 +245,7 @@ class ProcessPoolStrategy(ParallelStrategy, _PoolRunnableStrategy, _Resultable):
                     kwargs: Dict = {},
                     callback: Callable = None,
                     error_callback: Callable = None) -> None:
+        self.reset_result()
         self._Processors_List = [
             self._Processors_Pool.apply_async(func=function,
                                               args=args,
@@ -221,28 +255,37 @@ class ProcessPoolStrategy(ParallelStrategy, _PoolRunnableStrategy, _Resultable):
             for _ in range(self.tasks_size)]
 
         for process in self._Processors_List:
-            __process_running_result = process.get()
-            __process_run_successful = process.successful()
+            _process_running_result = None
+            _process_run_successful = None
+            _exception = None
+
+            try:
+                _process_running_result = process.get()
+                _process_run_successful = process.successful()
+            except Exception as e:
+                _exception = e
+                _process_run_successful = False
 
             # Save Running result state and Running result value as dict
-            self._result_saving(successful=__process_run_successful, result=__process_running_result)
+            self._result_saving(successful=_process_run_successful, result=_process_running_result, exception=_exception)
 
 
     def map(self, function: Callable, args_iter: IterableType = (), chunksize: int = None) -> None:
-        __process_running_result = None
+        self.reset_result()
+        _process_running_result = None
 
         try:
-            __process_running_result = self._Processors_Pool.map(
+            _process_running_result = self._Processors_Pool.map(
                 func=function, iterable=args_iter, chunksize=chunksize)
-            __exception = None
-            __process_run_successful = True
+            _exception = None
+            _process_run_successful = True
         except Exception as e:
-            __exception = e
-            __process_run_successful = False
+            _exception = e
+            _process_run_successful = False
 
         # Save Running result state and Running result value as dict
-        for __result in (__process_running_result, []):
-            self._result_saving(successful=__process_run_successful, result=__result)
+        for __result in (_process_running_result or []):
+            self._result_saving(successful=_process_run_successful, result=__result, exception=None)
 
 
     def async_map(self,
@@ -251,6 +294,7 @@ class ProcessPoolStrategy(ParallelStrategy, _PoolRunnableStrategy, _Resultable):
                   chunksize: int = None,
                   callback: Callable = None,
                   error_callback: Callable = None) -> None:
+        self.reset_result()
         __map_result = self._Processors_Pool.map_async(
             func=function,
             iterable=args_iter,
@@ -261,25 +305,26 @@ class ProcessPoolStrategy(ParallelStrategy, _PoolRunnableStrategy, _Resultable):
         __process_run_successful = __map_result.successful()
 
         # Save Running result state and Running result value as dict
-        for __result in (__process_running_result, []):
-            self._result_saving(successful=__process_run_successful, result=__result)
+        for __result in (__process_running_result or []):
+            self._result_saving(successful=__process_run_successful, result=__result, exception=None)
 
 
     def map_by_args(self, function: Callable, args_iter: IterableType[IterableType] = (), chunksize: int = None) -> None:
+        self.reset_result()
         __process_running_result = None
 
         try:
             __process_running_result = self._Processors_Pool.starmap(
                 func=function, iterable=args_iter, chunksize=chunksize)
             __exception = None
-            __process_run_successful = False
+            __process_run_successful = True
         except Exception as e:
             __exception = e
             __process_run_successful = False
 
         # Save Running result state and Running result value as dict
-        for __result in (__process_running_result, []):
-            self._result_saving(successful=__process_run_successful, result=__result)
+        for __result in (__process_running_result or []):
+            self._result_saving(successful=__process_run_successful, result=__result, exception=None)
 
 
     def async_map_by_args(self,
@@ -288,6 +333,7 @@ class ProcessPoolStrategy(ParallelStrategy, _PoolRunnableStrategy, _Resultable):
                           chunksize: int = None,
                           callback: Callable = None,
                           error_callback: Callable = None) -> None:
+        self.reset_result()
         __map_result = self._Processors_Pool.starmap_async(
             func=function,
             iterable=args_iter,
@@ -298,47 +344,48 @@ class ProcessPoolStrategy(ParallelStrategy, _PoolRunnableStrategy, _Resultable):
         __process_run_successful = __map_result.successful()
 
         # Save Running result state and Running result value as dict
-        for __result in (__process_running_result, []):
-            self._result_saving(successful=__process_run_successful, result=__result)
+        for __result in (__process_running_result or []):
+            self._result_saving(successful=__process_run_successful, result=__result, exception=None)
 
 
     def imap(self, function: Callable, args_iter: IterableType = (), chunksize: int = 1) -> None:
+        self.reset_result()
         __process_running_result = None
 
         try:
             imap_running_result = self._Processors_Pool.imap(func=function, iterable=args_iter, chunksize=chunksize)
             __process_running_result = [result for result in imap_running_result]
             __exception = None
-            __process_run_successful = False
+            __process_run_successful = True
         except Exception as e:
             __exception = e
             __process_run_successful = False
 
         # Save Running result state and Running result value as dict
-        for __result in (__process_running_result, []):
-            self._result_saving(successful=__process_run_successful, result=__result)
+        for __result in (__process_running_result or []):
+            self._result_saving(successful=__process_run_successful, result=__result, exception=None)
 
 
     def imap_unordered(self, function: Callable, args_iter: IterableType = (), chunksize: int = 1) -> None:
+        self.reset_result()
         __process_running_result = None
 
         try:
-            imap_running_result = self._Processors_Pool.imap_unordered(func=function,iterable=args_iter, chunksize=chunksize)
+            imap_running_result = self._Processors_Pool.imap_unordered(func=function, iterable=args_iter, chunksize=chunksize)
             __process_running_result = [result for result in imap_running_result]
             __exception = None
-            __process_run_successful = False
+            __process_run_successful = True
         except Exception as e:
             __exception = e
             __process_run_successful = False
 
         # Save Running result state and Running result value as dict
-        for __result in (__process_running_result, []):
-            self._result_saving(successful=__process_run_successful, result=__result)
+        for __result in (__process_running_result or []):
+            self._result_saving(successful=__process_run_successful, result=__result, exception=None)
 
 
-    def _result_saving(self, successful: bool, result: List) -> None:
-        process_result = {"successful": successful, "result": result}
-        # Saving value into list
+    def _result_saving(self, successful: bool, result: List, exception: Exception) -> None:
+        process_result = {"successful": successful, "result": result, "exception": exception}
         self._Processors_Running_Result.append(process_result)
 
 
@@ -351,7 +398,16 @@ class ProcessPoolStrategy(ParallelStrategy, _PoolRunnableStrategy, _Resultable):
         self._Processors_Pool.terminate()
 
 
-    def get_result(self) -> List[_ParallelResult]:
+    def get_result(self) -> List[_ProcessPoolResult]:
         return self.result()
 
+
+    def _saving_process(self) -> List[_ProcessPoolResult]:
+        _pool_results = []
+        for __result in self._Processors_Running_Result:
+            _pool_result = _ProcessPoolResult()
+            _pool_result.is_successful = __result["successful"]
+            _pool_result.data = __result["result"]
+            _pool_results.append(_pool_result)
+        return _pool_results
 
