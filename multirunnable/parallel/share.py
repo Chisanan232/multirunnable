@@ -1,5 +1,5 @@
 from multiprocessing.managers import BaseManager
-from multiprocessing import managers
+from multiprocessing import managers, Manager
 from inspect import isclass as inspect_isclass
 from typing import Dict, Any
 
@@ -29,7 +29,9 @@ managers.AutoProxy = redefined_autoproxy
 
 _Assign_Manager_Flag: Dict[str, bool] = {}
 _Manager_Start_Flag: bool = False
-_Current_Sharing_Manager: BaseManager
+_Current_Sharing_Manager: BaseManager = None
+
+Global_Manager = Manager()
 
 
 class _SharingManager(BaseManager):
@@ -38,6 +40,10 @@ class _SharingManager(BaseManager):
 
 def get_current_manager() -> BaseManager:
     return _Current_Sharing_Manager
+
+
+def activate_manager_server() -> _SharingManager:
+    return SharingManager()
 
 
 def get_manager_attr(attr: str) -> Any:
@@ -106,7 +112,6 @@ def sharing_in_processes(proxytype: Any = None):
         _foo = Foo()    # It could be used and shared in each different processes.
 
     :param proxytype:
-    :param _class: A class.
     :return: The instance which could be used and shared in each different processes.
     """
 
