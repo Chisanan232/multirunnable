@@ -23,7 +23,13 @@ class BaseResult(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def worker_id(self) -> str:
+    def worker_name(self) -> str:
+        pass
+
+
+    @property
+    @abstractmethod
+    def worker_ident(self) -> str:
         pass
 
 
@@ -49,7 +55,8 @@ class BaseResult(metaclass=ABCMeta):
 class MRResult(BaseResult):
 
     _PID: str = ""
-    _Worker_ID: str = ""
+    _Worker_Name: str = ""
+    _Worker_Ident: str = ""
     _Data: List[Any] = []
     _State: ResultState = None
     _Exception: Exception = None
@@ -65,13 +72,23 @@ class MRResult(BaseResult):
 
 
     @property
-    def worker_id(self) -> str:
-        return self._Worker_ID
+    def worker_name(self) -> str:
+        return self._Worker_Name
 
 
-    @worker_id.setter
-    def worker_id(self, worker_id) -> None:
-        self._Worker_ID = worker_id
+    @worker_name.setter
+    def worker_name(self, worker_name) -> None:
+        self._Worker_Name = worker_name
+
+
+    @property
+    def worker_ident(self) -> str:
+        return self._Worker_Ident
+
+
+    @worker_ident.setter
+    def worker_ident(self, worker_id) -> None:
+        self._Worker_Ident = worker_id
 
 
     @property
