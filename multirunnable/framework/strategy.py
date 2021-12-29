@@ -586,3 +586,8 @@ class Resultable(metaclass=ABCMeta):
         pass
 
 
+    @abstractmethod
+    def _saving_process(self):
+        pass
+
+
