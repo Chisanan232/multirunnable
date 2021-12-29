@@ -1,4 +1,7 @@
+import re
+
 from multirunnable.parallel.strategy import ParallelStrategy, ProcessStrategy, ProcessPoolStrategy
+from multirunnable.parallel.result import ParallelResult
 
 from ..framework.strategy import GeneralRunningTestSpec, PoolRunningTestSpec
 from ..test_config import (
@@ -24,7 +27,7 @@ Running_Diff_Time: int = Running_Diff_Time
 _Manager = mp.Manager()
 _Process_Lock = mp.Lock()
 
-Running_Parent_PID = None
+Running_Parent_PID: str = ""
 Running_Count = _Manager.Value("i", 0)
 Running_PIDs: List = _Manager.list()
 Running_PPIDs: List = _Manager.list()
@@ -82,7 +85,11 @@ def target_fun(*args, **kwargs) -> str:
         Running_Finish_Timestamp.append(_time)
 
     time.sleep(Test_Function_Sleep_Time)
-    return f"result_{mp.current_process()}"
+    return f"result_{_pid}"
+
+
+def target_error_fun(*args, **kwargs) -> str:
+    raise Exception("Testing result raising an exception.")
 
 
 def pool_target_fun(*args, **kwargs) -> str:
@@ -107,7 +114,7 @@ def pool_target_fun(*args, **kwargs) -> str:
         Running_Finish_Timestamp.append(_time)
 
     time.sleep(Test_Function_Sleep_Time)
-    return f"result_{mp.current_process()}"
+    return f"result_{_pid}"
 
 
 def map_target_fun(*args, **kwargs):
@@ -141,7 +148,7 @@ def map_target_fun(*args, **kwargs):
         Running_Finish_Timestamp.append(_time)
 
     time.sleep(Test_Function_Sleep_Time)
-    return f"result_{mp.current_process()}"
+    return f"result_{_pid}"
 
 
 class TargetCls:
@@ -204,6 +211,10 @@ def process_pool_strategy():
     return _strategy
 
 
+_Generate_Worker_Error_Msg = \
+    f"The instances which be created by method 'generate_worker' should be an instance of 'multiprocessing.Process'."
+
+
 class TestProcess(GeneralRunningTestSpec):
 
     @pytest.mark.skip(reason="Not implement testing logic.")
@@ -218,291 +229,317 @@ class TestProcess(GeneralRunningTestSpec):
 
     def test_generate_worker_with_function_with_no_argument(self, process_strategy: ProcessStrategy):
         # Test for no any parameters
-        _processes = [process_strategy.generate_worker(target_fun) for _ in range(Process_Size)]
-        _processes_chksums = map(TestProcess._chk_process_instn, _processes)
-        assert False not in list(_processes_chksums), f"The instances which be created by method 'generate_worker' should be an instance of 'multiprocessing.Process'."
+        self._generate_worker(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=target_fun,
+            error_msg=_Generate_Worker_Error_Msg)
+
+        process_strategy.reset_result()
 
 
     def test_generate_worker_with_function_with_args(self, process_strategy: ProcessStrategy):
         # Test for parameters with '*args'
-        _processes_with_args = [process_strategy.generate_worker(target_fun, *Test_Function_Args) for _ in range(Process_Size)]
-        _processes_chksums = map(TestProcess._chk_process_instn, _processes_with_args)
-        assert False not in list(_processes_chksums), f"The instances which be created by method 'generate_worker' should be an instance of 'multiprocessing.Process'."
+        self._generate_worker(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=target_fun,
+            args=Test_Function_Args,
+            error_msg=_Generate_Worker_Error_Msg)
+
+        process_strategy.reset_result()
 
 
     def test_generate_worker_with_function_with_kwargs(self, process_strategy: ProcessStrategy):
         # Test for parameters with '**kwargs'
-        _processes_with_kwargs = [process_strategy.generate_worker(target_fun, **Test_Function_Kwargs) for _ in range(Process_Size)]
-        _processes_chksums = map(TestProcess._chk_process_instn, _processes_with_kwargs)
-        assert False not in list(_processes_chksums), f"The instances which be created by method 'generate_worker' should be an instance of 'multiprocessing.Process'."
+        self._generate_worker(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=target_fun,
+            kwargs=Test_Function_Kwargs,
+            error_msg=_Generate_Worker_Error_Msg)
+
+        process_strategy.reset_result()
 
 
     def test_generate_worker_with_bounded_function_with_no_argument(self, process_strategy: ProcessStrategy):
         # # # # Test target function is bounded function.
         # Test for no any parameters
         _tc = TargetCls()
-        _processes = [process_strategy.generate_worker(_tc.method) for _ in range(Process_Size)]
-        _processes_chksums = map(TestProcess._chk_process_instn, _processes)
-        assert False not in list(_processes_chksums), f"The instances which be created by method 'generate_worker' should be an instance of 'multiprocessing.Process'."
+        self._generate_worker(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=_tc.method,
+            error_msg=_Generate_Worker_Error_Msg)
+
+        process_strategy.reset_result()
 
 
     def test_generate_worker_with_bounded_function_with_args(self, process_strategy: ProcessStrategy):
         # # # # Test target function is bounded function.
         # Test for parameters with '*args'
         _tc = TargetCls()
-        _processes_with_args = [process_strategy.generate_worker(_tc.method, *Test_Function_Args) for _ in range(Process_Size)]
-        _processes_chksums = map(TestProcess._chk_process_instn, _processes_with_args)
-        assert False not in list(_processes_chksums), f"The instances which be created by method 'generate_worker' should be an instance of 'multiprocessing.Process'."
+        self._generate_worker(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=_tc.method,
+            args=Test_Function_Args,
+            error_msg=_Generate_Worker_Error_Msg)
+
+        process_strategy.reset_result()
 
 
     def test_generate_worker_with_bounded_function_with_kwargs(self, process_strategy: ProcessStrategy):
         # # # # Test target function is bounded function.
         # Test for parameters with '**kwargs'
         _tc = TargetCls()
-        _processes_with_kwargs = [process_strategy.generate_worker(_tc.method, **Test_Function_Kwargs) for _ in range(Process_Size)]
-        _processes_chksums = map(TestProcess._chk_process_instn, _processes_with_kwargs)
-        assert False not in list(_processes_chksums), f"The instances which be created by method 'generate_worker' should be an instance of 'multiprocessing.Process'."
+        self._generate_worker(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=_tc.method,
+            kwargs=Test_Function_Kwargs,
+            error_msg=_Generate_Worker_Error_Msg)
+
+        process_strategy.reset_result()
 
 
     def test_generate_worker_with_classmethod_function_with_no_argument(self, process_strategy: ProcessStrategy):
         # # # # Test target function is classmethod function.
         # Test for no any parameters
-        _processes = [process_strategy.generate_worker(TargetCls.classmethod_fun) for _ in range(Process_Size)]
-        _processes_chksums = map(TestProcess._chk_process_instn, _processes)
-        assert False not in list(_processes_chksums), f"The instances which be created by method 'generate_worker' should be an instance of 'multiprocessing.Process'."
+        self._generate_worker(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=TargetCls.classmethod_fun,
+            error_msg=_Generate_Worker_Error_Msg)
+
+        process_strategy.reset_result()
 
 
     def test_generate_worker_with_classmethod_function_with_args(self, process_strategy: ProcessStrategy):
         # # # # Test target function is classmethod function.
         # Test for parameters with '*args'
-        _processes_with_args = [process_strategy.generate_worker(TargetCls.classmethod_fun, *Test_Function_Args) for _ in range(Process_Size)]
-        _processes_chksums = map(TestProcess._chk_process_instn, _processes_with_args)
-        assert False not in list(_processes_chksums), f"The instances which be created by method 'generate_worker' should be an instance of 'multiprocessing.Process'."
+        self._generate_worker(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=TargetCls.classmethod_fun,
+            args=Test_Function_Args,
+            error_msg=_Generate_Worker_Error_Msg)
+
+        process_strategy.reset_result()
 
 
     def test_generate_worker_with_classmethod_function_with_kwargs(self, process_strategy: ProcessStrategy):
         # # # # Test target function is classmethod function.
         # Test for parameters with '**kwargs'
-        _processes_with_kwargs = [process_strategy.generate_worker(TargetCls.classmethod_fun, **Test_Function_Kwargs) for _ in range(Process_Size)]
-        _processes_chksums = map(TestProcess._chk_process_instn, _processes_with_kwargs)
-        assert False not in list(_processes_chksums), f"The instances which be created by method 'generate_worker' should be an instance of 'multiprocessing.Process'."
+        self._generate_worker(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=TargetCls.classmethod_fun,
+            kwargs=Test_Function_Kwargs,
+            error_msg=_Generate_Worker_Error_Msg)
+
+        process_strategy.reset_result()
 
 
     def test_generate_worker_with_staticmethod_function_with_no_argument(self, process_strategy: ProcessStrategy):
         # # # # Test target function is staticmethod function.
         # Test for no any parameters
-        _processes = [process_strategy.generate_worker(TargetCls.staticmethod_fun) for _ in range(Process_Size)]
-        _processes_chksums = map(TestProcess._chk_process_instn, _processes)
-        assert False not in list(_processes_chksums), f"The instances which be created by method 'generate_worker' should be an instance of 'multiprocessing.Process'."
+        self._generate_worker(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=TargetCls.staticmethod_fun,
+            error_msg=_Generate_Worker_Error_Msg)
+
+        process_strategy.reset_result()
 
 
     def test_generate_worker_with_staticmethod_function_with_args(self, process_strategy: ProcessStrategy):
         # # # # Test target function is staticmethod function.
         # Test for parameters with '*args'
-        _processes_with_args = [process_strategy.generate_worker(TargetCls.staticmethod_fun, *Test_Function_Args) for _ in range(Process_Size)]
-        _processes_chksums = map(TestProcess._chk_process_instn, _processes_with_args)
-        assert False not in list(_processes_chksums), f"The instances which be created by method 'generate_worker' should be an instance of 'multiprocessing.Process'."
+        self._generate_worker(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=TargetCls.staticmethod_fun,
+            args=Test_Function_Args,
+            error_msg=_Generate_Worker_Error_Msg)
+
+        process_strategy.reset_result()
 
 
     def test_generate_worker_with_staticmethod_function_with_kwargs(self, process_strategy: ProcessStrategy):
         # # # # Test target function is staticmethod function.
         # Test for parameters with '**kwargs'
-        _processes_with_kwargs = [process_strategy.generate_worker(TargetCls.staticmethod_fun, **Test_Function_Kwargs) for _ in range(Process_Size)]
-        _processes_chksums = map(TestProcess._chk_process_instn, _processes_with_kwargs)
-        assert False not in list(_processes_chksums), f"The instances which be created by method 'generate_worker' should be an instance of 'multiprocessing.Process'."
+        self._generate_worker(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=TargetCls.staticmethod_fun,
+            kwargs=Test_Function_Kwargs,
+            error_msg=_Generate_Worker_Error_Msg)
+
+        process_strategy.reset_result()
 
 
-    @staticmethod
-    def _chk_process_instn(process) -> bool:
-        return isinstance(process, mp.Process)
+    def _chk_worker_instance_type(self, worker) -> bool:
+        return isinstance(worker, mp.Process)
 
 
     def test_activate_workers_with_function_with_no_arguments(self, process_strategy: ProcessStrategy):
-        TestProcess._initial()
+        self._activate_workers(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=target_fun)
 
-        _processes = [process_strategy.generate_worker(target_fun) for _ in range(Process_Size)]
-        process_strategy.activate_workers(_processes)
-        process_strategy.close(_processes)
+        process_strategy.reset_result()
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
-        TestProcess._chk_process_record()
+        TestProcess._chk_record()
 
 
     def test_activate_workers_with_function_with_args(self, process_strategy: ProcessStrategy):
-        TestProcess._initial()
+        self._activate_workers(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=target_fun,
+            args=Test_Function_Args)
 
-        _processes_with_args = [process_strategy.generate_worker(target_fun, *Test_Function_Args) for _ in range(Process_Size)]
-        process_strategy.activate_workers(_processes_with_args)
-        process_strategy.close(_processes_with_args)
+        process_strategy.reset_result()
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
-        TestProcess._chk_process_record()
+        TestProcess._chk_record()
 
 
     def test_activate_workers_with_function_with_kwargs(self, process_strategy: ProcessStrategy):
-        TestProcess._initial()
+        self._activate_workers(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=target_fun,
+            kwargs=Test_Function_Kwargs)
 
-        _processes_with_kwargs = [process_strategy.generate_worker(target_fun, **Test_Function_Kwargs) for _ in range(Process_Size)]
-        process_strategy.activate_workers(_processes_with_kwargs)
-        process_strategy.close(_processes_with_kwargs)
+        process_strategy.reset_result()
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
-        TestProcess._chk_process_record()
+        TestProcess._chk_record()
 
 
     def test_activate_workers_with_bounded_function_with_no_arguments(self, process_strategy: ProcessStrategy):
-        TestProcess._initial()
-
         _tc = TargetCls()
-        _processes = [process_strategy.generate_worker(_tc.method) for _ in range(Process_Size)]
-        process_strategy.activate_workers(_processes)
-        process_strategy.close(_processes)
+        self._activate_workers(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=_tc.method)
+
+        process_strategy.reset_result()
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
-        TestProcess._chk_process_record()
+        TestProcess._chk_record()
 
 
     def test_activate_workers_with_bounded_function_with_args(self, process_strategy: ProcessStrategy):
-        TestProcess._initial()
-
         _tc = TargetCls()
-        _processes_with_args = [process_strategy.generate_worker(_tc.method, *Test_Function_Args) for _ in range(Process_Size)]
-        process_strategy.activate_workers(_processes_with_args)
-        process_strategy.close(_processes_with_args)
+        self._activate_workers(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=_tc.method,
+            args=Test_Function_Args)
+
+        process_strategy.reset_result()
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
-        TestProcess._chk_process_record()
+        TestProcess._chk_record()
 
 
     def test_activate_workers_with_bounded_function_with_kwargs(self, process_strategy: ProcessStrategy):
-        TestProcess._initial()
-
         _tc = TargetCls()
-        _processes_with_kwargs = [process_strategy.generate_worker(_tc.method, **Test_Function_Kwargs) for _ in range(Process_Size)]
-        process_strategy.activate_workers(_processes_with_kwargs)
-        process_strategy.close(_processes_with_kwargs)
+        self._activate_workers(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=_tc.method,
+            kwargs=Test_Function_Kwargs)
+
+        process_strategy.reset_result()
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
-        TestProcess._chk_process_record()
+        TestProcess._chk_record()
 
 
     def test_activate_workers_with_classmethod_function_with_no_arguments(self, process_strategy: ProcessStrategy):
-        TestProcess._initial()
+        self._activate_workers(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=TargetCls.classmethod_fun)
 
-        _processes = [process_strategy.generate_worker(TargetCls.classmethod_fun) for _ in range(Process_Size)]
-        process_strategy.activate_workers(_processes)
-        process_strategy.close(_processes)
+        process_strategy.reset_result()
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
-        TestProcess._chk_process_record()
+        TestProcess._chk_record()
 
 
     def test_activate_workers_with_classmethod_function_with_args(self, process_strategy: ProcessStrategy):
-        TestProcess._initial()
+        self._activate_workers(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=TargetCls.classmethod_fun,
+            args=Test_Function_Args)
 
-        _processes_with_args = [process_strategy.generate_worker(TargetCls.classmethod_fun, *Test_Function_Args) for _ in range(Process_Size)]
-        process_strategy.activate_workers(_processes_with_args)
-        process_strategy.close(_processes_with_args)
+        process_strategy.reset_result()
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
-        TestProcess._chk_process_record()
+        TestProcess._chk_record()
 
 
     def test_activate_workers_with_classmethod_function_with_kwargs(self, process_strategy: ProcessStrategy):
-        TestProcess._initial()
+        self._activate_workers(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=TargetCls.classmethod_fun,
+            kwargs=Test_Function_Kwargs)
 
-        _processes_with_kwargs = [process_strategy.generate_worker(TargetCls.classmethod_fun, **Test_Function_Kwargs) for _ in range(Process_Size)]
-        process_strategy.activate_workers(_processes_with_kwargs)
-        process_strategy.close(_processes_with_kwargs)
+        process_strategy.reset_result()
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
-        TestProcess._chk_process_record()
+        TestProcess._chk_record()
 
 
     def test_activate_workers_with_staticmethod_function_with_no_arguments(self, process_strategy: ProcessStrategy):
-        TestProcess._initial()
+        self._activate_workers(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=TargetCls.staticmethod_fun)
 
-        _processes = [process_strategy.generate_worker(TargetCls.staticmethod_fun) for _ in range(Process_Size)]
-        process_strategy.activate_workers(_processes)
-        process_strategy.close(_processes)
+        process_strategy.reset_result()
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
-        TestProcess._chk_process_record()
+        TestProcess._chk_record()
 
 
     def test_activate_workers_with_staticmethod_function_with_args(self, process_strategy: ProcessStrategy):
-        TestProcess._initial()
+        self._activate_workers(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=TargetCls.staticmethod_fun,
+            args=Test_Function_Args)
 
-        _processes_with_args = [process_strategy.generate_worker(TargetCls.staticmethod_fun, *Test_Function_Args) for _ in range(Process_Size)]
-        process_strategy.activate_workers(_processes_with_args)
-        process_strategy.close(_processes_with_args)
+        process_strategy.reset_result()
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
-        TestProcess._chk_process_record()
+        TestProcess._chk_record()
 
 
     def test_activate_workers_with_staticmethod_function_with_kwargs(self, process_strategy: ProcessStrategy):
-        TestProcess._initial()
+        self._activate_workers(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=TargetCls.staticmethod_fun,
+            kwargs=Test_Function_Kwargs)
 
-        _processes_with_kwargs = [process_strategy.generate_worker(TargetCls.staticmethod_fun, **Test_Function_Kwargs) for _ in range(Process_Size)]
-        process_strategy.activate_workers(_processes_with_kwargs)
-        process_strategy.close(_processes_with_kwargs)
+        process_strategy.reset_result()
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
-        TestProcess._chk_process_record()
-
-
-    @staticmethod
-    def _initial():
-        # Test for parameters with '**kwargs'
-        reset_running_flag()
-        reset_running_timer()
-
-        global Running_Parent_PID
-        Running_Parent_PID = os.getpid()
-
-
-    @staticmethod
-    def _chk_process_record():
-        assert Running_Count.value == Process_Size, f"The running count should be the same as the amount of process."
-
-        _ppid_list = Running_PPIDs[:]
-        _pid_list = Running_PIDs[:]
-        _current_process_list = Running_Current_Processes[:]
-        _timestamp_list = Running_Finish_Timestamp[:]
-
-        assert len(set(_ppid_list)) == 1, f"The PPID of each process should be the same."
-        assert _ppid_list[0] == Running_Parent_PID, f"The PPID should equal to {Running_Parent_PID}. But it got {_ppid_list[0]}."
-        assert len(_pid_list) == Process_Size, f"The count of PID (no de-duplicate) should be the same as the count of processes."
-        assert len(set(_pid_list)) == Process_Size, f"The count of PID (de-duplicate) should be the same as the count of processes."
-        assert len(_pid_list) == len(_current_process_list), f"The count of current process name (no de-duplicate) should be equal to count of PIDs."
-        assert len(set(_pid_list)) == len(set(_current_process_list)), f"The count of current process name (de-duplicate) should be equal to count of PIDs."
-
-        _max_timestamp = max(_timestamp_list)
-        _min_timestamp = min(_timestamp_list)
-        _diff_timestamp = _max_timestamp - _min_timestamp
-        assert _diff_timestamp <= Running_Diff_Time, f"Processes should be run in the same time period."
+        TestProcess._chk_record()
 
 
     @pytest.mark.skip(reason="Not implement testing logic.")
     def test_close(self, process_strategy: ProcessStrategy):
-        # Test for no any parameters
-        # process_strategy.close(self.__Processes)
-        # _active_children_list = mp.active_children()
-        # print(len(_active_children_list) == 0)
-        # # assert len(_active_children_list) == 0, f"Processes should be closed finely."
-        #
-        # # Test for parameters with '*args'
-        # process_strategy.close(self.__Processes_With_Args)
-        # _active_children_list = mp.active_children()
-        # print(len(_active_children_list) == 0)
-        # # assert len(_active_children_list) == 0, f"Processes should be closed finely."
-        #
-        # # Test for parameters with '**kwargs'
-        # process_strategy.close(self.__Processes_With_Kwargs)
-        # _active_children_list = mp.active_children()
-        # print(len(_active_children_list) == 0)
-        # assert len(_active_children_list) == 0, f"Processes should be closed finely."
         pass
 
 
@@ -516,9 +553,68 @@ class TestProcess(GeneralRunningTestSpec):
         pass
 
 
-    @pytest.mark.skip(reason="Not implement. The result feature not finish.")
-    def test_get_result(self, process_strategy: ProcessStrategy):
-        pass
+    def test_get_success_result(self, process_strategy: ProcessStrategy):
+        self._activate_workers(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=target_fun,
+            args=Test_Function_Args)
+
+        _result = process_strategy.get_result()
+        assert _result is not None and _result != [], f"The running result should not be empty."
+        assert type(_result) is list, f"The result should be a list type object."
+        for _r in _result:
+            assert isinstance(_r, ParallelResult) is True, f"The element of result should be instance of object 'ParallelResult'."
+            assert _r.ppid == Running_Parent_PID, f"The PPID should be the same as we recorded."
+            assert _r.pid in Running_PIDs, f"The PID should exists in list we record."
+            assert _r.worker_name, f"It should have process name."
+            assert _r.worker_ident, f"It should have process identity."
+            assert _r.data == f"result_{_r.pid}", f"Its data should be same as we expect 'result_{_r.pid}'."
+            assert _r.state == "successful", f"Its state should be 'successful'."
+            assert _r.exit_code is None, f"The exit code should be None (it return multiprocessing.current_process.exitcode)."
+            assert _r.exception is None, f"It should have nothing exception."
+
+
+    def test_get_failure_result(self, process_strategy: ProcessStrategy):
+        self._activate_workers(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=target_error_fun)
+
+        _result = process_strategy.get_result()
+        assert _result is not None and _result != [], f""
+        assert type(_result) is list, f""
+        for _r in _result:
+            assert isinstance(_r, ParallelResult) is True, f""
+            assert _r.ppid, f"It should have PPID."
+            assert _r.pid, f"It should have PID."
+            assert _r.worker_name, f"It should have process name."
+            assert _r.worker_ident, f"It should have process identity."
+            assert _r.data is None, f"Its data should be None."
+            assert _r.state == "fail", f"Its state should be 'fail'."
+            assert _r.exit_code is None, f"The exit code should not be None (it return multiprocessing.current_process.exitcode)."
+            assert isinstance(_r.exception, Exception) and "Testing result raising an exception" in str(_r.exception), f"It should have an exception and error message is 'Testing result raising an exception'."
+
+
+    def _initial(self):
+        # Test for parameters with '**kwargs'
+        reset_running_flag()
+        reset_running_timer()
+
+        global Running_Parent_PID
+        Running_Parent_PID = os.getpid()
+
+
+    @staticmethod
+    def _chk_record():
+        GeneralRunningTestSpec._chk_ppid_info(ppid_list=Running_PPIDs, running_parent_pid=Running_Parent_PID)
+        GeneralRunningTestSpec._chk_process_record(
+            running_cnt=Running_Count.value,
+            worker_size=Process_Size,
+            running_wokrer_ids=Running_PIDs,
+            running_current_workers=Running_Current_Processes,
+            running_finish_timestamps=Running_Finish_Timestamp
+        )
 
 
 
@@ -530,7 +626,7 @@ class TestProcessPool(PoolRunningTestSpec):
 
 
     @pytest.mark.skip(reason="Not implement testing logic.")
-    def test_async_apply_with_function(self, process_pool_strategy: ProcessPoolStrategy):
+    def test_apply_with_function(self, process_pool_strategy: ProcessPoolStrategy):
         pass
         # TestProcessPool._initial()
         #
@@ -540,7 +636,7 @@ class TestProcessPool(PoolRunningTestSpec):
 
 
     @pytest.mark.skip(reason="Not implement testing logic.")
-    def test_async_apply_with_bounded_function(self, process_pool_strategy: ProcessPoolStrategy):
+    def test_apply_with_bounded_function(self, process_pool_strategy: ProcessPoolStrategy):
         pass
         # TestProcessPool._initial()
         #
@@ -551,7 +647,7 @@ class TestProcessPool(PoolRunningTestSpec):
 
 
     @pytest.mark.skip(reason="Not implement testing logic.")
-    def test_async_apply_with_classmethod_function(self, process_pool_strategy: ProcessPoolStrategy):
+    def test_apply_with_classmethod_function(self, process_pool_strategy: ProcessPoolStrategy):
         pass
         # TestProcessPool._initial()
         #
@@ -561,7 +657,7 @@ class TestProcessPool(PoolRunningTestSpec):
 
 
     @pytest.mark.skip(reason="Not implement testing logic.")
-    def test_async_apply_with_staticmethod_function(self, process_pool_strategy: ProcessPoolStrategy):
+    def test_apply_with_staticmethod_function(self, process_pool_strategy: ProcessPoolStrategy):
         pass
         # TestProcessPool._initial()
         #
@@ -571,119 +667,93 @@ class TestProcessPool(PoolRunningTestSpec):
 
 
     def test_async_apply_with_function_with_no_arguments(self, process_pool_strategy: ProcessPoolStrategy):
-        TestProcessPool._initial()
+        self._async_apply(strategy=process_pool_strategy, target_fun=pool_target_fun)
 
-        process_pool_strategy.async_apply(function=pool_target_fun)
-
-        TestProcessPool._chk_process_record()
+        TestProcessPool._chk_record()
 
 
     def test_async_apply_with_function_with_args(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for parameters with '*args'
-        TestProcessPool._initial()
+        self._async_apply(strategy=process_pool_strategy, target_fun=pool_target_fun, args=Test_Function_Args)
 
-        process_pool_strategy.async_apply(function=pool_target_fun, args=Test_Function_Args)
-
-        TestProcessPool._chk_process_record()
+        TestProcessPool._chk_record()
 
 
     def test_async_apply_with_function_with_kwargs(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for parameters with '**kwargs'
-        TestProcessPool._initial()
+        self._async_apply(strategy=process_pool_strategy, target_fun=pool_target_fun, kwargs=Test_Function_Kwargs)
 
-        process_pool_strategy.async_apply(function=pool_target_fun, kwargs=Test_Function_Kwargs)
-
-        TestProcessPool._chk_process_record()
+        TestProcessPool._chk_record()
 
 
     def test_async_apply_with_bounded_function_with_no_arguments(self, process_pool_strategy: ProcessPoolStrategy):
-        TestProcessPool._initial()
-
         _tc = TargetPoolCls()
-        process_pool_strategy.async_apply(function=_tc.method)
+        self._async_apply(strategy=process_pool_strategy, target_fun=_tc.method)
 
-        TestProcessPool._chk_process_record()
+        TestProcessPool._chk_record()
 
 
     def test_async_apply_with_bounded_function_with_args(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for parameters with '*args'
-        TestProcessPool._initial()
-
         _tc = TargetPoolCls()
-        process_pool_strategy.async_apply(function=_tc.method, args=Test_Function_Args)
+        self._async_apply(strategy=process_pool_strategy, target_fun=_tc.method, args=Test_Function_Args)
 
-        TestProcessPool._chk_process_record()
+        TestProcessPool._chk_record()
 
 
     def test_async_apply_with_bounded_function_with_kwargs(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for parameters with '**kwargs'
-        TestProcessPool._initial()
-
         _tc = TargetPoolCls()
-        process_pool_strategy.async_apply(function=_tc.method, kwargs=Test_Function_Kwargs)
+        self._async_apply(strategy=process_pool_strategy, target_fun=_tc.method, kwargs=Test_Function_Kwargs)
 
-        TestProcessPool._chk_process_record()
+        TestProcessPool._chk_record()
 
 
     def test_async_apply_with_classmethod_function_with_no_arguments(self, process_pool_strategy: ProcessPoolStrategy):
-        TestProcessPool._initial()
+        self._async_apply(strategy=process_pool_strategy, target_fun=TargetPoolCls.classmethod_fun)
 
-        process_pool_strategy.async_apply(function=TargetPoolCls.classmethod_fun)
-
-        TestProcessPool._chk_process_record()
+        TestProcessPool._chk_record()
 
 
     def test_async_apply_with_classmethod_function_with_args(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for parameters with '*args'
-        TestProcessPool._initial()
+        self._async_apply(strategy=process_pool_strategy, target_fun=TargetPoolCls.classmethod_fun, args=Test_Function_Args)
 
-        process_pool_strategy.async_apply(function=TargetPoolCls.classmethod_fun, args=Test_Function_Args)
-
-        TestProcessPool._chk_process_record()
+        TestProcessPool._chk_record()
 
 
     def test_async_apply_with_classmethod_function_with_kwargs(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for parameters with '**kwargs'
-        TestProcessPool._initial()
+        self._async_apply(strategy=process_pool_strategy, target_fun=TargetPoolCls.classmethod_fun, kwargs=Test_Function_Kwargs)
 
-        process_pool_strategy.async_apply(function=TargetPoolCls.classmethod_fun, kwargs=Test_Function_Kwargs)
-
-        TestProcessPool._chk_process_record()
+        TestProcessPool._chk_record()
 
 
     def test_async_apply_with_staticmethod_function_with_no_arguments(self, process_pool_strategy: ProcessPoolStrategy):
-        TestProcessPool._initial()
+        self._async_apply(strategy=process_pool_strategy, target_fun=TargetPoolCls.staticmethod_fun)
 
-        process_pool_strategy.async_apply(function=TargetPoolCls.staticmethod_fun)
-
-        TestProcessPool._chk_process_record()
+        TestProcessPool._chk_record()
 
 
     def test_async_apply_with_staticmethod_function_with_args(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for parameters with '*args'
-        TestProcessPool._initial()
+        self._async_apply(strategy=process_pool_strategy, target_fun=TargetPoolCls.staticmethod_fun, args=Test_Function_Args)
 
-        process_pool_strategy.async_apply(function=TargetPoolCls.staticmethod_fun, args=Test_Function_Args)
-
-        TestProcessPool._chk_process_record()
+        TestProcessPool._chk_record()
 
 
     def test_async_apply_with_staticmethod_function_with_kwargs(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for parameters with '**kwargs'
-        TestProcessPool._initial()
+        self._async_apply(strategy=process_pool_strategy, target_fun=TargetPoolCls.staticmethod_fun, kwargs=Test_Function_Kwargs)
 
-        process_pool_strategy.async_apply(function=TargetPoolCls.staticmethod_fun, kwargs=Test_Function_Kwargs)
-
-        TestProcessPool._chk_process_record()
+        TestProcessPool._chk_record()
 
 
     def test_map_with_function(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for no any parameters
-        TestProcessPool._initial()
+        self._map(strategy=process_pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Args)
 
-        process_pool_strategy.map(function=map_target_fun, args_iter=Test_Function_Args)
-
-        TestProcessPool._chk_process_record_map()
+        TestProcessPool._chk_map_record()
 
         # Test for parameters with '*args'
         # process_pool_strategy.map(function=target_fun, args_iter=Test_Function_Args)
@@ -691,39 +761,31 @@ class TestProcessPool(PoolRunningTestSpec):
 
     def test_map_with_bounded_function(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for no any parameters
-        TestProcessPool._initial()
-
         _tc = TargetPoolMapCls()
-        process_pool_strategy.map(function=_tc.method, args_iter=Test_Function_Args)
+        self._map(strategy=process_pool_strategy, target_fun=_tc.method, args_iter=Test_Function_Args)
 
-        TestProcessPool._chk_process_record_map()
+        TestProcessPool._chk_map_record()
 
 
     def test_map_with_classmethod_function(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for no any parameters
-        TestProcessPool._initial()
+        self._map(strategy=process_pool_strategy, target_fun=TargetPoolMapCls.classmethod_fun, args_iter=Test_Function_Args)
 
-        process_pool_strategy.map(function=TargetPoolMapCls.classmethod_fun, args_iter=Test_Function_Args)
-
-        TestProcessPool._chk_process_record_map()
+        TestProcessPool._chk_map_record()
 
 
     def test_map_with_staticmethod_function(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for no any parameters
-        TestProcessPool._initial()
+        self._map(strategy=process_pool_strategy, target_fun=TargetPoolMapCls.staticmethod_fun, args_iter=Test_Function_Args)
 
-        process_pool_strategy.map(function=TargetPoolMapCls.staticmethod_fun, args_iter=Test_Function_Args)
-
-        TestProcessPool._chk_process_record_map()
+        TestProcessPool._chk_map_record()
 
 
     def test_async_map_with_function(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for no any parameters
-        TestProcessPool._initial()
+        self._async_map(strategy=process_pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Args)
 
-        process_pool_strategy.async_map(function=map_target_fun, args_iter=Test_Function_Args)
-
-        TestProcessPool._chk_process_record_map()
+        TestProcessPool._chk_map_record()
 
         # Test for parameters with '*args'
         # process_pool_strategy.async_map(function=target_fun, args_iter=Test_Function_Args)
@@ -731,39 +793,31 @@ class TestProcessPool(PoolRunningTestSpec):
 
     def test_async_map_with_bounded_function(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for no any parameters
-        TestProcessPool._initial()
-
         _tc = TargetPoolMapCls()
-        process_pool_strategy.async_map(function=_tc.method, args_iter=Test_Function_Args)
+        self._async_map(strategy=process_pool_strategy, target_fun=_tc.method, args_iter=Test_Function_Args)
 
-        TestProcessPool._chk_process_record_map()
+        TestProcessPool._chk_map_record()
 
 
     def test_async_map_with_classmethod_function(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for no any parameters
-        TestProcessPool._initial()
+        self._async_map(strategy=process_pool_strategy, target_fun=TargetPoolMapCls.classmethod_fun, args_iter=Test_Function_Args)
 
-        process_pool_strategy.async_map(function=TargetPoolMapCls.classmethod_fun, args_iter=Test_Function_Args)
-
-        TestProcessPool._chk_process_record_map()
+        TestProcessPool._chk_map_record()
 
 
     def test_async_map_with_staticmethod_function(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for no any parameters
-        TestProcessPool._initial()
+        self._async_map(strategy=process_pool_strategy, target_fun=TargetPoolMapCls.staticmethod_fun, args_iter=Test_Function_Args)
 
-        process_pool_strategy.async_map(function=TargetPoolMapCls.staticmethod_fun, args_iter=Test_Function_Args)
-
-        TestProcessPool._chk_process_record_map()
+        TestProcessPool._chk_map_record()
 
 
     def test_map_by_args_with_function(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for no any parameters
-        TestProcessPool._initial()
+        self._map_by_args(strategy=process_pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Multiple_Args)
 
-        process_pool_strategy.map_by_args(function=map_target_fun, args_iter=Test_Function_Multiple_Args)
-
-        TestProcessPool._chk_process_record_map()
+        TestProcessPool._chk_map_record()
 
         # Test for parameters with '*args'
         # process_pool_strategy.map_by_args(function=target_fun, args_iter=Test_Function_Args)
@@ -771,39 +825,31 @@ class TestProcessPool(PoolRunningTestSpec):
 
     def test_map_by_args_with_bounded_function(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for no any parameters
-        TestProcessPool._initial()
-
         _tc = TargetPoolMapCls()
-        process_pool_strategy.map_by_args(function=_tc.method, args_iter=Test_Function_Multiple_Args)
+        self._map_by_args(strategy=process_pool_strategy, target_fun=_tc.method, args_iter=Test_Function_Multiple_Args)
 
-        TestProcessPool._chk_process_record_map()
+        TestProcessPool._chk_map_record()
 
 
     def test_map_by_args_with_classmethod_function(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for no any parameters
-        TestProcessPool._initial()
+        self._map_by_args(strategy=process_pool_strategy, target_fun=TargetPoolMapCls.classmethod_fun, args_iter=Test_Function_Multiple_Args)
 
-        process_pool_strategy.map_by_args(function=TargetPoolMapCls.classmethod_fun, args_iter=Test_Function_Multiple_Args)
-
-        TestProcessPool._chk_process_record_map()
+        TestProcessPool._chk_map_record()
 
 
     def test_map_by_args_with_staticmethod_function(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for no any parameters
-        TestProcessPool._initial()
+        self._map_by_args(strategy=process_pool_strategy, target_fun=TargetPoolMapCls.staticmethod_fun, args_iter=Test_Function_Multiple_Args)
 
-        process_pool_strategy.map_by_args(function=TargetPoolMapCls.staticmethod_fun, args_iter=Test_Function_Multiple_Args)
-
-        TestProcessPool._chk_process_record_map()
+        TestProcessPool._chk_map_record()
 
 
     def test_async_map_by_args_with_function(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for no any parameters
-        TestProcessPool._initial()
+        self._async_map_by_args(strategy=process_pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Multiple_Args)
 
-        process_pool_strategy.async_map_by_args(function=map_target_fun, args_iter=Test_Function_Multiple_Args)
-
-        TestProcessPool._chk_process_record_map()
+        TestProcessPool._chk_map_record()
 
         # Test for parameters with '*args'
         # process_pool_strategy.async_map_by_args(function=target_fun, args_iter=Test_Function_Args)
@@ -811,151 +857,138 @@ class TestProcessPool(PoolRunningTestSpec):
 
     def test_async_map_by_args_with_bounded_function(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for no any parameters
-        TestProcessPool._initial()
-
         _tc = TargetPoolMapCls()
-        process_pool_strategy.async_map_by_args(function=_tc.method, args_iter=Test_Function_Multiple_Args)
+        self._async_map_by_args(strategy=process_pool_strategy, target_fun=_tc.method, args_iter=Test_Function_Multiple_Args)
 
-        TestProcessPool._chk_process_record_map()
+        TestProcessPool._chk_map_record()
 
 
     def test_async_map_by_args_with_classmethod_function(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for no any parameters
-        TestProcessPool._initial()
+        self._async_map_by_args(strategy=process_pool_strategy, target_fun=TargetPoolMapCls.classmethod_fun, args_iter=Test_Function_Multiple_Args)
 
-        process_pool_strategy.async_map_by_args(function=TargetPoolMapCls.classmethod_fun, args_iter=Test_Function_Multiple_Args)
-
-        TestProcessPool._chk_process_record_map()
+        TestProcessPool._chk_map_record()
 
 
     def test_async_map_by_args_with_staticmethod_function(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for no any parameters
-        TestProcessPool._initial()
+        self._async_map_by_args(strategy=process_pool_strategy, target_fun=TargetPoolMapCls.staticmethod_fun, args_iter=Test_Function_Multiple_Args)
 
-        process_pool_strategy.async_map_by_args(function=TargetPoolMapCls.staticmethod_fun, args_iter=Test_Function_Multiple_Args)
-
-        TestProcessPool._chk_process_record_map()
+        TestProcessPool._chk_map_record()
 
 
     def test_imap_with_function(self, process_pool_strategy: ProcessPoolStrategy):
-        TestProcessPool._initial()
+        self._imap(strategy=process_pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Args)
 
-        process_pool_strategy.imap(function=map_target_fun, args_iter=Test_Function_Args)
-
-        TestProcessPool._chk_process_record_map()
+        TestProcessPool._chk_map_record()
 
 
     def test_imap_with_bounded_function(self, process_pool_strategy: ProcessPoolStrategy):
-        TestProcessPool._initial()
-
         _tc = TargetPoolMapCls()
-        process_pool_strategy.imap(function=_tc.method, args_iter=Test_Function_Args)
+        self._imap(strategy=process_pool_strategy, target_fun=_tc.method, args_iter=Test_Function_Args)
 
-        TestProcessPool._chk_process_record_map()
+        TestProcessPool._chk_map_record()
 
 
     def test_imap_with_classmethod_function(self, process_pool_strategy: ProcessPoolStrategy):
-        TestProcessPool._initial()
+        self._imap(strategy=process_pool_strategy, target_fun=TargetPoolMapCls.classmethod_fun, args_iter=Test_Function_Args)
 
-        process_pool_strategy.imap(function=TargetPoolMapCls.classmethod_fun, args_iter=Test_Function_Args)
-
-        TestProcessPool._chk_process_record_map()
+        TestProcessPool._chk_map_record()
 
 
     def test_imap_with_staticmethod_function(self, process_pool_strategy: ProcessPoolStrategy):
-        TestProcessPool._initial()
+        self._imap(strategy=process_pool_strategy, target_fun=TargetPoolMapCls.staticmethod_fun, args_iter=Test_Function_Args)
 
-        process_pool_strategy.imap(function=TargetPoolMapCls.staticmethod_fun, args_iter=Test_Function_Args)
-
-        TestProcessPool._chk_process_record_map()
+        TestProcessPool._chk_map_record()
 
 
     def test_imap_unordered_with_function(self, process_pool_strategy: ProcessPoolStrategy):
-        TestProcessPool._initial()
+        self._imap_unordered(strategy=process_pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Args)
 
-        process_pool_strategy.imap_unordered(function=map_target_fun, args_iter=Test_Function_Args)
-
-        TestProcessPool._chk_process_record_map()
+        TestProcessPool._chk_map_record()
 
 
     def test_imap_unordered_with_bounded_function(self, process_pool_strategy: ProcessPoolStrategy):
-        TestProcessPool._initial()
-
         _tc = TargetPoolMapCls()
-        process_pool_strategy.imap_unordered(function=_tc.method, args_iter=Test_Function_Args)
+        self._imap_unordered(strategy=process_pool_strategy, target_fun=_tc.method, args_iter=Test_Function_Args)
 
-        TestProcessPool._chk_process_record_map()
+        TestProcessPool._chk_map_record()
 
 
     def test_imap_unordered_with_classmethod_function(self, process_pool_strategy: ProcessPoolStrategy):
-        TestProcessPool._initial()
+        self._imap_unordered(strategy=process_pool_strategy, target_fun=TargetPoolMapCls.classmethod_fun, args_iter=Test_Function_Args)
 
-        process_pool_strategy.imap_unordered(function=TargetPoolMapCls.classmethod_fun, args_iter=Test_Function_Args)
-
-        TestProcessPool._chk_process_record_map()
+        TestProcessPool._chk_map_record()
 
 
     def test_imap_unordered_with_staticmethod_function(self, process_pool_strategy: ProcessPoolStrategy):
-        TestProcessPool._initial()
+        self._imap_unordered(strategy=process_pool_strategy, target_fun=TargetPoolMapCls.staticmethod_fun, args_iter=Test_Function_Args)
 
-        process_pool_strategy.imap_unordered(function=TargetPoolMapCls.staticmethod_fun, args_iter=Test_Function_Args)
-
-        TestProcessPool._chk_process_record_map()
+        TestProcessPool._chk_map_record()
 
 
-    @staticmethod
-    def _initial():
-        # Test for parameters with '**kwargs'
-        reset_pool_running_value()
-        reset_running_timer()
+    def test_get_success_result_with_async_apply(self, process_pool_strategy: ProcessPoolStrategy):
+        self._async_apply(strategy=process_pool_strategy, target_fun=pool_target_fun)
 
-        global Running_Parent_PID
-        Running_Parent_PID = os.getpid()
+        _results = process_pool_strategy.get_result()
+        PoolRunningTestSpec._chk_getting_success_result(results=_results)
 
 
-    @staticmethod
-    def _chk_process_record():
-        assert Pool_Running_Count.value == Pool_Size, f"The running count should be the same as the process pool size."
+    def test_get_failure_result_with_async_apply(self, process_pool_strategy: ProcessPoolStrategy):
+        self._async_apply(strategy=process_pool_strategy, target_fun=target_error_fun)
 
-        _ppid_list = Running_PPIDs[:]
-        _pid_list = Running_PIDs[:]
-        _current_process_list = Running_Current_Processes[:]
-        _timestamp_list = Running_Finish_Timestamp[:]
-
-        assert len(set(_ppid_list)) == 1, f"The PPID of each process should be the same."
-        assert _ppid_list[0] == Running_Parent_PID, f"The PPID should equal to {Running_Parent_PID}. But it got {_ppid_list[0]}."
-        assert len(_pid_list) == Process_Size, f"The count of PID (no de-duplicate) should be the same as the count of processes."
-        assert len(set(_pid_list)) == Process_Size, f"The count of PID (de-duplicate) should be the same as the count of processes."
-        assert len(_pid_list) == len(_current_process_list), f"The count of current process name (no de-duplicate) should be equal to count of PIDs."
-        assert len(set(_pid_list)) == len(set(_current_process_list)), f"The count of current process name (de-duplicate) should be equal to count of PIDs."
-
-        _max_timestamp = max(_timestamp_list)
-        _min_timestamp = min(_timestamp_list)
-        _diff_timestamp = _max_timestamp - _min_timestamp
-        assert _diff_timestamp <= Running_Diff_Time, f"Processes should be run in the same time period."
+        _results = process_pool_strategy.get_result()
+        PoolRunningTestSpec._chk_getting_failure_result(results=_results)
 
 
-    @staticmethod
-    def _chk_process_record_map():
-        _argument_size = len(Test_Function_Args)
-        assert Pool_Running_Count.value == _argument_size, f"The running count should be the same as the process pool size."
+    @pytest.mark.skip(reason="Not finish yet.")
+    def test_get_success_result_with_map(self, process_pool_strategy: ProcessPoolStrategy):
+        self._map(strategy=process_pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Args)
 
-        _ppid_list = Running_PPIDs[:]
-        _pid_list = Running_PIDs[:]
-        _current_process_list = Running_Current_Processes[:]
-        _timestamp_list = Running_Finish_Timestamp[:]
+        _results = process_pool_strategy.get_result()
+        PoolRunningTestSpec._chk_getting_success_result(results=_results)
 
-        assert len(set(_ppid_list)) == 1, f"The PPID of each process should be the same."
-        assert _ppid_list[0] == Running_Parent_PID, f"The PPID should equal to {Running_Parent_PID}. But it got {_ppid_list[0]}."
-        assert len(_pid_list) == _argument_size, f"The count of PID (no de-duplicate) should be the same as the count of processes."
-        assert len(set(_pid_list)) == _argument_size, f"The count of PID (de-duplicate) should be the same as the count of processes."
-        assert len(_pid_list) == len(_current_process_list), f"The count of current process name (no de-duplicate) should be equal to count of PIDs."
-        assert len(set(_pid_list)) == len(set(_current_process_list)), f"The count of current process name (de-duplicate) should be equal to count of PIDs."
 
-        _max_timestamp = max(_timestamp_list)
-        _min_timestamp = min(_timestamp_list)
-        _diff_timestamp = _max_timestamp - _min_timestamp
-        assert _diff_timestamp <= Running_Diff_Time, f"Processes should be run in the same time period."
+    def test_get_failure_result_with_map(self, process_pool_strategy: ProcessPoolStrategy):
+        self._map(strategy=process_pool_strategy, target_fun=target_error_fun, args_iter=Test_Function_Args)
+
+        _results = process_pool_strategy.get_result()
+        PoolRunningTestSpec._chk_getting_failure_result(results=_results)
+
+
+    def test_get_success_result_with_async_map(self, process_pool_strategy: ProcessPoolStrategy):
+        self._async_map(strategy=process_pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Args)
+
+        _results = process_pool_strategy.get_result()
+        PoolRunningTestSpec._chk_getting_success_result(results=_results)
+
+
+    def test_get_success_result_with_map_by_args(self, process_pool_strategy: ProcessPoolStrategy):
+        self._map_by_args(strategy=process_pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Multiple_Args)
+
+        _results = process_pool_strategy.get_result()
+        PoolRunningTestSpec._chk_getting_success_result(results=_results)
+
+
+    def test_get_success_result_with_async_map_by_args(self, process_pool_strategy: ProcessPoolStrategy):
+        self._async_map_by_args(strategy=process_pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Multiple_Args)
+
+        _results = process_pool_strategy.get_result()
+        PoolRunningTestSpec._chk_getting_success_result(results=_results)
+
+
+    def test_get_success_result_with_imap(self, process_pool_strategy: ProcessPoolStrategy):
+        self._imap(strategy=process_pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Args)
+
+        _results = process_pool_strategy.get_result()
+        PoolRunningTestSpec._chk_getting_success_result(results=_results)
+
+
+    def test_get_success_result_with_imap_unordered(self, process_pool_strategy: ProcessPoolStrategy):
+        self._imap_unordered(strategy=process_pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Args)
+
+        _results = process_pool_strategy.get_result()
+        PoolRunningTestSpec._chk_getting_success_result(results=_results)
 
 
     def test_close(self, process_pool_strategy: ProcessPoolStrategy):
@@ -981,7 +1014,35 @@ class TestProcessPool(PoolRunningTestSpec):
             assert True, f"It work finely."
 
 
-    @pytest.mark.skip(reason="Not implement. The result feature not finish.")
-    def test_get_result(self, process_pool_strategy: ProcessPoolStrategy):
-        pass
+    def _initial(self):
+        # Test for parameters with '**kwargs'
+        reset_pool_running_value()
+        reset_running_timer()
+
+        global Running_Parent_PID
+        Running_Parent_PID = os.getpid()
+
+
+    @staticmethod
+    def _chk_record():
+        PoolRunningTestSpec._chk_ppid_info(ppid_list=Running_PPIDs, running_parent_pid=Running_Parent_PID)
+        PoolRunningTestSpec._chk_process_record(
+            pool_running_cnt=Pool_Running_Count.value,
+            worker_size=Pool_Size,
+            running_worker_ids=Running_PIDs,
+            running_current_workers=Running_Current_Processes,
+            running_finish_timestamps=Running_Finish_Timestamp
+        )
+
+
+    @staticmethod
+    def _chk_map_record():
+        PoolRunningTestSpec._chk_ppid_info(ppid_list=Running_PPIDs, running_parent_pid=Running_Parent_PID)
+        PoolRunningTestSpec._chk_process_record_map(
+            pool_running_cnt=Pool_Running_Count.value,
+            function_args=Test_Function_Args,
+            running_worker_ids=Running_PIDs,
+            running_current_workers=Running_Current_Processes,
+            running_finish_timestamps=Running_Finish_Timestamp
+        )
 
