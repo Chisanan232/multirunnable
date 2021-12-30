@@ -11,9 +11,7 @@ from .framework import (
     MRResult as _MRResult
 )
 from .mode import RunningMode as _RunningMode
-from .tasks import OceanPersistenceTask as _OceanPersistenceTask
 from .adapter.strategy import PoolStrategyAdapter as _PoolStrategyAdapter
-from .persistence.interface import BasePersistence as _BasePersistence
 from ._config import set_mode
 
 
@@ -144,36 +142,6 @@ class SimplePool(Pool):
 
         global Pool_Runnable_Strategy
         Pool_Runnable_Strategy = __running_strategy_adapter.get_simple()
-
-
-
-class PersistencePool(Pool):
-
-    def __init__(self,
-                 mode: _RunningMode,
-                 pool_size: int,
-                 tasks_size: int,
-                 persistence_strategy: _BasePersistence,
-                 db_connection_pool_size: int):
-        super().__init__(mode=mode, pool_size=pool_size)
-        self.tasks_size = tasks_size
-        self.persistence_strategy = persistence_strategy
-        self.db_connection_pool_size = db_connection_pool_size
-        self._initial_running_strategy()
-
-
-    def _initial_running_strategy(self) -> None:
-        __persistence_task = _OceanPersistenceTask()
-        __persistence_task.strategy = self.persistence_strategy
-        __persistence_task.connection_pool_size = self.db_connection_pool_size
-
-        __running_strategy_adapter = _PoolStrategyAdapter(
-            mode=self._mode,
-            pool_size=self.pool_size,
-            tasks_size=self.tasks_size)
-
-        global Pool_Runnable_Strategy
-        Pool_Runnable_Strategy = __running_strategy_adapter.get_persistence(persistence=__persistence_task)
 
 
 

@@ -32,9 +32,7 @@ The framework section code:
 
 """
 
-from .task import (
-    BaseQueueTask,
-    BasePersistenceTask)
+from .task import BaseQueueTask
 
 from .executor import BaseExecutor
 from .pool import BasePool

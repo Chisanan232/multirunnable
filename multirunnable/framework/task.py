@@ -1,6 +1,5 @@
 from .features import BaseQueueType as _BaseQueueType
 from ..types import MRQueue as _MRQueue
-from ..persistence.interface import BasePersistence as _BasePersistence
 import multirunnable._utils as _utils
 
 from abc import ABCMeta, abstractmethod
@@ -74,23 +73,5 @@ class BaseQueueTask(metaclass=ABCMeta):
 
     @abstractmethod
     async def async_init_queue_with_values(self) -> None:
-        pass
-
-
-
-class BasePersistenceTask(metaclass=ABCMeta):
-
-    _Persistence_Strategy: _BasePersistence = None
-    _Database_Connection_Number: int = 0
-
-    @property
-    @abstractmethod
-    def strategy(self) -> _BasePersistence:
-        pass
-
-
-    @property
-    @abstractmethod
-    def connection_pool_size(self) -> int:
         pass
 

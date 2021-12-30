@@ -20,8 +20,8 @@ _LOGGER = getLogger(__user)
 
 from multirunnable.mode import RunningMode, FeatureMode
 from multirunnable.tasks import QueueTask
-from multirunnable.executor import SimpleExecutor, PersistenceExecutor
-from multirunnable.pool import SimplePool, PersistencePool
+from multirunnable.executor import SimpleExecutor
+from multirunnable.pool import SimplePool
 from multirunnable._import_utils import ImportMultiRunnable as _ImportMultiRunnable
 from multirunnable._config import set_mode, get_current_mode
 

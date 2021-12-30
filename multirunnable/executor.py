@@ -12,8 +12,6 @@ from .framework import (
 )
 from .mode import RunningMode as _RunningMode
 from .adapter.strategy import ExecutorStrategyAdapter as _ExecutorStrategyAdapter
-from .tasks import OceanPersistenceTask as _OceanPersistenceTask
-from .persistence.interface import BasePersistence as _BasePersistence
 from ._config import set_mode
 
 
@@ -110,33 +108,6 @@ class SimpleExecutor(Executor):
 
         global General_Runnable_Strategy
         General_Runnable_Strategy = __running_strategy_adapter.get_simple()
-
-
-
-class PersistenceExecutor(Executor):
-
-    def __init__(self,
-                 mode: _RunningMode,
-                 executors: int,
-                 persistence_strategy: _BasePersistence,
-                 db_connection_pool_size: int):
-        super().__init__(mode=mode, executors=executors)
-        self.persistence_strategy = persistence_strategy
-        self.db_connection_pool_size = db_connection_pool_size
-        self._initial_running_strategy()
-
-
-    def _initial_running_strategy(self) -> None:
-        __persistence_task = _OceanPersistenceTask()
-        __persistence_task.strategy = self.persistence_strategy
-        __persistence_task.connection_pool_size = self.db_connection_pool_size
-
-        __running_strategy_adapter = _ExecutorStrategyAdapter(
-            mode=self._mode,
-            executors=self._executors_number)
-
-        global General_Runnable_Strategy
-        General_Runnable_Strategy = __running_strategy_adapter.get_persistence(persistence=__persistence_task)
 
 
 
