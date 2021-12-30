@@ -32,11 +32,6 @@ class TestAdapterStrategy:
         pass
 
 
-    @pytest.mark.skip(reason="Possible deprecated")
-    def test_get_persistence(self):
-        pass
-
-
 
 class TestAdapterExecuteStrategy:
 
@@ -64,11 +59,6 @@ class TestAdapterExecuteStrategy:
         assert isinstance(_strategy, AsynchronousStrategy) is True, f"The type of strategy instance should be 'AsynchronousStrategy'."
 
 
-    @pytest.mark.skip(reason="Possible deprecated")
-    def test_get_persistence(self):
-        pass
-
-
 
 class TestAdapterPoolStrategy:
 
@@ -88,9 +78,4 @@ class TestAdapterPoolStrategy:
         _strategy_adapter = PoolStrategyAdapter(mode=RunningMode.GreenThread, pool_size=_Worker_Pool_Size, tasks_size=_Task_Size)
         _strategy = _strategy_adapter.get_simple()
         assert isinstance(_strategy, GreenThreadPoolStrategy) is True, f"The type of strategy instance should be 'GreenThreadPoolStrategy'."
-
-
-    @pytest.mark.skip(reason="Possible deprecated")
-    def test_get_persistence(self):
-        pass
 
