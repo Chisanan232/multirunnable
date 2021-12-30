@@ -1,5 +1,3 @@
-import re
-
 from multirunnable.parallel.strategy import ParallelStrategy, ProcessStrategy, ProcessPoolStrategy
 from multirunnable.parallel.result import ParallelResult
 
@@ -16,6 +14,7 @@ import datetime
 import pytest
 import time
 import os
+import re
 
 
 Process_Size: int = Worker_Size
@@ -934,6 +933,7 @@ class TestProcessPool(PoolRunningTestSpec):
         PoolRunningTestSpec._chk_getting_success_result(results=_results)
 
 
+    @pytest.mark.skip(reason="Not finish yet. Consider about whether the necessary about catch the exception or not.")
     def test_get_failure_result_with_async_apply(self, process_pool_strategy: ProcessPoolStrategy):
         self._async_apply(strategy=process_pool_strategy, target_fun=target_error_fun)
 
@@ -941,7 +941,6 @@ class TestProcessPool(PoolRunningTestSpec):
         PoolRunningTestSpec._chk_getting_failure_result(results=_results)
 
 
-    @pytest.mark.skip(reason="Not finish yet.")
     def test_get_success_result_with_map(self, process_pool_strategy: ProcessPoolStrategy):
         self._map(strategy=process_pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Args)
 
@@ -949,6 +948,7 @@ class TestProcessPool(PoolRunningTestSpec):
         PoolRunningTestSpec._chk_getting_success_result(results=_results)
 
 
+    @pytest.mark.skip(reason="Not finish yet. Consider about whether the necessary about catch the exception or not.")
     def test_get_failure_result_with_map(self, process_pool_strategy: ProcessPoolStrategy):
         self._map(strategy=process_pool_strategy, target_fun=target_error_fun, args_iter=Test_Function_Args)
 

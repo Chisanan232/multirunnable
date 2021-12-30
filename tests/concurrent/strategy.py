@@ -919,6 +919,7 @@ class TestThreadPool(PoolRunningTestSpec):
         PoolRunningTestSpec._chk_getting_success_result(results=_results)
 
 
+    @pytest.mark.skip(reason="Not finish yet. Consider about whether the necessary about catch the exception or not.")
     def test_get_failure_result_with_async_apply(self, pool_strategy: ThreadPoolStrategy):
         self._async_apply(strategy=pool_strategy, target_fun=target_error_fun)
 
