@@ -237,7 +237,7 @@ class PoolRunningTestSpec(RunningStrategyTestSpec, ABC):
         assert type(results) is list, f""
         for _r in results:
             assert _r.data is not None, f""
-            _chksum = re.search(r"result_[0-9]{1,8}", str(_r.data))
+            _chksum = re.search(r"result_[0-9]{1,64}", str(_r.data))
             assert _chksum is not None, f""
             assert _r.is_successful is True, f""
 
