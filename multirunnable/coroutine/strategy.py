@@ -1,19 +1,22 @@
+from os import getpid
 from abc import ABCMeta, ABC
 from types import FunctionType, MethodType
 from typing import List, Iterable as IterableType, Callable, Optional, Union, Tuple, Dict
 from collections.abc import Iterable
 from multipledispatch import dispatch
 from gevent.greenlet import Greenlet
+from gevent.threading import get_ident, getcurrent
 from gevent.pool import Pool
 from asyncio.tasks import Task
 import functools
-import itertools
 import asyncio
 import gevent
 
+from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 from multirunnable.mode import FeatureMode as _FeatureMode
 from multirunnable.coroutine.result import (
     CoroutineResult as _CoroutineResult,
+    GreenThreadPoolResult as _GreenThreadPoolResult,
     AsynchronousResult as _AsynchronousResult)
 from multirunnable.framework import (
     BaseQueueTask as _BaseQueueTask,
@@ -28,46 +31,102 @@ from multirunnable.framework import (
 
 
 
-def starmapstar(args):
-    return list(itertools.starmap(args[0], args[1]))
-
-
-
 class CoroutineStrategy(metaclass=ABCMeta):
 
-    pass
+    _GreenThread_Running_Result_By_Name: Dict[str, dict] = {}
+    _GreenThread_Running_Result: List = []
+    _Async_Running_Result: List = []
+
+    @classmethod
+    def save_return_value(cls, function: Callable) -> Callable:
+        __self = cls
+
+        @functools.wraps(function)
+        def save_value_fun(*args, **kwargs) -> None:
+            _current_thread = getcurrent()
+
+            _thread_result = {
+                "pid": getpid(),
+                "name": _current_thread.name,
+                "ident": get_ident()
+            }
+
+            try:
+                value = function(*args, **kwargs)
+            except Exception as e:
+                _thread_result.update({
+                    "successful": False,
+                    "exception": e
+                })
+            else:
+                _thread_result.update({
+                    "result": value,
+                    "successful": True,
+                })
+            finally:
+                __self._GreenThread_Running_Result_By_Name[str(_current_thread.name)] = _thread_result
+
+        return save_value_fun
+
+
+    @classmethod
+    def async_save_return_value(cls, function: Callable) -> Callable:
+        __self = cls
+
+        @functools.wraps(function)
+        async def save_value_fun(*args, **kwargs) -> None:
+            _current_task = asyncio.current_task()
+
+            if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION >= 8:
+                _task_result = {
+                    "pid": getpid(),
+                    "name": _current_task.get_name(),
+                    "mem_id": id(_current_task)
+                }
+            else:
+                _task_result = {
+                    "pid": getpid(),
+                    "name": f"AsyncTask-{id(_current_task)}",
+                    "mem_id": id(_current_task)
+                }
+
+            try:
+                value = await function(*args, **kwargs)
+            except Exception as e:
+                _task_result.update({
+                    "successful": False,
+                    "exception": e
+                })
+            else:
+                _task_result.update({
+                    "result": value,
+                    "successful": True,
+                })
+            finally:
+                __self._Async_Running_Result.append(_task_result)
+
+        return save_value_fun
 
 
 
-class BaseGreenThreadStrategy(CoroutineStrategy):
+class BaseGreenThreadStrategy(CoroutineStrategy, _Resultable, ABC):
 
     _Strategy_Feature_Mode: _FeatureMode = _FeatureMode.GreenThread
     # _Gevent_Running_Result: List = []
-    _GreenThread_Running_Result: List = []
+    # _GreenThread_Running_Result: List = []
 
     def result(self) -> List[_CoroutineResult]:
-        __coroutine_results = self._result_handling()
+        __coroutine_results = self._saving_process()
+        self.reset_result()
         return __coroutine_results
 
 
-    def _result_handling(self) -> List[_CoroutineResult]:
-        __coroutine_results = []
-        for __result in self._GreenThread_Running_Result:
-            __coroutine_result = _CoroutineResult()
-            __coroutine_successful = __result.get("successful", None)
-            if __coroutine_successful is True:
-                __coroutine_result.state = _ResultState.SUCCESS.value
-            else:
-                __coroutine_result.state = _ResultState.FAIL.value
-
-            __coroutine_result.data = __result.get("result", None)
-            __coroutine_results.append(__coroutine_result)
-
-        return __coroutine_results
+    def reset_result(self):
+        self._GreenThread_Running_Result[:] = []
 
 
 
-class GreenThreadStrategy(BaseGreenThreadStrategy, _GeneralRunnableStrategy, _Resultable):
+class GreenThreadStrategy(BaseGreenThreadStrategy, _GeneralRunnableStrategy):
 
     _Strategy_Feature_Mode: _FeatureMode = _FeatureMode.GreenThread
 
@@ -93,8 +152,15 @@ class GreenThreadStrategy(BaseGreenThreadStrategy, _GeneralRunnableStrategy, _Re
 
 
     def generate_worker(self, target: Callable, *args, **kwargs) -> Greenlet:
-        # return gevent.spawn(target, *args, **kwargs)
-        return Greenlet(target, *args, **kwargs)
+
+        @functools.wraps(target)
+        @CoroutineStrategy.save_return_value
+        def _target_function(*_args, **_kwargs):
+            result_value = target(*_args, **_kwargs)
+            return result_value
+
+        # return gevent.spawn(_target_function, *args, **kwargs)
+        return Greenlet(_target_function, *args, **kwargs)
 
 
     @dispatch(Greenlet)
@@ -111,15 +177,15 @@ class GreenThreadStrategy(BaseGreenThreadStrategy, _GeneralRunnableStrategy, _Re
     @dispatch(Greenlet)
     def close(self, workers: Greenlet) -> None:
         workers.join()
-        result = GreenThreadStrategy._format_result(worker=workers)
+        result = self._format_result(worker=workers)
         self._GreenThread_Running_Result.append(result)
 
 
     @dispatch(Iterable)
     def close(self, workers: List[Greenlet]) -> None:
         gevent.joinall(workers)
-        results = map(GreenThreadStrategy._format_result, workers)
-        self._GreenThread_Running_Result = list(results)
+        results = map(self._format_result, workers)
+        self._GreenThread_Running_Result = [_r for _r in results]
 
 
     def kill(self) -> None:
@@ -134,18 +200,44 @@ class GreenThreadStrategy(BaseGreenThreadStrategy, _GeneralRunnableStrategy, _Re
         return self.result()
 
 
-    @staticmethod
-    def _format_result(worker: Greenlet) -> Dict:
-        return {
-            "loop": worker.loop,
+    def _format_result(self, worker: Greenlet) -> Dict:
+        assert worker.name in self._GreenThread_Running_Result_By_Name, f"It should must have the AsyncTask which be named as '{worker.name}'."
+        _async_task_result = self._GreenThread_Running_Result_By_Name[worker.name]
+        _async_task_result.update({
+            # "loop": worker.loop,
             "parent": worker.parent,
-            "name": worker.name,
             "args": worker.args,
             "kwargs": worker.kwargs,
-            "value": worker.value,
-            "exception": worker.exception,
-            "successfully": worker.successful()
-        }
+        })
+        return _async_task_result
+
+
+    def _saving_process(self) -> List[_CoroutineResult]:
+        __coroutine_results = []
+        for __result in self._GreenThread_Running_Result:
+            _cresult = _CoroutineResult()
+
+            # # # # Save some basic info of Process
+            _cresult.pid = __result["pid"]
+            _cresult.worker_name = __result["name"]
+            _cresult.worker_ident = __result["ident"]
+            _cresult.parent = __result["parent"]
+            _cresult.args = __result["args"]
+            _cresult.kwargs = __result["kwargs"]
+
+            # # # # Save state of process
+            __coroutine_successful = __result.get("successful", None)
+            if __coroutine_successful is True:
+                _cresult.state = _ResultState.SUCCESS.value
+            else:
+                _cresult.state = _ResultState.FAIL.value
+
+            # # # # Save running result of process
+            _cresult.data = __result.get("result", None)
+            _cresult.exception = __result.get("exception", None)
+            __coroutine_results.append(_cresult)
+
+        return __coroutine_results
 
 
 
@@ -173,6 +265,7 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
 
 
     def apply(self, function: Callable, *args, **kwargs) -> None:
+        self.reset_result()
         __process_running_result = None
 
         try:
@@ -195,6 +288,7 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
                     kwargs: Dict = {},
                     callback: Callable = None,
                     error_callback: Callable = None) -> None:
+        self.reset_result()
         self._GreenThread_List = [
             self._GreenThread_Pool.apply_async(func=function,
                                                args=args,
@@ -211,6 +305,7 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
 
 
     def map(self, function: Callable, args_iter: IterableType = (), chunksize: int = None) -> None:
+        self.reset_result()
         __process_running_result = None
 
         try:
@@ -232,6 +327,7 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
                   chunksize: int = None,
                   callback: Callable = None,
                   error_callback: Callable = None) -> None:
+        self.reset_result()
         __map_result = self._GreenThread_Pool.map_async(
             func=function,
             iterable=args_iter,
@@ -253,6 +349,7 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
         :param chunksize:
         :return:
         """
+        self.reset_result()
         args_iter_set = set(args_iter)
         if len(args_iter_set) == 1:
             _arguments = args_iter[0]
@@ -292,6 +389,7 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
         :param chunksize:
         :return:
         """
+        self.reset_result()
         _args = args[:-1]
         _last_args = args[-1:] * size
         partial_function = functools.partial(function, *_args)
@@ -304,6 +402,7 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
                           chunksize: int = None,
                           callback: Callable = None,
                           error_callback: Callable = None) -> None:
+        self.reset_result()
         args_iter_set = set(args_iter)
         if len(args_iter_set) == 1:
             _arguments = args_iter[0]
@@ -343,6 +442,7 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
         :param callback:
         :return:
         """
+        self.reset_result()
         _args = args[:-1]
         _last_args = args[-1:] * size
         partial_function = functools.partial(function, *_args)
@@ -350,13 +450,14 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
 
 
     def imap(self, function: Callable, args_iter: IterableType = (), chunksize: int = 1) -> None:
+        self.reset_result()
         __process_running_result = None
 
         try:
             imap_running_result = self._GreenThread_Pool.imap(function, args_iter)
             __process_running_result = [result for result in imap_running_result]
             __exception = None
-            __process_run_successful = False
+            __process_run_successful = True
         except Exception as e:
             __exception = e
             __process_run_successful = False
@@ -366,13 +467,14 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
 
 
     def imap_unordered(self, function: Callable, args_iter: IterableType = (), chunksize: int = 1) -> None:
+        self.reset_result()
         __process_running_result = None
 
         try:
             imap_running_result = self._GreenThread_Pool.imap_unordered(function, args_iter)
             __process_running_result = [result for result in imap_running_result]
             __exception = None
-            __process_run_successful = False
+            __process_run_successful = True
         except Exception as e:
             __exception = e
             __process_run_successful = False
@@ -400,16 +502,21 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
         return self.result()
 
 
+    def _saving_process(self) -> List[_GreenThreadPoolResult]:
+        _pool_results = []
+        for __result in self._GreenThread_Running_Result:
+            _pool_result = _GreenThreadPoolResult()
+            _pool_result.is_successful = __result["successful"]
+            _pool_result.data = __result["result"]
+            _pool_results.append(_pool_result)
+        return _pool_results
+
+
 
 class BaseAsyncStrategy(CoroutineStrategy, _AsyncRunnableStrategy, ABC):
 
     _Strategy_Feature_Mode = _FeatureMode.Asynchronous
-    _Async_Event_Loop = None
-    _Async_Task_List: List[Task] = None
     _Async_Running_Result: List = []
-
-    def get_event_loop(self):
-        pass
 
 
 
@@ -494,15 +601,23 @@ class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
 
 
     def generate_worker(self, target: Callable, *args, **kwargs) -> Task:
-        return asyncio.create_task(target(*args, **kwargs))
+
+        @functools.wraps(target)
+        @CoroutineStrategy.async_save_return_value
+        def _target_function(*_args, **_kwargs):
+            result_value = target(*_args, **_kwargs)
+            return result_value
+
+        # return asyncio.create_task(target(*args, **kwargs))
+        return asyncio.create_task(_target_function(*args, **kwargs))
 
 
     @dispatch(Task)
     async def activate_workers(self, workers: Task) -> None:
         value = await workers
-        self._Async_Running_Result.append({
-            "result": value
-        })
+        # self._Async_Running_Result.append({
+        #     "result": value
+        # })
 
 
     @dispatch(Iterable)
@@ -530,23 +645,23 @@ class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
 
 
     def get_result(self) -> List[_AsynchronousResult]:
-        __async_results = self._result_handling()
+        __async_results = self._saving_process()
         return __async_results
 
 
-    def _result_handling(self) -> List[_AsynchronousResult]:
-        __async_results = []
+    def _saving_process(self) -> List[_AsynchronousResult]:
+        _async_results = []
         for __result in self._Async_Running_Result:
-            __async_result = _AsynchronousResult()
+            _async_result = _AsynchronousResult()
 
-            # __async_result.worker_id = __result.get("async_id")
-            # __async_result.event_loop = __result.get("event_loop")
-            # __async_result.data = __result.get("result_data")
-            # __async_result.exception = __result.get("exceptions")
+            # _async_result.worker_id = __result.get("async_id")
+            # _async_result.event_loop = __result.get("event_loop")
+            # _async_result.data = __result.get("result_data")
+            # _async_result.exception = __result.get("exceptions")
 
-            __async_result.data = __result.get("result")
+            _async_result.data = __result.get("result", None)
 
-            __async_results.append(__async_result)
+            _async_results.append(_async_result)
 
-        return __async_results
+        return _async_results
 
