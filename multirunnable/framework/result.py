@@ -119,3 +119,30 @@ class MRResult(BaseResult):
     @exception.setter
     def exception(self, exception: Exception) -> None:
         self._Exception = exception
+
+
+
+class PoolResult:
+
+    _Data: List[Any] = None
+    _Is_Successful: bool = None
+
+    @property
+    def data(self) -> List[Any]:
+        return self._Data
+
+
+    @data.setter
+    def data(self, d) -> None:
+        self._Data = d
+
+
+    @property
+    def is_successful(self) -> bool:
+        return self._Is_Successful
+
+
+    @is_successful.setter
+    def is_successful(self, successful) -> None:
+        self._Is_Successful = successful
+

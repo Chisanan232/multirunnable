@@ -1,4 +1,4 @@
-from multirunnable.framework.result import MRResult as _MRResult
+from multirunnable.framework.result import MRResult as _MRResult, PoolResult as _PoolResult
 
 from typing import List, Any
 
@@ -30,27 +30,6 @@ class ParallelResult(_MRResult):
 
 
 
-class ProcessPoolResult:
-
-    _Data: List[Any] = None
-    _Is_Successful: bool = None
-
-    @property
-    def data(self) -> List[Any]:
-        return self._Data
-
-
-    @data.setter
-    def data(self, d) -> None:
-        self._Data = d
-
-
-    @property
-    def is_successful(self) -> bool:
-        return self._Is_Successful
-
-
-    @is_successful.setter
-    def is_successful(self, successful) -> None:
-        self._Is_Successful = successful
+class ProcessPoolResult(_PoolResult):
+    pass
 
