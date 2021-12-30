@@ -1,4 +1,6 @@
+from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 from multirunnable.concurrent.strategy import ConcurrentStrategy, ThreadStrategy, ThreadPoolStrategy
+from multirunnable.concurrent.result import ConcurrentResult, ThreadPoolResult
 
 from ..framework.strategy import GeneralRunningTestSpec, PoolRunningTestSpec
 from ..test_config import (
@@ -62,7 +64,6 @@ def target_fun(*args, **kwargs) -> str:
 
     with _Thread_Lock:
         Running_Count += 1
-        print(f"Running_Count: {Running_Count} - {threading.current_thread()}")
 
         if args:
             assert args == Test_Function_Args, f"The argument *args* should be same as the input outside."
@@ -81,7 +82,11 @@ def target_fun(*args, **kwargs) -> str:
         Running_Finish_Timestamp.append(_time)
 
     time.sleep(Test_Function_Sleep_Time)
-    return f"result_{threading.current_thread()}"
+    return f"result_{_ident}"
+
+
+def target_error_fun(*args, **kwargs) -> str:
+    raise Exception("Testing result raising an exception.")
 
 
 def pool_target_fun(*args, **kwargs) -> str:
@@ -89,7 +94,6 @@ def pool_target_fun(*args, **kwargs) -> str:
 
     with _Thread_Lock:
         Pool_Running_Count += 1
-        print(f"Pool_Running_Count: {Pool_Running_Count} - {threading.current_thread()}")
 
         if args:
             assert args == Test_Function_Args, f"The argument *args* should be same as the input outside."
@@ -108,7 +112,7 @@ def pool_target_fun(*args, **kwargs) -> str:
         Running_Finish_Timestamp.append(_time)
 
     time.sleep(Test_Function_Sleep_Time)
-    return f"result_{threading.current_thread()}"
+    return f"result_{_ident}"
 
 
 def map_target_fun(*args, **kwargs):
@@ -123,7 +127,6 @@ def map_target_fun(*args, **kwargs):
 
     with _Thread_Lock:
         Pool_Running_Count += 1
-        print(f"Pool_Running_Count: {Pool_Running_Count} - {threading.current_thread()}")
 
         if args:
             assert set(args) <= set(Test_Function_Args), f"The argument *args* should be one of element of the input outside."
@@ -144,7 +147,7 @@ def map_target_fun(*args, **kwargs):
         Running_Finish_Timestamp.append(_time)
 
     time.sleep(Test_Function_Sleep_Time)
-    return f"result_{threading.current_thread()}"
+    return f"result_{_ident}"
 
 
 class TargetCls:
@@ -534,6 +537,49 @@ class TestThread(GeneralRunningTestSpec):
         TestThread._chk_record()
 
 
+    def test_get_success_result(self, strategy: ThreadStrategy):
+        self._activate_workers(
+            strategy=strategy,
+            worker_size=Thread_Size,
+            target_fun=target_fun,
+            args=Test_Function_Args)
+
+        _result = strategy.get_result()
+        assert _result is not None and _result != [], f"The running result should not be empty."
+        assert type(_result) is list, f"The result should be a list type object."
+        for _r in _result:
+            assert isinstance(_r, ConcurrentResult) is True, f"The element of result should be instance of object 'ConcurrentResult'."
+            assert _r.pid, f"The PID should exists in list we record."
+            assert _r.worker_name, f"It should have thread name."
+            assert _r.worker_ident, f"It should have thread identity."
+            if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION >= 8:
+                assert _r.native_id, f"It should have thread native ID."
+            assert _r.data == f"result_{_r.worker_ident}", f"Its data should be same as we expect 'result_{_r.pid}'."
+            assert _r.state == "successful", f"Its state should be 'successful'."
+            assert _r.exception is None, f"It should have nothing exception."
+
+
+    def test_get_failure_result(self, strategy: ThreadStrategy):
+        self._activate_workers(
+            strategy=strategy,
+            worker_size=Thread_Size,
+            target_fun=target_error_fun)
+
+        _result = strategy.get_result()
+        assert _result is not None and _result != [], f""
+        assert type(_result) is list, f""
+        for _r in _result:
+            assert isinstance(_r, ConcurrentResult) is True, f""
+            assert _r.pid, f"It should have PID."
+            assert _r.worker_name, f"It should have thread name."
+            assert _r.worker_ident, f"It should have thread identity."
+            if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION >= 8:
+                assert _r.native_id, f"It should have thread native ID."
+            assert _r.data is None, f"Its data should be None."
+            assert _r.state == "fail", f"Its state should be 'fail'."
+            assert isinstance(_r.exception, Exception) and "Testing result raising an exception" in str(_r.exception), f"It should have an exception and error message is 'Testing result raising an exception'."
+
+
     def _initial(self):
         # Test for parameters with '**kwargs'
         reset_running_flag()
@@ -583,11 +629,6 @@ class TestThread(GeneralRunningTestSpec):
 
     @pytest.mark.skip(reason="Not implement testing logic.")
     def test_kill(self, strategy: ThreadStrategy):
-        pass
-
-
-    @pytest.mark.skip(reason="Not implement. The result feature not finish.")
-    def test_get_result(self, strategy: ThreadStrategy):
         pass
 
 
@@ -871,6 +912,62 @@ class TestThreadPool(PoolRunningTestSpec):
         TestThreadPool._chk_map_record()
 
 
+    def test_get_success_result_with_async_apply(self, pool_strategy: ThreadPoolStrategy):
+        self._async_apply(strategy=pool_strategy, target_fun=pool_target_fun)
+
+        _results = pool_strategy.get_result()
+        PoolRunningTestSpec._chk_getting_success_result(results=_results)
+
+
+    def test_get_failure_result_with_async_apply(self, pool_strategy: ThreadPoolStrategy):
+        self._async_apply(strategy=pool_strategy, target_fun=target_error_fun)
+
+        _results = pool_strategy.get_result()
+        PoolRunningTestSpec._chk_getting_failure_result(results=_results)
+
+
+    def test_get_success_result_with_map(self, pool_strategy: ThreadPoolStrategy):
+        self._map(strategy=pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Args)
+
+        _results = pool_strategy.get_result()
+        PoolRunningTestSpec._chk_getting_success_result(results=_results)
+
+
+    def test_get_success_result_with_async_map(self, pool_strategy: ThreadPoolStrategy):
+        self._async_map(strategy=pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Args)
+
+        _results = pool_strategy.get_result()
+        PoolRunningTestSpec._chk_getting_success_result(results=_results)
+
+
+    def test_get_success_result_with_map_by_args(self, pool_strategy: ThreadPoolStrategy):
+        self._map_by_args(strategy=pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Multiple_Args)
+
+        _results = pool_strategy.get_result()
+        PoolRunningTestSpec._chk_getting_success_result(results=_results)
+
+
+    def test_get_success_result_with_async_map_by_args(self, pool_strategy: ThreadPoolStrategy):
+        self._async_map_by_args(strategy=pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Multiple_Args)
+
+        _results = pool_strategy.get_result()
+        PoolRunningTestSpec._chk_getting_success_result(results=_results)
+
+
+    def test_get_success_result_with_imap(self, pool_strategy: ThreadPoolStrategy):
+        self._imap(strategy=pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Args)
+
+        _results = pool_strategy.get_result()
+        PoolRunningTestSpec._chk_getting_success_result(results=_results)
+
+
+    def test_get_success_result_with_imap_unordered(self, pool_strategy: ThreadPoolStrategy):
+        self._imap_unordered(strategy=pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Args)
+
+        _results = pool_strategy.get_result()
+        PoolRunningTestSpec._chk_getting_success_result(results=_results)
+
+
     def _initial(self):
         # Test for parameters with '**kwargs'
         reset_pool_running_value()
@@ -900,11 +997,6 @@ class TestThreadPool(PoolRunningTestSpec):
             running_current_workers=Running_Current_Threads,
             running_finish_timestamps=Running_Finish_Timestamp
         )
-
-
-    @pytest.mark.skip(reason="Not implement. The result feature not finish.")
-    def test_get_result(self, pool_strategy: ThreadPoolStrategy):
-        pass
 
 
     def test_close(self, pool_strategy: ThreadPoolStrategy):

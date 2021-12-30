@@ -1,4 +1,5 @@
 from multirunnable.coroutine.strategy import CoroutineStrategy, GreenThreadStrategy, GreenThreadPoolStrategy, AsynchronousStrategy
+from multirunnable.coroutine.result import CoroutineResult, GreenThreadPoolResult
 from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 
 from ..framework.strategy import GeneralRunningTestSpec, PoolRunningTestSpec
@@ -18,6 +19,7 @@ import pytest
 import time
 import sys
 import os
+import re
 
 
 Green_Thread_Size: int = Worker_Size
@@ -90,7 +92,7 @@ def target_fun(*args, **kwargs) -> str:
         Running_Finish_Timestamp.append(_time)
 
     gevent.sleep(Test_Function_Sleep_Time)
-    return f"result_{__get_current_thread()}"
+    return f"result_{_ident}"
 
 
 def pool_target_fun(*args, **kwargs) -> str:
@@ -116,7 +118,11 @@ def pool_target_fun(*args, **kwargs) -> str:
         Running_Finish_Timestamp.append(_time)
 
     gevent.sleep(Test_Function_Sleep_Time)
-    return f"result_{__get_current_thread()}"
+    return f"result_{_ident}"
+
+
+def target_error_fun(*args, **kwargs) -> str:
+    raise Exception("Testing result raising an exception.")
 
 
 def map_target_fun(*args, **kwargs):
@@ -151,7 +157,7 @@ def map_target_fun(*args, **kwargs):
         Running_Finish_Timestamp.append(_time)
 
     gevent.sleep(Test_Function_Sleep_Time)
-    return f"result_{__get_current_thread()}"
+    return f"result_{_ident}"
 
 
 def map_target_fun_with_diff_args(*args, **kwargs):
@@ -186,7 +192,7 @@ def map_target_fun_with_diff_args(*args, **kwargs):
         Running_Finish_Timestamp.append(_time)
 
     gevent.sleep(Test_Function_Sleep_Time)
-    return f"result_{__get_current_thread()}"
+    return f"result_{_ident}"
 
 
 def __get_current_thread_ident():
@@ -226,7 +232,7 @@ async def target_async_fun(*args, **kwargs) -> str:
 
     # await async_sleep(Test_Function_Sleep_Time)
     await asyncio.sleep(Test_Function_Sleep_Time)
-    return f"result_{_current_task}"
+    return f"result_{id(_current_task)}"
 
 
 class TargetCls:
@@ -637,14 +643,53 @@ class TestGreenThread(GeneralRunningTestSpec):
         TestGreenThread._chk_record()
 
 
-    @pytest.mark.skip(reason="Not implement testing logic.")
-    def test_get_success_result(self, process_strategy: GreenThreadStrategy):
-        pass
+    def test_get_success_result(self, strategy: GreenThreadStrategy):
+        self._activate_workers(
+            strategy=strategy,
+            worker_size=Green_Thread_Size,
+            target_fun=target_fun,
+            args=Test_Function_Args)
+
+        _result = strategy.get_result()
+        assert _result is not None and _result != [], f"The running result should not be empty."
+        assert type(_result) is list, f"The result should be a list type object."
+        for _r in _result:
+            assert isinstance(_r, CoroutineResult) is True, f"The element of result should be instance of object 'ConcurrentResult'."
+            assert _r.pid, f"The PID should exists in list we record."
+            assert _r.worker_name, f"It should have thread name."
+            assert _r.worker_ident, f"It should have thread identity."
+            # assert _r.loop, f""
+            assert _r.parent, f""
+            assert _r.args is not None, f""
+            assert _r.kwargs is not None, f""
+            assert _r.data == f"result_{_r.worker_ident}", f"Its data should be same as we expect 'result_{_r.pid}'."
+            assert _r.state == "successful", f"Its state should be 'successful'."
+            assert _r.exception is None, f"It should have nothing exception."
 
 
-    @pytest.mark.skip(reason="Not implement testing logic.")
-    def test_get_failure_result(self, process_strategy: GreenThreadStrategy):
-        pass
+    # @pytest.mark.skip(reason="Consider this feature.")
+    def test_get_failure_result(self, strategy: GreenThreadStrategy):
+        self._activate_workers(
+            strategy=strategy,
+            worker_size=Green_Thread_Size,
+            target_fun=target_error_fun)
+
+        _result = strategy.get_result()
+        assert _result is not None and _result != [], f""
+        assert type(_result) is list, f""
+        for _r in _result:
+            assert isinstance(_r, CoroutineResult) is True, f""
+            assert _r.pid, f"It should have PID."
+            assert _r.worker_name, f"It should have thread name."
+            assert _r.worker_ident, f"It should have thread identity."
+            # assert _r.loop, f""
+            assert _r.parent, f""
+            assert _r.args is not None, f""
+            assert _r.kwargs is not None, f""
+            assert _r.data is None, f"Its data should be None."
+            assert _r.state == "fail", f"Its state should be 'fail'."
+            print(f"[DEBUG] _r.exception: {_r.exception}")
+            assert isinstance(_r.exception, Exception) and "Testing result raising an exception" in str(_r.exception), f"It should have an exception and error message is 'Testing result raising an exception'."
 
 
     @pytest.mark.skip(reason="Not implement testing logic.")
@@ -983,9 +1028,61 @@ class TestGreenThreadPool(PoolRunningTestSpec):
         TestGreenThreadPool._chk_map_record()
 
 
-    @pytest.mark.skip(reason="Not implement. The result feature not finish.")
-    def test_get_result(self, pool_strategy: GreenThreadPoolStrategy):
-        pass
+    def test_get_success_result_with_async_apply(self, pool_strategy: GreenThreadPoolStrategy):
+        self._async_apply(strategy=pool_strategy, target_fun=pool_target_fun)
+
+        _results = pool_strategy.get_result()
+        PoolRunningTestSpec._chk_getting_success_result(results=_results)
+
+
+    @pytest.mark.skip(reason="Still consider about this feature.")
+    def test_get_failure_result_with_async_apply(self, pool_strategy: GreenThreadPoolStrategy):
+        self._async_apply(strategy=pool_strategy, target_fun=target_error_fun)
+
+        _results = pool_strategy.get_result()
+        PoolRunningTestSpec._chk_getting_failure_result(results=_results)
+
+
+    def test_get_success_result_with_map(self, pool_strategy: GreenThreadPoolStrategy):
+        self._map(strategy=pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Args)
+
+        _results = pool_strategy.get_result()
+        PoolRunningTestSpec._chk_getting_success_result(results=_results)
+
+
+    def test_get_success_result_with_async_map(self, pool_strategy: GreenThreadPoolStrategy):
+        self._async_map(strategy=pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Args)
+
+        _results = pool_strategy.get_result()
+        PoolRunningTestSpec._chk_getting_success_result(results=_results)
+
+
+    def test_get_success_result_with_map_by_args(self, pool_strategy: GreenThreadPoolStrategy):
+        self._map_by_args(strategy=pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Multiple_Args)
+
+        _results = pool_strategy.get_result()
+        PoolRunningTestSpec._chk_getting_success_result(results=_results)
+
+
+    def test_get_success_result_with_async_map_by_args(self, pool_strategy: GreenThreadPoolStrategy):
+        self._async_map_by_args(strategy=pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Multiple_Args)
+
+        _results = pool_strategy.get_result()
+        PoolRunningTestSpec._chk_getting_success_result(results=_results)
+
+
+    def test_get_success_result_with_imap(self, pool_strategy: GreenThreadPoolStrategy):
+        self._imap(strategy=pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Args)
+
+        _results = pool_strategy.get_result()
+        PoolRunningTestSpec._chk_getting_success_result(results=_results)
+
+
+    def test_get_success_result_with_imap_unordered(self, pool_strategy: GreenThreadPoolStrategy):
+        self._imap_unordered(strategy=pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Args)
+
+        _results = pool_strategy.get_result()
+        PoolRunningTestSpec._chk_getting_success_result(results=_results)
 
 
     def test_close(self, pool_strategy: GreenThreadPoolStrategy):
@@ -1408,29 +1505,30 @@ class TestAsynchronous(GeneralRunningTestSpec):
 
     @staticmethod
     def _chk_async_task_record():
-        assert Running_Count == Green_Thread_Size, f"The running count should be the same as the amount of process."
+        GeneralRunningTestSpec._chk_running_cnt(running_cnt=Running_Count, worker_size=Green_Thread_Size)
 
-        _ppid_list = Running_PPIDs[:]
-        _thread_id_list = Running_GreenThread_IDs[:]
         _current_process_list = Running_Current_Threads[:]
-        _timestamp_list = Running_Finish_Timestamp[:]
-
-        # assert len(set(_ppid_list)) == 1, f"The PPID of each process should be the same."
-        # assert _ppid_list[0] == Running_Parent_PID, f"The PPID should equal to {Running_Parent_PID}. But it got {_ppid_list[0]}."
         assert len(_current_process_list) == Green_Thread_Size, f"The count of PID (no de-duplicate) should be the same as the count of processes."
         assert len(set(_current_process_list)) == Green_Thread_Size, f"The count of PID (de-duplicate) should be the same as the count of processes."
-        # assert len(_thread_id_list) == len(_current_process_list), f"The count of current process name (no de-duplicate) should be equal to count of PIDs."
-        # assert len(set(_thread_id_list)) == len(set(_current_process_list)), f"The count of current process name (de-duplicate) should be equal to count of PIDs."
 
-        _max_timestamp = max(_timestamp_list)
-        _min_timestamp = min(_timestamp_list)
-        _diff_timestamp = _max_timestamp - _min_timestamp
-        assert _diff_timestamp <= Running_Diff_Time, f"Processes should be run in the same time period."
+        GeneralRunningTestSpec._chk_done_timestamp(timestamp_list=Running_Finish_Timestamp[:])
 
 
-    @pytest.mark.skip(reason="Not implement. The result feature not finish.")
-    def test_get_result(self, async_strategy: AsynchronousStrategy):
-        pass
+    def test_get_async_result(self, async_strategy: AsynchronousStrategy):
+        self._initial()
+
+        async def __run_process():
+            await async_strategy.initialization(queue_tasks=None, features=None)
+            _async_task = [async_strategy.generate_worker(target_async_fun, **Test_Function_Kwargs) for _ in range(Green_Thread_Size)]
+            await async_strategy.activate_workers(_async_task)
+
+        asyncio.run(__run_process())
+
+        _result = async_strategy.get_result()
+        for _r in _result:
+            assert _r.data, f""
+            _chksum = re.search(r"result_[0-9]{1,64}", str(_r.data))
+            assert _chksum is not None, f""
 
 
     @pytest.mark.skip(reason="Not implement testing logic.")
