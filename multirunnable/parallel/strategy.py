@@ -236,7 +236,7 @@ class ProcessPoolStrategy(ParallelStrategy, _PoolRunnableStrategy, _Resultable):
             __process_run_successful = False
 
         # Save Running result state and Running result value as dict
-        self._result_saving(successful=__process_run_successful, result=__process_running_result)
+        self._result_saving(successful=__process_run_successful, result=__process_running_result, exception=None)
 
 
     def async_apply(self,
@@ -385,8 +385,8 @@ class ProcessPoolStrategy(ParallelStrategy, _PoolRunnableStrategy, _Resultable):
 
 
     def _result_saving(self, successful: bool, result: List, exception: Exception) -> None:
-        process_result = {"successful": successful, "result": result, "exception": exception}
-        self._Processors_Running_Result.append(process_result)
+        _process_result = {"successful": successful, "result": result, "exception": exception}
+        self._Processors_Running_Result.append(_process_result)
 
 
     def close(self) -> None:
