@@ -1,4 +1,5 @@
 from typing import Tuple, Dict
+import os
 
 
 # # # # Base APIs setting
@@ -22,21 +23,26 @@ Semaphore_Value = 2
 Test_Pool_Name = "testing_pool"
 Test_Pool_Size = 2
 
+database_host = os.getenv("DB_HOST")
+database_port = os.getenv("DB_PORT")
+database_user = os.getenv("DB_USER")
+database_password = os.getenv("DB_PASSWORD")
+database_db = os.getenv("DB_DATABASE")
+
 Database_Config = {
-    "host": "127.0.0.1",
-    "port": "3306",
-    "user": "root",
-    "password": "root",
-    "database": "tw_stock"
+    "host": database_host,
+    "port": database_port,
+    "user": database_user,
+    "password": database_password,
+    "database": database_db
 }
 
 Database_Pool_Config = {
-    # "host": "127.0.0.1",
-    "host": "localhost",
-    "port": "3306",
-    "user": "root",
-    "password": "root",
-    "database": "tw_stock",
+    "host": database_host,
+    "port": database_port,
+    "user": database_user,
+    "password": database_password,
+    "database": database_db,
     "pool_name": Test_Pool_Name,
     "pool_size": Test_Pool_Size
 }
