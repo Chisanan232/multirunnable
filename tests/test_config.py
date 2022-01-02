@@ -26,7 +26,7 @@ Database_Config = {
     "host": "127.0.0.1",
     "port": "3306",
     "user": "root",
-    "password": "password",
+    "password": "root",
     "database": "tw_stock"
 }
 
@@ -35,7 +35,7 @@ Database_Pool_Config = {
     "host": "localhost",
     "port": "3306",
     "user": "root",
-    "password": "password",
+    "password": "root",
     "database": "tw_stock",
     "pool_name": Test_Pool_Name,
     "pool_size": Test_Pool_Size
