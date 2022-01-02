@@ -23,11 +23,11 @@ Semaphore_Value = 2
 Test_Pool_Name = "testing_pool"
 Test_Pool_Size = 2
 
-database_host = os.getenv("DB_HOST")
-database_port = os.getenv("DB_PORT")
-database_user = os.getenv("DB_USER")
-database_password = os.getenv("DB_PASSWORD")
-database_db = os.getenv("DB_DATABASE")
+database_host = (os.getenv("DB_HOST") or "127.0.0.1")
+database_port = (os.getenv("DB_PORT") or 3306)
+database_user = (os.getenv("DB_USER") or "root")
+database_password = (os.getenv("DB_PASSWORD") or "password")
+database_db = (os.getenv("DB_DATABASE") or "tw_stock")
 
 Database_Config = {
     "host": database_host,
