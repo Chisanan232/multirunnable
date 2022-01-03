@@ -42,7 +42,8 @@ class ExampleAdapterPool:
 
     def main_run(self):
         # # # # Initial Executor object
-        __pool = AdapterPool(strategy=ProcessPoolStrategy(pool_size=self.__Executor_Number, tasks_size=self.__Executor_Number))
+        __pool = AdapterPool(
+            strategy=ProcessPoolStrategy(pool_size=self.__Executor_Number, tasks_size=self.__Executor_Number))
         # __pool = AdapterPool(strategy=ThreadPoolStrategy(pool_size=self.__Executor_Number, tasks_size=self.__Executor_Number))
         # __pool = AdapterPool(strategy=GreenThreadPoolStrategy(pool_size=self.__Executor_Number, tasks_size=self.__Executor_Number))
 
