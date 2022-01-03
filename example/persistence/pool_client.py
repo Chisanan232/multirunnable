@@ -1,4 +1,5 @@
 from typing import List
+import logging
 import time
 import os
 
@@ -16,7 +17,6 @@ from multirunnable import SimplePool, QueueTask, RunningMode
 from multirunnable.adapter import Lock, BoundedSemaphore
 from multirunnable.parallel import ProcessQueueType
 from multirunnable.persistence.file import SavingStrategy
-from multirunnable.logger import ocean_logger
 
 # code component
 from dao import TestDao
@@ -30,7 +30,7 @@ class ExamplePoolClient:
 
     def __init__(self, worker_num: int):
         self.__Pool_Size = worker_num
-        self.__logger = ocean_logger
+        self.__logger = logging.getLogger(self.__class__.__name__)
 
 
     def main_run(self):

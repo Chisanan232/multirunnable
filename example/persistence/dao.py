@@ -1,11 +1,11 @@
 from multirunnable.api import RunWith, AsyncRunWith, QueueOperator
 from multirunnable.persistence.database.operator import DatabaseOperator
 from multirunnable.persistence.database.layer import BaseDao
-from multirunnable.logger import ocean_logger
-
-import datetime
 
 from db_mysql import MySQLSingleConnection, MySQLDriverConnectionPool, MySQLOperator
+
+import datetime
+import logging
 
 
 
@@ -45,7 +45,7 @@ class TestingDao(BaseDao):
                 2. For many process, it still instantiate them so many times and gets so many different instances.
         """
 
-        self._logger = ocean_logger
+        self._logger = logging.getLogger(self.__class__.__name__)
 
 
     @property

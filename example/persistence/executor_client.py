@@ -1,4 +1,5 @@
 from typing import List
+import logging
 import time
 import os
 
@@ -18,7 +19,6 @@ from multirunnable.parallel import ProcessQueueType
 from multirunnable.concurrent import ThreadQueueType
 from multirunnable.coroutine import GeventQueueType, AsynchronousQueueType
 from multirunnable.persistence.file import SavingStrategy
-from multirunnable.logger import ocean_logger
 
 # code component
 from dao import TestDao, AsyncTestDao
@@ -32,7 +32,7 @@ class ExampleExecutorClient:
 
     def __init__(self, worker_num: int):
         self.__Worker_Number = worker_num
-        self.__logger = ocean_logger
+        self.__logger = logging.getLogger(self.__class__.__name__)
 
 
     def main_run(self):
