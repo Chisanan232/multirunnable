@@ -14,8 +14,8 @@ if DEVELOPMENT_MODE:
 from multirunnable import SimpleExecutor, RunningMode, QueueTask, sleep, async_sleep
 from multirunnable.api import ConditionOperator, ConditionAsyncOperator, QueueOperator
 from multirunnable.adapter import Condition
-from multirunnable.parallel import MultiProcessingQueueType
-from multirunnable.concurrent import MultiThreadingQueueType
+from multirunnable.parallel import ProcessQueueType
+from multirunnable.concurrent import ThreadQueueType
 from multirunnable.coroutine import AsynchronousQueueType
 
 
@@ -155,7 +155,7 @@ class ExampleExecutor:
         __task = QueueTask()
         __task.name = "test_queue"
         # __task.queue_type = MultiProcessingQueueType.Queue
-        __task.queue_type = MultiThreadingQueueType.Queue
+        __task.queue_type = ThreadQueueType.Queue
         # __task.queue_type = AsynchronousQueueType.Queue
         __task.value = []
 
