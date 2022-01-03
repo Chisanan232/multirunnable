@@ -206,7 +206,7 @@ class JSONFormatter(File):
     def _data_handling(data: List[list]) -> str:
         import json
 
-        json_data = json.dumps(data, ensure_ascii=False)
+        json_data = json.dumps(data, ensure_ascii=False, default=str)
         return json_data
 
 
