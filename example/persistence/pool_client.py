@@ -8,118 +8,105 @@ if DEVELOPMENT_MODE:
     # Import package multirunnable
     import pathlib
     import sys
-    package_pyocean_path = str(pathlib.Path(__file__).absolute().parent.parent.parent)
-    sys.path.append(package_pyocean_path)
+    package_multirunnable_path = str(pathlib.Path(__file__).absolute().parent.parent.parent)
+    sys.path.append(package_multirunnable_path)
 
 # multirunnable package
-from multirunnable import SimplePool, PersistencePool, QueueTask, RunningMode
+from multirunnable import SimplePool, QueueTask, RunningMode
 from multirunnable.adapter import Lock, BoundedSemaphore
-from multirunnable.parallel import ProcessQueueType, ParallelResult
-from multirunnable.persistence import BasePersistence, DatabaseDriver
-from multirunnable.persistence.database import DatabaseConfig
+from multirunnable.parallel import ProcessQueueType
+from multirunnable.persistence.file import SavingStrategy
 from multirunnable.logger import ocean_logger
 
 # code component
 from dao import TestDao
-from fao import ExampleFao
+from fao import TestFao
 
 
 
 class ExamplePoolClient:
 
-    __Database_Config_Path = "Your database config path"
-
     __Pool_Size: int
-    __DB_CONNECTION_Number: int
 
-    def __init__(self, worker_num: int, db_conn_num: int):
+    def __init__(self, worker_num: int):
         self.__Pool_Size = worker_num
-        self.__DB_CONNECTION_Number = db_conn_num
         self.__logger = ocean_logger
-
-        self._database_config = {
-            "host": "Your database IPv4 address",
-            "port": "Your database port",
-            "user": "Your database user name",
-            "password": "Your database password",
-            "database": "Your database name"
-        }
 
 
     def main_run(self):
+        # test_dao = TestDao(connection_strategy=self.persistence_strategy())
         test_dao = TestDao(db_driver="mysql", use_pool=False)
 
-        __queue_task = QueueTask()
-        __queue_task.name = "test_sql_task"
-        __queue_task.queue_type = ProcessQueueType.Queue
-        sql_query = "select * from stock_data_2330 limit 3;"
-        __queue_task.value = [sql_query for _ in range(20)]
+        # # # # Initial and instantiate feature object: Queue Task, Lock and Bounded Semaphore
+        _queue_task = self.__init_queue()
+        _features = self.__init_features()
 
-        # # # # Initial and instantiate feature object: Lock and Bounded Semaphore
-        __lock = Lock()
-        __bounded_semaphore = BoundedSemaphore(value=2)
-        __features = __lock + __bounded_semaphore
-
-        # # # # Initial and instantiate pool object with persistence strategy
-        # __pool = PersistencePool(
-        #     mode=RunningMode.Parallel,
-        #     # mode=RunningMode.Concurrent,
-        #     # mode=RunningMode.GreenThread,
-        #     pool_size=self.__Pool_Size,
-        #     tasks_size=self.__Pool_Size,
-        #     persistence_strategy=self.persistence_strategy(),
-        #     db_connection_pool_size=self.__DB_CONNECTION_Number)
-
-        __pool = SimplePool(
+        _pool = SimplePool(
             mode=RunningMode.Parallel,
             # mode=RunningMode.Concurrent,
             # mode=RunningMode.GreenThread,
             pool_size=self.__Pool_Size,
             tasks_size=self.__Pool_Size)
 
-        __pool.initial(queue_tasks=__queue_task, features=__features)
-        __pool.async_apply(function=test_dao.get_test_data)
-        result = __pool.get_result()
+        _pool.initial(queue_tasks=_queue_task, features=_features)
+        _pool.async_apply(function=test_dao.get_test_data)
+        result = _pool.get_result()
 
-        print("Parallel result: ", result)
+        print("Result: ", result)
         for r in result:
-            print(f"+============ {r.worker_id} =============+")
-            print("Result.pid: ", r.pid)
-            print("Result.worker_id: ", r.worker_id)
-            print("Result.state: ", r.state)
+            print(f"+====================================+")
             print("Result.data: ", r.data)
-            print("Result.exception: ", r.exception)
+            print("Result.is_successful: ", r.is_successful)
             print("+====================================+\n")
 
-        # __fao = ExampleFao()
-        # self.__logger.debug(f"Start to save data to file ....")
-        # format_data = self.__only_data(result=result)
-        # print("[FINAL] format_data: ", format_data)
-        # __fao.all_thread_one_file(data=format_data)
-        # __fao.all_thread_one_file_in_archiver(data=format_data)
-        # self.__logger.debug(f"Saving successfully!")
+        self.__save_to_files(result=result)
+
+        end_time = time.time()
+        self.__logger.info(f"Total taking time: {end_time - start_time} seconds")
 
 
-    def __only_data(self, result: List[ParallelResult]):
+    def __init_queue(self):
+        _queue_task = QueueTask()
+        _queue_task.name = "test_sql_task"
+        _queue_task.queue_type = ProcessQueueType.Queue
+        sql_query = "select * from stock_data_2330 limit 3;"
+        _queue_task.value = [sql_query for _ in range(20)]
+        return _queue_task
+
+
+    def __init_features(self):
+        _lock = Lock()
+        _bounded_semaphore = BoundedSemaphore(value=2)
+        _features = _lock + _bounded_semaphore
+        return _features
+
+
+    def __save_to_files(self, result):
+        __fao = TestFao(strategy=SavingStrategy.ALL_THREADS_ONE_FILE)
+        self.__logger.debug(f"Start to save data to file ....")
+        _final_data = ExamplePoolClient._only_data(result=result)
+        print("[FINAL] format_data: ", _final_data)
+        __fao.save_as_csv(mode="a+", file="testing.csv", data=_final_data)
+        __fao.save_as_excel(mode="a+", file="testing.xlsx", data=_final_data)
+        __fao.save_as_json(mode="a+", file="testing.json", data=_final_data)
+        self.__logger.debug(f"Saving successfully!")
+
+
+    @staticmethod
+    def _only_data(result: List):
         new_data = []
         for d in result:
-            data_rows = d.data["data"]
+            data_rows = d.data
             for data_row in (data_rows or []):
                 new_data.append(data_row)
         return new_data
-
-
-    def __done(self) -> None:
-        end_time = time.time()
-        self.__logger.info(f"Total taking time: {end_time - start_time} seconds")
 
 
 
 if __name__ == '__main__':
 
     start_time = time.time()
-    __workers_number = 5
-    __db_connections_number = 2
+    __workers_number = 3
 
-    __pool_client = ExamplePoolClient(worker_num=__workers_number, db_conn_num=__db_connections_number)
+    __pool_client = ExamplePoolClient(worker_num=__workers_number)
     __pool_client.main_run()

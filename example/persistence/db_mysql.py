@@ -1,7 +1,11 @@
-from multirunnable.persistence.database.strategy import BaseDatabaseConnection,BaseSingleConnection, BaseConnectionPool
-from multirunnable.persistence.database.operator import DatabaseOperator
+from multirunnable.persistence.database.strategy import (
+    get_connection_pool,
+    BaseDatabaseConnection, BaseSingleConnection, BaseConnectionPool)
+from multirunnable.persistence.database.operator import DatabaseOperator, T
+from multirunnable.parallel.share import sharing_in_processes
 
-from typing import Any, Tuple, cast
+from multiprocessing.managers import NamespaceProxy
+from typing import Tuple, Dict, Any, cast, Generic, Union
 from mysql.connector.connection import MySQLConnection
 from mysql.connector.pooling import MySQLConnectionPool, PooledMySQLConnection
 from mysql.connector.errors import PoolError
@@ -13,45 +17,40 @@ import os
 
 
 
+class MySQLSingleConnectionProxy(NamespaceProxy):
+    _exposed_ = ('__getattribute__', '__setattr__', '__delattr__', 'connection')
+
+
+
+class MySQLDriverConnectionPoolProxy(NamespaceProxy):
+    _exposed_ = ('__getattribute__', '__setattr__', '__delattr__', 'connection')
+
+
+
+class MySQLOperatorProxy(NamespaceProxy):
+    _exposed_ = ('__getattribute__', '__setattr__', '__delattr__', '_connection', '_cursor')
+
+
+
+# @sharing_in_processes(proxytype=MySQLSingleConnectionProxy)
+# @sharing_in_processes()
 class MySQLSingleConnection(BaseSingleConnection):
 
     @property
     def connection(self) -> MySQLConnection:
+        """
+        Note:
+            For resolving this issue, we should do something to avoid this issue.
+            However, it has exception about "TypeError: can't pickle _mysql_connector.MySQL objects" for database package.
+        :return:
+        """
         return self._database_connection
-
-
-    @connection.setter
-    def connection(self, conn: MySQLConnection) -> None:
-        self._database_connection = conn
-
-
-    @property
-    def cursor(self) -> MySQLCursor:
-        # if self.connection.ping(reconnect=True) is False:
-        #     print("[WARN] Ping to MySQL database fail, it will re-connect to database again.")
-        #     self.close()
-        #     self.initial(**self.database_config)
-        #     if self.connection is None or self.cursor is None:
-        #         raise ConnectionError
-        return self._database_cursor
-
-
-    @cursor.setter
-    def cursor(self, cur: MySQLCursor) -> None:
-        self._database_cursor = cur
 
 
     def connect_database(self, **kwargs) -> MySQLConnection:
         # return mysql.connector.connect(**self._Database_Config)
         _connection = mysql.connector.connect(**kwargs)
-        print(f'[DEBUG] init MySQLSingleConnection.connection: {_connection}')
         return _connection
-
-
-    def build_cursor(self) -> MySQLCursor:
-        _cursor = self.connection.cursor(buffered=True)
-        print(f'[DEBUG] init MySQLSingleConnection.cursor: {_cursor}')
-        return _cursor
 
 
     def commit(self) -> None:
@@ -60,8 +59,6 @@ class MySQLSingleConnection(BaseSingleConnection):
 
     def close(self) -> None:
         if self.connection is not None and self.connection.is_connected():
-            if self.cursor is not None:
-                self.cursor.close()
             self.connection.close()
             logging.info(f"MySQL connection is closed. - PID: {os.getpid()}")
         else:
@@ -69,54 +66,27 @@ class MySQLSingleConnection(BaseSingleConnection):
 
 
 
+# @sharing_in_processes(proxytype=MySQLSingleConnectionProxy)
 class MySQLDriverConnectionPool(BaseConnectionPool):
 
-    def get_database_conn_pool(self, name: str = "") -> MySQLConnectionPool:
-        return super(MySQLDriverConnectionPool, self).get_database_conn_pool()
-
-
-    @property
-    def connection(self) -> PooledMySQLConnection:
-        return super(MySQLDriverConnectionPool, self).connection
-
-
-    @connection.setter
-    def connection(self, conn: PooledMySQLConnection) -> None:
-        super(MySQLDriverConnectionPool, self).connection = conn
-
-
-    @property
-    def cursor(self) -> MySQLCursor:
-        return super(MySQLDriverConnectionPool, self).cursor
-
-
-    @cursor.setter
-    def cursor(self, cur: MySQLCursor) -> None:
-        super(MySQLDriverConnectionPool, self).cursor = cur
-
-
     def connect_database(self, **kwargs) -> MySQLConnectionPool:
-        # connection_pool = MySQLConnectionPool(**self._Database_Config)
         connection_pool = MySQLConnectionPool(**kwargs)
         return connection_pool
 
 
-    def get_one_connection(self) -> PooledMySQLConnection:
+    def get_one_connection(self, pool_name: str = "", **kwargs) -> PooledMySQLConnection:
         while True:
             try:
                 # return self.database_connection_pool.get_connection()
-                __connection = self.get_database_conn_pool.get_connection()
+                __connection = get_connection_pool(pool_name=pool_name).get_connection()
                 logging.info(f"Get a valid connection: {__connection}")
                 return __connection
             except PoolError as e:
                 logging.error(f"Connection Pool: {self.get_database_conn_pool.pool_size} ")
                 logging.error(f"Will sleep for 5 seconds to wait for connection is available. - {self.getName()}")
                 time.sleep(5)
-
-
-    def build_cursor(self) -> MySQLCursor:
-        self.cursor = self.connection.cursor()
-        return self.cursor
+            except AttributeError as ae:
+                raise ConnectionError(f"Cannot get the one connection instance from connection pool because it doesn't exist the connection pool with the name '{pool_name}'.")
 
 
     def commit(self) -> None:
@@ -129,8 +99,6 @@ class MySQLDriverConnectionPool(BaseConnectionPool):
 
     def close(self) -> None:
         if self.connection is not None and self.connection.is_connected():
-            if self.cursor is not None:
-                self.cursor.close()
             self.connection.close()
             logging.info(f"MySQL connection is closed. - PID: {os.getpid()}")
         else:
@@ -138,33 +106,15 @@ class MySQLDriverConnectionPool(BaseConnectionPool):
 
 
 
+# @sharing_in_processes(proxytype=MySQLOperatorProxy)
 class MySQLOperator(DatabaseOperator):
     
-    def __init__(self, conn_strategy: BaseDatabaseConnection):
-        super(MySQLOperator, self).__init__(conn_strategy=conn_strategy)
-        self.conn_strategy = conn_strategy
-        self._db_connection = self.conn_strategy.connection
-        self._db_cursor = self.conn_strategy.cursor
+    def __init__(self, conn_strategy: BaseDatabaseConnection, db_config: Dict = {}):
+        super().__init__(conn_strategy=conn_strategy, db_config=db_config)
 
 
-    @property
-    def _connection(self) -> MySQLConnection:
-        if self._db_connection is None:
-            print(f"[DEBUG] MySQLOperator._connection:: it lost instance...")
-            self._db_connection = self.conn_strategy.connection
-        print(f"[DEBUG] MySQLOperator._connection: {self._db_connection}")
-        print(f"[DEBUG] ID of MySQLOperator._connection: {id(self._db_connection)}")
-        return self._db_connection
-
-
-    @property
-    def _cursor(self) -> MySQLCursor:
-        if self._db_cursor is None:
-            print(f"[DEBUG] MySQLOperator._cursor:: it lost instance...")
-            self._db_cursor = self.conn_strategy.cursor
-        print(f"[DEBUG] MySQLOperator._cursor: {self._db_cursor}")
-        print(f"[DEBUG] ID of MySQLOperator._cursor: {id(self._db_cursor)}")
-        return self._db_cursor
+    def initial_cursor(self, connection: Union[MySQLConnection, PooledMySQLConnection]) -> MySQLCursor:
+        return connection.cursor(buffered=True)
 
 
     @property
@@ -182,13 +132,7 @@ class MySQLOperator(DatabaseOperator):
 
 
     def execute(self, operator: Any, params: Tuple = None, multi: bool = False) -> MySQLCursor:
-        import multiprocessing as mp
-        print(f"[DEBUG] Before execute the SQL query. - {mp.current_process}")
-        print(f"[DEBUG] MySQLOperator._cursor: {self._cursor}")
-        self.conn_strategy.cursor = self._cursor.execute(operation=operator, params=params, multi=multi)
-        print(f"[DEBUG] After execute the SQL query. - {mp.current_process}")
-        print(f"[DEBUG] MySQLOperator._cursor: {self._cursor}")
-        return self.conn_strategy.cursor
+        return self._cursor.execute(operation=operator, params=params, multi=multi)
 
 
     def execute_many(self, operator: Any, seq_params=None) -> MySQLCursor:
@@ -208,7 +152,6 @@ class MySQLOperator(DatabaseOperator):
 
 
     def fetch_all(self) -> MySQLCursor:
-        print(f"[YEE] MySQLOperator._cursor in MySQLOperator.fetch_all: {self._cursor}")
         return self._cursor.fetchall()
 
 
