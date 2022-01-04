@@ -1,4 +1,3 @@
-from .configuration import FileConfig, ArchiverConfig, DefaultConfig
 # from .saver import FileSaver, ArchiverSaver
 from .mediator import SavingMediator
 from .files import (
