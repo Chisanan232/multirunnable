@@ -37,7 +37,7 @@ def singleton(_class):
 
         def __new__(_class, *args, **kwargs):
             if _SingletonClass._Instance is None:
-                _SingletonClass._Instance = super(_SingletonClass, _class).__new__(_class, *args, **kwargs)
+                _SingletonClass._Instance = super(_SingletonClass, _class).__new__(_class)
                 _SingletonClass._Instance._sealed = False
             return _SingletonClass._Instance
 
@@ -64,7 +64,7 @@ class Singleton:
 
     def __new__(cls, *args, **kwargs):
         if cls._Instance is None:
-            cls._Instance = super(Singleton, cls).__new__(cls, *args, **kwargs)
+            cls._Instance = super(Singleton, cls).__new__(cls)
         return cls._Instance
 
 
@@ -76,7 +76,7 @@ class NamedSingleton:
     def __new__(cls, *args, **kwargs):
         _cls_name = cls.__name__
         if _cls_name not in cls._Instances.keys():
-            cls._Instances[_cls_name] = super(NamedSingleton, cls).__new__(cls, *args, **kwargs)
+            cls._Instances[_cls_name] = super(NamedSingleton, cls).__new__(cls)
         return cls._Instances[_cls_name]
 
 
@@ -88,7 +88,7 @@ class ConnectionPoolSingleton:
     def __new__(cls, *args, **kwargs):
         _pool_name = kwargs.get("pool_name", "")
         if _pool_name not in cls._Instances.keys():
-            cls._Instances[_pool_name] = super(ConnectionPoolSingleton, cls).__new__(cls, *args, **kwargs)
+            cls._Instances[_pool_name] = super(ConnectionPoolSingleton, cls).__new__(cls)
         return cls._Instances[_pool_name]
 
 
