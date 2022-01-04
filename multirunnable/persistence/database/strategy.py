@@ -15,8 +15,6 @@ _Database_Connection: Generic[T] = None
 _Database_Session: Generic[T] = None
 _Database_Cursor: Generic[T] = None
 
-_Query_State = None
-
 
 def database_connection_pools() -> Dict[str, Any]:
     """
@@ -104,28 +102,7 @@ class BaseDatabaseConnection(BasePersistence):
     __Default_Password = "password"
     __Default_Database = "default"
 
-    # def __init__(self, configuration: BaseDatabaseConfiguration = None, **kwargs):
     def __init__(self, **kwargs):
-        # # # # Deprecated
-        # if configuration is not None:
-        #     __username_val = configuration.username
-        #     __password_val = configuration.password
-        #     __host_val = configuration.host
-        #     __port_val = configuration.port
-        #     __database_val = configuration.database
-        # else:
-        #     __host_val = DefaultConfig.HOST.value
-        #     __port_val = DefaultConfig.PORT.value
-        #     __username_val = DefaultConfig.USERNAME.value
-        #     __password_val = DefaultConfig.PASSWORD.value
-        #     __database_val = DefaultConfig.DATABASE.value
-        #
-        # self._Database_Config[ConfigKey.USERNAME.value] = __username_val
-        # self._Database_Config[ConfigKey.PASSWORD.value] = __password_val
-        # self._Database_Config[ConfigKey.HOST.value] = __host_val
-        # self._Database_Config[ConfigKey.PORT.value] = __port_val
-        # self._Database_Config[ConfigKey.DATABASE.value] = __database_val
-
         _host = kwargs.get("host", self.__Default_Host)
         _port = kwargs.get("port", self.__Default_Port)
         _user = kwargs.get("user", self.__Default_User)
