@@ -123,6 +123,29 @@ executors:
 #           DB_HOST: 127.0.0.1
 #           DB_PORT: 3306
 
+  docker-py36:
+    docker:
+      - image: circleci/python:3.6
+        auth:
+          username: chisanan232
+          password: $DOCKERHUB_PASSWORD
+        environment:
+          MYSQL_PASSWORD: 'password'
+          MYSQL_DATABASE: 'tw_stock'
+          MYSQL_ROOT_HOST: 127.0.0.1
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_USER: 'root'
+          DB_PASSWORD: 'password'
+
+      - image: circleci/mysql:8.0.23
+        auth:
+          username: chisanan232
+          password: $DOCKERHUB_PASSWORD
+        environment:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_ALLOW_EMPTY_PASSWORD: true
+
   docker-py37:
     docker:
       - image: circleci/python:3.7
@@ -223,10 +246,10 @@ jobs:
 #    steps:
 #      - prepare_testing_data
 
-#  test-linux-python36:
-#    executor: docker-py36
-#    steps:
-#      - run_python_test
+  test-linux-python36:
+    executor: docker-py36
+    steps:
+      - run_python_test
 
   test-linux-python37:
     executor: docker-py37
@@ -268,6 +291,7 @@ workflows:
     jobs:    # and here we list the jobs we are going to run.
       # General work flow
 #      - build-testing-database
+      - test-linux-python36
       - test-linux-python37
       - test-linux-python38
       - test-linux-python39
