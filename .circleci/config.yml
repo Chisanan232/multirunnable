@@ -249,6 +249,9 @@ jobs:
   test-linux-python36:
     executor: docker-py36
     steps:
+      - isntall_databade_driver_tool
+      - test_databade_connection
+      - prepare_testing_data
       - run_python_test
 
   test-linux-python37:
