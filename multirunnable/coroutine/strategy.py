@@ -75,9 +75,12 @@ class CoroutineStrategy(metaclass=ABCMeta):
 
         @functools.wraps(function)
         async def save_value_fun(*args, **kwargs) -> None:
-            _current_task = asyncio.current_task()
+            if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
+                _current_task = asyncio.current_task()
+            else:
+                _current_task = asyncio.Task.current_task()
 
-            if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION >= 8:
+            if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) >= (3, 8):
                 _task_result = {
                     "pid": getpid(),
                     "name": _current_task.get_name(),
@@ -531,7 +534,7 @@ class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
             __worker = await self.generate_worker(target=target, *args, **kwargs)
             await self.activate_workers(__worker)
 
-        asyncio.run(__start_new_async_task())
+        AsynchronousStrategy._run_async_task(__start_new_async_task)
 
 
     @dispatch(Iterable, tuple, dict)
@@ -541,7 +544,7 @@ class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
             __workers = [await self.generate_worker(target=__function, *args, **kwargs) for __function in target]
             await self.activate_workers(__workers)
 
-        asyncio.run(__start_new_async_tasks())
+        AsynchronousStrategy._run_async_task(__start_new_async_tasks)
 
 
     def run(self,
@@ -555,7 +558,7 @@ class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
             workers_list = [self._generate_worker(function, args) for _ in range(self.executors_number)]
             await self.activate_workers(workers_list)
 
-        asyncio.run(__run_process())
+        AsynchronousStrategy._run_async_task(__run_process)
 
 
     def map(self,
@@ -569,7 +572,7 @@ class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
             __workers_list = [self._generate_worker(function, args) for args in args_iter]
             await self.activate_workers(__workers_list)
 
-        asyncio.run(__map_process())
+        AsynchronousStrategy._run_async_task(__map_process)
 
 
     def map_with_function(self,
@@ -587,7 +590,7 @@ class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
             __workers_list = [self._generate_worker(fun, args) for fun, args in zip(functions, args_iter)]
             await self.activate_workers(__workers_list)
 
-        asyncio.run(__map_with_function_process())
+        AsynchronousStrategy._run_async_task(__map_with_function_process)
 
 
     async def initialization(self,
@@ -595,7 +598,12 @@ class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
                              features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
                              *args, **kwargs) -> None:
         if kwargs.get("event_loop") is None:
-            _running_event_loop = asyncio.get_running_loop()
+            if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
+                _running_event_loop = asyncio.get_running_loop()
+            else:
+                # # # # Python 3.6
+                # # # # It will raise an exception: AttributeError: module 'asyncio' has no attribute 'get_running_loop'
+                _running_event_loop = asyncio.get_event_loop()
             kwargs["event_loop"] = _running_event_loop
         await super(AsynchronousStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
 
@@ -609,7 +617,13 @@ class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
             return result_value
 
         # return asyncio.create_task(target(*args, **kwargs))
-        return asyncio.create_task(_target_function(*args, **kwargs))
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
+            return asyncio.create_task(_target_function(*args, **kwargs))
+        else:
+            # # # # Python 3.6
+            # # # # It will raise an exception: AttributeError: module 'asyncio' has no attribute 'create_task'
+            _event_loop = asyncio.get_event_loop()
+            return _event_loop.create_task(_target_function(*args, **kwargs))
 
 
     @dispatch(Task)
@@ -664,4 +678,13 @@ class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
             _async_results.append(_async_result)
 
         return _async_results
+
+
+    @staticmethod
+    def _run_async_task(_function):
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
+            asyncio.run(_function())
+        else:
+            _event_loop = asyncio.get_event_loop()
+            _event_loop.run_until_complete(_function())
 
