@@ -1,3 +1,4 @@
+from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 from multirunnable.mode import RunningMode, FeatureMode
 from multirunnable.api.decorator import retry, async_retry, RunWith, AsyncRunWith
 from multirunnable.adapter.lock import Lock, RLock, Semaphore, BoundedSemaphore
@@ -112,7 +113,11 @@ def run_async(_function, _feature):
         _ps = [_strategy.generate_worker(_function) for _ in range(Worker_Size)]
         await _strategy.activate_workers(_ps)
 
-    asyncio.run(__process(), debug=True)
+    if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
+        asyncio.run(__process(), debug=True)
+    else:
+        _event_loop = asyncio.get_event_loop()
+        _event_loop.run_until_complete(__process())
 
 
 def _run_with_multiple_workers(_strategy, _function):
@@ -768,7 +773,10 @@ class TestAsyncFeaturesDecorator:
         async def _target_testing():
             # Save a timestamp into list
             await asyncio.sleep(_Sleep_Time)
-            _current_task = asyncio.current_task()
+            if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
+                _current_task = asyncio.current_task()
+            else:
+                _current_task = asyncio.Task.current_task()
             _current_task_id = id(_current_task)
             _time = float(time.time())
             _done_timestamp[_current_task_id] = _time
@@ -789,7 +797,10 @@ class TestAsyncFeaturesDecorator:
         async def _target_testing():
             # Save a timestamp into list
             await asyncio.sleep(_Sleep_Time)
-            _current_task = asyncio.current_task()
+            if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
+                _current_task = asyncio.current_task()
+            else:
+                _current_task = asyncio.Task.current_task()
             _current_task_id = id(_current_task)
             _time = float(time.time())
             _done_timestamp[_current_task_id] = _time
@@ -811,7 +822,10 @@ class TestAsyncFeaturesDecorator:
             # Save a time stamp into list
             try:
                 await asyncio.sleep(_Sleep_Time)
-                _current_task = asyncio.current_task()
+                if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
+                    _current_task = asyncio.current_task()
+                else:
+                    _current_task = asyncio.Task.current_task()
                 _current_task_id = id(_current_task)
                 _time = float(time.time())
                 _done_timestamp[_current_task_id] = _time

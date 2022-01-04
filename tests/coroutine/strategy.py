@@ -220,7 +220,10 @@ async def target_async_fun(*args, **kwargs) -> str:
 
         _pid = os.getpid()
         _ppid = os.getppid()
-        _current_task = asyncio.current_task(loop=asyncio.get_event_loop())
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
+            _current_task = asyncio.current_task(loop=asyncio.get_event_loop())
+        else:
+            _current_task = asyncio.Task.current_task(loop=asyncio.get_event_loop())
         # _async_task_name = _current_task.get_name()
         # _time = str(datetime.datetime.now())
         _time = int(time.time())
@@ -1164,7 +1167,11 @@ class TestAsynchronous(GeneralRunningTestSpec):
                 target_fun=target_async_fun,
                 error_msg=_Async_Generate_Worker_Error_Msg)
 
-        asyncio.run(__chk_type())
+        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+            asyncio.run(__chk_type())
+        else:
+            _event_loop = asyncio.get_event_loop()
+            _event_loop.run_until_complete(__chk_type())
 
 
     def test_generate_worker_with_function_with_args(self, async_strategy: AsynchronousStrategy):
@@ -1177,7 +1184,11 @@ class TestAsynchronous(GeneralRunningTestSpec):
                 args=Test_Function_Args,
                 error_msg=_Async_Generate_Worker_Error_Msg)
 
-        asyncio.run(__chk_type())
+        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+            asyncio.run(__chk_type())
+        else:
+            _event_loop = asyncio.get_event_loop()
+            _event_loop.run_until_complete(__chk_type())
 
 
     def test_generate_worker_with_function_with_kwargs(self, async_strategy: AsynchronousStrategy):
@@ -1190,7 +1201,11 @@ class TestAsynchronous(GeneralRunningTestSpec):
                 kwargs=Test_Function_Kwargs,
                 error_msg=_Async_Generate_Worker_Error_Msg)
 
-        asyncio.run(__chk_type())
+        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+            asyncio.run(__chk_type())
+        else:
+            _event_loop = asyncio.get_event_loop()
+            _event_loop.run_until_complete(__chk_type())
 
 
     def test_generate_worker_with_bounded_function_with_no_argument(self, async_strategy: AsynchronousStrategy):
@@ -1204,7 +1219,11 @@ class TestAsynchronous(GeneralRunningTestSpec):
                 target_fun=_tc.method,
                 error_msg=_Async_Generate_Worker_Error_Msg)
 
-        asyncio.run(__chk_type())
+        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+            asyncio.run(__chk_type())
+        else:
+            _event_loop = asyncio.get_event_loop()
+            _event_loop.run_until_complete(__chk_type())
 
 
     def test_generate_worker_with_bounded_function_with_args(self, async_strategy: AsynchronousStrategy):
@@ -1219,7 +1238,11 @@ class TestAsynchronous(GeneralRunningTestSpec):
                 args=Test_Function_Args,
                 error_msg=_Async_Generate_Worker_Error_Msg)
 
-        asyncio.run(__chk_type())
+        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+            asyncio.run(__chk_type())
+        else:
+            _event_loop = asyncio.get_event_loop()
+            _event_loop.run_until_complete(__chk_type())
 
 
     def test_generate_worker_with_bounded_function_with_kwargs(self, async_strategy: AsynchronousStrategy):
@@ -1234,7 +1257,11 @@ class TestAsynchronous(GeneralRunningTestSpec):
                 kwargs=Test_Function_Kwargs,
                 error_msg=_Async_Generate_Worker_Error_Msg)
 
-        asyncio.run(__chk_type())
+        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+            asyncio.run(__chk_type())
+        else:
+            _event_loop = asyncio.get_event_loop()
+            _event_loop.run_until_complete(__chk_type())
 
 
     def test_generate_worker_with_classmethod_function_with_no_argument(self, async_strategy: AsynchronousStrategy):
@@ -1247,7 +1274,11 @@ class TestAsynchronous(GeneralRunningTestSpec):
                 target_fun=TargetAsyncCls.classmethod_fun,
                 error_msg=_Async_Generate_Worker_Error_Msg)
 
-        asyncio.run(__chk_type())
+        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+            asyncio.run(__chk_type())
+        else:
+            _event_loop = asyncio.get_event_loop()
+            _event_loop.run_until_complete(__chk_type())
 
 
     def test_generate_worker_with_classmethod_function_with_args(self, async_strategy: AsynchronousStrategy):
@@ -1261,7 +1292,11 @@ class TestAsynchronous(GeneralRunningTestSpec):
                 args=Test_Function_Args,
                 error_msg=_Async_Generate_Worker_Error_Msg)
 
-        asyncio.run(__chk_type())
+        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+            asyncio.run(__chk_type())
+        else:
+            _event_loop = asyncio.get_event_loop()
+            _event_loop.run_until_complete(__chk_type())
 
 
     def test_generate_worker_with_classmethod_function_with_kwargs(self, async_strategy: AsynchronousStrategy):
@@ -1275,7 +1310,11 @@ class TestAsynchronous(GeneralRunningTestSpec):
                 kwargs=Test_Function_Kwargs,
                 error_msg=_Async_Generate_Worker_Error_Msg)
 
-        asyncio.run(__chk_type())
+        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+            asyncio.run(__chk_type())
+        else:
+            _event_loop = asyncio.get_event_loop()
+            _event_loop.run_until_complete(__chk_type())
 
 
     def test_generate_worker_with_staticmethod_function_with_no_argument(self, async_strategy: AsynchronousStrategy):
@@ -1288,7 +1327,11 @@ class TestAsynchronous(GeneralRunningTestSpec):
                 target_fun=TargetAsyncCls.staticmethod_fun,
                 error_msg=_Async_Generate_Worker_Error_Msg)
 
-        asyncio.run(__chk_type())
+        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+            asyncio.run(__chk_type())
+        else:
+            _event_loop = asyncio.get_event_loop()
+            _event_loop.run_until_complete(__chk_type())
 
 
     def test_generate_worker_with_staticmethod_function_with_args(self, async_strategy: AsynchronousStrategy):
@@ -1302,7 +1345,11 @@ class TestAsynchronous(GeneralRunningTestSpec):
                 args=Test_Function_Args,
                 error_msg=_Async_Generate_Worker_Error_Msg)
 
-        asyncio.run(__chk_type())
+        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+            asyncio.run(__chk_type())
+        else:
+            _event_loop = asyncio.get_event_loop()
+            _event_loop.run_until_complete(__chk_type())
 
 
     def test_generate_worker_with_staticmethod_function_with_kwargs(self, async_strategy: AsynchronousStrategy):
@@ -1316,7 +1363,11 @@ class TestAsynchronous(GeneralRunningTestSpec):
                 kwargs=Test_Function_Kwargs,
                 error_msg=_Async_Generate_Worker_Error_Msg)
 
-        asyncio.run(__chk_type())
+        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+            asyncio.run(__chk_type())
+        else:
+            _event_loop = asyncio.get_event_loop()
+            _event_loop.run_until_complete(__chk_type())
 
 
     def _chk_worker_instance_type(self, _thread) -> bool:
@@ -1331,7 +1382,11 @@ class TestAsynchronous(GeneralRunningTestSpec):
             _async_task = [async_strategy.generate_worker(target_async_fun) for _ in range(Green_Thread_Size)]
             await async_strategy.activate_workers(_async_task)
 
-        asyncio.run(__run_process())
+        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+            asyncio.run(__run_process())
+        else:
+            _event_loop = asyncio.get_event_loop()
+            _event_loop.run_until_complete(__run_process())
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
         TestAsynchronous._chk_async_task_record()
@@ -1345,7 +1400,11 @@ class TestAsynchronous(GeneralRunningTestSpec):
             _async_task = [async_strategy.generate_worker(target_async_fun, *Test_Function_Args) for _ in range(Green_Thread_Size)]
             await async_strategy.activate_workers(_async_task)
 
-        asyncio.run(__run_process())
+        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+            asyncio.run(__run_process())
+        else:
+            _event_loop = asyncio.get_event_loop()
+            _event_loop.run_until_complete(__run_process())
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
         TestAsynchronous._chk_async_task_record()
@@ -1359,7 +1418,11 @@ class TestAsynchronous(GeneralRunningTestSpec):
             _async_task = [async_strategy.generate_worker(target_async_fun, **Test_Function_Kwargs) for _ in range(Green_Thread_Size)]
             await async_strategy.activate_workers(_async_task)
 
-        asyncio.run(__run_process())
+        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+            asyncio.run(__run_process())
+        else:
+            _event_loop = asyncio.get_event_loop()
+            _event_loop.run_until_complete(__run_process())
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
         TestAsynchronous._chk_async_task_record()
@@ -1374,7 +1437,11 @@ class TestAsynchronous(GeneralRunningTestSpec):
             _async_task = [async_strategy.generate_worker(_tc.method) for _ in range(Green_Thread_Size)]
             await async_strategy.activate_workers(_async_task)
 
-        asyncio.run(__run_process())
+        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+            asyncio.run(__run_process())
+        else:
+            _event_loop = asyncio.get_event_loop()
+            _event_loop.run_until_complete(__run_process())
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
         TestAsynchronous._chk_async_task_record()
@@ -1389,7 +1456,11 @@ class TestAsynchronous(GeneralRunningTestSpec):
             _async_task = [async_strategy.generate_worker(_tc.method, *Test_Function_Args) for _ in range(Green_Thread_Size)]
             await async_strategy.activate_workers(_async_task)
 
-        asyncio.run(__run_process())
+        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+            asyncio.run(__run_process())
+        else:
+            _event_loop = asyncio.get_event_loop()
+            _event_loop.run_until_complete(__run_process())
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
         TestAsynchronous._chk_async_task_record()
@@ -1404,7 +1475,11 @@ class TestAsynchronous(GeneralRunningTestSpec):
             _async_task = [async_strategy.generate_worker(_tc.method, **Test_Function_Kwargs) for _ in range(Green_Thread_Size)]
             await async_strategy.activate_workers(_async_task)
 
-        asyncio.run(__run_process())
+        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+            asyncio.run(__run_process())
+        else:
+            _event_loop = asyncio.get_event_loop()
+            _event_loop.run_until_complete(__run_process())
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
         TestAsynchronous._chk_async_task_record()
@@ -1418,7 +1493,11 @@ class TestAsynchronous(GeneralRunningTestSpec):
             _async_task = [async_strategy.generate_worker(TargetAsyncCls.classmethod_fun) for _ in range(Green_Thread_Size)]
             await async_strategy.activate_workers(_async_task)
 
-        asyncio.run(__run_process())
+        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+            asyncio.run(__run_process())
+        else:
+            _event_loop = asyncio.get_event_loop()
+            _event_loop.run_until_complete(__run_process())
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
         TestAsynchronous._chk_async_task_record()
@@ -1432,7 +1511,11 @@ class TestAsynchronous(GeneralRunningTestSpec):
             _async_task = [async_strategy.generate_worker(TargetAsyncCls.classmethod_fun, *Test_Function_Args) for _ in range(Green_Thread_Size)]
             await async_strategy.activate_workers(_async_task)
 
-        asyncio.run(__run_process())
+        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+            asyncio.run(__run_process())
+        else:
+            _event_loop = asyncio.get_event_loop()
+            _event_loop.run_until_complete(__run_process())
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
         TestAsynchronous._chk_async_task_record()
@@ -1446,7 +1529,11 @@ class TestAsynchronous(GeneralRunningTestSpec):
             _async_task = [async_strategy.generate_worker(TargetAsyncCls.classmethod_fun, **Test_Function_Kwargs) for _ in range(Green_Thread_Size)]
             await async_strategy.activate_workers(_async_task)
 
-        asyncio.run(__run_process())
+        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+            asyncio.run(__run_process())
+        else:
+            _event_loop = asyncio.get_event_loop()
+            _event_loop.run_until_complete(__run_process())
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
         TestAsynchronous._chk_async_task_record()
@@ -1460,7 +1547,11 @@ class TestAsynchronous(GeneralRunningTestSpec):
             _async_task = [async_strategy.generate_worker(TargetAsyncCls.staticmethod_fun) for _ in range(Green_Thread_Size)]
             await async_strategy.activate_workers(_async_task)
 
-        asyncio.run(__run_process())
+        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+            asyncio.run(__run_process())
+        else:
+            _event_loop = asyncio.get_event_loop()
+            _event_loop.run_until_complete(__run_process())
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
         TestAsynchronous._chk_async_task_record()
@@ -1474,7 +1565,11 @@ class TestAsynchronous(GeneralRunningTestSpec):
             _async_task = [async_strategy.generate_worker(TargetAsyncCls.staticmethod_fun, *Test_Function_Args) for _ in range(Green_Thread_Size)]
             await async_strategy.activate_workers(_async_task)
 
-        asyncio.run(__run_process())
+        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+            asyncio.run(__run_process())
+        else:
+            _event_loop = asyncio.get_event_loop()
+            _event_loop.run_until_complete(__run_process())
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
         TestAsynchronous._chk_async_task_record()
@@ -1488,7 +1583,11 @@ class TestAsynchronous(GeneralRunningTestSpec):
             _async_task = [async_strategy.generate_worker(TargetAsyncCls.staticmethod_fun, **Test_Function_Kwargs) for _ in range(Green_Thread_Size)]
             await async_strategy.activate_workers(_async_task)
 
-        asyncio.run(__run_process())
+        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+            asyncio.run(__run_process())
+        else:
+            _event_loop = asyncio.get_event_loop()
+            _event_loop.run_until_complete(__run_process())
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
         TestAsynchronous._chk_async_task_record()
@@ -1522,7 +1621,11 @@ class TestAsynchronous(GeneralRunningTestSpec):
             _async_task = [async_strategy.generate_worker(target_async_fun, **Test_Function_Kwargs) for _ in range(Green_Thread_Size)]
             await async_strategy.activate_workers(_async_task)
 
-        asyncio.run(__run_process())
+        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+            asyncio.run(__run_process())
+        else:
+            _event_loop = asyncio.get_event_loop()
+            _event_loop.run_until_complete(__run_process())
 
         _result = async_strategy.get_result()
         for _r in _result:

@@ -1,3 +1,4 @@
+from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 from multirunnable.mode import RunningMode, FeatureMode
 from multirunnable.adapter.lock import Lock, RLock, Semaphore, BoundedSemaphore
 from multirunnable.adapter.communication import Event, Condition
@@ -135,7 +136,11 @@ def run_async(_function, _feature):
         _ps = [_strategy.generate_worker(_function) for _ in range(Worker_Size)]
         await _strategy.activate_workers(_ps)
 
-    asyncio.run(__process())
+    if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+        asyncio.run(__process())
+    else:
+        _event_loop = asyncio.get_event_loop()
+        _event_loop.run_until_complete(__process())
 
 
 def _run_with_multiple_workers(_strategy, _function):
@@ -327,7 +332,10 @@ class TestLockAdapterOperator(TestOperator):
             # Save a timestamp into list
             await _lock_async_opts.acquire()
             await asyncio.sleep(_Sleep_Time)
-            _async_task = asyncio.current_task()
+            if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
+                _async_task = asyncio.current_task(loop=asyncio.get_event_loop())
+            else:
+                _async_task = asyncio.Task.current_task()
             _async_task_id = id(_async_task)
             _time = float(time.time())
             _done_timestamp[_async_task_id] = _time
@@ -350,7 +358,10 @@ class TestLockAdapterOperator(TestOperator):
             try:
                 async with _lock_async_opts:
                     await asyncio.sleep(_Sleep_Time)
-                    _async_task = asyncio.current_task()
+                    if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
+                        _async_task = asyncio.current_task(loop=asyncio.get_event_loop())
+                    else:
+                        _async_task = asyncio.Task.current_task()
                     _async_task_id = id(_async_task)
                     _time = float(time.time())
                     _done_timestamp[_async_task_id] = _time
@@ -629,7 +640,10 @@ class TestSemaphoreAdapterOperator(TestOperator):
             # Save a timestamp into list
             await _smp_async_opts.acquire()
             await asyncio.sleep(_Sleep_Time)
-            _async_task = asyncio.current_task()
+            if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
+                _async_task = asyncio.current_task(loop=asyncio.get_event_loop())
+            else:
+                _async_task = asyncio.Task.current_task()
             _async_task_id = id(_async_task)
             _time = float(time.time())
             _done_timestamp[_async_task_id] = _time
@@ -652,7 +666,10 @@ class TestSemaphoreAdapterOperator(TestOperator):
             try:
                 async with _smp_async_opts:
                     await asyncio.sleep(_Sleep_Time)
-                    _async_task = asyncio.current_task()
+                    if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
+                        _async_task = asyncio.current_task(loop=asyncio.get_event_loop())
+                    else:
+                        _async_task = asyncio.Task.current_task()
                     _async_task_id = id(_async_task)
                     _time = float(time.time())
                     _done_timestamp[_async_task_id] = _time
@@ -812,7 +829,10 @@ class TestBoundedSemaphoreAdapterOperator(TestOperator):
             # Save a timestamp into list
             await _bsmp_async_opts.acquire()
             await asyncio.sleep(_Sleep_Time)
-            _async_task = asyncio.current_task()
+            if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
+                _async_task = asyncio.current_task(loop=asyncio.get_event_loop())
+            else:
+                _async_task = asyncio.Task.current_task()
             _async_task_id = id(_async_task)
             _time = float(time.time())
             _done_timestamp[_async_task_id] = _time
@@ -835,7 +855,10 @@ class TestBoundedSemaphoreAdapterOperator(TestOperator):
             try:
                 async with _bsmp_async_opts:
                     await asyncio.sleep(_Sleep_Time)
-                    _async_task = asyncio.current_task()
+                    if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
+                        _async_task = asyncio.current_task(loop=asyncio.get_event_loop())
+                    else:
+                        _async_task = asyncio.Task.current_task()
                     _async_task_id = id(_async_task)
                     _time = float(time.time())
                     _done_timestamp[_async_task_id] = _time
@@ -960,7 +983,10 @@ class TestEventAdapterOperator(TestOperator):
                 await asyncio.sleep(_Sleep_Time)
                 _thread_index = random.randrange(_Random_Start_Time, _Random_End_Time)
                 _async_task_flag["producer"].append(_thread_index)
-                _async_task_ids["producer"] = str(id(asyncio.current_task()))
+                if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
+                    _async_task_ids["producer"] = str(id(asyncio.current_task()))
+                else:
+                    _async_task_ids["producer"] = str(id(asyncio.Task.current_task()))
                 _event_opts.set()
 
         async def _target_consumer():
@@ -1153,7 +1179,10 @@ class TestConditionAdapterOperator(TestOperator):
                 await asyncio.sleep(_Sleep_Time)
                 _thread_index = random.randrange(_Random_Start_Time, _Random_End_Time)
                 _async_task_flag["producer"].append(_thread_index)
-                _async_task_ids["producer"] = str(id(asyncio.current_task()))
+                if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
+                    _async_task_ids["producer"] = str(id(asyncio.current_task()))
+                else:
+                    _async_task_ids["producer"] = str(id(asyncio.Task.current_task()))
                 await _condition_opts.acquire()
                 _condition_opts.notify_all()
                 _condition_opts.release()
@@ -1194,7 +1223,10 @@ class TestConditionAdapterOperator(TestOperator):
                 async with _condition_opts:
                     await _condition_opts.wait()
                     _async_task_flag["consumer"].append(float(time.time()))
-                    _async_task_ids["consumer"] = str(id(asyncio.current_task()))
+                    if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
+                        _async_task_ids["consumer"] = str(id(asyncio.current_task()))
+                    else:
+                        _async_task_ids["consumer"] = str(id(asyncio.Task.current_task()))
                     if len(_async_task_flag["producer"]) == 3:
                         break
 
