@@ -35,7 +35,6 @@ class _TestFaoMainThread:
         for thread in thread_list:
             thread.join()
 
-        print(f"[DEBUG] Run_Result_Data_List: {Run_Result_Data_List}")
         self._fao.save_as_csv(file=f"for_testing_all.csv", mode="a+", data=Run_Result_Data_List)
         if self._strategy == SavingStrategy.ONE_THREAD_ONE_FILE_AND_COMPRESS_ALL:
             self._fao.compress_as_zip(file=f"for_testing.zip", mode="a", data=Run_Result_Data_List)
@@ -53,9 +52,7 @@ class _TestFaoClientThread(threading.Thread):
         with Thread_Lock:
             global Thread_Counter
             data = Test_Data_List[Thread_Counter]
-            print(f"Get data: {data} - {self.getName()}")
             final_data = self.fao.save_as_csv(file=f"for_testing_{Thread_Counter}.csv", mode="a+", data=[data])
-            print(f"Final Data: {final_data}")
             if final_data != 0 and final_data != 1:
                 for _data in final_data:
                     Run_Result_Data_List.append(_data)
