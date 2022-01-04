@@ -27,12 +27,8 @@ class AsynchronousWaiter(CoroutineWaiter):
 
     @staticmethod
     async def sleep(delay: float, result=None, loop: AbstractEventLoop = None) -> Future:
-        if PYTHON_MAJOR_VERSION == 3:
-            if PYTHON_MINOR_VERSION >= 10:
-                logging.info("Doesn't pass parameter 'loop' to asyncio.sleep.")
-                return await async_sleep(delay=delay, result=result)
-            return await async_sleep(delay=delay, result=result, loop=loop)
-        else:
-            from ..exceptions import VersionError
-            raise VersionError
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) >= (3, 10):
+            logging.info("Doesn't pass parameter 'loop' to asyncio.sleep.")
+            return await async_sleep(delay=delay, result=result)
+        return await async_sleep(delay=delay, result=result, loop=loop)
 

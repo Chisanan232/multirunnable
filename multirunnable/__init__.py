@@ -8,6 +8,9 @@ from typing import Tuple, Dict, Union
 from functools import wraps
 
 PYTHON_MAJOR_VERSION = int(version_info[0])
+if PYTHON_MAJOR_VERSION < 3:
+    from .exceptions import VersionError
+    raise VersionError
 PYTHON_MINOR_VERSION = int(version_info[1])
 PYTHON_VERSION = f"{PYTHON_MAJOR_VERSION}.{PYTHON_MINOR_VERSION}"
 

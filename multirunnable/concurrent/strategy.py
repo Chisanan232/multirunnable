@@ -39,7 +39,7 @@ class ConcurrentStrategy(_Resultable, ABC):
         def save_value_fun(*args, **kwargs) -> None:
             _current_thread = current_thread()
 
-            if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION >= 8:
+            if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) >= (3, 8):
                 _thread_result = {
                     "pid": getpid(),
                     "name": _current_thread.name,

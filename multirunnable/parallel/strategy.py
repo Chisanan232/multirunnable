@@ -143,7 +143,7 @@ class ProcessStrategy(ParallelStrategy, _GeneralRunnableStrategy):
         workers.join()
 
         from .. import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
-        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
             workers.close()
 
 

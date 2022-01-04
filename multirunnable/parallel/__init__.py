@@ -24,22 +24,18 @@ It needs to configure 'set_start_method' value to be 'fork' to
 let it work around.
 """
 
-from multiprocessing import set_start_method as set_multiprocessing_start_method
+from multiprocessing import set_start_method as set_multiprocessing_start_method, current_process
 from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 from platform import system as runtime_os
 import logging
 import re
 
-if PYTHON_MAJOR_VERSION == 3:
-    if PYTHON_MINOR_VERSION >= 9:
-        logging.info("Force 'multiprocessing' to use 'fork'.")
-        if re.search(re.escape(runtime_os()), "Windows", re.IGNORECASE) is not None:
-            set_multiprocessing_start_method('spawn', force=True)
-        else:
-            set_multiprocessing_start_method('fork')
-else:
-    from ..exceptions import VersionError
-    raise VersionError
+if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) >= (3, 9):
+    logging.info("Force 'multiprocessing' to use 'fork'.")
+    if re.search(re.escape(runtime_os()), "Windows", re.IGNORECASE) is not None:
+        set_multiprocessing_start_method('spawn', force=True)
+    else:
+        set_multiprocessing_start_method('fork')
 
 from multirunnable.parallel.features import ProcessQueueType, ProcessLock, ProcessCommunication
 from multirunnable.parallel.strategy import ParallelStrategy, ProcessStrategy, ProcessPoolStrategy

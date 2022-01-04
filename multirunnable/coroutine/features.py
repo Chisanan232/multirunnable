@@ -1,5 +1,4 @@
 from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
-from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 from multirunnable.framework.features import (
     PosixThreadLock as _PosixThreadLock,
     PosixThreadCommunication as _PosixThreadCommunication,
@@ -8,36 +7,34 @@ from multirunnable.types import (
     MRCondition as _MRCondition,
     MREvent as _MREvent
 )
-from multirunnable.exceptions import VersionError
 
-if PYTHON_MAJOR_VERSION == 3:
-    if PYTHON_MINOR_VERSION > 6:
-        from gevent.queue import (
-            Queue as _Greenlet_Queue,
-            SimpleQueue as _Greenlet_SimpleQueue,
-            JoinableQueue as _Greenlet_JoinableQueue,
-            PriorityQueue as _Greenlet_PriorityQueue,
-            LifoQueue as _Greenlet_LifoQueue)
+if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
+    from gevent.queue import (
+        Queue as _Greenlet_Queue,
+        SimpleQueue as _Greenlet_SimpleQueue,
+        JoinableQueue as _Greenlet_JoinableQueue,
+        PriorityQueue as _Greenlet_PriorityQueue,
+        LifoQueue as _Greenlet_LifoQueue)
 
-        class GeventQueueType(_BaseQueueType):
-            Queue = _Greenlet_Queue()
-            SimpleQueue = _Greenlet_SimpleQueue()
-            JoinableQueue = _Greenlet_JoinableQueue()
-            PriorityQueue = _Greenlet_PriorityQueue()
-            LifoQueue = _Greenlet_LifoQueue()
+    class GeventQueueType(_BaseQueueType):
+        Queue = _Greenlet_Queue()
+        SimpleQueue = _Greenlet_SimpleQueue()
+        JoinableQueue = _Greenlet_JoinableQueue()
+        PriorityQueue = _Greenlet_PriorityQueue()
+        LifoQueue = _Greenlet_LifoQueue()
 
-    else:
-        from gevent.queue import (
-            Queue as _Greenlet_Queue,
-            JoinableQueue as _Greenlet_JoinableQueue,
-            PriorityQueue as _Greenlet_PriorityQueue,
-            LifoQueue as _Greenlet_LifoQueue)
+else:
+    from gevent.queue import (
+        Queue as _Greenlet_Queue,
+        JoinableQueue as _Greenlet_JoinableQueue,
+        PriorityQueue as _Greenlet_PriorityQueue,
+        LifoQueue as _Greenlet_LifoQueue)
 
-        class GeventQueueType(_BaseQueueType):
-            Queue = _Greenlet_Queue()
-            JoinableQueue = _Greenlet_JoinableQueue()
-            PriorityQueue = _Greenlet_PriorityQueue()
-            LifoQueue = _Greenlet_LifoQueue()
+    class GeventQueueType(_BaseQueueType):
+        Queue = _Greenlet_Queue()
+        JoinableQueue = _Greenlet_JoinableQueue()
+        PriorityQueue = _Greenlet_PriorityQueue()
+        LifoQueue = _Greenlet_LifoQueue()
 
 from gevent.threading import Lock as _Greenlet_Lock
 from gevent.lock import (
@@ -163,15 +160,12 @@ class _AsyncUtils:
     @classmethod
     def chk_loop(cls, **kwargs) -> Dict:
         __loop = kwargs.get("loop", None)
-        if PYTHON_MAJOR_VERSION == 3:
-            if PYTHON_MINOR_VERSION >= 10:
-                logging.info("Doesn't pass parameter 'loop' in Python 3.10.")
-                return {}
-            else:
-                if __loop is not None:
-                    return {"loop": __loop}
-                else:
-                    raise ValueError("Async Event Loop object cannot be empty.")
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) >= (3, 10):
+            logging.info("Doesn't pass parameter 'loop' in Python 3.10.")
+            return {}
         else:
-            raise VersionError
+            if __loop is not None:
+                return {"loop": __loop}
+            else:
+                raise ValueError("Async Event Loop object cannot be empty.")
 
