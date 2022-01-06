@@ -9,7 +9,7 @@ Welcome to MultiRunnable's documentation!
 |python-versions| |release-version| |pypi-version| |license|
 
 
-:GitHub Version: |version|
+:GitHub Release: |version|
 :PyPi Release: |release|
 :Date: |today|
 
@@ -31,9 +31,20 @@ Building Status
 
 
 Overview
------------------
+----------
 
 A Python framework integrates running multiple tasks simultaneously with different strategy.
+It target to help developers build parallelism feature easily and clearly. You just only focus
+on the business logic implementations or others.
+
+Let's demonstrate an example to show how easy and clear it is!
+
+.. code-block:: python
+
+   from multirunnable import SimpleExecutor, RunningMode
+
+   _executor = SimpleExecutor(mode=RunningMode.Parallel, executors=10)
+   _executor.run(function=target_function, args=("index_1", "index_2.2"))
 
 
 .. toctree::
@@ -57,9 +68,18 @@ A Python framework integrates running multiple tasks simultaneously with differe
 
 .. toctree::
    :caption: API Reference
-   :maxdepth: 5
+   :maxdepth: 2
 
-   multirunnable_api
+   Mode </api_references/mode.rst>
+   Executors </api_references/executors.rst>
+   Pools </api_references/pools.rst>
+   Parallel Modules </api_references/strategy_parallel.rst>
+   Concurrent Modules </api_references/strategy_concurrent.rst>
+   Coroutine Modules </api_references/strategy_coroutine.rst>
+   Synchronizations </api_references/synchronizations.rst>
+   Decorators Modules </api_references/decorators.rst>
+   Persistence with File </api_references/persistence_file.rst>
+   Persistence with Database </api_references/persistence_database.rst>
 
 
 
