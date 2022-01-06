@@ -6,15 +6,39 @@
 Welcome to MultiRunnable's documentation!
 =========================================
 
+|python-versions| |release-version| |pypi-version| |license|
 
-:Version: |version|
-:Release: |release|
+
+:GitHub Version: |version|
+:PyPi Release: |release|
 :Date: |today|
 
 
+Building Status
+-----------------
+
++------------+---------------------------------+----------------------+
+|     OS     |          Building Status        |    Coverage Status   |
++============+=================================+======================+
+|    Linux   |    |travis-ci build-status|     |    (Deprecated CI)   |
++------------+---------------------------------+----------------------+
+|    Linux   |     |circle-ci build-status|    |                      |
++------------+---------------------------------+   |codecov-coverage| |
+|    Linux   |  |github-actions build-status|  |                      |
++------------+---------------------------------+----------------------+
+|   Windows  |     |appveyor build-status|     | |coveralls-coverage| |
++------------+---------------------------------+----------------------+
+
+
+Overview
+-----------------
+
+A Python framework integrates running multiple tasks simultaneously with different strategy.
+
+
 .. toctree::
-   :maxdepth: 2
    :caption: General documentation
+   :maxdepth: 3
 
    introduction
    installation
@@ -23,8 +47,8 @@ Welcome to MultiRunnable's documentation!
 
 
 .. toctree::
-   :maxdepth: 2
    :caption: Development documentation
+   :maxdepth: 2
 
    flow
    architecture
@@ -32,10 +56,61 @@ Welcome to MultiRunnable's documentation!
 
 
 .. toctree::
-   :maxdepth: 3
    :caption: API Reference
+   :maxdepth: 5
 
    multirunnable_api
+
+
+
+.. |python-versions| image:: https://img.shields.io/pypi/pyversions/multirunnable.svg?logo=python&logoColor=FBE072
+    :alt: Travis-CI build status
+    :target: https://pypi.org/project/multirunnable
+
+
+.. |release-version| image:: https://img.shields.io/github/release/Chisanan232/multirunnable.svg?label=Release&sort=semver
+    :alt: Package release version in GitHub
+    :target: https://github.com/Chisanan232/multirunnable/releases
+
+
+.. |pypi-version| image:: https://badge.fury.io/py/multirunnable.svg
+    :alt: Package version in PyPi
+    :target: https://badge.fury.io/py/multirunnable
+
+
+.. |license| image:: https://img.shields.io/badge/License-Apache%202.0-blue.svg
+    :alt: License
+    :target: https://opensource.org/licenses/Apache-2.0
+
+
+.. |travis-ci build-status| image:: https://app.travis-ci.com/Chisanan232/multirunnable.svg?branch=master
+    :alt: Travis-CI building status
+    :target: https://app.travis-ci.com/Chisanan232/multirunnable
+
+
+.. |circle-ci build-status| image:: https://circleci.com/gh/Chisanan232/multirunnable.svg?style=svg
+    :alt: Circle-CI building status
+    :target: https://app.circleci.com/pipelines/github/Chisanan232/multirunnable
+
+
+.. |github-actions build-status| image:: https://github.com/Chisanan232/multirunnable/actions/workflows/ci.yml/badge.svg
+    :alt: GitHub-Actions building status
+    :target: https://github.com/Chisanan232/multirunnable/actions/workflows/ci.yml
+
+
+.. |appveyor build-status| image:: https://ci.appveyor.com/api/projects/status/v0nq38jtof6vcm23?svg=true
+    :alt: AppVeyor building status
+    :target: https://ci.appveyor.com/project/Chisanan232/multirunnable
+
+
+.. |codecov-coverage| image:: https://codecov.io/gh/Chisanan232/multirunnable/branch/master/graph/badge.svg?token=E2AGK1ZIDH
+    :alt: Test coverage with 'codecov'
+    :target: https://codecov.io/gh/Chisanan232/multirunnable
+
+
+.. |coveralls-coverage| image:: https://coveralls.io/repos/github/Chisanan232/multirunnable/badge.svg?branch=master
+    :alt: Test coverage with 'coveralls'
+    :target: https://coveralls.io/github/Chisanan232/multirunnable?branch=master
 
 
 Indices and tables
