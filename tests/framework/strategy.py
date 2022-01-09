@@ -1,6 +1,6 @@
 from multirunnable.framework.strategy import GeneralRunnableStrategy, PoolRunnableStrategy, AsyncRunnableStrategy
 
-from ..test_config import Running_Diff_Time
+from ..test_config import Worker_Pool_Size, Running_Diff_Time, Test_Function_Sleep_Time
 
 from abc import ABCMeta, abstractmethod, ABC
 from typing import List, Tuple, Dict, Callable
@@ -20,17 +20,21 @@ class RunningStrategyTestSpec(metaclass=ABCMeta):
         pass
 
 
-    @abstractmethod
-    def test_terminal(self, **kwargs):
-        pass
-
-
 
 class GeneralRunningTestSpec(RunningStrategyTestSpec):
 
-    @abstractmethod
-    def test_kill(self, **kwargs):
-        pass
+    def _start_new_worker(self, strategy: GeneralRunnableStrategy, worker_size: int, target_fun: Callable, args=None, kwargs=None) -> None:
+        self._initial()
+
+        if args is not None:
+            _workers = [strategy.start_new_worker(target=target_fun, args=args) for _ in range(worker_size)]
+        elif kwargs is not None:
+            _workers = [strategy.start_new_worker(target=target_fun, kwargs=kwargs) for _ in range(worker_size)]
+        elif args is not None and kwargs is not None:
+            _workers = [strategy.start_new_worker(target=target_fun, args=args, kwargs=kwargs) for _ in range(worker_size)]
+        else:
+            _workers = [strategy.start_new_worker(target=target_fun) for _ in range(worker_size)]
+        strategy.close(_workers)
 
 
     def _generate_worker(self, strategy: GeneralRunnableStrategy, worker_size: int, target_fun: Callable, error_msg: str, args=None, kwargs=None) -> None:
@@ -75,7 +79,8 @@ class GeneralRunningTestSpec(RunningStrategyTestSpec):
     @staticmethod
     def _chk_process_record(
             running_cnt: int, worker_size: int, running_wokrer_ids: List[str],
-            running_current_workers: List[str], running_finish_timestamps: List[int]):
+            running_current_workers: List[str], running_finish_timestamps: List[int],
+            de_duplicate: bool = True):
 
         GeneralRunningTestSpec._chk_running_cnt(running_cnt=running_cnt, worker_size=worker_size)
 
@@ -85,8 +90,8 @@ class GeneralRunningTestSpec(RunningStrategyTestSpec):
         _timestamp_list = running_finish_timestamps[:]
 
         # GeneralRunningTestSpec._chk_ppid_info(ppid_list=_ppid_list, running_parent_pid=running_parent_pid)
-        GeneralRunningTestSpec._chk_worker_id_size(worker_id_list=_worker_id_list, worker_size=worker_size)
-        GeneralRunningTestSpec._chk_current_worker(worker_id_list=_worker_id_list, current_worker_list=_current_worker_list)
+        GeneralRunningTestSpec._chk_worker_id_size(worker_id_list=_worker_id_list, worker_size=worker_size, de_duplicate=de_duplicate)
+        GeneralRunningTestSpec._chk_current_worker(worker_id_list=_worker_id_list, current_worker_list=_current_worker_list, de_duplicate=de_duplicate)
         GeneralRunningTestSpec._chk_done_timestamp(timestamp_list=_timestamp_list)
 
 
@@ -102,15 +107,17 @@ class GeneralRunningTestSpec(RunningStrategyTestSpec):
 
 
     @staticmethod
-    def _chk_worker_id_size(worker_id_list: List[str], worker_size: int):
+    def _chk_worker_id_size(worker_id_list: List[str], worker_size: int, de_duplicate: bool = True):
         assert len(worker_id_list) == worker_size, f"The count of PID (no de-duplicate) should be the same as the count of processes."
-        assert len(set(worker_id_list)) == worker_size, f"The count of PID (de-duplicate) should be the same as the count of processes."
+        if de_duplicate is True:
+            assert len(set(worker_id_list)) == worker_size, f"The count of PID (de-duplicate) should be the same as the count of processes."
 
 
     @staticmethod
-    def _chk_current_worker(worker_id_list: List[str], current_worker_list: List[str]):
+    def _chk_current_worker(worker_id_list: List[str], current_worker_list: List[str], de_duplicate: bool = True):
         assert len(worker_id_list) == len(current_worker_list), f"The count of current process name (no de-duplicate) should be equal to count of PIDs."
-        assert len(set(worker_id_list)) == len(set(current_worker_list)), f"The count of current process name (de-duplicate) should be equal to count of PIDs."
+        if de_duplicate is True:
+            assert len(set(worker_id_list)) == len(set(current_worker_list)), f"The count of current process name (de-duplicate) should be equal to count of PIDs."
 
 
     @staticmethod
@@ -124,15 +131,15 @@ class GeneralRunningTestSpec(RunningStrategyTestSpec):
 
 class PoolRunningTestSpec(RunningStrategyTestSpec, ABC):
 
-    def _apply(self, strategy: PoolRunnableStrategy, target_fun: Callable, args, kwargs):
+    def _apply(self, strategy: PoolRunnableStrategy, target_fun: Callable, args=(), kwargs={}):
         self._initial()
 
-        if args is not None:
-            strategy.apply(function=target_fun, *args)
-        elif kwargs is not None:
-            strategy.apply(function=target_fun, **kwargs)
-        elif args is not None and kwargs is not None:
-            strategy.apply(function=target_fun, *args, **kwargs)
+        if args:
+            strategy.apply(function=target_fun, args=args)
+        elif kwargs:
+            strategy.apply(function=target_fun, kwargs=kwargs)
+        elif args and kwargs:
+            strategy.apply(function=target_fun, args=args, kwargs=kwargs)
         else:
             strategy.apply(function=target_fun)
 
@@ -192,6 +199,33 @@ class PoolRunningTestSpec(RunningStrategyTestSpec, ABC):
 
 
     @staticmethod
+    def _chk_process_record_blocking(
+            pool_running_cnt: int, worker_size: int,
+            running_worker_ids: List[str], running_current_workers: List[str],
+            running_finish_timestamps: List[int], de_duplicate: bool = True):
+
+        GeneralRunningTestSpec._chk_running_cnt(running_cnt=pool_running_cnt, worker_size=worker_size)
+
+        # _ppid_list = running_ppids[:]
+        _pid_list = running_worker_ids[:]
+        _current_workers_list = running_current_workers[:]
+        _timestamp_list = running_finish_timestamps[:]
+
+        # GeneralRunningTestSpec._chk_ppid_info(ppid_list=_ppid_list, running_parent_pid=running_parent_pid)
+        GeneralRunningTestSpec._chk_worker_id_size(worker_id_list=_current_workers_list, worker_size=worker_size, de_duplicate=de_duplicate)
+        GeneralRunningTestSpec._chk_current_worker(worker_id_list=_current_workers_list, current_worker_list=_current_workers_list, de_duplicate=de_duplicate)
+        PoolRunningTestSpec._chk_blocking_done_timestamp(timestamp_list=_timestamp_list)
+
+
+    @staticmethod
+    def _chk_blocking_done_timestamp(timestamp_list: List[int]):
+        _max_timestamp = max(timestamp_list)
+        _min_timestamp = min(timestamp_list)
+        _diff_timestamp = _max_timestamp - _min_timestamp
+        assert _diff_timestamp <= (Test_Function_Sleep_Time * Worker_Pool_Size) + Running_Diff_Time, f"Processes should be run in the same time period."
+
+
+    @staticmethod
     def _chk_process_record(
             pool_running_cnt: int, worker_size: int,
             running_worker_ids: List[str], running_current_workers: List[str],
@@ -215,7 +249,7 @@ class PoolRunningTestSpec(RunningStrategyTestSpec, ABC):
     def _chk_process_record_map(
             pool_running_cnt: int, function_args: List[str],
             running_worker_ids: List[str], running_current_workers: List[str],
-            running_finish_timestamps: List[int]):
+            running_finish_timestamps: List[int], de_duplicate: bool = True):
 
         _argument_size = len(function_args)
         GeneralRunningTestSpec._chk_running_cnt(running_cnt=pool_running_cnt, worker_size=_argument_size)
@@ -226,8 +260,8 @@ class PoolRunningTestSpec(RunningStrategyTestSpec, ABC):
         _timestamp_list = running_finish_timestamps[:]
 
         # GeneralRunningTestSpec._chk_ppid_info(ppid_list=_ppid_list, running_parent_pid=running_parent_pid)
-        GeneralRunningTestSpec._chk_worker_id_size(worker_id_list=_current_workers_list, worker_size=_argument_size)
-        GeneralRunningTestSpec._chk_current_worker(worker_id_list=_current_workers_list, current_worker_list=_current_workers_list)
+        GeneralRunningTestSpec._chk_worker_id_size(worker_id_list=_current_workers_list, worker_size=_argument_size, de_duplicate=de_duplicate)
+        GeneralRunningTestSpec._chk_current_worker(worker_id_list=_current_workers_list, current_worker_list=_current_workers_list, de_duplicate=de_duplicate)
         GeneralRunningTestSpec._chk_done_timestamp(timestamp_list=_timestamp_list)
 
 
