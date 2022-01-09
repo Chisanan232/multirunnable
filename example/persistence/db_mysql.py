@@ -1,7 +1,7 @@
 from multirunnable.persistence.database.strategy import (
     get_connection_pool,
     BaseDatabaseConnection, BaseSingleConnection, BaseConnectionPool)
-from multirunnable.persistence.database.operator import DatabaseOperator, T
+from multirunnable.persistence.database.operator import DatabaseOperator
 from multirunnable.parallel.share import sharing_in_processes
 
 from multiprocessing.managers import NamespaceProxy
@@ -82,8 +82,8 @@ class MySQLDriverConnectionPool(BaseConnectionPool):
                 logging.info(f"Get a valid connection: {__connection}")
                 return __connection
             except PoolError as e:
-                logging.error(f"Connection Pool: {self.get_database_conn_pool.pool_size} ")
-                logging.error(f"Will sleep for 5 seconds to wait for connection is available. - {self.getName()}")
+                logging.error(f"Connection Pool: {get_connection_pool(pool_name=pool_name)} ")
+                logging.error(f"Will sleep for 5 seconds to wait for connection is available.")
                 time.sleep(5)
             except AttributeError as ae:
                 raise ConnectionError(f"Cannot get the one connection instance from connection pool because it doesn't exist the connection pool with the name '{pool_name}'.")
@@ -93,8 +93,8 @@ class MySQLDriverConnectionPool(BaseConnectionPool):
         self.connection.commit()
 
 
-    def close_pool(self) -> None:
-        self.get_database_conn_pool.close()
+    def close_pool(self, pool_name: str) -> None:
+        get_connection_pool(pool_name=pool_name).close()
 
 
     def close(self) -> None:
