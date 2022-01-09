@@ -72,15 +72,27 @@ class ExampleExecutor:
 
     def main_run(self):
         # # # # Initial Executor object
-        __executor = SimpleExecutor(mode=RunningMode.Parallel, executors=self.__Executor_Number)
+        # __executor = SimpleExecutor(mode=RunningMode.Parallel, executors=self.__Executor_Number)
         # __executor = SimpleExecutor(mode=RunningMode.Concurrent, executors=self.__Executor_Number)
-        # __executor = SimpleExecutor(mode=RunningMode.GreenThread, executors=self.__Executor_Number)
+        __executor = SimpleExecutor(mode=RunningMode.GreenThread, executors=self.__Executor_Number)
+
+        # # # # Generally running with 'start_new_worker'
+        _args = ("index_1", "index_2.2")
+        _kwargs = {"param_1": "index_1", "param_2": "index_2.2"}
+        _workers_list = []
+        for _ in range(5):
+            _worker = __executor.start_new_worker(target=self.__example.target_function)
+            # _worker = __executor.start_new_worker(target=self.__example.target_function, args=_args)
+            # _worker = __executor.start_new_worker(self.__example.target_function, _args)
+            # _worker = __executor.start_new_worker(self.__example.target_function, kwargs=_kwargs)
+            _workers_list.append(_worker)
+        __executor.close(_workers_list)
 
         # # # # Running the Executor
         # # # # Generally running
-        __executor.run(
-            function=self.__example.target_function,
-            args=("index_1", "index_2.2"))
+        # __executor.run(
+        #     function=self.__example.target_function,
+        #     args=("index_1", "index_2.2"))
 
         # # # # Generally running which will raise exception
         # __executor.run(
