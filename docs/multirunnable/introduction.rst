@@ -1,9 +1,27 @@
-=======================
-Overview
-=======================
+===============
+Introduction
+===============
 
-Python is a high level program language, but it's free to let anyone choose which running strategy you want to use (Parallel, Concurrent or Coroutine).
-Below are some example for each strategy:
+About
+======
+
+Python is a high level program language, but it could implement different parallelism: *Parallel*, *Concurrent* and *Coroutine*.
+No matter which way developers choose to use, they all have some rules:
+
+    Initial multiple runnable objects -> Run them -> Join and Close them
+
+About **runnable objects**, it means a object which would be configured target functions (sometimes, including its parameters).
+Developers could initial multiple it and run them simultaneously. Like *threading.Thread* or *multiprocessing.Process*.
+No matter Parallel, Concurrent or Coroutine, they're different, absolutely. But their usage-procedure are similar, too.
+*MultiRunnable* target to integrate the usage-procedure and try to let developers to implement parallelism code easily and clearly
+with different running strategy, event it still isn't a stable and entire package (It's release version is |release|) currently.
+
+
+Comparison
+===========
+
+Now, it clears that Parallel, Concurrent or Coroutine are different but its usage-procedures are mostly the same.
+Below are some demonstrations with them:
 
 * Parallel - with '*multiprocessing*':
 
@@ -19,12 +37,17 @@ Below are some example for each strategy:
 
     if __name__ == '__main__':
 
+        # Initial runnable objects --- Processes
         process_list = [Process(target=function)for _ in range(Process_Number)]
+
+        # Run runnable objects
         for p in process_list:
             p.start()
 
+        # Close runnable objects
         for p in process_list:
             p.join()
+            p.close()    # New in Python 3.7 up.
 
 
 * Concurrent - with '*threading*':
@@ -41,12 +64,17 @@ Below are some example for each strategy:
 
     if __name__ == '__main__':
 
+        # Initial runnable objects --- Threads
         threads_list = [threading.Thread(target=function) for _ in range(Thread_Number)]
+
+        # Run runnable objects
         for thread in threads_list:
             thread.start()
 
+        # Close runnable objects
         for thread in threads_list:
             thread.join()
+            thread.close()
 
 
 * Coroutine - with '*gevent*' (Green Thread):
@@ -63,10 +91,14 @@ Below are some example for each strategy:
 
     if __name__ == '__main__':
 
+        # Initial runnable objects --- Green Threads
         greenlets_list = [Greenlet(function) for _ in range(Green_Thread_Number)]
+
+        # Run runnable objects
         for _greenlet in greenlets_list:
             _greenlet.start()
 
+        # Close runnable objects
         for _greenlet in greenlets_list:
             _greenlet.join()
 
@@ -81,25 +113,23 @@ Below are some example for each strategy:
         print("This is function content ...")
 
     async def running_function():
+        # Initial runnable objects --- Green Threads
         task = asyncio.create_task(function())
         await task
 
 
     if __name__ == '__main__':
 
+        # Run runnable objects
         asyncio.run(running_function())
 
 
-No matter which way you choose to implement, it's Python, it's easy.
+Above all are demonstrations with Python library (*multiprocessing*, *threading* and *asyncio* are native library).
+It could observe that the usage-procedures of Parallel (*multiprocessing*), Concurrent (*threading*), Coroutine (*gevent*) are the same.
+Though left one Coroutine (*asyncio*) doesn't need to close asynchronous tasks but it still needs to initial and run them.
+So let's show an example parallelism code with *multirunnable*:
 
-However, you may change the way to do something for testing, for efficiency, for resource concern or something else.
-You need to change to use parallel or coroutine but business logic has been done. The only way is refactoring code.
-It's not a problem if it has full-fledged testing code (TDD); if not, it must be an ordeal.
-
-Package '*multirunnable*' is a framework which could build a program with different running strategy by mode option.
-Currently, it has 4 options could use: Parallel, Concurrent, GreenThread and Asynchronous.
-
-Here's an example to do the same thing with it:
+* Implement by '*multirunnable*':
 
 .. code-block:: python
 
@@ -120,39 +150,59 @@ Here's an example to do the same thing with it:
         executor.run(function=function, args={"index": f"test_{random.randrange(1, 10)}"})
 
 
-How about Parallel? I want to let it be more fast.
-Only one thing you need to do: change the mode.
-
+Obviously, you could reach the same target with using *Executor.run* only.
+However, that's Concurrent. How about Parallel or Coroutine? It's very easy, it just only change the value of option *mode*:
 
 .. code-block:: python
 
     ... # Any code is the same
-
+    # Change to Parallel!
     executor = SimpleExecutor(mode=RunningMode.Parallel, executors=Workers_Number)
+    ... # Any code is the same
 
+or
+
+.. code-block:: python
+
+    ... # Any code is the same
+    # Change to Coroutine with Green Thread!
+    executor = SimpleExecutor(mode=RunningMode.GreenThread, executors=Workers_Number)
     ... # Any code is the same
 
 
-Program still could run without any refactoring and doesn't need to modify anything.
-Want change to use other way to run? Change the Running Mode, that's all.
+It's also the same with Coroutine --- Asynchronous. But please remember that target function should be a **awaitable** function:
 
-::
+.. code-block:: python
 
-    Parallel, Concurrent and GreenThread are in common but Asynchronous isn't.
-    From above all, we could change the mode to run the code as the running strategy we configure.
-    However, it only accepts 'awaitable' function to run asynchronously in Python.
-    In the other word, you must remember add keyword 'async' before function which is the target to run with *multirunnable*.
+    from multirunnable import SimpleExecutor, RunningMode, async_sleep
+    import random
+
+    Workers_Number = 5
+
+    async def function(index):
+        print(f"This is function with index {index}")
+        async_sleep(3)
 
 
-=======================
+    if __name__ == '__main__':
+
+        executor = SimpleExecutor(mode=RunningMode.Asynchronous, executors=Workers_Number)
+        executor.run(function=function, args={"index": f"test_{random.randrange(1, 10)}"})
+
+
 Quickly Start
-=======================
+==============
 
 Install this package by pip:
 
+.. code-block:: bash
+
     pip install multirunnable
 
+
 Write a simple code to run it.
+
+.. code-block:: bash
 
     >>> from multirunnable import SimpleExecutor, RunningMode
     >>> executor = SimpleExecutor(mode=RunningMode.Parallel, executors=3)
