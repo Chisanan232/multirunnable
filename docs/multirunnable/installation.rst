@@ -1,21 +1,23 @@
-=======================
-Quickly Start
-=======================
+==============
+Installation
+==============
+
+Install via PIP
+================
 
 Install this package by pip:
 
+.. code-block:: bash
+
     pip install multirunnable
 
-Write a simple code to run it.
 
-    >>> from multirunnable import SimpleExecutor, RunningMode
-    >>> executor = SimpleExecutor(mode=RunningMode.Parallel, executors=3)
-    >>> def function(index):
-    ...     print(f"This is function with index {index}")
-    ...
-    >>> executor.run(function=function, args={"index": f"test_param"})
-    This is function with index test_param
-    This is function with index test_param
-    This is function with index test_param
-    >>>
+Dependencies
+==============
 
+* Gevent
+
+*MultiRunnable* is dependence on another Python package *gevent* which is a framework of green thread of Python.
+Python has a native library to implement Green Thread feature is *greenlet*.
+However, it's a very featherweight library. It event doesn't have Lock or something else features.
+That's the reason why *multirunnable* uses *gevent*.
