@@ -50,13 +50,15 @@ from threading import (Thread,
                        Condition as ThreadingCondition)
 
 from multiprocessing.pool import AsyncResult, ApplyResult
-from multiprocessing import (Queue as MultiProcessingQueue,
-                             Lock as MultiProcessingLock,
-                             RLock as MultiProcessingRLock,
-                             BoundedSemaphore as MultiProcessingBoundedSemaphore,
-                             Semaphore as MultiProcessingSemaphore,
-                             Event as MultiProcessingEvent,
-                             Condition as MultiProcessingCondition)
+from multiprocessing import (
+    Process,
+    Queue as MultiProcessingQueue,
+    Lock as MultiProcessingLock,
+    RLock as MultiProcessingRLock,
+    BoundedSemaphore as MultiProcessingBoundedSemaphore,
+    Semaphore as MultiProcessingSemaphore,
+    Event as MultiProcessingEvent,
+    Condition as MultiProcessingCondition)
 
 from gevent.greenlet import Greenlet
 from gevent.queue import Queue as GeventQueue
@@ -77,7 +79,7 @@ from asyncio.locks import (Lock as AsyncIOLock,
 from typing import Union, NewType
 
 
-__MRTasks = Union[Thread, AsyncResult, ApplyResult, Greenlet, Task]
+__MRTasks = Union[Thread, Process, AsyncResult, ApplyResult, Greenlet, Task]
 MRTasks = NewType("MRTasks", __MRTasks)
 
 __MRQueue = Union[Queue, MultiProcessingQueue, GeventQueue, AsyncIOQueue]
