@@ -3,6 +3,7 @@ from .features import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
 from .adapter.collection import BaseList as _BaseList
 from .result import MRResult as _MRResult
 from ..mode import RunningMode as _RunningMode
+from ..types import MRTasks as _MRTasks
 import multirunnable._utils as _utils
 
 from abc import ABCMeta, abstractmethod
@@ -125,6 +126,16 @@ class BaseExecutor(metaclass=ABCMeta):
         :param args_iter:
         :param queue_tasks:
         :param features:
+        :return:
+        """
+        pass
+
+
+    @abstractmethod
+    def close(self, workers: Union[_MRTasks, List[_MRTasks]]) -> None:
+        """
+        Description:
+            Close executor(s).
         :return:
         """
         pass
