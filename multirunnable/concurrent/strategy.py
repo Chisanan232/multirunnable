@@ -1,8 +1,8 @@
 from abc import ABC
 from os import getpid
-from types import MethodType
+from types import FunctionType, MethodType
 from typing import List, Dict, Callable, Iterable as IterableType, Optional, Union, Tuple, cast
-from functools import wraps
+from functools import wraps, partial as PartialFunction
 from collections.abc import Iterable
 from multipledispatch import dispatch
 from threading import Thread, current_thread
@@ -94,16 +94,16 @@ class ThreadStrategy(ConcurrentStrategy, _GeneralRunnableStrategy):
         super(ThreadStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
 
 
-    @dispatch(MethodType, tuple, dict)
-    def start_new_worker(self, target: Callable, args: Tuple = (), kwargs: Dict = {}) -> Thread:
-        __worker = self.generate_worker(target=target, *args, **kwargs)
+    @dispatch((FunctionType, MethodType, PartialFunction), args=tuple, kwargs=dict)
+    def _start_new_worker(self, target: Callable, args: Tuple = (), kwargs: Dict = {}) -> Thread:
+        __worker = self.generate_worker(target, *args, **kwargs)
         self.activate_workers(__worker)
         return __worker
 
 
-    @dispatch(Iterable, tuple, dict)
-    def start_new_worker(self, target: List[Callable], args: Tuple = (), kwargs: Dict = {}) -> List[Thread]:
-        __workers = [self.generate_worker(target=__function, *args, **kwargs) for __function in target]
+    @dispatch(Iterable, args=tuple, kwargs=dict)
+    def _start_new_worker(self, target: List[Callable], args: Tuple = (), kwargs: Dict = {}) -> List[Thread]:
+        __workers = [self.generate_worker(__function, *args, **kwargs) for __function in target]
         self.activate_workers(__workers)
         return __workers
 
@@ -203,7 +203,7 @@ class ThreadPoolStrategy(ConcurrentStrategy, _PoolRunnableStrategy, _Resultable)
         self._Thread_Pool = ThreadPool(processes=self.pool_size, initializer=__pool_initializer, initargs=__pool_initargs)
 
 
-    def apply(self, function: Callable, *args, **kwargs) -> None:
+    def apply(self, function: Callable, args: Tuple = (), kwargs: Dict = {}) -> None:
         self.reset_result()
         __process_running_result = None
 

@@ -140,16 +140,16 @@ class GreenThreadStrategy(BaseGreenThreadStrategy, _GeneralRunnableStrategy):
         super(GreenThreadStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
 
 
-    @dispatch(MethodType, tuple, dict)
-    def start_new_worker(self, target: Callable, args: Tuple = (), kwargs: Dict = {}) -> Greenlet:
-        __worker = self.generate_worker(target=target, *args, **kwargs)
+    @dispatch((FunctionType, MethodType, functools.partial), args=tuple, kwargs=dict)
+    def _start_new_worker(self, target: Callable, args: Tuple = (), kwargs: Dict = {}) -> Greenlet:
+        __worker = self.generate_worker(target, *args, **kwargs)
         self.activate_workers(__worker)
         return __worker
 
 
-    @dispatch(Iterable, tuple, dict)
-    def start_new_worker(self, target: List[Callable], args: Tuple = (), kwargs: Dict = {}) -> List[Greenlet]:
-        __workers = [self.generate_worker(target=__function, *args, **kwargs) for __function in target]
+    @dispatch(Iterable, args=tuple, kwargs=dict)
+    def _start_new_worker(self, target: List[Callable], args: Tuple = (), kwargs: Dict = {}) -> List[Greenlet]:
+        __workers = [self.generate_worker(__function, *args, **kwargs) for __function in target]
         self.activate_workers(__workers)
         return __workers
 
@@ -267,7 +267,7 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
         self._GreenThread_Pool = Pool(size=self.pool_size)
 
 
-    def apply(self, function: Callable, *args, **kwargs) -> None:
+    def apply(self, function: Callable, args: Tuple = (), kwargs: Dict = {}) -> None:
         self.reset_result()
         __process_running_result = None
 
@@ -527,21 +527,21 @@ class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
 
     _Strategy_Feature_Mode: _FeatureMode = _FeatureMode.Asynchronous
 
-    @dispatch(MethodType, tuple, dict)
-    def start_new_worker(self, target: Callable, args: Tuple = (), kwargs: Dict = {}) -> None:
+    @dispatch((FunctionType, MethodType, functools.partial), args=tuple, kwargs=dict)
+    def _start_new_worker(self, target: Callable, args: Tuple = (), kwargs: Dict = {}) -> None:
 
         async def __start_new_async_task():
-            __worker = await self.generate_worker(target=target, *args, **kwargs)
+            __worker = await self.generate_worker(target, *args, **kwargs)
             await self.activate_workers(__worker)
 
         AsynchronousStrategy._run_async_task(__start_new_async_task)
 
 
-    @dispatch(Iterable, tuple, dict)
-    def start_new_worker(self, target: List[Callable], args: Tuple = (), kwargs: Dict = {}) -> None:
+    @dispatch(Iterable, args=tuple, kwargs=dict)
+    def _start_new_worker(self, target: List[Callable], args: Tuple = (), kwargs: Dict = {}) -> None:
 
         async def __start_new_async_tasks():
-            __workers = [await self.generate_worker(target=__function, *args, **kwargs) for __function in target]
+            __workers = [await self.generate_worker(__function, *args, **kwargs) for __function in target]
             await self.activate_workers(__workers)
 
         AsynchronousStrategy._run_async_task(__start_new_async_tasks)

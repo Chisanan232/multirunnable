@@ -102,16 +102,16 @@ class ProcessStrategy(ParallelStrategy, _GeneralRunnableStrategy):
         activate_manager_server()
 
 
-    @dispatch((FunctionType, MethodType, PartialFunction), tuple, dict)
-    def start_new_worker(self, target: Callable, args: Tuple = (), kwargs: Dict = {}) -> Process:
-        __worker = self.generate_worker(target=target, *args, **kwargs)
+    @dispatch((FunctionType, MethodType, PartialFunction), args=tuple, kwargs=dict)
+    def _start_new_worker(self, target: Callable, args: Tuple = (), kwargs: Dict = {}) -> Process:
+        __worker = self.generate_worker(target, *args, **kwargs)
         self.activate_workers(__worker)
         return __worker
 
 
-    @dispatch(Iterable, tuple, dict)
-    def start_new_worker(self, target: List[Callable], args: Tuple = (), kwargs: Dict = {}) -> List[Process]:
-        __workers = [self.generate_worker(target=__function, *args, **kwargs) for __function in target]
+    @dispatch(Iterable, args=tuple, kwargs=dict)
+    def _start_new_worker(self, target: List[Callable], args: Tuple = (), kwargs: Dict = {}) -> List[Process]:
+        __workers = [self.generate_worker(__function, *args, **kwargs) for __function in target]
         self.activate_workers(__workers)
         return __workers
 
@@ -221,7 +221,7 @@ class ProcessPoolStrategy(ParallelStrategy, _PoolRunnableStrategy, _Resultable):
         self._Processors_Pool = Pool(processes=self.pool_size, initializer=__pool_initializer, initargs=__pool_initargs)
 
 
-    def apply(self, function: Callable, *args, **kwargs) -> None:
+    def apply(self, function: Callable, args: Tuple = (), kwargs: Dict = {}) -> None:
         self.reset_result()
         __process_running_result = None
 

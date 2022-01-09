@@ -11,7 +11,6 @@ from types import MethodType, FunctionType
 from typing import cast, List, Tuple, Dict, Iterable, Callable, Optional, Union
 from functools import partial as PartialFunctionType
 from multipledispatch import dispatch
-import logging
 
 
 
@@ -325,8 +324,26 @@ class GeneralRunnableStrategy(RunnableStrategy):
         pass
 
 
+    def start_new_worker(self, target: Callable, args: Tuple = (), kwargs: Dict = {}) -> _MRTasks:
+        """
+        Description:
+            Initial and activate an executor (process, thread, etc).
+            This is a template method is open to outside. The read implementation is '_start_new_worker'.
+        :return:
+        """
+
+        if len(args) > 0:
+            _worker = self._start_new_worker(target, args=args)
+        elif len(kwargs) > 0:
+            _args = tuple(kwargs.values())
+            _worker = self._start_new_worker(target, kwargs=kwargs)
+        else:
+            _worker = self._start_new_worker(target)
+        return _worker
+
+
     @abstractmethod
-    def start_new_worker(self, target: Callable, *args, **kwargs) -> None:
+    def _start_new_worker(self, target: Callable, args: Tuple = (), kwargs: Dict = {}) -> _MRTasks:
         """
         Description:
             Initial and activate an executor (process, thread, etc).
@@ -386,7 +403,7 @@ class PoolRunnableStrategy(RunnableStrategy):
 
 
     @abstractmethod
-    def apply(self, function: Callable, *args, **kwargs) -> None:
+    def apply(self, function: Callable, args: Tuple = (), kwargs: Dict = {}) -> None:
         """
         Description:
             Refer to multiprocessing.pool.apply.
@@ -553,8 +570,26 @@ class AsyncRunnableStrategy(GeneralRunnableStrategy, ABC):
         pass
 
 
+    async def start_new_worker(self, target: Callable, args: Tuple = (), kwargs: Dict = {}) -> _MRTasks:
+        """
+        Description:
+            Initial and activate an executor (process, thread, etc).
+            This is a template method is open to outside. The read implementation is '_start_new_worker'.
+        :return:
+        """
+
+        if len(args) > 0:
+            _worker = await self._start_new_worker(target, args=args)
+        elif len(kwargs) > 0:
+            _args = tuple(kwargs.values())
+            _worker = await self._start_new_worker(target, kwargs=kwargs)
+        else:
+            _worker = await self._start_new_worker(target)
+        return _worker
+
+
     @abstractmethod
-    async def start_new_worker(self, target: Callable, *args, **kwargs) -> None:
+    async def _start_new_worker(self, target: Callable, args: Tuple = (), kwargs: Dict = {}) -> None:
         """
         Description:
             Initial and activate an executor (process, thread, etc).

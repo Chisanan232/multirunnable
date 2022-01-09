@@ -50,8 +50,8 @@ class Pool(ABC, _BasePool):
             queue_tasks=queue_tasks, features=features, *args, **kwargs)
 
 
-    def apply(self, function: Callable, *args, **kwargs) -> None:
-        Pool_Runnable_Strategy.apply(function=function, *args, **kwargs)
+    def apply(self, function: Callable, args: Tuple = (), kwargs: Dict = {}) -> None:
+        Pool_Runnable_Strategy.apply(function=function, args=args, kwargs=kwargs)
 
 
     def async_apply(self,

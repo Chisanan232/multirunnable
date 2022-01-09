@@ -8,10 +8,12 @@ from .framework import (
     BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory,
     BaseExecutor as _BaseExecutor,
     GeneralRunnableStrategy as _GeneralRunnableStrategy,
+    Resultable as _Resultable,
     MRResult as _MRResult
 )
 from .mode import RunningMode as _RunningMode
 from .adapter.strategy import ExecutorStrategyAdapter as _ExecutorStrategyAdapter
+from .types import MRTasks as _MRTasks
 from ._config import set_mode
 
 
@@ -29,8 +31,9 @@ class Executor(ABC, _BaseExecutor):
         set_mode(mode=mode)
 
 
-    def start_new_worker(self, target: Callable, *args, **kwargs) -> None:
-        General_Runnable_Strategy.start_new_worker(target=target, *args, **kwargs)
+    def start_new_worker(self, target: Callable, args: Tuple = (), kwargs: Dict = {}):
+        _worker = General_Runnable_Strategy.start_new_worker(target, args=args, kwargs=kwargs)
+        return _worker
 
 
     def run(self,
@@ -81,6 +84,10 @@ class Executor(ABC, _BaseExecutor):
             features=features)
 
 
+    def close(self, workers: Union[_MRTasks, List[_MRTasks]]) -> None:
+        General_Runnable_Strategy.close(workers)
+
+
     def terminal(self) -> None:
         General_Runnable_Strategy.terminal()
 
@@ -90,7 +97,10 @@ class Executor(ABC, _BaseExecutor):
 
 
     def result(self) -> List[_MRResult]:
-        return General_Runnable_Strategy.get_result()
+        if isinstance(General_Runnable_Strategy, _Resultable):
+            return General_Runnable_Strategy.get_result()
+        else:
+            raise ValueError("This running strategy isn't a Resultable object.")
 
 
 
