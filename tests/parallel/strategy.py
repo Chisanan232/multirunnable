@@ -221,9 +221,135 @@ class TestProcess(GeneralRunningTestSpec):
         pass
 
 
-    @pytest.mark.skip(reason="Not implement testing logic.")
-    def test_start_new_worker(self, process_strategy: ProcessStrategy):
-        pass
+    def test_start_new_worker_with_function_with_no_argument(self, process_strategy: ProcessStrategy):
+        self._start_new_worker(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=target_fun)
+
+        TestProcess._chk_record()
+        process_strategy.reset_result()
+
+
+    def test_start_new_worker_with_function_with_args(self, process_strategy: ProcessStrategy):
+        self._start_new_worker(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=target_fun,
+            args=Test_Function_Args)
+
+        TestProcess._chk_record()
+        process_strategy.reset_result()
+
+
+    def test_start_new_worker_with_function_with_kwargs(self, process_strategy: ProcessStrategy):
+        self._start_new_worker(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=target_fun,
+            kwargs=Test_Function_Kwargs)
+
+        TestProcess._chk_record()
+        process_strategy.reset_result()
+
+
+    def test_start_new_worker_with_bounded_function_with_no_argument(self, process_strategy: ProcessStrategy):
+        _tc = TargetCls()
+        self._start_new_worker(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=_tc.method)
+
+        TestProcess._chk_record()
+        process_strategy.reset_result()
+
+
+    def test_start_new_worker_with_bounded_function_with_args(self, process_strategy: ProcessStrategy):
+        _tc = TargetCls()
+        self._start_new_worker(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=_tc.method,
+            args=Test_Function_Args)
+
+        TestProcess._chk_record()
+        process_strategy.reset_result()
+
+
+    def test_start_new_worker_with_bounded_function_with_kwargs(self, process_strategy: ProcessStrategy):
+        _tc = TargetCls()
+        self._start_new_worker(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=_tc.method,
+            kwargs=Test_Function_Kwargs)
+
+        TestProcess._chk_record()
+        process_strategy.reset_result()
+
+
+    def test_start_new_worker_with_classmethod_function_with_no_argument(self, process_strategy: ProcessStrategy):
+        self._start_new_worker(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=TargetCls.classmethod_fun)
+
+        TestProcess._chk_record()
+        process_strategy.reset_result()
+
+
+    def test_start_new_worker_with_classmethod_function_with_args(self, process_strategy: ProcessStrategy):
+        self._start_new_worker(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=TargetCls.classmethod_fun,
+            args=Test_Function_Args)
+
+        TestProcess._chk_record()
+        process_strategy.reset_result()
+
+
+    def test_start_new_worker_with_classmethod_function_with_kwargs(self, process_strategy: ProcessStrategy):
+        self._start_new_worker(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=TargetCls.classmethod_fun,
+            kwargs=Test_Function_Kwargs)
+
+        TestProcess._chk_record()
+        process_strategy.reset_result()
+
+
+    def test_start_new_worker_with_staticmethod_function_with_no_argument(self, process_strategy: ProcessStrategy):
+        self._start_new_worker(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=TargetCls.staticmethod_fun)
+
+        TestProcess._chk_record()
+        process_strategy.reset_result()
+
+
+    def test_start_new_worker_with_staticmethod_function_with_args(self, process_strategy: ProcessStrategy):
+        self._start_new_worker(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=TargetCls.staticmethod_fun,
+            args=Test_Function_Args)
+
+        TestProcess._chk_record()
+        process_strategy.reset_result()
+
+
+    def test_start_new_worker_with_staticmethod_function_with_kwargs(self, process_strategy: ProcessStrategy):
+        self._start_new_worker(
+            strategy=process_strategy,
+            worker_size=Process_Size,
+            target_fun=TargetCls.staticmethod_fun,
+            kwargs=Test_Function_Kwargs)
+
+        TestProcess._chk_record()
+        process_strategy.reset_result()
 
 
     def test_generate_worker_with_function_with_no_argument(self, process_strategy: ProcessStrategy):
@@ -624,45 +750,79 @@ class TestProcessPool(PoolRunningTestSpec):
         pass
 
 
-    @pytest.mark.skip(reason="Not implement testing logic.")
-    def test_apply_with_function(self, process_pool_strategy: ProcessPoolStrategy):
-        pass
-        # TestProcessPool._initial()
-        #
-        # process_pool_strategy.apply(function=pool_target_fun)
-        #
-        # TestProcessPool._chk_process_record()
+    def test_apply_with_function_with_no_arguments(self, process_pool_strategy: ProcessPoolStrategy):
+        self._apply(strategy=process_pool_strategy, target_fun=pool_target_fun)
+
+        TestProcessPool._chk_blocking_record()
 
 
-    @pytest.mark.skip(reason="Not implement testing logic.")
-    def test_apply_with_bounded_function(self, process_pool_strategy: ProcessPoolStrategy):
-        pass
-        # TestProcessPool._initial()
-        #
-        # _tc = TargetCls()
-        # process_pool_strategy.apply(function=_tc.method)
-        #
-        # TestProcessPool._chk_process_record()
+    def test_apply_with_function_with_args(self, process_pool_strategy: ProcessPoolStrategy):
+        self._apply(strategy=process_pool_strategy, target_fun=pool_target_fun, args=Test_Function_Args)
+
+        TestProcessPool._chk_blocking_record()
 
 
-    @pytest.mark.skip(reason="Not implement testing logic.")
-    def test_apply_with_classmethod_function(self, process_pool_strategy: ProcessPoolStrategy):
-        pass
-        # TestProcessPool._initial()
-        #
-        # process_pool_strategy.apply(function=TargetCls.classmethod_fun)
-        #
-        # TestProcessPool._chk_process_record()
+    def test_apply_with_function_with_kwargs(self, process_pool_strategy: ProcessPoolStrategy):
+        self._apply(strategy=process_pool_strategy, target_fun=pool_target_fun, kwargs=Test_Function_Kwargs)
+
+        TestProcessPool._chk_blocking_record()
 
 
-    @pytest.mark.skip(reason="Not implement testing logic.")
-    def test_apply_with_staticmethod_function(self, process_pool_strategy: ProcessPoolStrategy):
-        pass
-        # TestProcessPool._initial()
-        #
-        # process_pool_strategy.apply(function=TargetCls.staticmethod_fun)
-        #
-        # TestProcessPool._chk_process_record()
+    def test_apply_with_bounded_function_with_no_arguments(self, process_pool_strategy: ProcessPoolStrategy):
+        _tc = TargetPoolCls()
+        self._apply(strategy=process_pool_strategy, target_fun=_tc.method)
+
+        TestProcessPool._chk_blocking_record()
+
+
+    def test_apply_with_bounded_function_with_args(self, process_pool_strategy: ProcessPoolStrategy):
+        _tc = TargetPoolCls()
+        self._apply(strategy=process_pool_strategy, target_fun=_tc.method, args=Test_Function_Args)
+
+        TestProcessPool._chk_blocking_record()
+
+
+    def test_apply_with_bounded_function_with_kwargs(self, process_pool_strategy: ProcessPoolStrategy):
+        _tc = TargetPoolCls()
+        self._apply(strategy=process_pool_strategy, target_fun=_tc.method, kwargs=Test_Function_Kwargs)
+
+        TestProcessPool._chk_blocking_record()
+
+
+    def test_apply_with_classmethod_function_with_no_arguments(self, process_pool_strategy: ProcessPoolStrategy):
+        self._apply(strategy=process_pool_strategy, target_fun=TargetPoolCls.classmethod_fun)
+
+        TestProcessPool._chk_blocking_record()
+
+
+    def test_apply_with_classmethod_function_with_args(self, process_pool_strategy: ProcessPoolStrategy):
+        self._apply(strategy=process_pool_strategy, target_fun=TargetPoolCls.classmethod_fun, args=Test_Function_Args)
+
+        TestProcessPool._chk_blocking_record()
+
+
+    def test_apply_with_classmethod_function_with_kwargs(self, process_pool_strategy: ProcessPoolStrategy):
+        self._apply(strategy=process_pool_strategy, target_fun=TargetPoolCls.classmethod_fun, kwargs=Test_Function_Kwargs)
+
+        TestProcessPool._chk_blocking_record()
+
+
+    def test_apply_with_staticmethod_function_with_no_arguments(self, process_pool_strategy: ProcessPoolStrategy):
+        self._apply(strategy=process_pool_strategy, target_fun=TargetPoolCls.staticmethod_fun)
+
+        TestProcessPool._chk_blocking_record()
+
+
+    def test_apply_with_staticmethod_function_with_args(self, process_pool_strategy: ProcessPoolStrategy):
+        self._apply(strategy=process_pool_strategy, target_fun=TargetPoolCls.staticmethod_fun, args=Test_Function_Args)
+
+        TestProcessPool._chk_blocking_record()
+
+
+    def test_apply_with_staticmethod_function_with_kwargs(self, process_pool_strategy: ProcessPoolStrategy):
+        self._apply(strategy=process_pool_strategy, target_fun=TargetPoolCls.staticmethod_fun, kwargs=Test_Function_Kwargs)
+
+        TestProcessPool._chk_blocking_record()
 
 
     def test_async_apply_with_function_with_no_arguments(self, process_pool_strategy: ProcessPoolStrategy):
@@ -1021,6 +1181,18 @@ class TestProcessPool(PoolRunningTestSpec):
 
         global Running_Parent_PID
         Running_Parent_PID = os.getpid()
+
+
+    @staticmethod
+    def _chk_blocking_record():
+        PoolRunningTestSpec._chk_ppid_info(ppid_list=Running_PPIDs, running_parent_pid=Running_Parent_PID)
+        PoolRunningTestSpec._chk_process_record_blocking(
+            pool_running_cnt=Pool_Running_Count.value,
+            worker_size=Pool_Size,
+            running_worker_ids=Running_PIDs,
+            running_current_workers=Running_Current_Processes,
+            running_finish_timestamps=Running_Finish_Timestamp
+        )
 
 
     @staticmethod

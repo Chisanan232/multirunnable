@@ -330,9 +330,135 @@ class TestGreenThread(GeneralRunningTestSpec):
         pass
 
 
-    @pytest.mark.skip(reason="Not implement testing logic.")
-    def test_start_new_worker(self, strategy: GreenThreadStrategy):
-        pass
+    def test_start_new_worker_with_function_with_no_argument(self, strategy: GreenThreadStrategy):
+        self._start_new_worker(
+            strategy=strategy,
+            worker_size=Green_Thread_Size,
+            target_fun=target_fun)
+
+        TestGreenThread._chk_record()
+        strategy.reset_result()
+
+
+    def test_start_new_worker_with_function_with_args(self, strategy: GreenThreadStrategy):
+        self._start_new_worker(
+            strategy=strategy,
+            worker_size=Green_Thread_Size,
+            target_fun=target_fun,
+            args=Test_Function_Args)
+
+        TestGreenThread._chk_record()
+        strategy.reset_result()
+
+
+    def test_start_new_worker_with_function_with_kwargs(self, strategy: GreenThreadStrategy):
+        self._start_new_worker(
+            strategy=strategy,
+            worker_size=Green_Thread_Size,
+            target_fun=target_fun,
+            kwargs=Test_Function_Kwargs)
+
+        TestGreenThread._chk_record()
+        strategy.reset_result()
+
+
+    def test_start_new_worker_with_bounded_function_with_no_argument(self, strategy: GreenThreadStrategy):
+        _tc = TargetCls()
+        self._start_new_worker(
+            strategy=strategy,
+            worker_size=Green_Thread_Size,
+            target_fun=_tc.method)
+
+        TestGreenThread._chk_record()
+        strategy.reset_result()
+
+
+    def test_start_new_worker_with_bounded_function_with_args(self, strategy: GreenThreadStrategy):
+        _tc = TargetCls()
+        self._start_new_worker(
+            strategy=strategy,
+            worker_size=Green_Thread_Size,
+            target_fun=_tc.method,
+            args=Test_Function_Args)
+
+        TestGreenThread._chk_record()
+        strategy.reset_result()
+
+
+    def test_start_new_worker_with_bounded_function_with_kwargs(self, strategy: GreenThreadStrategy):
+        _tc = TargetCls()
+        self._start_new_worker(
+            strategy=strategy,
+            worker_size=Green_Thread_Size,
+            target_fun=_tc.method,
+            kwargs=Test_Function_Kwargs)
+
+        TestGreenThread._chk_record()
+        strategy.reset_result()
+
+
+    def test_start_new_worker_with_classmethod_function_with_no_argument(self, strategy: GreenThreadStrategy):
+        self._start_new_worker(
+            strategy=strategy,
+            worker_size=Green_Thread_Size,
+            target_fun=TargetCls.classmethod_fun)
+
+        TestGreenThread._chk_record()
+        strategy.reset_result()
+
+
+    def test_start_new_worker_with_classmethod_function_with_args(self, strategy: GreenThreadStrategy):
+        self._start_new_worker(
+            strategy=strategy,
+            worker_size=Green_Thread_Size,
+            target_fun=TargetCls.classmethod_fun,
+            args=Test_Function_Args)
+
+        TestGreenThread._chk_record()
+        strategy.reset_result()
+
+
+    def test_start_new_worker_with_classmethod_function_with_kwargs(self, strategy: GreenThreadStrategy):
+        self._start_new_worker(
+            strategy=strategy,
+            worker_size=Green_Thread_Size,
+            target_fun=TargetCls.classmethod_fun,
+            kwargs=Test_Function_Kwargs)
+
+        TestGreenThread._chk_record()
+        strategy.reset_result()
+
+
+    def test_start_new_worker_with_staticmethod_function_with_no_argument(self, strategy: GreenThreadStrategy):
+        self._start_new_worker(
+            strategy=strategy,
+            worker_size=Green_Thread_Size,
+            target_fun=TargetCls.staticmethod_fun)
+
+        TestGreenThread._chk_record()
+        strategy.reset_result()
+
+
+    def test_start_new_worker_with_staticmethod_function_with_args(self, strategy: GreenThreadStrategy):
+        self._start_new_worker(
+            strategy=strategy,
+            worker_size=Green_Thread_Size,
+            target_fun=TargetCls.staticmethod_fun,
+            args=Test_Function_Args)
+
+        TestGreenThread._chk_record()
+        strategy.reset_result()
+
+
+    def test_start_new_worker_with_staticmethod_function_with_kwargs(self, strategy: GreenThreadStrategy):
+        self._start_new_worker(
+            strategy=strategy,
+            worker_size=Green_Thread_Size,
+            target_fun=TargetCls.staticmethod_fun,
+            kwargs=Test_Function_Kwargs)
+
+        TestGreenThread._chk_record()
+        strategy.reset_result()
 
 
     def test_generate_worker_with_function_with_no_argument(self, strategy: GreenThreadStrategy):
@@ -717,16 +843,6 @@ class TestGreenThread(GeneralRunningTestSpec):
         pass
 
 
-    @pytest.mark.skip(reason="Not implement testing logic.")
-    def test_terminal(self, strategy: GreenThreadStrategy):
-        pass
-
-
-    @pytest.mark.skip(reason="Not implement testing logic.")
-    def test_kill(self, strategy: GreenThreadStrategy):
-        pass
-
-
     def _initial(self):
         # Test for parameters with '**kwargs'
         reset_running_flag()
@@ -755,14 +871,79 @@ class TestGreenThreadPool(PoolRunningTestSpec):
         pass
 
 
-    @pytest.mark.skip(reason="Not implement testing logic.")
-    def test_async_apply(self, pool_strategy: GreenThreadPoolStrategy):
-        pass
-        # TestGreenThreadPool._initial()
-        #
-        # pool_strategy.apply(function=pool_target_fun)
-        #
-        # TestGreenThreadPool._chk_process_record()
+    def test_apply_with_function_with_no_arguments(self, pool_strategy: GreenThreadPoolStrategy):
+        self._apply(strategy=pool_strategy, target_fun=pool_target_fun)
+
+        TestGreenThreadPool._chk_blocking_record()
+
+
+    def test_apply_with_function_with_args(self, pool_strategy: GreenThreadPoolStrategy):
+        self._apply(strategy=pool_strategy, target_fun=pool_target_fun, args=Test_Function_Args)
+
+        TestGreenThreadPool._chk_blocking_record()
+
+
+    def test_apply_with_function_with_kwargs(self, pool_strategy: GreenThreadPoolStrategy):
+        self._apply(strategy=pool_strategy, target_fun=pool_target_fun, kwargs=Test_Function_Kwargs)
+
+        TestGreenThreadPool._chk_blocking_record()
+
+
+    def test_apply_with_bounded_function_with_no_arguments(self, pool_strategy: GreenThreadPoolStrategy):
+        _tc = TargetPoolCls()
+        self._apply(strategy=pool_strategy, target_fun=_tc.method)
+
+        TestGreenThreadPool._chk_blocking_record()
+
+
+    def test_apply_with_bounded_function_with_args(self, pool_strategy: GreenThreadPoolStrategy):
+        _tc = TargetPoolCls()
+        self._apply(strategy=pool_strategy, target_fun=_tc.method, args=Test_Function_Args)
+
+        TestGreenThreadPool._chk_blocking_record()
+
+
+    def test_apply_with_bounded_function_with_kwargs(self, pool_strategy: GreenThreadPoolStrategy):
+        _tc = TargetPoolCls()
+        self._apply(strategy=pool_strategy, target_fun=_tc.method, kwargs=Test_Function_Kwargs)
+
+        TestGreenThreadPool._chk_blocking_record()
+
+
+    def test_apply_with_classmethod_function_with_no_arguments(self, pool_strategy: GreenThreadPoolStrategy):
+        self._apply(strategy=pool_strategy, target_fun=TargetPoolCls.classmethod_fun)
+
+        TestGreenThreadPool._chk_blocking_record()
+
+
+    def test_apply_with_classmethod_function_with_args(self, pool_strategy: GreenThreadPoolStrategy):
+        self._apply(strategy=pool_strategy, target_fun=TargetPoolCls.classmethod_fun, args=Test_Function_Args)
+
+        TestGreenThreadPool._chk_blocking_record()
+
+
+    def test_apply_with_classmethod_function_with_kwargs(self, pool_strategy: GreenThreadPoolStrategy):
+        self._apply(strategy=pool_strategy, target_fun=TargetPoolCls.classmethod_fun, kwargs=Test_Function_Kwargs)
+
+        TestGreenThreadPool._chk_blocking_record()
+
+
+    def test_apply_with_staticmethod_function_with_no_arguments(self, pool_strategy: GreenThreadPoolStrategy):
+        self._apply(strategy=pool_strategy, target_fun=TargetPoolCls.staticmethod_fun)
+
+        TestGreenThreadPool._chk_blocking_record()
+
+
+    def test_apply_with_staticmethod_function_with_args(self, pool_strategy: GreenThreadPoolStrategy):
+        self._apply(strategy=pool_strategy, target_fun=TargetPoolCls.staticmethod_fun, args=Test_Function_Args)
+
+        TestGreenThreadPool._chk_blocking_record()
+
+
+    def test_apply_with_staticmethod_function_with_kwargs(self, pool_strategy: GreenThreadPoolStrategy):
+        self._apply(strategy=pool_strategy, target_fun=TargetPoolCls.staticmethod_fun, kwargs=Test_Function_Kwargs)
+
+        TestGreenThreadPool._chk_blocking_record()
 
 
     def test_async_apply_with_function_with_no_arguments(self, pool_strategy: GreenThreadPoolStrategy):
@@ -1118,6 +1299,17 @@ class TestGreenThreadPool(PoolRunningTestSpec):
 
         global Running_Parent_PID
         Running_Parent_PID = os.getpid()
+
+
+    @staticmethod
+    def _chk_blocking_record():
+        PoolRunningTestSpec._chk_process_record_blocking(
+            pool_running_cnt=Pool_Running_Count,
+            worker_size=Pool_Size,
+            running_worker_ids=Running_GreenThread_IDs,
+            running_current_workers=Running_Current_Threads,
+            running_finish_timestamps=Running_Finish_Timestamp
+        )
 
 
     @staticmethod
@@ -1653,16 +1845,6 @@ class TestAsynchronous(GeneralRunningTestSpec):
         # _active_children_list = mp.active_children()
         # print(len(_active_children_list) == 0)
         # assert len(_active_children_list) == 0, f"Processes should be closed finely."
-        pass
-
-
-    @pytest.mark.skip(reason="Not implement testing logic.")
-    def test_terminal(self, async_strategy: AsynchronousStrategy):
-        pass
-
-
-    @pytest.mark.skip(reason="Not implement testing logic.")
-    def test_kill(self, async_strategy: AsynchronousStrategy):
         pass
 
 
