@@ -1,25 +1,18 @@
-
-Usage
-=======================
+========
+Usages
+========
 
 This package classifies the runnable unit to be Executor and Pool.
 It also supports doing some operators with running multiple tasks simultaneously 
 like Lock, Semaphore, Event, etc.
 
-Runnable Components
------------------------
+Run Executor or Pool with RunningMode
+======================================
 
 *Executor*
-~~~~~~~~~~~~~~~~~~~~~~~
+------------
 
-This is a basic unit for every running strategy.
-
-* Parallel -> Process
-* Concurrent -> Thread
-* Green Thread -> Greenlet object
-* Asynchronous -> Asynchronous task object
-
-We could run an easy Parallel, Concurrent or Coroutine code with it.
+This object would operate with basic unit runnable object like Process or Thread by running strategy.
 
 .. code-block:: python
 
@@ -30,14 +23,9 @@ We could run an easy Parallel, Concurrent or Coroutine code with it.
 
 
 *Pool*
-~~~~~~~~~~~~~~~~~~~~~~~
+-------
 
-This Pool concept is same as below:
-
-* Parallel -> multiprocessing.Pool
-* Concurrent -> multiprocessing.ThreadPool
-* Green Thread -> gevent.pool.Pool
-* Asynchronous -> Doesn't support this feature
+This is Pool of runnable object with running strategy.
 
 .. code-block:: python
 
@@ -48,14 +36,15 @@ This Pool concept is same as below:
 
 
 
+Synchronize MultiRunnable Task --- Lock the performance
+=========================================================
 
-Lock Features
------------------------
+It could synchronize tasks of *multirunnable* objects with Lock, Semaphore, etc.
 
 *Lock*
-~~~~~~~~~~~~~~~~~~~~~~~
+-------
 
-With _multirunnable_, it should initial Lock objects before you use it.
+With *multirunnable*, it should initial Lock objects before you use it.
 
 .. code-block:: python
 
@@ -66,11 +55,11 @@ With _multirunnable_, it should initial Lock objects before you use it.
     lock = Lock()
 
     executor = SimpleExecutor(mode=RunningMode.Parallel, executors=3)
-    # Pass into executor or pool via parameter 'features'
+    # Pass it into executor or pool via option *features*
     executor.run(function=<Your target function>, features=lock)
 
 
-It could use the Lock object via **LockOperator**.
+It could use the Lock object via object **LockOperator**.
 
 .. code-block:: python
 
@@ -87,7 +76,23 @@ It could use the Lock object via **LockOperator**.
         lock.release()
 
 
-Above code with Lock function is equal to below:
+or implement via Python keyword **with**:
+
+.. code-block:: python
+
+    from multirunnable.api import LockOperator
+    import time
+
+    lock = LockOperator()
+
+    def lock_function():
+        with lock:
+            print("Running process in lock and will sleep 2 seconds.")
+            time.sleep(2)
+            print(f"Wake up process and release lock.")
+
+
+Above implementations with Lock feature is equal to below:
 
 .. code-block:: python
 
@@ -128,7 +133,7 @@ Or with keyword **with**:
     ... # Some logic
 
 
-✨👀 **Using features with Python decorator**
+✨👀 **Using multirunnable features with Python decorator**
 
 It also could use Lock via decorator **RunWith** (it's **AsyncRunWith** with Asynchronous).
 
@@ -144,39 +149,21 @@ It also could use Lock via decorator **RunWith** (it's **AsyncRunWith** with Asy
         print(f"Wake up process and release lock.")
 
 
-Only below features support decorator:
-**Lock**, **RLock**, **Semaphore**, **Bounded Semaphore**.
+Only these features support decorator: **Lock**, **RLock**, **Semaphore**, **Bounded Semaphore**.
 
-*RLock*
-~~~~~~~~~~~~~~~~~~~~~~~
+Why Lock with decorator?
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Lock only could acquire and release one time but RLock could acquire and release multiple times.
-
-.. code-block:: python
-
-    from multirunnable.api import RLockOperator
-    import time
-
-    rlock = RLockOperator()
-
-    def lock_function():
-        rlock.acquire()
-        print("Acquire RLock 1 time")
-        rlock.acquire()
-        print("Acquire RLock 2 time")
-        print("Running process in lock and will sleep 2 seconds.")
-        time.sleep(2)
-        print(f"Wake up process and release lock.")
-        rlock.release()
-        print("Acquire Release 1 time")
-        rlock.release()
-        print("Acquire Release 2 time")
+Lock, Semaphore or something else features would deeply affect the performance of parallelism.
+*MultiRunnable* require developers do as much as you can about ONLY lock the necessary section to
+let parallelism stay at high performance. It also could remind others this function would run with
+lock.
 
 
 *Semaphore*
-~~~~~~~~~~~~~~~~~~~~~~~
+-------------
 
-Semaphore could accept multiple runnable unit in target function:
+Semaphore could accept multiple runnable objects to run target function:
 
 .. code-block:: python
 
@@ -190,20 +177,14 @@ Semaphore could accept multiple runnable unit in target function:
         print(f"Wake up process and release lock.")
 
 
-*Bounded Semaphore*
-~~~~~~~~~~~~~~~~~~~~~~~
-
-It's mostly same as _Semaphore_.
-
-
-Communication Features
------------------------
+Synchronize MultiRunnable Task --- Communicate with each others
+================================================================
 
 For features Event and Condition, they all don't support using with decorator. 
 So it must use it via operator object.
 
 *Event*
-~~~~~~~~~~~~~~~~~~~~~~~
+---------
 
 .. code-block:: python
 
@@ -256,7 +237,7 @@ So it must use it via operator object.
 
 
 *Condition*
-~~~~~~~~~~~~~~~~~~~~~~~
+-------------
 
 .. code-block:: python
 
@@ -344,16 +325,14 @@ So it must use it via operator object.
 
 
 
+Using Queue in MultiRunnable
+=============================
 
-
-Queue
------------------------
-
-The Queue in _multirunnable_ classify to different type by running strategy.
+The Queue in *multirunnable* classify to different type by running strategy.
 For usage, it should do 2 things: initial and get.
 
 *Queue*
-~~~~~~~~~~~~~~~~~~~~~~~
+---------
 
 It must use Queue feature with object **QueueTask**. It could configure some info like name, type and value.
 Name is a key of the queue object. Type means which one Queue object type you want to use.
@@ -391,21 +370,15 @@ Also, we need to pass it by parameter '_queue_task_' before we use it.
 
 
 
+Retry to run target function if it raises exception
+====================================================
 
-
-Others
------------------------
-
-*Retry Mechanism*
-~~~~~~~~~~~~~~~~~~~~~~~
+*retry*
+--------
 
 It's possible that occurs unexpected something when running. Sometimes, it needs 
-to catch that exceptions or errors to do some handling, it even needs to do something
-finally and keep going run the code. That's the reason this feature exists.
-
-Below is the life cycle of runnable unit (worker):
-
-.. image:: https://github.com/Chisanan232/multirunnable/blob/master/docs/imgs/MultiRunnable-Worker_work_flow.png
+to catch that exceptions or errors to do some handling or it needs to do something
+finally and keep going run. That's the reason why this feature exists.
 
 It could use the feature via Python decorator **retry** (It's **async_retry** with Asynchronous).
 
@@ -438,11 +411,9 @@ It absolutely could configure timeout time (Default value is 1).
 It would be decorated as a 'retry' object after adds decorator on it. 
 So we could add some features you need.
 
-* Initialization 
+* Initialization
 
 The function which should be run first before run target function.
-Default implementation is doing nothing.
-The usage is decorating as target function annotation name and call **.initialization** method.
 
 .. code-block:: python
 
@@ -453,11 +424,7 @@ The usage is decorating as target function annotation name and call **.initializ
 
 * Done Handling
 
-It will return value after run completely target function. This feature argument 
-receives the result. You could do some result-handling here to reach your own target, 
-and it will return it out.
-Default implementation is doing nothing, just return the result it gets.
-The usage is decorating as target function annotation name and call **.done_handling** method.
+It will return value after run completely target function.
 
 .. code-block:: python
 
@@ -470,8 +437,6 @@ The usage is decorating as target function annotation name and call **.done_hand
 * Final Handling
 
 It's the feature run something which MUST to do. For example, close IO.
-Default implementation is doing nothing.
-The usage is decorating as target function annotation name and call **.final_handling** method.
 
 .. code-block:: python
 
@@ -480,11 +445,9 @@ The usage is decorating as target function annotation name and call **.final_han
         print("This is final process")
 
 
-* Exception & Error - Handling 
+* Exception & Error - Handling
 
-Target to handle every exception or error. So the function argument absolutely receives exception or error.
-Default implementation is raising any exception or error it gets.
-The usage is decorating as target function annotation name and call **.error_handling** method.
+Target to handle every exception or error.
 
 .. code-block:: python
 
