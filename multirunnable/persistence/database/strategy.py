@@ -430,7 +430,7 @@ class BaseConnectionPool(BaseDatabaseConnection):
 
 
     @abstractmethod
-    def close_pool(self) -> None:
+    def close_pool(self, pool_name: str) -> None:
         """
         Description:
             Close the database connection pool instance.
