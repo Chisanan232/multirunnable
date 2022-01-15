@@ -13,6 +13,3 @@ sphinx:
 python:
   install:
     - requirements: dev-requirements.txt
-      path: .
-      extra_requirements:
-        - docs
