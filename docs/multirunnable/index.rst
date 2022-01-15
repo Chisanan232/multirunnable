@@ -132,10 +132,3 @@ Let's demonstrate an example to show how easy and clear it is!
     :alt: Test coverage with 'coveralls'
     :target: https://coveralls.io/github/Chisanan232/multirunnable?branch=master
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
