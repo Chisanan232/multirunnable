@@ -20,6 +20,8 @@ Some demonstrations of how to use some general modules and its APIs. It demonstr
 
 Demonstrating the core module and APIs of *multirunnable*.
 
+.. _Simple Executor:
+
 Simple Executor
 ----------------
 
@@ -50,6 +52,8 @@ An example shows how to use *multirunnable.SimpleExecutor*:
     print("Result: ", _result)
 
 
+
+.. _Simple Pool:
 
 Simple Pool
 ------------
@@ -88,6 +92,8 @@ Using *multirunnable.SimplePool*:
 
 
 
+.. _Persistence - File:
+
 Persistence - File
 -------------------
 
@@ -104,6 +110,8 @@ About persistence as file, it could use FAO (File Access Object) with object *Ba
 Consider about remove the template implementations to let subclass to implement it like database subpackage.
 It will deprecate this at version 0.18.0 and remove this at version 0.19.0 if it ensures the decision.
 
+
+.. _Persistence - Database:
 
 Persistence - Database
 -----------------------
@@ -310,6 +318,8 @@ An example show how to decorate Lock feature to a function.
         return "Return_Value"
 
 
+
+.. _Retry mechanism:
 
 Retry mechanism
 -----------------

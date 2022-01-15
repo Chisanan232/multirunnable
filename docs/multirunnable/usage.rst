@@ -9,6 +9,8 @@ like Lock, Semaphore, Event, etc.
 Run Executor or Pool with RunningMode
 ======================================
 
+.. _Executor Usage:
+
 *Executor*
 ------------
 
@@ -21,6 +23,8 @@ This object would operate with basic unit runnable object like Process or Thread
     executor = SimpleExecutor(mode=RunningMode.Parallel, executors=3)
     executor.run(function=<Your target function>, args=<The arguments of target function>)
 
+
+.. _Pool Usage:
 
 *Pool*
 -------
@@ -35,6 +39,8 @@ This is Pool of runnable object with running strategy.
     pool.async_apply(function=<Your target function>, args=<The arguments of target function>)
 
 
+
+.. _Synchronize MultiRunnable Task --- Lock the performance:
 
 Synchronize MultiRunnable Task --- Lock the performance
 =========================================================
@@ -369,6 +375,8 @@ Also, we need to pass it by parameter '_queue_task_' before we use it.
     executor.run(function=<Your target function>, queue_tasks=test_queue_task)
 
 
+
+.. _Retry to run target function if it raises exception:
 
 Retry to run target function if it raises exception
 ====================================================
