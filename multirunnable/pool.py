@@ -8,7 +8,7 @@ from .framework import (
     BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory,
     PoolRunnableStrategy as _PoolRunnableStrategy,
     Resultable as _Resultable,
-    MRResult as _MRResult
+    PoolResult as _PoolResult
 )
 from .mode import RunningMode as _RunningMode
 from .adapter.strategy import PoolStrategyAdapter as _PoolStrategyAdapter
@@ -120,7 +120,7 @@ class Pool(ABC, _BasePool):
         Pool_Runnable_Strategy.terminal()
 
 
-    def get_result(self) -> List[_MRResult]:
+    def get_result(self) -> List[_PoolResult]:
         __result = Pool_Runnable_Strategy.get_result()
         return __result
 

@@ -48,7 +48,7 @@ from .features import (
     PosixThreadCommunication,
     BaseFeatureAdapterFactory,
     BaseGlobalizeAPI)
-from .result import MRResult, ResultState
+from .result import MRResult, PoolResult, ResultState
 
 from .api import (
     AdapterOperator, BaseLockAdapterOperator,
