@@ -14,7 +14,7 @@ if PYTHON_MAJOR_VERSION < 3:
 PYTHON_MINOR_VERSION = int(version_info[1])
 PYTHON_VERSION = f"{PYTHON_MAJOR_VERSION}.{PYTHON_MINOR_VERSION}"
 
-from multirunnable._version import _github_tag_version__, __version__
+from multirunnable._version import __github_tag_version__, __version__
 from multirunnable.mode import RunningMode, FeatureMode
 from multirunnable.tasks import QueueTask
 from multirunnable.executor import SimpleExecutor

@@ -8,9 +8,6 @@ Welcome to MultiRunnable's documentation!
 
 |python-versions| |release-version| |pypi-version| |license|
 
-
-:GitHub Release: |version|
-:PyPi Release: |release|
 :Date: |today|
 
 

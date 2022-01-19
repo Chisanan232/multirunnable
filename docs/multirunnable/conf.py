@@ -23,9 +23,9 @@ copyright = '2021, Bryant Liu'
 author = 'Bryant Liu'
 
 # The full version, including alpha/beta/rc tags
-from multirunnable import _github_tag_version__, __version__
+from multirunnable import __github_tag_version__, __version__
 
-version = _github_tag_version__
+version = __github_tag_version__()
 release = __version__
 
 
