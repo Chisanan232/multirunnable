@@ -519,7 +519,6 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
 class BaseAsyncStrategy(CoroutineStrategy, _AsyncRunnableStrategy, ABC):
 
     _Strategy_Feature_Mode = _FeatureMode.Asynchronous
-    _Async_Running_Result: List = []
 
 
 
@@ -668,13 +667,21 @@ class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
         for __result in self._Async_Running_Result:
             _async_result = _AsynchronousResult()
 
-            # _async_result.worker_id = __result.get("async_id")
-            # _async_result.event_loop = __result.get("event_loop")
-            # _async_result.data = __result.get("result_data")
-            # _async_result.exception = __result.get("exceptions")
+            # # # # Save some basic info of Process
+            _async_result.pid = __result["pid"]
+            _async_result.worker_name = __result["name"]
+            _async_result.worker_ident = __result["mem_id"]
 
+            # # # # Save state of process
+            __coroutine_successful = __result.get("successful", None)
+            if __coroutine_successful is True:
+                _async_result.state = _ResultState.SUCCESS.value
+            else:
+                _async_result.state = _ResultState.FAIL.value
+
+            # # # # Save running result of process
             _async_result.data = __result.get("result", None)
-
+            _async_result.exception = __result.get("exception", None)
             _async_results.append(_async_result)
 
         return _async_results
