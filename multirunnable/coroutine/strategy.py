@@ -520,6 +520,9 @@ class BaseAsyncStrategy(CoroutineStrategy, _AsyncRunnableStrategy, ABC):
 
     _Strategy_Feature_Mode = _FeatureMode.Asynchronous
 
+    def reset_result(self):
+        self._Async_Running_Result[:] = []
+
 
 
 class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
@@ -528,6 +531,7 @@ class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
 
     @dispatch((FunctionType, MethodType, functools.partial), args=tuple, kwargs=dict)
     def _start_new_worker(self, target: Callable, args: Tuple = (), kwargs: Dict = {}) -> None:
+        self.reset_result()
 
         async def __start_new_async_task():
             __worker = await self.generate_worker(target, *args, **kwargs)
@@ -538,6 +542,7 @@ class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
 
     @dispatch(Iterable, args=tuple, kwargs=dict)
     def _start_new_worker(self, target: List[Callable], args: Tuple = (), kwargs: Dict = {}) -> None:
+        self.reset_result()
 
         async def __start_new_async_tasks():
             __workers = [await self.generate_worker(__function, *args, **kwargs) for __function in target]
@@ -551,6 +556,8 @@ class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
             args: Optional[Union[Tuple, Dict]] = None,
             queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
             features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
+
+        self.reset_result()
 
         async def __run_process():
             await self.initialization(queue_tasks=queue_tasks, features=features)
@@ -566,6 +573,8 @@ class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
             queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
             features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
 
+        self.reset_result()
+
         async def __map_process():
             await self.initialization(queue_tasks=queue_tasks, features=features)
             __workers_list = [self._generate_worker(function, args) for args in args_iter]
@@ -579,6 +588,8 @@ class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
                           args_iter: IterableType = [],
                           queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
                           features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
+
+        self.reset_result()
 
         async def __map_with_function_process():
             nonlocal args_iter
@@ -659,6 +670,8 @@ class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
 
     def get_result(self) -> List[_AsynchronousResult]:
         __async_results = self._saving_process()
+        print(f"[DEBUG] self._Async_Running_Result: {self._Async_Running_Result}")
+        self.reset_result()
         return __async_results
 
 
