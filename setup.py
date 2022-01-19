@@ -5,8 +5,8 @@ with open("README.md", "r") as fh:
     readme = fh.read()
 
 setuptools.setup(
-    name="multirunnable",
-    version="0.16.0",
+    name="MultiRunnable",
+    version="0.16.1",
     author="Liu, Bryant",
     author_email="chi10211201@cycu.org.tw",
     url="https://multirunnable.readthedocs.io",
