@@ -1581,6 +1581,7 @@ class TestAsynchronous(GeneralRunningTestSpec):
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
         TestAsynchronous._chk_async_task_record()
+        async_strategy.reset_result()
 
 
     def test_activate_workers_with_function_with_args(self, async_strategy: AsynchronousStrategy):
@@ -1599,6 +1600,7 @@ class TestAsynchronous(GeneralRunningTestSpec):
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
         TestAsynchronous._chk_async_task_record()
+        async_strategy.reset_result()
 
 
     def test_activate_workers_with_function_with_kwargs(self, async_strategy: AsynchronousStrategy):
@@ -1617,6 +1619,7 @@ class TestAsynchronous(GeneralRunningTestSpec):
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
         TestAsynchronous._chk_async_task_record()
+        async_strategy.reset_result()
 
 
     def test_activate_workers_with_bounded_function_with_no_arguments(self, async_strategy: AsynchronousStrategy):
@@ -1636,6 +1639,7 @@ class TestAsynchronous(GeneralRunningTestSpec):
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
         TestAsynchronous._chk_async_task_record()
+        async_strategy.reset_result()
 
 
     def test_activate_workers_with_bounded_function_with_args(self, async_strategy: AsynchronousStrategy):
@@ -1655,6 +1659,7 @@ class TestAsynchronous(GeneralRunningTestSpec):
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
         TestAsynchronous._chk_async_task_record()
+        async_strategy.reset_result()
 
 
     def test_activate_workers_with_bounded_function_with_kwargs(self, async_strategy: AsynchronousStrategy):
@@ -1674,6 +1679,7 @@ class TestAsynchronous(GeneralRunningTestSpec):
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
         TestAsynchronous._chk_async_task_record()
+        async_strategy.reset_result()
 
 
     def test_activate_workers_with_classmethod_function_with_no_arguments(self, async_strategy: AsynchronousStrategy):
@@ -1692,6 +1698,7 @@ class TestAsynchronous(GeneralRunningTestSpec):
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
         TestAsynchronous._chk_async_task_record()
+        async_strategy.reset_result()
 
 
     def test_activate_workers_with_classmethod_function_with_args(self, async_strategy: AsynchronousStrategy):
@@ -1710,6 +1717,7 @@ class TestAsynchronous(GeneralRunningTestSpec):
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
         TestAsynchronous._chk_async_task_record()
+        async_strategy.reset_result()
 
 
     def test_activate_workers_with_classmethod_function_with_kwargs(self, async_strategy: AsynchronousStrategy):
@@ -1728,6 +1736,7 @@ class TestAsynchronous(GeneralRunningTestSpec):
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
         TestAsynchronous._chk_async_task_record()
+        async_strategy.reset_result()
 
 
     def test_activate_workers_with_staticmethod_function_with_no_arguments(self, async_strategy: AsynchronousStrategy):
@@ -1746,6 +1755,7 @@ class TestAsynchronous(GeneralRunningTestSpec):
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
         TestAsynchronous._chk_async_task_record()
+        async_strategy.reset_result()
 
 
     def test_activate_workers_with_staticmethod_function_with_args(self, async_strategy: AsynchronousStrategy):
@@ -1764,6 +1774,7 @@ class TestAsynchronous(GeneralRunningTestSpec):
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
         TestAsynchronous._chk_async_task_record()
+        async_strategy.reset_result()
 
 
     def test_activate_workers_with_staticmethod_function_with_kwargs(self, async_strategy: AsynchronousStrategy):
@@ -1782,6 +1793,7 @@ class TestAsynchronous(GeneralRunningTestSpec):
 
         # Check some info which be saved in 'Running_PIDs', 'Running_PPIDs', 'Running_Current_Process' and 'Running_Finish_Timestamp'
         TestAsynchronous._chk_async_task_record()
+        async_strategy.reset_result()
 
 
     def _initial(self):
@@ -1823,7 +1835,7 @@ class TestAsynchronous(GeneralRunningTestSpec):
             assert _r.pid, f"The PID should exists in list we record."
             assert _r.worker_name, f"It should have thread name."
             assert _r.worker_ident, f"It should have thread identity."
-            assert _r.data, f""
+            assert _r.data, f"It should not be an empty value."
             _chksum = re.search(r"result_[0-9]{1,64}", str(_r.data))
             assert _chksum is not None, f""
             assert _r.state == "successful", f"Its state should be 'successful'."
