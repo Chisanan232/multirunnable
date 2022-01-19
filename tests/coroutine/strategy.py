@@ -796,7 +796,6 @@ class TestGreenThread(GeneralRunningTestSpec):
             assert _r.exception is None, f"It should have nothing exception."
 
 
-    # @pytest.mark.skip(reason="Consider this feature.")
     def test_get_failure_result(self, strategy: GreenThreadStrategy):
         self._activate_workers(
             strategy=strategy,
@@ -1821,9 +1820,14 @@ class TestAsynchronous(GeneralRunningTestSpec):
 
         _result = async_strategy.get_result()
         for _r in _result:
+            assert _r.pid, f"The PID should exists in list we record."
+            assert _r.worker_name, f"It should have thread name."
+            assert _r.worker_ident, f"It should have thread identity."
             assert _r.data, f""
             _chksum = re.search(r"result_[0-9]{1,64}", str(_r.data))
             assert _chksum is not None, f""
+            assert _r.state == "successful", f"Its state should be 'successful'."
+            assert _r.exception is None, f"It should have nothing exception."
 
 
     @pytest.mark.skip(reason="Not implement testing logic.")
