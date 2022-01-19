@@ -88,7 +88,7 @@ class BaseDatabaseConnection(BasePersistence):
         Therefore it should consider about sharing instances between multiple different workers.
     """
 
-    __Database_Config: Dict[str, Union[str, int]] = {
+    _Database_Config: Dict[str, Union[str, int]] = {
         "host": "",
         "port": "",
         "user": "",
@@ -124,7 +124,7 @@ class BaseDatabaseConnection(BasePersistence):
         __cls_str = str(self.__class__)
         __cls_name = _get_cls_name(cls_str=__cls_str)
         if __cls_name != "":
-            __instance_brief = f"{__cls_name}({self.__Database_Config})"
+            __instance_brief = f"{__cls_name}({self._Database_Config})"
         else:
             __instance_brief = __cls_str
         return __instance_brief
@@ -141,7 +141,7 @@ class BaseDatabaseConnection(BasePersistence):
             Get all database configuration content.
         :return:
         """
-        return self.__Database_Config
+        return self._Database_Config
 
 
     @database_config.setter
@@ -151,7 +151,7 @@ class BaseDatabaseConnection(BasePersistence):
             Get all database configuration content.
         :return:
         """
-        self.__Database_Config.update(config)
+        self._Database_Config.update(config)
 
 
     def update_database_config(self, key: str, value: Any) -> None:
@@ -160,7 +160,7 @@ class BaseDatabaseConnection(BasePersistence):
             Get all database configuration content.
         :return:
         """
-        self.__Database_Config[key] = value
+        self._Database_Config[key] = value
 
 
     @property
@@ -369,13 +369,13 @@ class BaseConnectionPool(BaseDatabaseConnection):
             The number be suggested to be roughly equal to the CPUs amount of host which the program be run.
         :return:
         """
-        _db_conn_num = self.__Database_Config["pool_size"]
+        _db_conn_num = self._Database_Config["pool_size"]
         if _db_conn_num < 0:
             raise ValueError("The database connection pool size cannot less than 0.")
 
         if _db_conn_num is None or _db_conn_num == 0:
-            self.__Database_Config["pool_size"] = cpu_count()
-            return self.__Database_Config["pool_size"]
+            self._Database_Config["pool_size"] = cpu_count()
+            return self._Database_Config["pool_size"]
         else:
             if _db_conn_num > cpu_count():
                 logging.warning("Warning about suggestion is the best "
@@ -394,7 +394,7 @@ class BaseConnectionPool(BaseDatabaseConnection):
         if pool_size < 0:
             raise ValueError("The database connection pool size cannot less than 0.")
 
-        self.__Database_Config["pool_size"] = pool_size
+        self._Database_Config["pool_size"] = pool_size
 
 
     def reconnect(self, timeout: int = 3) -> Generic[T]:
