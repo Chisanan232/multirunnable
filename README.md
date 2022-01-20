@@ -2,7 +2,7 @@
 
 [![Supported Versions](https://img.shields.io/pypi/pyversions/multirunnable.svg?logo=python&logoColor=FBE072)](https://pypi.org/project/multirunnable)
 [![Release](https://img.shields.io/github/release/Chisanan232/multirunnable.svg?label=Release&sort=semver)](https://github.com/Chisanan232/multirunnable/releases)
-[![PyPI version](https://badge.fury.io/py/multirunnable.svg)](https://badge.fury.io/py/multirunnable)
+[![PyPI version](https://badge.fury.io/py/MultiRunnable.svg)](https://badge.fury.io/py/MultiRunnable)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Documentation Status](https://readthedocs.org/projects/multirunnable/badge/?version=latest)](https://multirunnable.readthedocs.io/en/latest/?badge=latest)
 

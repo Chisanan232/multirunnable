@@ -92,7 +92,7 @@ Let's demonstrate an example to show how easy and clear it is!
 
 .. |pypi-version| image:: https://badge.fury.io/py/multirunnable.svg
     :alt: Package version in PyPi
-    :target: https://badge.fury.io/py/multirunnable
+    :target: https://badge.fury.io/py/MultiRunnable
 
 
 .. |license| image:: https://img.shields.io/badge/License-Apache%202.0-blue.svg
