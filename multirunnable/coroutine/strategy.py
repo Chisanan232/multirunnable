@@ -307,6 +307,76 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
             self._result_saving(successful=__process_run_successful, result=__process_running_result)
 
 
+    def apply_with_iter(self, functions_iter: List[Callable], args_iter: List[Tuple] = None, kwargs_iter: List[Dict] = None) -> None:
+        self.reset_result()
+        __process_running_result = None
+
+        if args_iter is None:
+            args_iter = [() for _ in functions_iter]
+
+        if kwargs_iter is None:
+            kwargs_iter = [{} for _ in functions_iter]
+
+        try:
+            __process_running_result = [
+                self._GreenThread_Pool.apply(func=_func, args=_args, kwds=_kwargs)
+                for _func, _args, _kwargs in zip(functions_iter, args_iter, kwargs_iter)
+            ]
+            __exception = None
+            __process_run_successful = True
+        except Exception as e:
+            __exception = e
+            __process_run_successful = False
+
+        # Save Running result state and Running result value as dict
+        self._result_saving(successful=__process_run_successful, result=__process_running_result)
+
+
+    def async_apply_with_iter(self,
+                              functions_iter: List[Callable],
+                              args_iter: List[Tuple] = None,
+                              kwargs_iter: List[Dict] = None,
+                              callback_iter: List[Callable] = None,
+                              error_callback_iter: List[Callable] = None) -> None:
+        self.reset_result()
+
+        if args_iter is None:
+            args_iter = [() for _ in functions_iter]
+
+        if kwargs_iter is None:
+            kwargs_iter = [{} for _ in functions_iter]
+
+        if callback_iter is None:
+            callback_iter = [None for _ in functions_iter]
+
+        if error_callback_iter is None:
+            error_callback_iter = [None for _ in functions_iter]
+
+        self._GreenThread_List = [
+            self._GreenThread_Pool.apply_async(
+                func=_func,
+                args=_args,
+                kwds=_kwargs,
+                callback=_callback)
+            for _func, _args, _kwargs, _callback in zip(functions_iter, args_iter, kwargs_iter, callback_iter)
+        ]
+
+        for process in self._GreenThread_List:
+            _process_running_result = None
+            _process_run_successful = None
+            _exception = None
+
+            try:
+                _process_running_result = process.get()
+                _process_run_successful = process.successful()
+            except Exception as e:
+                _exception = e
+                _process_run_successful = False
+
+            # Save Running result state and Running result value as dict
+            self._result_saving(successful=_process_run_successful, result=_process_running_result)
+
+
     def map(self, function: Callable, args_iter: IterableType = (), chunksize: int = None) -> None:
         self.reset_result()
         __process_running_result = None
