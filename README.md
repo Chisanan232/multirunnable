@@ -1,4 +1,4 @@
-# multirunnable
+# MultiRunnable
 
 [![Supported Versions](https://img.shields.io/pypi/pyversions/multirunnable.svg?logo=python&logoColor=FBE072)](https://pypi.org/project/multirunnable)
 [![Release](https://img.shields.io/github/release/Chisanan232/multirunnable.svg?label=Release&sort=semver)](https://github.com/Chisanan232/multirunnable/releases)

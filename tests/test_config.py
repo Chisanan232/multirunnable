@@ -5,7 +5,7 @@ import os
 # # # # Base APIs setting
 Worker_Size: int = 7
 Worker_Pool_Size: int = 7
-Task_Size: int = 7
+Task_Size: int = 3
 
 Running_Diff_Time: int = 2
 
