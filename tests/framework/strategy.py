@@ -157,6 +157,32 @@ class PoolRunningTestSpec(RunningStrategyTestSpec, ABC):
             strategy.async_apply(function=target_fun)
 
 
+    def _apply_with_iter(self, strategy: PoolRunnableStrategy, target_funcs_iter: List[Callable], args_iter: List[Tuple] = None, kwargs_iter: List[Dict] = None):
+        self._initial()
+
+        if args_iter:
+            strategy.apply_with_iter(functions_iter=target_funcs_iter, args_iter=args_iter)
+        elif kwargs_iter:
+            strategy.apply_with_iter(functions_iter=target_funcs_iter, kwargs_iter=kwargs_iter)
+        elif args_iter and kwargs_iter:
+            strategy.apply_with_iter(functions_iter=target_funcs_iter, args_iter=args_iter, kwargs_iter=kwargs_iter)
+        else:
+            strategy.apply_with_iter(functions_iter=target_funcs_iter)
+
+
+    def _async_apply_with_iter(self, strategy: PoolRunnableStrategy, target_funcs_iter: List[Callable], args_iter: List[Tuple] = None, kwargs_iter: List[Dict] = None):
+        self._initial()
+
+        if args_iter is not None:
+            strategy.async_apply_with_iter(functions_iter=target_funcs_iter, args_iter=args_iter)
+        elif kwargs_iter is not None:
+            strategy.async_apply_with_iter(functions_iter=target_funcs_iter, kwargs_iter=kwargs_iter)
+        elif args_iter is not None and kwargs_iter is not None:
+            strategy.async_apply_with_iter(functions_iter=target_funcs_iter, args_iter=args_iter, kwargs_iter=kwargs_iter)
+        else:
+            strategy.async_apply_with_iter(functions_iter=target_funcs_iter)
+
+
     def _map(self, strategy: PoolRunnableStrategy, target_fun: Callable, args_iter=()):
         self._initial()
 
