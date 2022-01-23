@@ -9,7 +9,7 @@ from ..test_config import (
     Test_Function_Sleep_Time,
     Test_Function_Args, Test_Function_Multiple_Args, Test_Function_Kwargs)
 
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Callable
 import threading
 import datetime
 import pytest
@@ -196,6 +196,31 @@ class TargetPoolMapCls:
     @staticmethod
     def staticmethod_fun(*args, **kwargs) -> None:
         map_target_fun(*args, **kwargs)
+
+
+def pool_target_funcs_iter() -> List[Callable]:
+    return [pool_target_fun for _ in range(Task_Size)]
+
+
+def pool_target_methods_iter() -> List[Callable]:
+    _ts = TargetPoolCls()
+    return [_ts.method for _ in range(Task_Size)]
+
+
+def pool_target_classmethods_iter() -> List[Callable]:
+    return [TargetPoolCls.classmethod_fun for _ in range(Task_Size)]
+
+
+def pool_target_staticmethods_iter() -> List[Callable]:
+    return [TargetPoolCls.staticmethod_fun for _ in range(Task_Size)]
+
+
+def pool_target_func_args_iter() -> List[Tuple]:
+    return [Test_Function_Args for _ in range(Task_Size)]
+
+
+def pool_target_funcs_kwargs_iter() -> List[Dict]:
+    return [Test_Function_Kwargs for _ in range(Task_Size)]
 
 
 @pytest.fixture(scope="class")
@@ -910,6 +935,198 @@ class TestThreadPool(PoolRunningTestSpec):
     def test_async_apply_with_staticmethod_function_with_kwargs(self, pool_strategy: ThreadPoolStrategy):
         # Test for parameters with '**kwargs'
         self._async_apply(strategy=pool_strategy, target_fun=TargetPoolCls.staticmethod_fun, kwargs=Test_Function_Kwargs)
+
+        TestThreadPool._chk_record()
+
+
+    def test_apply_with_iter_with_function_with_no_arguments(self, pool_strategy: ThreadPoolStrategy):
+        self._apply_with_iter(strategy=pool_strategy, target_funcs_iter=pool_target_funcs_iter())
+
+        TestThreadPool._chk_blocking_record()
+
+
+    def test_apply_with_iter_with_function_with_args(self, pool_strategy: ThreadPoolStrategy):
+        self._apply_with_iter(
+            strategy=pool_strategy,
+            target_funcs_iter=pool_target_funcs_iter(),
+            args_iter=pool_target_func_args_iter())
+
+        TestThreadPool._chk_blocking_record()
+
+
+    def test_apply_with_iter_with_function_with_kwargs(self, pool_strategy: ThreadPoolStrategy):
+        self._apply_with_iter(
+            strategy=pool_strategy,
+            target_funcs_iter=pool_target_funcs_iter(),
+            kwargs_iter=pool_target_funcs_kwargs_iter())
+
+        TestThreadPool._chk_blocking_record()
+
+
+    def test_apply_with_iter_with_bounded_function_with_no_arguments(self, pool_strategy: ThreadPoolStrategy):
+        self._apply_with_iter(strategy=pool_strategy, target_funcs_iter=pool_target_methods_iter())
+
+        TestThreadPool._chk_blocking_record()
+
+
+    def test_apply_with_iter_with_bounded_function_with_args(self, pool_strategy: ThreadPoolStrategy):
+        self._apply_with_iter(
+            strategy=pool_strategy,
+            target_funcs_iter=pool_target_methods_iter(),
+            args_iter=pool_target_func_args_iter())
+
+        TestThreadPool._chk_blocking_record()
+
+
+    def test_apply_with_iter_with_bounded_function_with_kwargs(self, pool_strategy: ThreadPoolStrategy):
+        self._apply_with_iter(
+            strategy=pool_strategy,
+            target_funcs_iter=pool_target_methods_iter(),
+            kwargs_iter=pool_target_funcs_kwargs_iter())
+
+        TestThreadPool._chk_blocking_record()
+
+
+    def test_apply_with_iter_with_classmethod_function_with_no_arguments(self, pool_strategy: ThreadPoolStrategy):
+        self._apply_with_iter(strategy=pool_strategy, target_funcs_iter=pool_target_classmethods_iter())
+
+        TestThreadPool._chk_blocking_record()
+
+
+    def test_apply_with_iter_with_classmethod_function_with_args(self, pool_strategy: ThreadPoolStrategy):
+        self._apply_with_iter(
+            strategy=pool_strategy,
+            target_funcs_iter=pool_target_classmethods_iter(),
+            args_iter=pool_target_func_args_iter())
+
+        TestThreadPool._chk_blocking_record()
+
+
+    def test_apply_with_iter_with_classmethod_function_with_kwargs(self, pool_strategy: ThreadPoolStrategy):
+        self._apply_with_iter(
+            strategy=pool_strategy,
+            target_funcs_iter=pool_target_classmethods_iter(),
+            kwargs_iter=pool_target_funcs_kwargs_iter())
+
+        TestThreadPool._chk_blocking_record()
+
+
+    def test_apply_with_iter_with_staticmethod_function_with_no_arguments(self, pool_strategy: ThreadPoolStrategy):
+        self._apply_with_iter(strategy=pool_strategy, target_funcs_iter=pool_target_staticmethods_iter())
+
+        TestThreadPool._chk_blocking_record()
+
+
+    def test_apply_with_iter_with_staticmethod_function_with_args(self, pool_strategy: ThreadPoolStrategy):
+        self._apply_with_iter(
+            strategy=pool_strategy,
+            target_funcs_iter=pool_target_staticmethods_iter(),
+            args_iter=pool_target_func_args_iter())
+
+        TestThreadPool._chk_blocking_record()
+
+
+    def test_apply_with_iter_with_staticmethod_function_with_kwargs(self, pool_strategy: ThreadPoolStrategy):
+        self._apply_with_iter(
+            strategy=pool_strategy,
+            target_funcs_iter=pool_target_staticmethods_iter(),
+            kwargs_iter=pool_target_funcs_kwargs_iter())
+
+        TestThreadPool._chk_blocking_record()
+
+
+    def test_async_apply_with_iter_with_function_with_no_arguments(self, pool_strategy: ThreadPoolStrategy):
+        self._async_apply_with_iter(strategy=pool_strategy, target_funcs_iter=pool_target_funcs_iter())
+
+        TestThreadPool._chk_record()
+
+
+    def test_async_apply_with_iter_with_function_with_args(self, pool_strategy: ThreadPoolStrategy):
+        self._async_apply_with_iter(
+            strategy=pool_strategy,
+            target_funcs_iter=pool_target_funcs_iter(),
+            args_iter=pool_target_func_args_iter())
+
+        TestThreadPool._chk_record()
+
+
+    def test_async_apply_with_iter_with_function_with_kwargs(self, pool_strategy: ThreadPoolStrategy):
+        self._async_apply_with_iter(
+            strategy=pool_strategy,
+            target_funcs_iter=pool_target_funcs_iter(),
+            kwargs_iter=pool_target_funcs_kwargs_iter())
+
+        TestThreadPool._chk_record()
+
+
+    def test_async_apply_with_iter_with_bounded_function_with_no_arguments(self, pool_strategy: ThreadPoolStrategy):
+        self._async_apply_with_iter(strategy=pool_strategy, target_funcs_iter=pool_target_methods_iter())
+
+        TestThreadPool._chk_record()
+
+
+    def test_async_apply_with_iter_with_bounded_function_with_args(self, pool_strategy: ThreadPoolStrategy):
+        self._async_apply_with_iter(
+            strategy=pool_strategy,
+            target_funcs_iter=pool_target_methods_iter(),
+            args_iter=pool_target_func_args_iter())
+
+        TestThreadPool._chk_record()
+
+
+    def test_async_apply_with_iter_with_bounded_function_with_kwargs(self, pool_strategy: ThreadPoolStrategy):
+        self._async_apply_with_iter(
+            strategy=pool_strategy,
+            target_funcs_iter=pool_target_methods_iter(),
+            kwargs_iter=pool_target_funcs_kwargs_iter())
+
+        TestThreadPool._chk_record()
+
+
+    def test_async_apply_with_iter_with_classmethod_function_with_no_arguments(self, pool_strategy: ThreadPoolStrategy):
+        self._async_apply_with_iter(strategy=pool_strategy, target_funcs_iter=pool_target_classmethods_iter())
+
+        TestThreadPool._chk_record()
+
+
+    def test_async_apply_with_iter_with_classmethod_function_with_args(self, pool_strategy: ThreadPoolStrategy):
+        self._async_apply_with_iter(
+            strategy=pool_strategy,
+            target_funcs_iter=pool_target_classmethods_iter(),
+            args_iter=pool_target_func_args_iter())
+
+        TestThreadPool._chk_record()
+
+
+    def test_async_apply_with_iter_with_classmethod_function_with_kwargs(self, pool_strategy: ThreadPoolStrategy):
+        self._async_apply_with_iter(
+            strategy=pool_strategy,
+            target_funcs_iter=pool_target_classmethods_iter(),
+            kwargs_iter=pool_target_funcs_kwargs_iter())
+
+        TestThreadPool._chk_record()
+
+
+    def test_async_apply_with_iter_with_staticmethod_function_with_no_arguments(self, pool_strategy: ThreadPoolStrategy):
+        self._async_apply_with_iter(strategy=pool_strategy, target_funcs_iter=pool_target_staticmethods_iter())
+
+        TestThreadPool._chk_record()
+
+
+    def test_async_apply_with_iter_with_staticmethod_function_with_args(self, pool_strategy: ThreadPoolStrategy):
+        self._async_apply_with_iter(
+            strategy=pool_strategy,
+            target_funcs_iter=pool_target_staticmethods_iter(),
+            args_iter=pool_target_func_args_iter())
+
+        TestThreadPool._chk_record()
+
+
+    def test_async_apply_with_iter_with_staticmethod_function_with_kwargs(self, pool_strategy: ThreadPoolStrategy):
+        self._async_apply_with_iter(
+            strategy=pool_strategy,
+            target_funcs_iter=pool_target_staticmethods_iter(),
+            kwargs_iter=pool_target_funcs_kwargs_iter())
 
         TestThreadPool._chk_record()
 
