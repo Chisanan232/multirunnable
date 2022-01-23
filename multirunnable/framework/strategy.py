@@ -428,6 +428,21 @@ class PoolRunnableStrategy(RunnableStrategy):
 
 
     @abstractmethod
+    def apply_with_iter(self, functions_iter: List[Callable], args_iter: List[Tuple] = (), kwargs_iter: List[Dict] = {}) -> None:
+        pass
+
+
+    @abstractmethod
+    def async_apply_with_iter(self,
+                              functions_iter: List[Callable],
+                              args_iter: List[Tuple] = (),
+                              kwargs_iter: List[Dict] = {},
+                              callback_iter: List[Callable] = None,
+                              error_callback_iter: List[Callable] = None) -> None:
+        pass
+
+
+    @abstractmethod
     def map(self, function: Callable, args_iter: Iterable = (), chunksize: int = None) -> None:
         """
         Description:
