@@ -230,7 +230,7 @@ def process_strategy():
 
 @pytest.fixture(scope="class")
 def process_pool_strategy():
-    _strategy = ProcessPoolStrategy(pool_size=Pool_Size, tasks_size=Task_Size)
+    _strategy = ProcessPoolStrategy(pool_size=Pool_Size)
     _strategy.initialization()
     return _strategy
 
@@ -776,103 +776,103 @@ class TestProcessPool(PoolRunningTestSpec):
 
 
     def test_apply_with_function_with_no_arguments(self, process_pool_strategy: ProcessPoolStrategy):
-        self._apply(strategy=process_pool_strategy, target_fun=pool_target_fun)
+        self._apply(strategy=process_pool_strategy, tasks_size=Task_Size, target_fun=pool_target_fun)
 
         TestProcessPool._chk_blocking_record()
 
 
     def test_apply_with_function_with_args(self, process_pool_strategy: ProcessPoolStrategy):
-        self._apply(strategy=process_pool_strategy, target_fun=pool_target_fun, args=Test_Function_Args)
+        self._apply(strategy=process_pool_strategy, tasks_size=Task_Size, target_fun=pool_target_fun, args=Test_Function_Args)
 
         TestProcessPool._chk_blocking_record()
 
 
     def test_apply_with_function_with_kwargs(self, process_pool_strategy: ProcessPoolStrategy):
-        self._apply(strategy=process_pool_strategy, target_fun=pool_target_fun, kwargs=Test_Function_Kwargs)
+        self._apply(strategy=process_pool_strategy, tasks_size=Task_Size, target_fun=pool_target_fun, kwargs=Test_Function_Kwargs)
 
         TestProcessPool._chk_blocking_record()
 
 
     def test_apply_with_bounded_function_with_no_arguments(self, process_pool_strategy: ProcessPoolStrategy):
         _tc = TargetPoolCls()
-        self._apply(strategy=process_pool_strategy, target_fun=_tc.method)
+        self._apply(strategy=process_pool_strategy, tasks_size=Task_Size, target_fun=_tc.method)
 
         TestProcessPool._chk_blocking_record()
 
 
     def test_apply_with_bounded_function_with_args(self, process_pool_strategy: ProcessPoolStrategy):
         _tc = TargetPoolCls()
-        self._apply(strategy=process_pool_strategy, target_fun=_tc.method, args=Test_Function_Args)
+        self._apply(strategy=process_pool_strategy, tasks_size=Task_Size, target_fun=_tc.method, args=Test_Function_Args)
 
         TestProcessPool._chk_blocking_record()
 
 
     def test_apply_with_bounded_function_with_kwargs(self, process_pool_strategy: ProcessPoolStrategy):
         _tc = TargetPoolCls()
-        self._apply(strategy=process_pool_strategy, target_fun=_tc.method, kwargs=Test_Function_Kwargs)
+        self._apply(strategy=process_pool_strategy, tasks_size=Task_Size, target_fun=_tc.method, kwargs=Test_Function_Kwargs)
 
         TestProcessPool._chk_blocking_record()
 
 
     def test_apply_with_classmethod_function_with_no_arguments(self, process_pool_strategy: ProcessPoolStrategy):
-        self._apply(strategy=process_pool_strategy, target_fun=TargetPoolCls.classmethod_fun)
+        self._apply(strategy=process_pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.classmethod_fun)
 
         TestProcessPool._chk_blocking_record()
 
 
     def test_apply_with_classmethod_function_with_args(self, process_pool_strategy: ProcessPoolStrategy):
-        self._apply(strategy=process_pool_strategy, target_fun=TargetPoolCls.classmethod_fun, args=Test_Function_Args)
+        self._apply(strategy=process_pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.classmethod_fun, args=Test_Function_Args)
 
         TestProcessPool._chk_blocking_record()
 
 
     def test_apply_with_classmethod_function_with_kwargs(self, process_pool_strategy: ProcessPoolStrategy):
-        self._apply(strategy=process_pool_strategy, target_fun=TargetPoolCls.classmethod_fun, kwargs=Test_Function_Kwargs)
+        self._apply(strategy=process_pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.classmethod_fun, kwargs=Test_Function_Kwargs)
 
         TestProcessPool._chk_blocking_record()
 
 
     def test_apply_with_staticmethod_function_with_no_arguments(self, process_pool_strategy: ProcessPoolStrategy):
-        self._apply(strategy=process_pool_strategy, target_fun=TargetPoolCls.staticmethod_fun)
+        self._apply(strategy=process_pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.staticmethod_fun)
 
         TestProcessPool._chk_blocking_record()
 
 
     def test_apply_with_staticmethod_function_with_args(self, process_pool_strategy: ProcessPoolStrategy):
-        self._apply(strategy=process_pool_strategy, target_fun=TargetPoolCls.staticmethod_fun, args=Test_Function_Args)
+        self._apply(strategy=process_pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.staticmethod_fun, args=Test_Function_Args)
 
         TestProcessPool._chk_blocking_record()
 
 
     def test_apply_with_staticmethod_function_with_kwargs(self, process_pool_strategy: ProcessPoolStrategy):
-        self._apply(strategy=process_pool_strategy, target_fun=TargetPoolCls.staticmethod_fun, kwargs=Test_Function_Kwargs)
+        self._apply(strategy=process_pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.staticmethod_fun, kwargs=Test_Function_Kwargs)
 
         TestProcessPool._chk_blocking_record()
 
 
     def test_async_apply_with_function_with_no_arguments(self, process_pool_strategy: ProcessPoolStrategy):
-        self._async_apply(strategy=process_pool_strategy, target_fun=pool_target_fun)
+        self._async_apply(strategy=process_pool_strategy, tasks_size=Task_Size, target_fun=pool_target_fun)
 
         TestProcessPool._chk_record()
 
 
     def test_async_apply_with_function_with_args(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for parameters with '*args'
-        self._async_apply(strategy=process_pool_strategy, target_fun=pool_target_fun, args=Test_Function_Args)
+        self._async_apply(strategy=process_pool_strategy, tasks_size=Task_Size, target_fun=pool_target_fun, args=Test_Function_Args)
 
         TestProcessPool._chk_record()
 
 
     def test_async_apply_with_function_with_kwargs(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for parameters with '**kwargs'
-        self._async_apply(strategy=process_pool_strategy, target_fun=pool_target_fun, kwargs=Test_Function_Kwargs)
+        self._async_apply(strategy=process_pool_strategy, tasks_size=Task_Size, target_fun=pool_target_fun, kwargs=Test_Function_Kwargs)
 
         TestProcessPool._chk_record()
 
 
     def test_async_apply_with_bounded_function_with_no_arguments(self, process_pool_strategy: ProcessPoolStrategy):
         _tc = TargetPoolCls()
-        self._async_apply(strategy=process_pool_strategy, target_fun=_tc.method)
+        self._async_apply(strategy=process_pool_strategy, tasks_size=Task_Size, target_fun=_tc.method)
 
         TestProcessPool._chk_record()
 
@@ -880,7 +880,7 @@ class TestProcessPool(PoolRunningTestSpec):
     def test_async_apply_with_bounded_function_with_args(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for parameters with '*args'
         _tc = TargetPoolCls()
-        self._async_apply(strategy=process_pool_strategy, target_fun=_tc.method, args=Test_Function_Args)
+        self._async_apply(strategy=process_pool_strategy, tasks_size=Task_Size, target_fun=_tc.method, args=Test_Function_Args)
 
         TestProcessPool._chk_record()
 
@@ -888,47 +888,47 @@ class TestProcessPool(PoolRunningTestSpec):
     def test_async_apply_with_bounded_function_with_kwargs(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for parameters with '**kwargs'
         _tc = TargetPoolCls()
-        self._async_apply(strategy=process_pool_strategy, target_fun=_tc.method, kwargs=Test_Function_Kwargs)
+        self._async_apply(strategy=process_pool_strategy, tasks_size=Task_Size, target_fun=_tc.method, kwargs=Test_Function_Kwargs)
 
         TestProcessPool._chk_record()
 
 
     def test_async_apply_with_classmethod_function_with_no_arguments(self, process_pool_strategy: ProcessPoolStrategy):
-        self._async_apply(strategy=process_pool_strategy, target_fun=TargetPoolCls.classmethod_fun)
+        self._async_apply(strategy=process_pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.classmethod_fun)
 
         TestProcessPool._chk_record()
 
 
     def test_async_apply_with_classmethod_function_with_args(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for parameters with '*args'
-        self._async_apply(strategy=process_pool_strategy, target_fun=TargetPoolCls.classmethod_fun, args=Test_Function_Args)
+        self._async_apply(strategy=process_pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.classmethod_fun, args=Test_Function_Args)
 
         TestProcessPool._chk_record()
 
 
     def test_async_apply_with_classmethod_function_with_kwargs(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for parameters with '**kwargs'
-        self._async_apply(strategy=process_pool_strategy, target_fun=TargetPoolCls.classmethod_fun, kwargs=Test_Function_Kwargs)
+        self._async_apply(strategy=process_pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.classmethod_fun, kwargs=Test_Function_Kwargs)
 
         TestProcessPool._chk_record()
 
 
     def test_async_apply_with_staticmethod_function_with_no_arguments(self, process_pool_strategy: ProcessPoolStrategy):
-        self._async_apply(strategy=process_pool_strategy, target_fun=TargetPoolCls.staticmethod_fun)
+        self._async_apply(strategy=process_pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.staticmethod_fun)
 
         TestProcessPool._chk_record()
 
 
     def test_async_apply_with_staticmethod_function_with_args(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for parameters with '*args'
-        self._async_apply(strategy=process_pool_strategy, target_fun=TargetPoolCls.staticmethod_fun, args=Test_Function_Args)
+        self._async_apply(strategy=process_pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.staticmethod_fun, args=Test_Function_Args)
 
         TestProcessPool._chk_record()
 
 
     def test_async_apply_with_staticmethod_function_with_kwargs(self, process_pool_strategy: ProcessPoolStrategy):
         # Test for parameters with '**kwargs'
-        self._async_apply(strategy=process_pool_strategy, target_fun=TargetPoolCls.staticmethod_fun, kwargs=Test_Function_Kwargs)
+        self._async_apply(strategy=process_pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.staticmethod_fun, kwargs=Test_Function_Kwargs)
 
         TestProcessPool._chk_record()
 

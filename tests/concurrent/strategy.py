@@ -230,7 +230,7 @@ def strategy():
 
 @pytest.fixture(scope="class")
 def pool_strategy():
-    _strategy = ThreadPoolStrategy(pool_size=Pool_Size, tasks_size=Task_Size)
+    _strategy = ThreadPoolStrategy(pool_size=Pool_Size)
     _strategy.initialization()
     return _strategy
 
@@ -782,103 +782,103 @@ class TestThreadPool(PoolRunningTestSpec):
 
 
     def test_apply_with_function_with_no_arguments(self, pool_strategy: ThreadPoolStrategy):
-        self._apply(strategy=pool_strategy, target_fun=pool_target_fun)
+        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=pool_target_fun)
 
         TestThreadPool._chk_blocking_record()
 
 
     def test_apply_with_function_with_args(self, pool_strategy: ThreadPoolStrategy):
-        self._apply(strategy=pool_strategy, target_fun=pool_target_fun, args=Test_Function_Args)
+        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=pool_target_fun, args=Test_Function_Args)
 
         TestThreadPool._chk_blocking_record()
 
 
     def test_apply_with_function_with_kwargs(self, pool_strategy: ThreadPoolStrategy):
-        self._apply(strategy=pool_strategy, target_fun=pool_target_fun, kwargs=Test_Function_Kwargs)
+        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=pool_target_fun, kwargs=Test_Function_Kwargs)
 
         TestThreadPool._chk_blocking_record()
 
 
     def test_apply_with_bounded_function_with_no_arguments(self, pool_strategy: ThreadPoolStrategy):
         _tc = TargetPoolCls()
-        self._apply(strategy=pool_strategy, target_fun=_tc.method)
+        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=_tc.method)
 
         TestThreadPool._chk_blocking_record()
 
 
     def test_apply_with_bounded_function_with_args(self, pool_strategy: ThreadPoolStrategy):
         _tc = TargetPoolCls()
-        self._apply(strategy=pool_strategy, target_fun=_tc.method, args=Test_Function_Args)
+        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=_tc.method, args=Test_Function_Args)
 
         TestThreadPool._chk_blocking_record()
 
 
     def test_apply_with_bounded_function_with_kwargs(self, pool_strategy: ThreadPoolStrategy):
         _tc = TargetPoolCls()
-        self._apply(strategy=pool_strategy, target_fun=_tc.method, kwargs=Test_Function_Kwargs)
+        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=_tc.method, kwargs=Test_Function_Kwargs)
 
         TestThreadPool._chk_blocking_record()
 
 
     def test_apply_with_classmethod_function_with_no_arguments(self, pool_strategy: ThreadPoolStrategy):
-        self._apply(strategy=pool_strategy, target_fun=TargetPoolCls.classmethod_fun)
+        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.classmethod_fun)
 
         TestThreadPool._chk_blocking_record()
 
 
     def test_apply_with_classmethod_function_with_args(self, pool_strategy: ThreadPoolStrategy):
-        self._apply(strategy=pool_strategy, target_fun=TargetPoolCls.classmethod_fun, args=Test_Function_Args)
+        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.classmethod_fun, args=Test_Function_Args)
 
         TestThreadPool._chk_blocking_record()
 
 
     def test_apply_with_classmethod_function_with_kwargs(self, pool_strategy: ThreadPoolStrategy):
-        self._apply(strategy=pool_strategy, target_fun=TargetPoolCls.classmethod_fun, kwargs=Test_Function_Kwargs)
+        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.classmethod_fun, kwargs=Test_Function_Kwargs)
 
         TestThreadPool._chk_blocking_record()
 
 
     def test_apply_with_staticmethod_function_with_no_arguments(self, pool_strategy: ThreadPoolStrategy):
-        self._apply(strategy=pool_strategy, target_fun=TargetPoolCls.staticmethod_fun)
+        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.staticmethod_fun)
 
         TestThreadPool._chk_blocking_record()
 
 
     def test_apply_with_staticmethod_function_with_args(self, pool_strategy: ThreadPoolStrategy):
-        self._apply(strategy=pool_strategy, target_fun=TargetPoolCls.staticmethod_fun, args=Test_Function_Args)
+        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.staticmethod_fun, args=Test_Function_Args)
 
         TestThreadPool._chk_blocking_record()
 
 
     def test_apply_with_staticmethod_function_with_kwargs(self, pool_strategy: ThreadPoolStrategy):
-        self._apply(strategy=pool_strategy, target_fun=TargetPoolCls.staticmethod_fun, kwargs=Test_Function_Kwargs)
+        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.staticmethod_fun, kwargs=Test_Function_Kwargs)
 
         TestThreadPool._chk_blocking_record()
 
 
     def test_async_apply_with_function_with_no_arguments(self, pool_strategy: ThreadPoolStrategy):
-        self._async_apply(strategy=pool_strategy, target_fun=pool_target_fun)
+        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=pool_target_fun)
 
         TestThreadPool._chk_record()
 
 
     def test_async_apply_with_function_with_args(self, pool_strategy: ThreadPoolStrategy):
         # Test for parameters with '*args'
-        self._async_apply(strategy=pool_strategy, target_fun=pool_target_fun, args=Test_Function_Args)
+        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=pool_target_fun, args=Test_Function_Args)
 
         TestThreadPool._chk_record()
 
 
     def test_async_apply_with_function_with_kwargs(self, pool_strategy: ThreadPoolStrategy):
         # Test for parameters with '**kwargs'
-        self._async_apply(strategy=pool_strategy, target_fun=pool_target_fun, kwargs=Test_Function_Kwargs)
+        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=pool_target_fun, kwargs=Test_Function_Kwargs)
 
         TestThreadPool._chk_record()
 
 
     def test_async_apply_with_bounded_function_with_no_arguments(self, pool_strategy: ThreadPoolStrategy):
         _tc = TargetPoolCls()
-        self._async_apply(strategy=pool_strategy, target_fun=_tc.method)
+        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=_tc.method)
 
         TestThreadPool._chk_record()
 
@@ -886,7 +886,7 @@ class TestThreadPool(PoolRunningTestSpec):
     def test_async_apply_with_bounded_function_with_args(self, pool_strategy: ThreadPoolStrategy):
         # Test for parameters with '*args'
         _tc = TargetPoolCls()
-        self._async_apply(strategy=pool_strategy, target_fun=_tc.method, args=Test_Function_Args)
+        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=_tc.method, args=Test_Function_Args)
 
         TestThreadPool._chk_record()
 
@@ -894,47 +894,47 @@ class TestThreadPool(PoolRunningTestSpec):
     def test_async_apply_with_bounded_function_with_kwargs(self, pool_strategy: ThreadPoolStrategy):
         # Test for parameters with '**kwargs'
         _tc = TargetPoolCls()
-        self._async_apply(strategy=pool_strategy, target_fun=_tc.method, kwargs=Test_Function_Kwargs)
+        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=_tc.method, kwargs=Test_Function_Kwargs)
 
         TestThreadPool._chk_record()
 
 
     def test_async_apply_with_classmethod_function_with_no_arguments(self, pool_strategy: ThreadPoolStrategy):
-        self._async_apply(strategy=pool_strategy, target_fun=TargetPoolCls.classmethod_fun)
+        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.classmethod_fun)
 
         TestThreadPool._chk_record()
 
 
     def test_async_apply_with_classmethod_function_with_args(self, pool_strategy: ThreadPoolStrategy):
         # Test for parameters with '*args'
-        self._async_apply(strategy=pool_strategy, target_fun=TargetPoolCls.classmethod_fun, args=Test_Function_Args)
+        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.classmethod_fun, args=Test_Function_Args)
 
         TestThreadPool._chk_record()
 
 
     def test_async_apply_with_classmethod_function_with_kwargs(self, pool_strategy: ThreadPoolStrategy):
         # Test for parameters with '**kwargs'
-        self._async_apply(strategy=pool_strategy, target_fun=TargetPoolCls.classmethod_fun, kwargs=Test_Function_Kwargs)
+        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.classmethod_fun, kwargs=Test_Function_Kwargs)
 
         TestThreadPool._chk_record()
 
 
     def test_async_apply_with_staticmethod_function_with_no_arguments(self, pool_strategy: ThreadPoolStrategy):
-        self._async_apply(strategy=pool_strategy, target_fun=TargetPoolCls.staticmethod_fun)
+        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.staticmethod_fun)
 
         TestThreadPool._chk_record()
 
 
     def test_async_apply_with_staticmethod_function_with_args(self, pool_strategy: ThreadPoolStrategy):
         # Test for parameters with '*args'
-        self._async_apply(strategy=pool_strategy, target_fun=TargetPoolCls.staticmethod_fun, args=Test_Function_Args)
+        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.staticmethod_fun, args=Test_Function_Args)
 
         TestThreadPool._chk_record()
 
 
     def test_async_apply_with_staticmethod_function_with_kwargs(self, pool_strategy: ThreadPoolStrategy):
         # Test for parameters with '**kwargs'
-        self._async_apply(strategy=pool_strategy, target_fun=TargetPoolCls.staticmethod_fun, kwargs=Test_Function_Kwargs)
+        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.staticmethod_fun, kwargs=Test_Function_Kwargs)
 
         TestThreadPool._chk_record()
 

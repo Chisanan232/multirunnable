@@ -334,7 +334,7 @@ def strategy() -> GreenThreadStrategy:
 
 @pytest.fixture(scope="class")
 def pool_strategy() -> GreenThreadPoolStrategy:
-    _strategy = GreenThreadPoolStrategy(pool_size=Pool_Size, tasks_size=Task_Size)
+    _strategy = GreenThreadPoolStrategy(pool_size=Pool_Size)
     _strategy.initialization()
     return _strategy
 
@@ -896,103 +896,103 @@ class TestGreenThreadPool(PoolRunningTestSpec):
 
 
     def test_apply_with_function_with_no_arguments(self, pool_strategy: GreenThreadPoolStrategy):
-        self._apply(strategy=pool_strategy, target_fun=pool_target_fun)
+        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=pool_target_fun)
 
         TestGreenThreadPool._chk_blocking_record()
 
 
     def test_apply_with_function_with_args(self, pool_strategy: GreenThreadPoolStrategy):
-        self._apply(strategy=pool_strategy, target_fun=pool_target_fun, args=Test_Function_Args)
+        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=pool_target_fun, args=Test_Function_Args)
 
         TestGreenThreadPool._chk_blocking_record()
 
 
     def test_apply_with_function_with_kwargs(self, pool_strategy: GreenThreadPoolStrategy):
-        self._apply(strategy=pool_strategy, target_fun=pool_target_fun, kwargs=Test_Function_Kwargs)
+        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=pool_target_fun, kwargs=Test_Function_Kwargs)
 
         TestGreenThreadPool._chk_blocking_record()
 
 
     def test_apply_with_bounded_function_with_no_arguments(self, pool_strategy: GreenThreadPoolStrategy):
         _tc = TargetPoolCls()
-        self._apply(strategy=pool_strategy, target_fun=_tc.method)
+        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=_tc.method)
 
         TestGreenThreadPool._chk_blocking_record()
 
 
     def test_apply_with_bounded_function_with_args(self, pool_strategy: GreenThreadPoolStrategy):
         _tc = TargetPoolCls()
-        self._apply(strategy=pool_strategy, target_fun=_tc.method, args=Test_Function_Args)
+        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=_tc.method, args=Test_Function_Args)
 
         TestGreenThreadPool._chk_blocking_record()
 
 
     def test_apply_with_bounded_function_with_kwargs(self, pool_strategy: GreenThreadPoolStrategy):
         _tc = TargetPoolCls()
-        self._apply(strategy=pool_strategy, target_fun=_tc.method, kwargs=Test_Function_Kwargs)
+        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=_tc.method, kwargs=Test_Function_Kwargs)
 
         TestGreenThreadPool._chk_blocking_record()
 
 
     def test_apply_with_classmethod_function_with_no_arguments(self, pool_strategy: GreenThreadPoolStrategy):
-        self._apply(strategy=pool_strategy, target_fun=TargetPoolCls.classmethod_fun)
+        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.classmethod_fun)
 
         TestGreenThreadPool._chk_blocking_record()
 
 
     def test_apply_with_classmethod_function_with_args(self, pool_strategy: GreenThreadPoolStrategy):
-        self._apply(strategy=pool_strategy, target_fun=TargetPoolCls.classmethod_fun, args=Test_Function_Args)
+        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.classmethod_fun, args=Test_Function_Args)
 
         TestGreenThreadPool._chk_blocking_record()
 
 
     def test_apply_with_classmethod_function_with_kwargs(self, pool_strategy: GreenThreadPoolStrategy):
-        self._apply(strategy=pool_strategy, target_fun=TargetPoolCls.classmethod_fun, kwargs=Test_Function_Kwargs)
+        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.classmethod_fun, kwargs=Test_Function_Kwargs)
 
         TestGreenThreadPool._chk_blocking_record()
 
 
     def test_apply_with_staticmethod_function_with_no_arguments(self, pool_strategy: GreenThreadPoolStrategy):
-        self._apply(strategy=pool_strategy, target_fun=TargetPoolCls.staticmethod_fun)
+        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.staticmethod_fun)
 
         TestGreenThreadPool._chk_blocking_record()
 
 
     def test_apply_with_staticmethod_function_with_args(self, pool_strategy: GreenThreadPoolStrategy):
-        self._apply(strategy=pool_strategy, target_fun=TargetPoolCls.staticmethod_fun, args=Test_Function_Args)
+        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.staticmethod_fun, args=Test_Function_Args)
 
         TestGreenThreadPool._chk_blocking_record()
 
 
     def test_apply_with_staticmethod_function_with_kwargs(self, pool_strategy: GreenThreadPoolStrategy):
-        self._apply(strategy=pool_strategy, target_fun=TargetPoolCls.staticmethod_fun, kwargs=Test_Function_Kwargs)
+        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.staticmethod_fun, kwargs=Test_Function_Kwargs)
 
         TestGreenThreadPool._chk_blocking_record()
 
 
     def test_async_apply_with_function_with_no_arguments(self, pool_strategy: GreenThreadPoolStrategy):
-        self._async_apply(strategy=pool_strategy, target_fun=pool_target_fun)
+        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=pool_target_fun)
 
         TestGreenThreadPool._chk_record()
 
 
     def test_async_apply_with_function_with_args(self, pool_strategy: GreenThreadPoolStrategy):
         # Test for parameters with '*args'
-        self._async_apply(strategy=pool_strategy, target_fun=pool_target_fun, args=Test_Function_Args)
+        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=pool_target_fun, args=Test_Function_Args)
 
         TestGreenThreadPool._chk_record()
 
 
     def test_async_apply_with_function_with_kwargs(self, pool_strategy: GreenThreadPoolStrategy):
         # Test for parameters with '**kwargs'
-        self._async_apply(strategy=pool_strategy, target_fun=pool_target_fun, kwargs=Test_Function_Kwargs)
+        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=pool_target_fun, kwargs=Test_Function_Kwargs)
 
         TestGreenThreadPool._chk_record()
 
 
     def test_async_apply_with_bounded_function_with_no_arguments(self, pool_strategy: GreenThreadPoolStrategy):
         _tc = TargetPoolCls()
-        self._async_apply(strategy=pool_strategy, target_fun=_tc.method)
+        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=_tc.method)
 
         TestGreenThreadPool._chk_record()
 
@@ -1000,7 +1000,7 @@ class TestGreenThreadPool(PoolRunningTestSpec):
     def test_async_apply_with_bounded_function_with_args(self, pool_strategy: GreenThreadPoolStrategy):
         # Test for parameters with '*args'
         _tc = TargetPoolCls()
-        self._async_apply(strategy=pool_strategy, target_fun=_tc.method, args=Test_Function_Args)
+        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=_tc.method, args=Test_Function_Args)
 
         TestGreenThreadPool._chk_record()
 
@@ -1008,47 +1008,47 @@ class TestGreenThreadPool(PoolRunningTestSpec):
     def test_async_apply_with_bounded_function_with_kwargs(self, pool_strategy: GreenThreadPoolStrategy):
         # Test for parameters with '**kwargs'
         _tc = TargetPoolCls()
-        self._async_apply(strategy=pool_strategy, target_fun=_tc.method, kwargs=Test_Function_Kwargs)
+        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=_tc.method, kwargs=Test_Function_Kwargs)
 
         TestGreenThreadPool._chk_record()
 
 
     def test_async_apply_with_classmethod_function_with_no_arguments(self, pool_strategy: GreenThreadPoolStrategy):
-        self._async_apply(strategy=pool_strategy, target_fun=TargetPoolCls.classmethod_fun)
+        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.classmethod_fun)
 
         TestGreenThreadPool._chk_record()
 
 
     def test_async_apply_with_classmethod_function_with_args(self, pool_strategy: GreenThreadPoolStrategy):
         # Test for parameters with '*args'
-        self._async_apply(strategy=pool_strategy, target_fun=TargetPoolCls.classmethod_fun, args=Test_Function_Args)
+        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.classmethod_fun, args=Test_Function_Args)
 
         TestGreenThreadPool._chk_record()
 
 
     def test_async_apply_with_classmethod_function_with_kwargs(self, pool_strategy: GreenThreadPoolStrategy):
         # Test for parameters with '**kwargs'
-        self._async_apply(strategy=pool_strategy, target_fun=TargetPoolCls.classmethod_fun, kwargs=Test_Function_Kwargs)
+        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.classmethod_fun, kwargs=Test_Function_Kwargs)
 
         TestGreenThreadPool._chk_record()
 
 
     def test_async_apply_with_staticmethod_function_with_no_arguments(self, pool_strategy: GreenThreadPoolStrategy):
-        self._async_apply(strategy=pool_strategy, target_fun=TargetPoolCls.staticmethod_fun)
+        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.staticmethod_fun)
 
         TestGreenThreadPool._chk_record()
 
 
     def test_async_apply_with_staticmethod_function_with_args(self, pool_strategy: GreenThreadPoolStrategy):
         # Test for parameters with '*args'
-        self._async_apply(strategy=pool_strategy, target_fun=TargetPoolCls.staticmethod_fun, args=Test_Function_Args)
+        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.staticmethod_fun, args=Test_Function_Args)
 
         TestGreenThreadPool._chk_record()
 
 
     def test_async_apply_with_staticmethod_function_with_kwargs(self, pool_strategy: GreenThreadPoolStrategy):
         # Test for parameters with '**kwargs'
-        self._async_apply(strategy=pool_strategy, target_fun=TargetPoolCls.staticmethod_fun, kwargs=Test_Function_Kwargs)
+        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.staticmethod_fun, kwargs=Test_Function_Kwargs)
 
         TestGreenThreadPool._chk_record()
 

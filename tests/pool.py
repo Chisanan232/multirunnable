@@ -119,17 +119,17 @@ def target_funcs_iter():
 
 @pytest.fixture(scope="function")
 def process_pool():
-    return SimplePool(mode=RunningMode.Parallel, pool_size=_Worker_Pool_Size, tasks_size=_Task_Size)
+    return SimplePool(mode=RunningMode.Parallel, pool_size=_Worker_Pool_Size)
 
 
 @pytest.fixture(scope="function")
 def thread_pool():
-    return SimplePool(mode=RunningMode.Concurrent, pool_size=_Worker_Pool_Size, tasks_size=_Task_Size)
+    return SimplePool(mode=RunningMode.Concurrent, pool_size=_Worker_Pool_Size)
 
 
 @pytest.fixture(scope="function")
 def green_thread_pool():
-    return SimplePool(mode=RunningMode.GreenThread, pool_size=_Worker_Pool_Size, tasks_size=_Task_Size)
+    return SimplePool(mode=RunningMode.GreenThread, pool_size=_Worker_Pool_Size)
 
 
 class TestSimplePool:
@@ -171,28 +171,28 @@ class TestSimplePool:
     def test_apply(self, thread_pool: SimplePool):
         TestSimplePool._initial()
         thread_pool.initial()
-        thread_pool.apply(function=pool_target_fun)
+        thread_pool.apply(tasks_size=Task_Size, function=pool_target_fun)
         TestSimplePool._chk_blocking_record()
 
 
     def test_apply_by_pykeyword_with(self, thread_pool: SimplePool):
         TestSimplePool._initial()
         with thread_pool as _pool:
-            _pool.apply(function=pool_target_fun)
+            _pool.apply(tasks_size=Task_Size, function=pool_target_fun)
         TestSimplePool._chk_blocking_record()
 
 
     def test_async_apply(self, thread_pool: SimplePool):
         TestSimplePool._initial()
         thread_pool.initial()
-        thread_pool.async_apply(function=pool_target_fun)
+        thread_pool.async_apply(tasks_size=Task_Size, function=pool_target_fun)
         TestSimplePool._chk_record()
 
 
     def test_async_apply_by_pykeyword_with(self, thread_pool: SimplePool):
         TestSimplePool._initial()
         with thread_pool as _pool:
-            _pool.async_apply(function=pool_target_fun)
+            _pool.async_apply(tasks_size=Task_Size, function=pool_target_fun)
         TestSimplePool._chk_record()
 
 
@@ -311,7 +311,7 @@ class TestSimplePool:
     def test_terminal(self, thread_pool: SimplePool):
         try:
             thread_pool.initial()
-            thread_pool.async_apply(function=lambda a: a+a, args=(1,))
+            thread_pool.async_apply(tasks_size=Task_Size, function=lambda a: a+a, args=(1,))
             thread_pool.terminal()
         except Exception as e:
             assert False, f"It should work finely without any issue. Please check it."
@@ -322,7 +322,7 @@ class TestSimplePool:
     def test_close(self, thread_pool: SimplePool):
         try:
             thread_pool.initial()
-            thread_pool.async_apply(function=lambda a: a+a, args=(1,))
+            thread_pool.async_apply(tasks_size=Task_Size, function=lambda a: a+a, args=(1,))
             thread_pool.close()
         except Exception as e:
             assert False, f"It should work finely without any issue. Please check it."

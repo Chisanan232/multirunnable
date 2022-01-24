@@ -63,19 +63,19 @@ class TestAdapterExecuteStrategy:
 class TestAdapterPoolStrategy:
 
     def test_get_simple_with_parallel(self):
-        _strategy_adapter = PoolStrategyAdapter(mode=RunningMode.Parallel, pool_size=_Worker_Pool_Size, tasks_size=_Task_Size)
+        _strategy_adapter = PoolStrategyAdapter(mode=RunningMode.Parallel, pool_size=_Worker_Pool_Size)
         _strategy = _strategy_adapter.get_simple()
         assert isinstance(_strategy, ProcessPoolStrategy) is True, f"The type of strategy instance should be 'ProcessPoolStrategy'."
 
 
     def test_get_simple_with_concurrent(self):
-        _strategy_adapter = PoolStrategyAdapter(mode=RunningMode.Concurrent, pool_size=_Worker_Pool_Size, tasks_size=_Task_Size)
+        _strategy_adapter = PoolStrategyAdapter(mode=RunningMode.Concurrent, pool_size=_Worker_Pool_Size)
         _strategy = _strategy_adapter.get_simple()
         assert isinstance(_strategy, ThreadPoolStrategy) is True, f"The type of strategy instance should be 'ThreadPoolStrategy'."
 
 
     def test_get_simple_with_coroutine(self):
-        _strategy_adapter = PoolStrategyAdapter(mode=RunningMode.GreenThread, pool_size=_Worker_Pool_Size, tasks_size=_Task_Size)
+        _strategy_adapter = PoolStrategyAdapter(mode=RunningMode.GreenThread, pool_size=_Worker_Pool_Size)
         _strategy = _strategy_adapter.get_simple()
         assert isinstance(_strategy, GreenThreadPoolStrategy) is True, f"The type of strategy instance should be 'GreenThreadPoolStrategy'."
 

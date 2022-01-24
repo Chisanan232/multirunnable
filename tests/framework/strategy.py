@@ -131,30 +131,30 @@ class GeneralRunningTestSpec(RunningStrategyTestSpec):
 
 class PoolRunningTestSpec(RunningStrategyTestSpec, ABC):
 
-    def _apply(self, strategy: PoolRunnableStrategy, target_fun: Callable, args=(), kwargs={}):
+    def _apply(self, strategy: PoolRunnableStrategy, tasks_size: int, target_fun: Callable, args=(), kwargs={}):
         self._initial()
 
         if args:
-            strategy.apply(function=target_fun, args=args)
+            strategy.apply(tasks_size=tasks_size, function=target_fun, args=args)
         elif kwargs:
-            strategy.apply(function=target_fun, kwargs=kwargs)
+            strategy.apply(tasks_size=tasks_size, function=target_fun, kwargs=kwargs)
         elif args and kwargs:
-            strategy.apply(function=target_fun, args=args, kwargs=kwargs)
+            strategy.apply(tasks_size=tasks_size, function=target_fun, args=args, kwargs=kwargs)
         else:
-            strategy.apply(function=target_fun)
+            strategy.apply(tasks_size=tasks_size, function=target_fun)
 
 
-    def _async_apply(self, strategy: PoolRunnableStrategy, target_fun: Callable, args=(), kwargs={}):
+    def _async_apply(self, strategy: PoolRunnableStrategy, tasks_size: int, target_fun: Callable, args=(), kwargs={}):
         self._initial()
 
         if args is not None:
-            strategy.async_apply(function=target_fun, args=args)
+            strategy.async_apply(tasks_size=tasks_size, function=target_fun, args=args)
         elif kwargs is not None:
-            strategy.async_apply(function=target_fun, kwargs=kwargs)
+            strategy.async_apply(tasks_size=tasks_size, function=target_fun, kwargs=kwargs)
         elif args is not None and kwargs is not None:
-            strategy.async_apply(function=target_fun, args=args, kwargs=kwargs)
+            strategy.async_apply(tasks_size=tasks_size, function=target_fun, args=args, kwargs=kwargs)
         else:
-            strategy.async_apply(function=target_fun)
+            strategy.async_apply(tasks_size=tasks_size, function=target_fun)
 
 
     def _apply_with_iter(self, strategy: PoolRunnableStrategy, target_funcs_iter: List[Callable], args_iter: List[Tuple] = None, kwargs_iter: List[Dict] = None):
