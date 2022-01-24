@@ -1380,7 +1380,7 @@ class TestThreadPool(PoolRunningTestSpec):
     def _chk_blocking_record():
         PoolRunningTestSpec._chk_process_record_blocking(
             pool_running_cnt=Pool_Running_Count,
-            worker_size=Thread_Size,
+            worker_size=Task_Size,
             running_worker_ids=Running_Thread_IDs,
             running_current_workers=Running_Current_Threads,
             running_finish_timestamps=Running_Finish_Timestamp,
@@ -1392,7 +1392,7 @@ class TestThreadPool(PoolRunningTestSpec):
     def _chk_record():
         PoolRunningTestSpec._chk_process_record(
             pool_running_cnt=Pool_Running_Count,
-            worker_size=Thread_Size,
+            worker_size=Task_Size,
             running_worker_ids=Running_Thread_IDs,
             running_current_workers=Running_Current_Threads,
             running_finish_timestamps=Running_Finish_Timestamp

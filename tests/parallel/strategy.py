@@ -1405,14 +1405,14 @@ class TestProcessPool(PoolRunningTestSpec):
         print(f"[DEBUG] Running_PPIDs: {Running_PPIDs}")
         print(f"[DEBUG] Running_Parent_PID: {Running_Parent_PID}")
         print(f"[DEBUG] Pool_Running_Count.value: {Pool_Running_Count.value}")
-        print(f"[DEBUG] Pool_Size: {Pool_Size}")
+        print(f"[DEBUG] Task_Size: {Task_Size}")
         print(f"[DEBUG] Running_PIDs: {Running_PIDs}")
         print(f"[DEBUG] Running_Current_Processes: {Running_Current_Processes}")
         print(f"[DEBUG] Running_Finish_Timestamp: {Running_Finish_Timestamp}")
         PoolRunningTestSpec._chk_ppid_info(ppid_list=Running_PPIDs, running_parent_pid=Running_Parent_PID)
         PoolRunningTestSpec._chk_process_record_blocking(
             pool_running_cnt=Pool_Running_Count.value,
-            worker_size=Pool_Size,
+            worker_size=Task_Size,
             running_worker_ids=Running_PIDs,
             running_current_workers=Running_Current_Processes,
             running_finish_timestamps=Running_Finish_Timestamp
@@ -1424,14 +1424,14 @@ class TestProcessPool(PoolRunningTestSpec):
         print(f"[DEBUG] Running_PPIDs: {Running_PPIDs}")
         print(f"[DEBUG] Running_Parent_PID: {Running_Parent_PID}")
         print(f"[DEBUG] Pool_Running_Count.value: {Pool_Running_Count.value}")
-        print(f"[DEBUG] Pool_Size: {Pool_Size}")
+        print(f"[DEBUG] Task_Size: {Task_Size}")
         print(f"[DEBUG] Running_PIDs: {Running_PIDs}")
         print(f"[DEBUG] Running_Current_Processes: {Running_Current_Processes}")
         print(f"[DEBUG] Running_Finish_Timestamp: {Running_Finish_Timestamp}")
         PoolRunningTestSpec._chk_ppid_info(ppid_list=Running_PPIDs, running_parent_pid=Running_Parent_PID)
         PoolRunningTestSpec._chk_process_record(
             pool_running_cnt=Pool_Running_Count.value,
-            worker_size=Pool_Size,
+            worker_size=Task_Size,
             running_worker_ids=Running_PIDs,
             running_current_workers=Running_Current_Processes,
             running_finish_timestamps=Running_Finish_Timestamp

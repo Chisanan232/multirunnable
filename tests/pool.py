@@ -3,6 +3,7 @@ from multirunnable.parallel.strategy import ProcessPoolStrategy
 from multirunnable.concurrent.strategy import ThreadPoolStrategy
 from multirunnable.coroutine.strategy import GreenThreadPoolStrategy
 
+from .framework.strategy import PoolRunningTestSpec
 from .test_config import (
     Worker_Pool_Size, Task_Size,
     Running_Diff_Time, Test_Function_Sleep_Time,
@@ -56,7 +57,6 @@ def pool_target_fun(*args, **kwargs) -> str:
 
     with _Thread_Lock:
         Pool_Running_Count += 1
-        print(f"Pool_Running_Count: {Pool_Running_Count} - {threading.current_thread()}")
 
         if args:
             assert args == Test_Function_Args, f"The argument *args* should be same as the input outside."
@@ -75,7 +75,7 @@ def pool_target_fun(*args, **kwargs) -> str:
         Running_Finish_Timestamp.append(_time)
 
     time.sleep(Test_Function_Sleep_Time)
-    return f"result_{threading.current_thread()}"
+    return f"result_{_ident}"
 
 
 def map_target_fun(*args, **kwargs):
@@ -90,7 +90,6 @@ def map_target_fun(*args, **kwargs):
 
     with _Thread_Lock:
         Pool_Running_Count += 1
-        print(f"Pool_Running_Count: {Pool_Running_Count} - {threading.current_thread()}")
 
         if args:
             assert set(args) <= set(Test_Function_Args), f"The argument *args* should be one of element of the input outside."
@@ -112,6 +111,10 @@ def map_target_fun(*args, **kwargs):
 
     time.sleep(Test_Function_Sleep_Time)
     return f"result_{threading.current_thread()}"
+
+
+def target_funcs_iter():
+    return [pool_target_fun for _ in range(_Task_Size)]
 
 
 @pytest.fixture(scope="function")
@@ -165,116 +168,144 @@ class TestSimplePool:
         assert isinstance(Pool_Runnable_Strategy, GreenThreadPoolStrategy), f"It should be an sub-instance of 'GreenThreadPoolStrategy'."
 
 
-    @pytest.mark.skip(reason="Not implement testing logic.")
     def test_apply(self, thread_pool: SimplePool):
         TestSimplePool._initial()
-        thread_pool.apply(function=pool_target_fun, args=(), queue_tasks=None, features=None)
-        TestSimplePool._chk_process_record()
+        thread_pool.initial()
+        thread_pool.apply(function=pool_target_fun)
+        TestSimplePool._chk_blocking_record()
 
 
-    @pytest.mark.skip(reason="Not implement testing logic.")
     def test_apply_by_pykeyword_with(self, thread_pool: SimplePool):
+        TestSimplePool._initial()
         with thread_pool as _pool:
-            _pool.apply(function=pool_target_fun, args=(), queue_tasks=None, features=None)
-        TestSimplePool._chk_process_record()
+            _pool.apply(function=pool_target_fun)
+        TestSimplePool._chk_blocking_record()
 
 
     def test_async_apply(self, thread_pool: SimplePool):
         TestSimplePool._initial()
         thread_pool.initial()
         thread_pool.async_apply(function=pool_target_fun)
-        TestSimplePool._chk_process_record()
+        TestSimplePool._chk_record()
 
 
     def test_async_apply_by_pykeyword_with(self, thread_pool: SimplePool):
         TestSimplePool._initial()
         with thread_pool as _pool:
             _pool.async_apply(function=pool_target_fun)
-        TestSimplePool._chk_process_record()
+        TestSimplePool._chk_record()
+
+
+    def test_apply_with_iter(self, thread_pool: SimplePool):
+        TestSimplePool._initial()
+        thread_pool.initial()
+        thread_pool.apply_with_iter(functions_iter=target_funcs_iter())
+        TestSimplePool._chk_blocking_record()
+
+
+    def test_apply_with_iter_by_pykeyword_with(self, thread_pool: SimplePool):
+        TestSimplePool._initial()
+        with thread_pool as _pool:
+            _pool.apply_with_iter(functions_iter=target_funcs_iter())
+        TestSimplePool._chk_blocking_record()
+
+
+    def test_async_apply_with_iter(self, thread_pool: SimplePool):
+        TestSimplePool._initial()
+        thread_pool.initial()
+        thread_pool.async_apply_with_iter(functions_iter=target_funcs_iter())
+        TestSimplePool._chk_record()
+
+
+    def test_async_apply_with_iter_by_pykeyword_with(self, thread_pool: SimplePool):
+        TestSimplePool._initial()
+        with thread_pool as _pool:
+            _pool.async_apply_with_iter(functions_iter=target_funcs_iter())
+        TestSimplePool._chk_record()
 
 
     def test_map(self, thread_pool: SimplePool):
         TestSimplePool._initial()
         thread_pool.initial()
         thread_pool.map(function=map_target_fun, args_iter=Test_Function_Args)
-        TestSimplePool._chk_process_record_map()
+        TestSimplePool._chk_map_record()
 
 
     def test_map_by_pykeyword_with(self, thread_pool: SimplePool):
         TestSimplePool._initial()
         with thread_pool as _pool:
             _pool.map(function=map_target_fun, args_iter=Test_Function_Args)
-        TestSimplePool._chk_process_record_map()
+        TestSimplePool._chk_map_record()
 
 
     def test_async_map(self, thread_pool: SimplePool):
         TestSimplePool._initial()
         thread_pool.initial()
         thread_pool.async_map(function=map_target_fun, args_iter=Test_Function_Args)
-        TestSimplePool._chk_process_record_map()
+        TestSimplePool._chk_map_record()
 
 
     def test_async_map_by_pykeyword_with(self, thread_pool: SimplePool):
         TestSimplePool._initial()
         with thread_pool as _pool:
             _pool.async_map(function=map_target_fun, args_iter=Test_Function_Args)
-        TestSimplePool._chk_process_record_map()
+        TestSimplePool._chk_map_record()
 
 
     def test_map_by_args(self, thread_pool: SimplePool):
         TestSimplePool._initial()
         thread_pool.initial()
         thread_pool.map_by_args(function=map_target_fun, args_iter=Test_Function_Multiple_Args)
-        TestSimplePool._chk_process_record_map()
+        TestSimplePool._chk_map_record()
 
 
     def test_map_by_args_by_pykeyword_with(self, thread_pool: SimplePool):
         TestSimplePool._initial()
         with thread_pool as _pool:
             _pool.map_by_args(function=map_target_fun, args_iter=Test_Function_Multiple_Args)
-        TestSimplePool._chk_process_record_map()
+        TestSimplePool._chk_map_record()
 
 
     def test_async_map_by_args(self, thread_pool: SimplePool):
         TestSimplePool._initial()
         thread_pool.initial()
         thread_pool.async_map_by_args(function=map_target_fun, args_iter=Test_Function_Multiple_Args)
-        TestSimplePool._chk_process_record_map()
+        TestSimplePool._chk_map_record()
 
 
     def test_async_map_by_args_by_pykeyword_with(self, thread_pool: SimplePool):
         TestSimplePool._initial()
         with thread_pool as _pool:
             _pool.async_map_by_args(function=map_target_fun, args_iter=Test_Function_Multiple_Args)
-        TestSimplePool._chk_process_record_map()
+        TestSimplePool._chk_map_record()
 
 
     def test_imap(self, thread_pool: SimplePool):
         TestSimplePool._initial()
         thread_pool.initial()
         thread_pool.imap(function=map_target_fun, args_iter=Test_Function_Args)
-        TestSimplePool._chk_process_record_map()
+        TestSimplePool._chk_map_record()
 
 
     def test_imap_by_pykeyword_with(self, thread_pool: SimplePool):
         TestSimplePool._initial()
         with thread_pool as _pool:
             _pool.imap(function=map_target_fun, args_iter=Test_Function_Args)
-        TestSimplePool._chk_process_record_map()
+        TestSimplePool._chk_map_record()
 
 
     def test_imap_unordered(self, thread_pool: SimplePool):
         TestSimplePool._initial()
         thread_pool.initial()
         thread_pool.imap_unordered(function=map_target_fun, args_iter=Test_Function_Args)
-        TestSimplePool._chk_process_record_map()
+        TestSimplePool._chk_map_record()
 
 
     def test_imap_unordered_by_pykeyword_with(self, thread_pool: SimplePool):
         TestSimplePool._initial()
         with thread_pool as _pool:
             _pool.imap_unordered(function=map_target_fun, args_iter=Test_Function_Args)
-        TestSimplePool._chk_process_record_map()
+        TestSimplePool._chk_map_record()
 
 
     def test_terminal(self, thread_pool: SimplePool):
@@ -315,46 +346,52 @@ class TestSimplePool:
 
 
     @staticmethod
-    def _chk_process_record():
-        assert Pool_Running_Count == _Worker_Pool_Size, f"The running count should be the same as the process pool size."
-
-        _ppid_list = Running_PPIDs[:]
-        _thread_id_list = Running_Thread_IDs[:]
-        _current_thread_list = Running_Current_Threads[:]
-        _timestamp_list = Running_Finish_Timestamp[:]
-
-        # assert len(set(_ppid_list)) == 1, f"The PPID of each process should be the same."
-        # assert _ppid_list[0] == Running_Parent_PID, f"The PPID should equal to {Running_Parent_PID}. But it got {_ppid_list[0]}."
-        assert len(_thread_id_list) == _Worker_Pool_Size, f"The count of PID (no de-duplicate) should be the same as the count of processes."
-        assert len(set(_thread_id_list)) == _Worker_Pool_Size, f"The count of PID (de-duplicate) should be the same as the count of processes."
-        assert len(_thread_id_list) == len(_current_thread_list), f"The count of current process name (no de-duplicate) should be equal to count of PIDs."
-        assert len(set(_thread_id_list)) == len(set(_current_thread_list)), f"The count of current process name (de-duplicate) should be equal to count of PIDs."
-
-        _max_timestamp = max(_timestamp_list)
-        _min_timestamp = min(_timestamp_list)
-        _diff_timestamp = _max_timestamp - _min_timestamp
-        assert _diff_timestamp <= Running_Diff_Time, f"Processes should be run in the same time period."
+    def _chk_blocking_record():
+        print(f"[DEBUG] Running_PPIDs: {Running_PPIDs}")
+        print(f"[DEBUG] Running_Parent_PID: {Running_Parent_PID}")
+        print(f"[DEBUG] Pool_Running_Count.value: {Pool_Running_Count}")
+        print(f"[DEBUG] _Task_Size: {_Task_Size}")
+        print(f"[DEBUG] Running_Thread_IDs: {Running_Thread_IDs}")
+        print(f"[DEBUG] Running_Current_Threads: {Running_Current_Threads}")
+        print(f"[DEBUG] Running_Finish_Timestamp: {Running_Finish_Timestamp}")
+        # PoolRunningTestSpec._chk_ppid_info(ppid_list=Running_PPIDs, running_parent_pid=Running_Parent_PID)
+        PoolRunningTestSpec._chk_process_record_blocking(
+            pool_running_cnt=Pool_Running_Count,
+            worker_size=_Task_Size,
+            running_worker_ids=Running_Thread_IDs,
+            running_current_workers=Running_Current_Threads,
+            running_finish_timestamps=Running_Finish_Timestamp,
+            de_duplicate=False
+        )
 
 
     @staticmethod
-    def _chk_process_record_map():
-        _argument_size = len(Test_Function_Args)
-        assert Pool_Running_Count == _argument_size, f"The running count should be the same as the process pool size."
+    def _chk_record():
+        print(f"[DEBUG] Running_PPIDs: {Running_PPIDs}")
+        print(f"[DEBUG] Running_Parent_PID: {Running_Parent_PID}")
+        print(f"[DEBUG] Pool_Running_Count.value: {Pool_Running_Count}")
+        print(f"[DEBUG] _Task_Size: {_Task_Size}")
+        print(f"[DEBUG] Running_Thread_IDs: {Running_Thread_IDs}")
+        print(f"[DEBUG] Running_Current_Threads: {Running_Current_Threads}")
+        print(f"[DEBUG] Running_Finish_Timestamp: {Running_Finish_Timestamp}")
+        # PoolRunningTestSpec._chk_ppid_info(ppid_list=Running_PPIDs, running_parent_pid=Running_Parent_PID)
+        PoolRunningTestSpec._chk_process_record(
+            pool_running_cnt=Pool_Running_Count,
+            worker_size=_Task_Size,
+            running_worker_ids=Running_Thread_IDs,
+            running_current_workers=Running_Current_Threads,
+            running_finish_timestamps=Running_Finish_Timestamp
+        )
 
-        _ppid_list = Running_PPIDs[:]
-        _thread_id_list = Running_Thread_IDs[:]
-        _current_thread_list = Running_Current_Threads[:]
-        _timestamp_list = Running_Finish_Timestamp[:]
 
-        # assert len(set(_ppid_list)) == 1, f"The PPID of each process should be the same."
-        # assert _ppid_list[0] == Running_Parent_PID, f"The PPID should equal to {Running_Parent_PID}. But it got {_ppid_list[0]}."
-        assert len(_thread_id_list) == _argument_size, f"The count of PID (no de-duplicate) should be the same as the count of processes."
-        assert len(set(_thread_id_list)) == _argument_size, f"The count of PID (de-duplicate) should be the same as the count of processes."
-        assert len(_thread_id_list) == len(_current_thread_list), f"The count of current process name (no de-duplicate) should be equal to count of PIDs."
-        assert len(set(_thread_id_list)) == len(set(_current_thread_list)), f"The count of current process name (de-duplicate) should be equal to count of PIDs."
-
-        _max_timestamp = max(_timestamp_list)
-        _min_timestamp = min(_timestamp_list)
-        _diff_timestamp = _max_timestamp - _min_timestamp
-        assert _diff_timestamp <= Running_Diff_Time, f"Processes should be run in the same time period."
+    @staticmethod
+    def _chk_map_record():
+        # PoolRunningTestSpec._chk_ppid_info(ppid_list=Running_PPIDs, running_parent_pid=Running_Parent_PID)
+        PoolRunningTestSpec._chk_process_record_map(
+            pool_running_cnt=Pool_Running_Count,
+            function_args=Test_Function_Args,
+            running_worker_ids=Running_Thread_IDs,
+            running_current_workers=Running_Current_Threads,
+            running_finish_timestamps=Running_Finish_Timestamp
+        )
 
