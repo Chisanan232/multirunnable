@@ -45,11 +45,10 @@ class ExamplePoolClient:
             mode=RunningMode.Parallel,
             # mode=RunningMode.Concurrent,
             # mode=RunningMode.GreenThread,
-            pool_size=self.__Pool_Size,
-            tasks_size=self.__Pool_Size)
+            pool_size=self.__Pool_Size)
 
         _pool.initial(queue_tasks=_queue_task, features=_features)
-        _pool.async_apply(function=test_dao.get_test_data)
+        _pool.async_apply(function=test_dao.get_test_data, tasks_size=self.__Pool_Size)
         result = _pool.get_result()
 
         print("Result: ", result)

@@ -40,16 +40,16 @@ class ExamplePool:
 
     def main_run(self):
         # # # # Initial Pool object
-        # __pool = SimplePool(mode=RunningMode.Parallel, pool_size=self.__Pool_Size, tasks_size=self.__Task_Size)
-        # __pool = SimplePool(mode=RunningMode.Concurrent, pool_size=self.__Pool_Size, tasks_size=self.__Task_Size)
-        __pool = SimplePool(mode=RunningMode.GreenThread, pool_size=self.__Pool_Size, tasks_size=self.__Task_Size)
+        # __pool = SimplePool(mode=RunningMode.Parallel, pool_size=self.__Pool_Size)
+        # __pool = SimplePool(mode=RunningMode.Concurrent, pool_size=self.__Pool_Size)
+        __pool = SimplePool(mode=RunningMode.GreenThread, pool_size=self.__Pool_Size)
 
 
         __result = None
         with __pool as pool:
             # # # # Running Pool
-            pool.apply(function=self.__Example_Target.target_function, args=(f"test_{random.randrange(10,20)}",))
-            # pool.async_apply(function=self.__Example_Target.target_function, kwargs={"index": f"test_{random.randrange(10,20)}"})
+            pool.apply(tasks_size=self.__Task_Size, function=self.__Example_Target.target_function, args=(f"test_{random.randrange(10,20)}",))
+            # pool.async_apply(tasks_size=self.__Task_Size, function=self.__Example_Target.target_function, kwargs={"index": f"test_{random.randrange(10,20)}"})
             pool.map(function=self.__Example_Target.target_function, args_iter=("index_1", "index_2.2", "index_3"))
             # pool.map_by_args(function=self.__Example_Target.target_function, args_iter=[("index_1", "index_2.2"), ("index_3",), (1, 2, 3)])
 
