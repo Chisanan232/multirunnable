@@ -187,8 +187,8 @@ class ThreadPoolStrategy(ConcurrentStrategy, _PoolRunnableStrategy, _Resultable)
     _Thread_Pool: ThreadPool = None
     _Thread_List: List[Union[ApplyResult, AsyncResult]] = None
 
-    def __init__(self, pool_size: int, tasks_size: int):
-        super().__init__(pool_size=pool_size, tasks_size=tasks_size)
+    def __init__(self, pool_size: int):
+        super().__init__(pool_size=pool_size)
 
 
     def initialization(self,
@@ -203,14 +203,14 @@ class ThreadPoolStrategy(ConcurrentStrategy, _PoolRunnableStrategy, _Resultable)
         self._Thread_Pool = ThreadPool(processes=self.pool_size, initializer=__pool_initializer, initargs=__pool_initargs)
 
 
-    def apply(self, function: Callable, args: Tuple = (), kwargs: Dict = {}) -> None:
+    def apply(self, tasks_size: int, function: Callable, args: Tuple = (), kwargs: Dict = {}) -> None:
         self.reset_result()
         __process_running_result = None
 
         try:
             __process_running_result = [
                 self._Thread_Pool.apply(func=function, args=args, kwds=kwargs)
-                for _ in range(self.tasks_size)]
+                for _ in range(tasks_size)]
             __exception = None
             __process_run_successful = True
         except Exception as e:
@@ -222,6 +222,7 @@ class ThreadPoolStrategy(ConcurrentStrategy, _PoolRunnableStrategy, _Resultable)
 
 
     def async_apply(self,
+                    tasks_size: int,
                     function: Callable,
                     args: Tuple = (),
                     kwargs: Dict = {},
@@ -234,7 +235,7 @@ class ThreadPoolStrategy(ConcurrentStrategy, _PoolRunnableStrategy, _Resultable)
                                           kwds=kwargs,
                                           callback=callback,
                                           error_callback=error_callback)
-            for _ in range(self.tasks_size)]
+            for _ in range(tasks_size)]
 
         for process in self._Thread_List:
             _process_running_result = None

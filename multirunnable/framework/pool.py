@@ -65,10 +65,11 @@ class BasePool(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def apply(self, function: Callable, *args, **kwargs) -> None:
+    def apply(self, tasks_size: int, function: Callable, *args, **kwargs) -> None:
         """
         Description:
             The adapter of multiprocessing.pool.apply.
+        :param tasks_size:
         :param function:
         :param args:
         :param kwargs:
@@ -79,6 +80,7 @@ class BasePool(metaclass=ABCMeta):
 
     @abstractmethod
     def async_apply(self,
+                    tasks_size: int,
                     function: Callable,
                     args: Tuple = (),
                     kwargs: Dict = {},
@@ -87,6 +89,7 @@ class BasePool(metaclass=ABCMeta):
         """
         Description:
             The adapter of multiprocessing.pool.apply_async.
+        :param tasks_size:
         :param function:
         :param args:
         :param kwargs:

@@ -252,8 +252,8 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
     _GreenThread_List: List[Greenlet] = []
     # _GreenThread_Running_Result: List = []
 
-    def __init__(self, pool_size: int, tasks_size: int):
-        super().__init__(pool_size=pool_size, tasks_size=tasks_size)
+    def __init__(self, pool_size: int):
+        super().__init__(pool_size=pool_size)
 
 
     def initialization(self,
@@ -267,14 +267,14 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
         self._GreenThread_Pool = Pool(size=self.pool_size)
 
 
-    def apply(self, function: Callable, args: Tuple = (), kwargs: Dict = {}) -> None:
+    def apply(self, tasks_size: int, function: Callable, args: Tuple = (), kwargs: Dict = {}) -> None:
         self.reset_result()
         __process_running_result = None
 
         try:
             __process_running_result = [
                 self._GreenThread_Pool.apply(func=function, args=args, kwds=kwargs)
-                for _ in range(self.tasks_size)]
+                for _ in range(tasks_size)]
             __exception = None
             __process_run_successful = True
         except Exception as e:
@@ -286,6 +286,7 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
 
 
     def async_apply(self,
+                    tasks_size: int,
                     function: Callable,
                     args: Tuple = (),
                     kwargs: Dict = {},
@@ -297,7 +298,7 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
                                                args=args,
                                                kwds=kwargs,
                                                callback=callback)
-            for _ in range(self.tasks_size)]
+            for _ in range(tasks_size)]
 
         for process in self._GreenThread_List:
             __process_running_result = process.get()

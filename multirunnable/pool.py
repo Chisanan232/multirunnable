@@ -50,17 +50,19 @@ class Pool(ABC, _BasePool):
             queue_tasks=queue_tasks, features=features, *args, **kwargs)
 
 
-    def apply(self, function: Callable, args: Tuple = (), kwargs: Dict = {}) -> None:
-        Pool_Runnable_Strategy.apply(function=function, args=args, kwargs=kwargs)
+    def apply(self, tasks_size: int, function: Callable, args: Tuple = (), kwargs: Dict = {}) -> None:
+        Pool_Runnable_Strategy.apply(tasks_size=tasks_size, function=function, args=args, kwargs=kwargs)
 
 
     def async_apply(self,
+                    tasks_size: int,
                     function: Callable,
                     args: Tuple = (),
                     kwargs: Dict = {},
                     callback: Callable = None,
                     error_callback: Callable = None) -> None:
         Pool_Runnable_Strategy.async_apply(
+            tasks_size=tasks_size,
             function=function,
             args=args,
             kwargs=kwargs,
@@ -146,17 +148,15 @@ class Pool(ABC, _BasePool):
 
 class SimplePool(Pool):
 
-    def __init__(self, mode: _RunningMode, pool_size: int, tasks_size: int):
+    def __init__(self, mode: _RunningMode, pool_size: int):
         super().__init__(mode=mode, pool_size=pool_size)
-        self._tasks_size = tasks_size
         self._initial_running_strategy()
 
 
     def _initial_running_strategy(self) -> None:
         __running_strategy_adapter = _PoolStrategyAdapter(
             mode=self._mode,
-            pool_size=self.pool_size,
-            tasks_size=self._tasks_size)
+            pool_size=self.pool_size)
 
         global Pool_Runnable_Strategy
         Pool_Runnable_Strategy = __running_strategy_adapter.get_simple()

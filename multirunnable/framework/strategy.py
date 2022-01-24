@@ -375,10 +375,9 @@ class GeneralRunnableStrategy(RunnableStrategy):
 
 class PoolRunnableStrategy(RunnableStrategy):
 
-    def __init__(self, pool_size: int, tasks_size: int):
+    def __init__(self, pool_size: int):
         super(PoolRunnableStrategy, self).__init__()
         self._pool_size = pool_size
-        self._tasks_size = tasks_size
 
 
     @property
@@ -392,18 +391,8 @@ class PoolRunnableStrategy(RunnableStrategy):
         return self._pool_size
 
 
-    @property
-    def tasks_size(self) -> int:
-        """
-        Description:
-            The number of threads or processes be create and activate to do something.
-        :return:
-        """
-        return self._tasks_size
-
-
     @abstractmethod
-    def apply(self, function: Callable, args: Tuple = (), kwargs: Dict = {}) -> None:
+    def apply(self, tasks_size: int, function: Callable, args: Tuple = (), kwargs: Dict = {}) -> None:
         """
         Description:
             Refer to multiprocessing.pool.apply.
@@ -414,6 +403,7 @@ class PoolRunnableStrategy(RunnableStrategy):
 
     @abstractmethod
     def async_apply(self,
+                    tasks_size: int,
                     function: Callable,
                     args: Tuple = (),
                     kwargs: Dict = {},
