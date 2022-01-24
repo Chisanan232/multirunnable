@@ -68,6 +68,24 @@ class Pool(ABC, _BasePool):
             error_callback=error_callback)
 
 
+    def apply_with_iter(self, functions_iter: List[Callable], args_iter: List[Tuple] = None, kwargs_iter: List[Dict] = None) -> None:
+        Pool_Runnable_Strategy.apply_with_iter(functions_iter=functions_iter, args_iter=args_iter, kwargs_iter=kwargs_iter)
+
+
+    def async_apply_with_iter(self,
+                              functions_iter: List[Callable],
+                              args_iter: List[Tuple] = None,
+                              kwargs_iter: List[Dict] = None,
+                              callback_iter: List[Callable] = None,
+                              error_callback_iter: List[Callable] = None) -> None:
+        Pool_Runnable_Strategy.async_apply_with_iter(
+            functions_iter=functions_iter,
+            args_iter=args_iter,
+            kwargs_iter=kwargs_iter,
+            callback_iter=callback_iter,
+            error_callback_iter=error_callback_iter)
+
+
     def map(self, function: Callable, args_iter: Iterable = (), chunksize: int = None) -> None:
         Pool_Runnable_Strategy.map(function=function, args_iter=args_iter, chunksize=chunksize)
 

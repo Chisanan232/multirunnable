@@ -98,6 +98,39 @@ class BasePool(metaclass=ABCMeta):
 
 
     @abstractmethod
+    def apply_with_iter(self, functions_iter: List[Callable], args_iter: List[Tuple] = None, kwargs_iter: List[Dict] = None) -> None:
+        """
+        Description:
+            The adapter of multiprocessing.pool.apply with iterator of arguments.
+        :param functions_iter:
+        :param args_iter:
+        :param kwargs_iter:
+        :return:
+        """
+        pass
+
+
+    @abstractmethod
+    def async_apply_with_iter(self,
+                              functions_iter: List[Callable],
+                              args_iter: List[Tuple] = None,
+                              kwargs_iter: List[Dict] = None,
+                              callback_iter: List[Callable] = None,
+                              error_callback_iter: List[Callable] = None) -> None:
+        """
+        Description:
+            The adapter of multiprocessing.pool.apply_async with iterator of arguments.
+        :param functions_iter:
+        :param args_iter:
+        :param kwargs_iter:
+        :param callback_iter:
+        :param error_callback_iter:
+        :return:
+        """
+        pass
+
+
+    @abstractmethod
     def map(self, function: Callable, args_iter: Iterable = (), chunksize: int = None) -> None:
         """
         Description:
