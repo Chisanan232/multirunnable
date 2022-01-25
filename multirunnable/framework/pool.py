@@ -1,7 +1,5 @@
 from .result import MRResult as _MRResult
-from ..mode import RunningMode as _RunningMode
 from ..types import MRTasks as _MRTasks
-import multirunnable._utils as _utils
 
 from abc import ABCMeta, abstractmethod
 from typing import List, Tuple, Dict, Iterable, Callable
@@ -13,27 +11,12 @@ class BasePool(metaclass=ABCMeta):
     _Worker_Timeout = 3
     _Ocean_Tasks_List: List[_MRTasks] = []
 
-    def __init__(self, mode: _RunningMode, pool_size: int):
-        self._mode = mode
+    def __init__(self, pool_size: int):
         self.pool_size = pool_size
 
 
     def __str__(self):
         return f"{self.__str__()} at {id(self.__class__)}"
-
-
-    def __repr__(self):
-        __instance_brief = None
-        # # self.__class__ value: <class '__main__.ACls'>
-        __cls_str = str(self.__class__)
-        __cls_name = _utils.get_cls_name(cls_str=__cls_str)
-        if __cls_name != "":
-            __instance_brief = f"{__cls_name}(" \
-                               f"mode={self._mode}, " \
-                               f"pool_size={self.pool_size})"
-        else:
-            __instance_brief = __cls_str
-        return __instance_brief
 
 
     def __enter__(self):

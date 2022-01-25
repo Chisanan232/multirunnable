@@ -15,6 +15,7 @@ from .mode import RunningMode as _RunningMode
 from .adapter.strategy import ExecutorStrategyAdapter as _ExecutorStrategyAdapter
 from .types import MRTasks as _MRTasks
 from ._config import set_mode
+from ._utils import get_cls_name as _get_cls_name
 
 
 _General_Runnable_Type = Union[_GeneralRunnableStrategy]
@@ -26,9 +27,8 @@ class Executor(ABC, _BaseExecutor):
     ParameterCannotBeNoneError = TypeError("It should not pass 'None' value parameter(s).")
     InvalidParameterBePass = TypeError("The parameters data type is invalid. It should all be tuple or dict.")
 
-    def __init__(self, mode: _RunningMode, executors: int):
-        super(Executor, self).__init__(mode=mode, executors=executors)
-        set_mode(mode=mode)
+    def __init__(self, executors: int):
+        super(Executor, self).__init__(executors=executors)
 
 
     def start_new_worker(self, target: Callable, args: Tuple = (), kwargs: Dict = {}):
@@ -107,8 +107,25 @@ class Executor(ABC, _BaseExecutor):
 class SimpleExecutor(Executor):
 
     def __init__(self, mode: _RunningMode, executors: int):
-        super().__init__(mode=mode, executors=executors)
+        set_mode(mode=mode)
+        self._mode = mode
+
+        super().__init__(executors=executors)
         self._initial_running_strategy()
+
+
+    def __repr__(self):
+        __instance_brief = None
+        # # self.__class__ value: <class '__main__.ACls'>
+        __cls_str = str(self.__class__)
+        __cls_name = _get_cls_name(cls_str=__cls_str)
+        if __cls_name != "":
+            __instance_brief = f"{__cls_name}(" \
+                               f"mode={self._mode}, " \
+                               f"worker_num={self._executors_number})"
+        else:
+            __instance_brief = __cls_str
+        return __instance_brief
 
 
     def _initial_running_strategy(self) -> None:
@@ -124,7 +141,7 @@ class SimpleExecutor(Executor):
 class AdapterExecutor(Executor):
 
     def __init__(self, strategy: _General_Runnable_Type = None):
-        super().__init__(mode=None, executors=strategy.executors_number)
+        super().__init__(executors=strategy.executors_number)
         self.__strategy = strategy
         self._initial_running_strategy()
 

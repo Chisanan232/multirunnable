@@ -2,9 +2,7 @@ from .task import BaseQueueTask as _BaseQueueTask
 from .features import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
 from .adapter.collection import BaseList as _BaseList
 from .result import MRResult as _MRResult
-from ..mode import RunningMode as _RunningMode
 from ..types import MRTasks as _MRTasks
-import multirunnable._utils as _utils
 
 from abc import ABCMeta, abstractmethod
 from typing import List, Tuple, Dict, Optional, Union, Callable as CallableType, Iterable as IterableType
@@ -15,27 +13,12 @@ from collections.abc import Callable
 
 class BaseExecutor(metaclass=ABCMeta):
 
-    def __init__(self, mode: _RunningMode, executors: int):
-        self._mode = mode
+    def __init__(self, executors: int):
         self._executors_number = executors
 
 
     def __str__(self):
         return f"{self.__str__()} at {id(self.__class__)}"
-
-
-    def __repr__(self):
-        __instance_brief = None
-        # # self.__class__ value: <class '__main__.ACls'>
-        __cls_str = str(self.__class__)
-        __cls_name = _utils.get_cls_name(cls_str=__cls_str)
-        if __cls_name != "":
-            __instance_brief = f"{__cls_name}(" \
-                               f"mode={self._mode}, " \
-                               f"worker_num={self._executors_number})"
-        else:
-            __instance_brief = __cls_str
-        return __instance_brief
 
 
     @abstractmethod

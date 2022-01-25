@@ -13,6 +13,7 @@ from .framework import (
 from .mode import RunningMode as _RunningMode
 from .adapter.strategy import PoolStrategyAdapter as _PoolStrategyAdapter
 from ._config import set_mode
+from ._utils import get_cls_name as _get_cls_name
 
 
 _Pool_Runnable_Type = Union[_PoolRunnableStrategy, _Resultable]
@@ -23,13 +24,8 @@ class Pool(ABC, _BasePool):
 
     NotSupportError = Exception("Asynchronous not support Pool strategy.")
 
-    def __init__(self, mode: _RunningMode, pool_size: int):
-        if mode is _RunningMode.Asynchronous:
-            raise self.NotSupportError
-
-        set_mode(mode=mode)
-
-        super(Pool, self).__init__(mode=mode, pool_size=pool_size)
+    def __init__(self, pool_size: int):
+        super(Pool, self).__init__(pool_size=pool_size)
         # self._initial_running_strategy()
 
 
@@ -149,8 +145,28 @@ class Pool(ABC, _BasePool):
 class SimplePool(Pool):
 
     def __init__(self, mode: _RunningMode, pool_size: int):
-        super().__init__(mode=mode, pool_size=pool_size)
+        if mode is _RunningMode.Asynchronous:
+            raise self.NotSupportError
+
+        set_mode(mode=mode)
+        self._mode = mode
+
+        super().__init__(pool_size=pool_size)
         self._initial_running_strategy()
+
+
+    def __repr__(self):
+        __instance_brief = None
+        # # self.__class__ value: <class '__main__.ACls'>
+        __cls_str = str(self.__class__)
+        __cls_name = _get_cls_name(cls_str=__cls_str)
+        if __cls_name != "":
+            __instance_brief = f"{__cls_name}(" \
+                               f"mode={self._mode}, " \
+                               f"pool_size={self.pool_size})"
+        else:
+            __instance_brief = __cls_str
+        return __instance_brief
 
 
     def _initial_running_strategy(self) -> None:
@@ -166,7 +182,7 @@ class SimplePool(Pool):
 class AdapterPool(Pool):
 
     def __init__(self, strategy: _Pool_Runnable_Type = None):
-        super().__init__(mode=None, pool_size=strategy.pool_size)
+        super().__init__(pool_size=strategy.pool_size)
         self.__strategy = strategy
         self._initial_running_strategy()
 
