@@ -97,8 +97,10 @@ skip_commits:
 install:
   - "%PYTHON%\\python.exe -m pip install pytest"
   - "%PYTHON%\\python.exe -m pip install pytest-cov"
+  - "%PYTHON%\\python.exe -m pip install pytest-rerunfailures"
   - "%PYTHON%\\python.exe -m pip install codecov"
   - "%PYTHON%\\python.exe -m pip install coveralls"
+  - "%PYTHON%\\python.exe -m pip install mysql-connector-python"
   - "%PYTHON%\\python.exe -m pip install -r dev-requirements.txt"
 
 #cache:
