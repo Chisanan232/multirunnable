@@ -1,7 +1,8 @@
-from ._retry import _Retry, _AsyncRetry
-
+from abc import ABCMeta, abstractmethod
+from types import MethodType, FunctionType, LambdaType
+from typing import List, Callable, Type, Any, Union, Optional
+from inspect import isclass as inspect_isclass
 from functools import wraps
-from typing import List, Callable, Type, Any
 
 from multirunnable.framework.result import MRResult as _MRResult
 from multirunnable.api.operator import (
@@ -13,30 +14,85 @@ from multirunnable.api.operator import (
     SemaphoreAsyncOperator as _SemaphoreAsyncOperator,
     BoundedSemaphoreAsyncOperator as _BoundedSemaphoreAsyncOperator
 )
+from ._retry import (
+    _BaseRetry,
+    _RetryFunction, _RetryBoundedFunction,
+    _BaseAsyncRetry,
+    _AsyncRetryFunction, _AsyncRetryBoundedFunction
+)
 
 
 
-def retry(function: Callable = None, timeout: int = 1):
+class _BaseRetryDecorator(metaclass=ABCMeta):
 
-    if function:
-        return _Retry(function=function, timeout=timeout)
-    else:
-        @wraps(function)
-        def __retry(function: Callable):
-            return _Retry(function=function, timeout=timeout)
-        return __retry
+    @staticmethod
+    @abstractmethod
+    def function(function=None, timeout: int = 1):
+        pass
 
 
+    @staticmethod
+    @abstractmethod
+    def bounded_function(function: Optional[FunctionType] = None, timeout: int = 1):
+        pass
 
-def async_retry(function: Callable = None, timeout: int = 1):
 
-    if function:
-        return _AsyncRetry(function=function, timeout=timeout)
-    else:
-        @wraps(function)
-        def __async_retry(function: Callable):
-            return _AsyncRetry(function=function, timeout=timeout)
-        return __async_retry
+    @classmethod
+    def _retry_process(cls, retry_mechanism: Type[Union[_BaseRetry, _BaseAsyncRetry]], function: Optional[FunctionType] = None, timeout: int = 1) -> Union[_BaseRetry, _BaseAsyncRetry]:
+        if inspect_isclass(function) is True:
+            raise ValueError("The target object be decorated should be a 'function' type object.")
+
+        if function:
+            return retry_mechanism(function=function, timeout=timeout)
+        else:
+            @wraps(function)
+            def __retry(function: Callable):
+                return retry_mechanism(function=function, timeout=timeout)
+
+            return __retry
+
+
+
+class retry(_BaseRetryDecorator):
+
+    @staticmethod
+    def function(function: Optional[FunctionType] = None, timeout: int = 1):
+        return retry._retry_process(retry_mechanism=_RetryFunction, function=function, timeout=timeout)
+
+
+    @staticmethod
+    def bounded_function(function: Optional[FunctionType] = None, timeout: int = 1):
+        return retry._retry_process(retry_mechanism=_RetryBoundedFunction, function=function, timeout=timeout)
+
+
+
+class async_retry(_BaseRetryDecorator):
+
+    @staticmethod
+    def function(function: Optional[FunctionType] = None, timeout: int = 1):
+        return async_retry._retry_process(retry_mechanism=_AsyncRetryFunction, function=function, timeout=timeout)
+
+
+    @staticmethod
+    def bounded_function(function: Optional[FunctionType] = None, timeout: int = 1):
+        return async_retry._retry_process(retry_mechanism=_AsyncRetryBoundedFunction, function=function, timeout=timeout)
+
+
+
+def retry_function(function: Optional[Union[FunctionType, MethodType]] = None, timeout: int = 1):
+    return retry.function(function=function, timeout=timeout)
+
+
+def retry_bounded_function(function: Optional[Union[FunctionType, MethodType]] = None, timeout: int = 1):
+    return retry.bounded_function(function=function, timeout=timeout)
+
+
+def async_retry_function(function: Callable = None, timeout: int = 1):
+    return async_retry.function(function=function, timeout=timeout)
+
+
+def async_retry_bounded_function(function: Callable = None, timeout: int = 1):
+    return async_retry.bounded_function(function=function, timeout=timeout)
 
 
 
