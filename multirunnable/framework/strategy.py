@@ -4,6 +4,7 @@ from .features import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
 from .result import MRResult as _MRResult, PoolResult as _PoolResult
 from ..mode import FeatureMode as _FeatureMode
 from ..types import MRTasks as _MRTasks
+from ..api._retry import _BaseRetry
 import multirunnable._utils as _utils
 
 from abc import ABCMeta, ABC, abstractmethod
@@ -286,19 +287,19 @@ class GeneralRunnableStrategy(RunnableStrategy):
         self.close(__workers_list)
 
 
-    @dispatch((FunctionType, MethodType, PartialFunctionType), type(None))
+    @dispatch((FunctionType, MethodType, PartialFunctionType, _BaseRetry), type(None))
     def _generate_worker(self, function: Callable, args) -> _MRTasks:
         __worker = self.generate_worker(function)
         return __worker
 
 
-    @dispatch((FunctionType, MethodType, PartialFunctionType), tuple)
+    @dispatch((FunctionType, MethodType, PartialFunctionType, _BaseRetry), tuple)
     def _generate_worker(self, function: Callable, args) -> _MRTasks:
         __worker = self.generate_worker(function, *args)
         return __worker
 
 
-    @dispatch((FunctionType, MethodType, PartialFunctionType), dict)
+    @dispatch((FunctionType, MethodType, PartialFunctionType, _BaseRetry), dict)
     def _generate_worker(self, function: Callable, args) -> _MRTasks:
         __worker = self.generate_worker(function, **args)
         return __worker
