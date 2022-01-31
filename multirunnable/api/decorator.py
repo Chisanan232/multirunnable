@@ -56,12 +56,12 @@ class _BaseRetryDecorator(metaclass=ABCMeta):
 class retry(_BaseRetryDecorator):
 
     @staticmethod
-    def function(function: Optional[FunctionType] = None, timeout: int = 1):
+    def function(function: Optional[FunctionType] = None, timeout: int = 1) -> _BaseRetry:
         return retry._retry_process(retry_mechanism=_RetryFunction, function=function, timeout=timeout)
 
 
     @staticmethod
-    def bounded_function(function: Optional[FunctionType] = None, timeout: int = 1):
+    def bounded_function(function: Optional[FunctionType] = None, timeout: int = 1) -> _BaseRetry:
         return retry._retry_process(retry_mechanism=_RetryBoundedFunction, function=function, timeout=timeout)
 
 
@@ -69,29 +69,29 @@ class retry(_BaseRetryDecorator):
 class async_retry(_BaseRetryDecorator):
 
     @staticmethod
-    def function(function: Optional[FunctionType] = None, timeout: int = 1):
+    def function(function: Optional[FunctionType] = None, timeout: int = 1) -> _BaseAsyncRetry:
         return async_retry._retry_process(retry_mechanism=_AsyncRetryFunction, function=function, timeout=timeout)
 
 
     @staticmethod
-    def bounded_function(function: Optional[FunctionType] = None, timeout: int = 1):
+    def bounded_function(function: Optional[FunctionType] = None, timeout: int = 1) -> _BaseAsyncRetry:
         return async_retry._retry_process(retry_mechanism=_AsyncRetryBoundedFunction, function=function, timeout=timeout)
 
 
 
-def retry_function(function: Optional[Union[FunctionType, MethodType]] = None, timeout: int = 1):
+def retry_function(function: Optional[Union[FunctionType, MethodType]] = None, timeout: int = 1) -> _BaseRetry:
     return retry.function(function=function, timeout=timeout)
 
 
-def retry_bounded_function(function: Optional[Union[FunctionType, MethodType]] = None, timeout: int = 1):
+def retry_bounded_function(function: Optional[Union[FunctionType, MethodType]] = None, timeout: int = 1) -> _BaseRetry:
     return retry.bounded_function(function=function, timeout=timeout)
 
 
-def async_retry_function(function: Callable = None, timeout: int = 1):
+def async_retry_function(function: Callable = None, timeout: int = 1) -> _BaseAsyncRetry:
     return async_retry.function(function=function, timeout=timeout)
 
 
-def async_retry_bounded_function(function: Callable = None, timeout: int = 1):
+def async_retry_bounded_function(function: Callable = None, timeout: int = 1) -> _BaseAsyncRetry:
     return async_retry.bounded_function(function=function, timeout=timeout)
 
 
