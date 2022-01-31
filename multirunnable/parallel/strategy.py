@@ -356,7 +356,7 @@ class ProcessPoolStrategy(ParallelStrategy, _PoolRunnableStrategy, _Resultable):
 
         # Save Running result state and Running result value as dict
         for __result in (_process_running_result or []):
-            self._result_saving(successful=_process_run_successful, result=__result, exception=None)
+            self._result_saving(successful=_process_run_successful, result=__result, exception=_exception)
 
 
     def async_map(self,
@@ -366,36 +366,45 @@ class ProcessPoolStrategy(ParallelStrategy, _PoolRunnableStrategy, _Resultable):
                   callback: Callable = None,
                   error_callback: Callable = None) -> None:
         self.reset_result()
-        __map_result = self._Processors_Pool.map_async(
+
+        _process_running_result = None
+        _exception = None
+
+        _map_result = self._Processors_Pool.map_async(
             func=function,
             iterable=args_iter,
             chunksize=chunksize,
             callback=callback,
             error_callback=error_callback)
-        __process_running_result = __map_result.get()
-        __process_run_successful = __map_result.successful()
+
+        try:
+            _process_running_result = _map_result.get()
+            _process_run_successful = _map_result.successful()
+        except Exception as e:
+            _exception = e
+            _process_run_successful = False
 
         # Save Running result state and Running result value as dict
-        for __result in (__process_running_result or []):
-            self._result_saving(successful=__process_run_successful, result=__result, exception=None)
+        for __result in (_process_running_result or []):
+            self._result_saving(successful=_process_run_successful, result=__result, exception=_exception)
 
 
     def map_by_args(self, function: Callable, args_iter: IterableType[IterableType] = (), chunksize: int = None) -> None:
         self.reset_result()
-        __process_running_result = None
+        _process_running_result = None
 
         try:
-            __process_running_result = self._Processors_Pool.starmap(
+            _process_running_result = self._Processors_Pool.starmap(
                 func=function, iterable=args_iter, chunksize=chunksize)
-            __exception = None
-            __process_run_successful = True
+            _exception = None
+            _process_run_successful = True
         except Exception as e:
-            __exception = e
-            __process_run_successful = False
+            _exception = e
+            _process_run_successful = False
 
         # Save Running result state and Running result value as dict
-        for __result in (__process_running_result or []):
-            self._result_saving(successful=__process_run_successful, result=__result, exception=None)
+        for __result in (_process_running_result or []):
+            self._result_saving(successful=_process_run_successful, result=__result, exception=_exception)
 
 
     def async_map_by_args(self,
@@ -405,54 +414,54 @@ class ProcessPoolStrategy(ParallelStrategy, _PoolRunnableStrategy, _Resultable):
                           callback: Callable = None,
                           error_callback: Callable = None) -> None:
         self.reset_result()
-        __map_result = self._Processors_Pool.starmap_async(
+        _map_result = self._Processors_Pool.starmap_async(
             func=function,
             iterable=args_iter,
             chunksize=chunksize,
             callback=callback,
             error_callback=error_callback)
-        __process_running_result = __map_result.get()
-        __process_run_successful = __map_result.successful()
+        _process_running_result = _map_result.get()
+        _process_run_successful = _map_result.successful()
 
         # Save Running result state and Running result value as dict
-        for __result in (__process_running_result or []):
-            self._result_saving(successful=__process_run_successful, result=__result, exception=None)
+        for __result in (_process_running_result or []):
+            self._result_saving(successful=_process_run_successful, result=__result, exception=None)
 
 
     def imap(self, function: Callable, args_iter: IterableType = (), chunksize: int = 1) -> None:
         self.reset_result()
-        __process_running_result = None
+        _process_running_result = None
 
         try:
             imap_running_result = self._Processors_Pool.imap(func=function, iterable=args_iter, chunksize=chunksize)
-            __process_running_result = [result for result in imap_running_result]
-            __exception = None
-            __process_run_successful = True
+            _process_running_result = [result for result in imap_running_result]
+            _exception = None
+            _process_run_successful = True
         except Exception as e:
-            __exception = e
-            __process_run_successful = False
+            _exception = e
+            _process_run_successful = False
 
         # Save Running result state and Running result value as dict
-        for __result in (__process_running_result or []):
-            self._result_saving(successful=__process_run_successful, result=__result, exception=None)
+        for __result in (_process_running_result or []):
+            self._result_saving(successful=_process_run_successful, result=__result, exception=_exception)
 
 
     def imap_unordered(self, function: Callable, args_iter: IterableType = (), chunksize: int = 1) -> None:
         self.reset_result()
-        __process_running_result = None
+        _process_running_result = None
 
         try:
             imap_running_result = self._Processors_Pool.imap_unordered(func=function, iterable=args_iter, chunksize=chunksize)
-            __process_running_result = [result for result in imap_running_result]
-            __exception = None
-            __process_run_successful = True
+            _process_running_result = [result for result in imap_running_result]
+            _exception = None
+            _process_run_successful = True
         except Exception as e:
-            __exception = e
-            __process_run_successful = False
+            _exception = e
+            _process_run_successful = False
 
         # Save Running result state and Running result value as dict
-        for __result in (__process_running_result or []):
-            self._result_saving(successful=__process_run_successful, result=__result, exception=None)
+        for __result in (_process_running_result or []):
+            self._result_saving(successful=_process_run_successful, result=__result, exception=_exception)
 
 
     def _result_saving(self, successful: bool, result: List, exception: Exception) -> None:
