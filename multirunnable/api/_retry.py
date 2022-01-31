@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from types import FrameType, FunctionType, MethodType
-from typing import Tuple, List, Dict, Callable
+from typing import Tuple, List, Dict, Callable, Union, Optional
 from functools import wraps, update_wrapper, partial
 import inspect
 import re
@@ -71,9 +71,7 @@ class _BaseRetry:
 
     @classmethod
     def initialization(cls, function: Callable):
-        _current_frame = inspect.currentframe()
-        _cls = cls._get_retry_object(current_frame=_current_frame)
-
+        _cls = cls._get_retry_instance(function=function)
         _cls._Initial_Function = function
 
         @wraps(function)
@@ -86,9 +84,7 @@ class _BaseRetry:
 
     @classmethod
     def error_handling(cls, function: Callable):
-        _current_frame = inspect.currentframe()
-        _cls = cls._get_retry_object(current_frame=_current_frame)
-
+        _cls = cls._get_retry_instance(function=function)
         _cls._Exception_Handling_Function = function
 
         @wraps(function)
@@ -99,9 +95,7 @@ class _BaseRetry:
 
     @classmethod
     def done_handling(cls, function):
-        _current_frame = inspect.currentframe()
-        _cls = cls._get_retry_object(current_frame=_current_frame)
-
+        _cls = cls._get_retry_instance(function=function)
         _cls._Done_Handling_Function = function
 
         @wraps(function)
@@ -112,8 +106,7 @@ class _BaseRetry:
 
     @classmethod
     def final_handling(cls, function):
-        _current_frame = inspect.currentframe()
-        _cls = cls._get_retry_object(current_frame=_current_frame)
+        _cls = cls._get_retry_instance(function=function)
         _cls._Final_Handling_Function = function
 
         @wraps(function)
@@ -123,16 +116,15 @@ class _BaseRetry:
 
 
     @classmethod
-    def _call_retry_object(cls, frame: List[inspect.FrameInfo], index: int):
-        _retry_func_name_iter = cls._search_target_function_in_code_lines(frame=frame, index=index)
-        _retry_func_name = _retry_func_name_iter[0]
-        assert _retry_func_name != "", f"It should already have the function which target to retry in keys."
+    def _call_retry_instance(cls, frame: List[inspect.FrameInfo], index: int):
+        _retry_func_name = cls.__search_target_function_by_frame(frame=frame, index=index)
+        assert _retry_func_name, f"It should already have the function which target to retry in keys."
         _cls = cls._Retry_Object[_retry_func_name]
         return _cls
 
 
     @classmethod
-    def _search_target_function_in_code_lines(cls, frame: List[inspect.FrameInfo], index: int) -> List[str]:
+    def __search_target_function_by_frame(cls, frame: List[inspect.FrameInfo], index: int) -> str:
         if index >= len(frame):
             raise ValueError("It cannot search the target function name in frame.")
 
@@ -145,51 +137,83 @@ class _BaseRetry:
 
         _code_lines = frame[index].code_context
         _retry_func_name_iter = filter(
-            lambda key: cls._exist_retry_function(retry_func=key, code_lines=_code_lines, line_index=0) is not None,
+            lambda key: cls.__exist_retry_function(retry_func=key, code_lines=_code_lines, line_index=0) is not None,
             cls._Retry_Object.keys()
         )
-        _retry_func_name_list = list(_retry_func_name_iter)
+        _retry_func_name_list: List[str] = list(_retry_func_name_iter)
 
-        if len(_retry_func_name_list) != 0:
-            return _retry_func_name_list
-        return cls._search_target_function_in_code_lines(frame=frame, index=_next_index)
+        if len(_retry_func_name_list) >= 1:
+            return _retry_func_name_list[0]
+        else:
+            return cls.__search_target_function_by_frame(frame=frame, index=_next_index)
 
 
     @classmethod
-    def _exist_retry_function(cls, retry_func: str, code_lines: List[str], line_index: int):
+    def __exist_retry_function(cls, retry_func: str, code_lines: List[str], line_index: int) -> Optional[str]:
         if line_index < len(code_lines):
-            if retry_func in code_lines[line_index]:
+            _retry_func_name = retry_func.split(".")[-1]
+            _search_result = re.search(re.escape(_retry_func_name) + r"\w{0,128}", str(code_lines[line_index]))
+            if _search_result is not None and f"{_retry_func_name}" == _search_result.group(0):
                 return retry_func
-            return cls._exist_retry_function(retry_func=retry_func, code_lines=code_lines, line_index=(line_index + 1))
+            return cls.__exist_retry_function(retry_func=retry_func, code_lines=code_lines, line_index=(line_index + 1))
         return None
 
 
     @classmethod
-    def _get_retry_object(cls, current_frame: FrameType):
-        _code_lines = cls._get_code_lines(current_frame=current_frame)
-        _retry_target_function_name = cls._parse_retry_target(code_lines=_code_lines, line_index=0)
-        _cls = cls._Retry_Object[_retry_target_function_name]
+    def _get_retry_instance(cls, function: Callable):
+        _qualname_function_name = function.__qualname__
+        _is_bounded = False
+        _class_function_format = re.search(r"\w{1,32}\.\w{1,32}", str(_qualname_function_name))
+        if _class_function_format is not None:
+            _class_name = _class_function_format.group(0).split(".")[0]
+            _is_bounded = True
+
+        _source_code_line = inspect.getsource(function)
+        _source_code_lines = inspect.getsourcelines(function)
+        _retry_target_function_name = cls.__parse_retry_target(code_lines=_source_code_line, is_bounded=_is_bounded)
+
+        if _is_bounded is True:
+            _retry_instance_key = f"{_class_name}.{_retry_target_function_name}"
+        else:
+            _retry_instance_key = _retry_target_function_name
+
+        _cls = cls._Retry_Object[_retry_instance_key]
         return _cls
 
 
     @classmethod
-    def _get_code_lines(cls, current_frame: FrameType) -> List[str]:
-        _frame = inspect.getouterframes(current_frame, 4)
-        _code_lines = _frame[1].code_context
-        return _code_lines
+    def __parse_retry_target(cls, code_lines: str, is_bounded: bool) -> str:
+        _search_result = cls.__search_decorator(code_line=code_lines, is_bounded=is_bounded)
+        if _search_result is not None:
+            return _search_result
+        raise ValueError("It cannot find the target function name.")
+
+
+    # @overload
+    # @classmethod
+    # def __parse_retry_target(cls, code_lines: List[str], line_index: int) -> str:
+    #     if line_index < len(code_lines):
+    #         _search_result = cls.__search_decorator(code_line=code_lines[line_index])
+    #         if _search_result is not None:
+    #             return _search_result
+    #         return cls.__parse_retry_target(code_lines=code_lines, line_index=(line_index + 1))
+    #
+    #     raise ValueError("It cannot find the target function name.")
 
 
     @classmethod
-    def _parse_retry_target(cls, code_lines: List[str], line_index: int) -> str:
-        if line_index < len(code_lines):
-            _search_retry_target = re.search(r"@[\w_]{1,64}\.", str(code_lines[line_index]))
-            if _search_retry_target is not None:
-                _retry_target = _search_retry_target.group(0).replace("@", "")
-                _retry_target = _retry_target.replace(".", "")
-                if _retry_target in cls._Retry_Object.keys():
-                    return _retry_target
-            return cls._parse_retry_target(code_lines=code_lines, line_index=(line_index + 1))
-        raise ValueError("It cannot find the target function name.")
+    def __search_decorator(cls, code_line: str, is_bounded: bool) -> Optional[str]:
+        _search_retry_target = re.search(r"@[\w_]{1,64}\.", str(code_line))
+        if _search_retry_target is not None:
+            _retry_target = _search_retry_target.group(0).replace("@", "")
+            _retry_target = _retry_target.replace(".", "")
+            if is_bounded is True:
+                _exist_retry_target = map(lambda key: _retry_target in key, cls._Retry_Object.keys())
+            else:
+                _exist_retry_target = map(lambda key: _retry_target == key, cls._Retry_Object.keys())
+            if True in set(_exist_retry_target):
+                return _retry_target
+        return None
 
 
 
@@ -199,7 +223,7 @@ class _RetryFunction(_BaseRetry):
 
 
     def __new__(cls, *args, **kwargs):
-        __function_name = kwargs['function'].__name__
+        __function_name = kwargs['function'].__qualname__
         if __function_name not in cls._Retry_Object.keys():
             cls._Retry_Object[__function_name] = super(_RetryFunction, cls).__new__(cls)
         return cls._Retry_Object[__function_name]
@@ -207,7 +231,7 @@ class _RetryFunction(_BaseRetry):
 
     def __init__(self, function: Callable, timeout: int = 1):
         super().__init__(function, timeout)
-        _cls = self._Retry_Object[function.__name__]
+        _cls = self._Retry_Object[function.__qualname__]
         _cls._Target_Function = function
         _cls._Running_Timeout = timeout
 
@@ -220,7 +244,7 @@ class _RetryFunction(_BaseRetry):
 
         _current_frame = inspect.currentframe()
         _frame = inspect.getouterframes(_current_frame, 1)
-        _current_cls = cls._call_retry_object(frame=_frame, index=1)
+        _current_cls = cls._call_retry_instance(frame=_frame, index=1)
 
         while __running_counter < _current_cls._Running_Timeout:
             try:
@@ -260,9 +284,11 @@ class _RetryBoundedFunction(_BaseRetry):
     _Exception_Handling_Function: Callable = None
     _Final_Handling_Function: Callable = None
 
+    __Current_Function = None
+
 
     def __new__(cls, *args, **kwargs):
-        __function_name = kwargs['function'].__name__
+        __function_name = kwargs['function'].__qualname__
         if __function_name not in cls._Retry_Object.keys():
             cls._Retry_Object[__function_name] = super(_RetryBoundedFunction, cls).__new__(cls)
         return cls._Retry_Object[__function_name]
@@ -271,9 +297,18 @@ class _RetryBoundedFunction(_BaseRetry):
     def __init__(self, function: Callable, timeout: int = 1):
         super().__init__(function, timeout)
         update_wrapper(self, function)
-        _cls = self._Retry_Object[function.__name__]
+
+        _cls = self._Retry_Object[function.__qualname__]
         _cls._Target_Function = function
         _cls._Running_Timeout = timeout
+
+        self.__Current_Function = function
+
+
+    def __repr__(self):
+        if self.__Current_Function is None:
+            return super(_RetryBoundedFunction, self).__repr__()
+        return f"{self.__Current_Function.__qualname__}"
 
 
     def __get__(self, instance, owner):
@@ -285,11 +320,9 @@ class _RetryBoundedFunction(_BaseRetry):
         __running_success_flag = None
         __result = None
 
-        _current_frame = inspect.currentframe()
-        _frame = inspect.getouterframes(_current_frame, 1)
-        _current_cls = self._call_retry_object(frame=_frame, index=1)
+        _current_cls = self._Retry_Object[repr(self)]
 
-        while __running_counter < self._Running_Timeout:
+        while __running_counter < _current_cls._Running_Timeout:
             try:
                 self.run_initial_function(current_cls=_current_cls, instance=instance)
                 __result = self.run_target_function(current_cls=_current_cls, instance=instance, *args, **kwargs)
@@ -393,9 +426,7 @@ class _BaseAsyncRetry(_BaseRetry):
     def initialization(cls, function: Callable):
         cls._chk_coroutine_function(function=function)
 
-        _current_frame = inspect.currentframe()
-        _cls = cls._get_retry_object(current_frame=_current_frame)
-
+        _cls = cls._get_retry_instance(function=function)
         _cls._Initial_Function = function
 
         @wraps(function)
@@ -410,9 +441,7 @@ class _BaseAsyncRetry(_BaseRetry):
     def error_handling(cls, function: Callable):
         cls._chk_coroutine_function(function=function)
 
-        _current_frame = inspect.currentframe()
-        _cls = cls._get_retry_object(current_frame=_current_frame)
-
+        _cls = cls._get_retry_instance(function=function)
         _cls._Exception_Handling_Function = function
 
         @wraps(function)
@@ -425,9 +454,7 @@ class _BaseAsyncRetry(_BaseRetry):
     def done_handling(cls, function):
         cls._chk_coroutine_function(function=function)
 
-        _current_frame = inspect.currentframe()
-        _cls = cls._get_retry_object(current_frame=_current_frame)
-
+        _cls = cls._get_retry_instance(function=function)
         _cls._Done_Handling_Function = function
 
         @wraps(function)
@@ -440,9 +467,7 @@ class _BaseAsyncRetry(_BaseRetry):
     def final_handling(cls, function):
         cls._chk_coroutine_function(function=function)
 
-        _current_frame = inspect.currentframe()
-        _cls = cls._get_retry_object(current_frame=_current_frame)
-
+        _cls = cls._get_retry_instance(function=function)
         _cls._Final_Handling_Function = function
 
         @wraps(function)
@@ -467,7 +492,7 @@ class _AsyncRetryFunction(_BaseAsyncRetry):
 
 
     def __new__(cls, *args, **kwargs):
-        __function_name = kwargs['function'].__name__
+        __function_name = kwargs['function'].__qualname__
         if __function_name not in cls._Retry_Object.keys():
             cls._Retry_Object[__function_name] = super(_AsyncRetryFunction, cls).__new__(cls)
         return cls._Retry_Object[__function_name]
@@ -475,9 +500,11 @@ class _AsyncRetryFunction(_BaseAsyncRetry):
 
     def __init__(self, function: Callable, timeout: int = 1):
         super().__init__(function, timeout)
+
         self._chk_coroutine_function(function=function)
+
         update_wrapper(self, function)
-        _cls = self._Retry_Object[function.__name__]
+        _cls = self._Retry_Object[function.__qualname__]
         _cls._Target_Function = function
         _cls._Running_Timeout = timeout
 
@@ -490,7 +517,7 @@ class _AsyncRetryFunction(_BaseAsyncRetry):
 
         _current_frame = inspect.currentframe()
         _frame = inspect.getouterframes(_current_frame, 1)
-        _current_cls = cls._call_retry_object(frame=_frame, index=0)
+        _current_cls = cls._call_retry_instance(frame=_frame, index=0)
 
         while __running_counter < _current_cls._Running_Timeout:
             try:
@@ -530,9 +557,11 @@ class _AsyncRetryBoundedFunction(_BaseAsyncRetry):
     _Exception_Handling_Function: Callable = None
     _Final_Handling_Function: Callable = None
 
+    __Current_Function = None
+
 
     def __new__(cls, *args, **kwargs):
-        __function_name = kwargs['function'].__name__
+        __function_name = kwargs['function'].__qualname__
         if __function_name not in cls._Retry_Object.keys():
             cls._Retry_Object[__function_name] = super(_AsyncRetryBoundedFunction, cls).__new__(cls)
         return cls._Retry_Object[__function_name]
@@ -540,11 +569,21 @@ class _AsyncRetryBoundedFunction(_BaseAsyncRetry):
 
     def __init__(self, function: Callable, timeout: int = 1):
         super().__init__(function, timeout)
+
         self._chk_coroutine_function(function=function)
+
         update_wrapper(self, function)
-        _cls = self._Retry_Object[function.__name__]
+        _cls = self._Retry_Object[function.__qualname__]
         _cls._Target_Function = function
         _cls._Running_Timeout = timeout
+
+        self.__Current_Function = function
+
+
+    def __repr__(self):
+        if self.__Current_Function is None:
+            return super(_AsyncRetryBoundedFunction, self).__repr__()
+        return f"{self.__Current_Function.__qualname__}"
 
 
     def __get__(self, instance, owner):
@@ -556,9 +595,7 @@ class _AsyncRetryBoundedFunction(_BaseAsyncRetry):
         __running_success_flag = None
         __result = None
 
-        _current_frame = inspect.currentframe()
-        _frame = inspect.getouterframes(_current_frame, 1)
-        _current_cls = self._call_retry_object(frame=_frame, index=0)
+        _current_cls = self._Retry_Object[repr(self)]
 
         while __running_counter < _current_cls._Running_Timeout:
             try:
