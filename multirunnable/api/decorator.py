@@ -38,7 +38,7 @@ class _BaseRetryDecorator(metaclass=ABCMeta):
 
 
     @classmethod
-    def _retry_process(cls, retry_mechanism: Type[Union[_BaseRetry, _BaseAsyncRetry]], function: Optional[FunctionType] = None, timeout: int = 1) -> Union[_BaseRetry, _BaseAsyncRetry]:
+    def _retry_process(cls, retry_mechanism: Type[Union[_BaseRetry, _BaseAsyncRetry]], function: Optional[FunctionType] = None, timeout: int = 1):
         if inspect_isclass(function) is True:
             raise ValueError("The target object be decorated should be a 'function' type object.")
 
@@ -56,12 +56,12 @@ class _BaseRetryDecorator(metaclass=ABCMeta):
 class retry(_BaseRetryDecorator):
 
     @staticmethod
-    def function(function: Optional[FunctionType] = None, timeout: int = 1) -> _BaseRetry:
+    def function(function: Optional[FunctionType] = None, timeout: int = 1):
         return retry._retry_process(retry_mechanism=_RetryFunction, function=function, timeout=timeout)
 
 
     @staticmethod
-    def bounded_function(function: Optional[FunctionType] = None, timeout: int = 1) -> _BaseRetry:
+    def bounded_function(function: Optional[FunctionType] = None, timeout: int = 1):
         return retry._retry_process(retry_mechanism=_RetryBoundedFunction, function=function, timeout=timeout)
 
 
@@ -69,29 +69,29 @@ class retry(_BaseRetryDecorator):
 class async_retry(_BaseRetryDecorator):
 
     @staticmethod
-    def function(function: Optional[FunctionType] = None, timeout: int = 1) -> _BaseAsyncRetry:
+    def function(function: Optional[FunctionType] = None, timeout: int = 1):
         return async_retry._retry_process(retry_mechanism=_AsyncRetryFunction, function=function, timeout=timeout)
 
 
     @staticmethod
-    def bounded_function(function: Optional[FunctionType] = None, timeout: int = 1) -> _BaseAsyncRetry:
+    def bounded_function(function: Optional[FunctionType] = None, timeout: int = 1):
         return async_retry._retry_process(retry_mechanism=_AsyncRetryBoundedFunction, function=function, timeout=timeout)
 
 
 
-def retry_function(function: Optional[Union[FunctionType, MethodType]] = None, timeout: int = 1) -> _BaseRetry:
+def retry_function(function: Optional[Union[FunctionType, MethodType]] = None, timeout: int = 1):
     return retry.function(function=function, timeout=timeout)
 
 
-def retry_bounded_function(function: Optional[Union[FunctionType, MethodType]] = None, timeout: int = 1) -> _BaseRetry:
+def retry_bounded_function(function: Optional[Union[FunctionType, MethodType]] = None, timeout: int = 1):
     return retry.bounded_function(function=function, timeout=timeout)
 
 
-def async_retry_function(function: Callable = None, timeout: int = 1) -> _BaseAsyncRetry:
+def async_retry_function(function: Callable = None, timeout: int = 1):
     return async_retry.function(function=function, timeout=timeout)
 
 
-def async_retry_bounded_function(function: Callable = None, timeout: int = 1) -> _BaseAsyncRetry:
+def async_retry_bounded_function(function: Callable = None, timeout: int = 1):
     return async_retry.bounded_function(function=function, timeout=timeout)
 
 
