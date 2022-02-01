@@ -90,7 +90,7 @@ Let's demonstrate an example to show how easy and clear it is!
     :target: https://github.com/Chisanan232/multirunnable/releases
 
 
-.. |pypi-version| image:: https://badge.fury.io/py/multirunnable.svg
+.. |pypi-version| image:: https://badge.fury.io/py/MultiRunnable.svg
     :alt: Package version in PyPi
     :target: https://badge.fury.io/py/MultiRunnable
 
