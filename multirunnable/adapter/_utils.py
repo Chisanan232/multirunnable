@@ -1,7 +1,7 @@
 from multirunnable.framework.synchronization import (
     PosixThreadLock,
-    PosixThreadCommunication,
-    BaseQueue)
+    PosixThreadCommunication)
+from multirunnable.framework.queue import BaseQueue
 from multirunnable.mode import FeatureMode
 from multirunnable._import_utils import ImportMultiRunnable
 

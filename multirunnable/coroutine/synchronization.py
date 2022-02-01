@@ -1,40 +1,11 @@
 from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 from multirunnable.framework.synchronization import (
     PosixThreadLock as _PosixThreadLock,
-    PosixThreadCommunication as _PosixThreadCommunication,
-    BaseQueueType as _BaseQueueType)
+    PosixThreadCommunication as _PosixThreadCommunication)
 from multirunnable.types import (
     MRCondition as _MRCondition,
     MREvent as _MREvent
 )
-
-if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
-    from gevent.queue import (
-        Queue as _Greenlet_Queue,
-        SimpleQueue as _Greenlet_SimpleQueue,
-        JoinableQueue as _Greenlet_JoinableQueue,
-        PriorityQueue as _Greenlet_PriorityQueue,
-        LifoQueue as _Greenlet_LifoQueue)
-
-    class GeventQueueType(_BaseQueueType):
-        Queue = _Greenlet_Queue()
-        SimpleQueue = _Greenlet_SimpleQueue()
-        JoinableQueue = _Greenlet_JoinableQueue()
-        PriorityQueue = _Greenlet_PriorityQueue()
-        LifoQueue = _Greenlet_LifoQueue()
-
-else:
-    from gevent.queue import (
-        Queue as _Greenlet_Queue,
-        JoinableQueue as _Greenlet_JoinableQueue,
-        PriorityQueue as _Greenlet_PriorityQueue,
-        LifoQueue as _Greenlet_LifoQueue)
-
-    class GeventQueueType(_BaseQueueType):
-        Queue = _Greenlet_Queue()
-        JoinableQueue = _Greenlet_JoinableQueue()
-        PriorityQueue = _Greenlet_PriorityQueue()
-        LifoQueue = _Greenlet_LifoQueue()
 
 from gevent.threading import Lock as _Greenlet_Lock
 from gevent.lock import (
@@ -43,17 +14,13 @@ from gevent.lock import (
     BoundedSemaphore as _Greenlet_BoundedSemaphore)
 from gevent.event import Event as _Greenlet_Event
 
-from asyncio.queues import (
-    Queue as _Async_Queue,
-    PriorityQueue as _Async_PriorityQueue,
-    LifoQueue as _Async_LifoQueue)
 from asyncio.locks import (
     Lock as _Async_Lock,
     Semaphore as _Async_Semaphore,
     BoundedSemaphore as _Async_BoundedSemaphore)
 from asyncio import Event as _Async_Event, Condition as _Async_Condition
 
-from typing import Dict, Optional, Union
+from typing import Dict, Optional
 import logging
 
 
@@ -92,14 +59,6 @@ class GreenThreadCommunication(GreenThreadCommunicationSpec):
 
     def get_event(self, *args, **kwargs) -> _Greenlet_Event:
         return _Greenlet_Event()
-
-
-
-class AsynchronousQueueType(_BaseQueueType):
-
-    Queue = _Async_Queue()
-    PriorityQueue = _Async_PriorityQueue()
-    LifoQueue = _Async_LifoQueue()
 
 
 

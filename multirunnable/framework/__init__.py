@@ -43,11 +43,13 @@ from .strategy import (
     PoolRunnableStrategy,
     Resultable)
 from .synchronization import (
-    BaseQueueType,
     PosixThread,
     PosixThreadCommunication,
     BaseFeatureAdapterFactory,
-    BaseGlobalizeAPI)
+    BaseGlobalizeAPI as BaseGlobalizeSyncAPI)
+from .queue import (
+    BaseQueueType,
+    BaseGlobalizeAPI as BaseGlobalizeQueueAPI)
 from .result import MRResult, PoolResult, ResultState
 
 from .api import (

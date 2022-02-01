@@ -1,27 +1,11 @@
 from abc import ABCMeta, abstractmethod
-from enum import Enum
 
 from ..types import (
     MRLock as _MRLock, MRRLock as _MRRLock,
     MRSemaphore as _MRSemaphore, MRBoundedSemaphore as _MRBoundedSemaphore,
-    MREvent as _MREvent, MRCondition as _MRCondition,
-    MRQueue as _MRQueue
+    MREvent as _MREvent, MRCondition as _MRCondition
 )
 import multirunnable._utils as _utils
-
-
-
-class BaseQueueType(Enum):
-
-    pass
-
-
-
-class BaseQueue(metaclass=ABCMeta):
-
-    @abstractmethod
-    def get_queue(self, qtype: BaseQueueType) -> _MRQueue:
-        pass
 
 
 
@@ -244,19 +228,6 @@ class BaseGlobalizeAPI(metaclass=ABCMeta):
         Description:
             Globalize Bounded Semaphore object.
         :param bsmp:
-        :return:
-        """
-        pass
-
-
-    @staticmethod
-    @abstractmethod
-    def queue(name, queue) -> None:
-        """
-        Description:
-            Globalize Queue object.
-        :param name:
-        :param queue:
         :return:
         """
         pass

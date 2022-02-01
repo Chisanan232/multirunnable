@@ -37,6 +37,7 @@ if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) >= (3, 9):
     else:
         set_multiprocessing_start_method('fork')
 
-from multirunnable.parallel.synchronization import ProcessQueueType, ProcessLock, ProcessCommunication
 from multirunnable.parallel.strategy import ParallelStrategy, ProcessStrategy, ProcessPoolStrategy
+from multirunnable.parallel.synchronization import ProcessLock, ProcessCommunication
+from multirunnable.parallel.queue import ProcessQueueType
 from multirunnable.parallel.result import ParallelResult
