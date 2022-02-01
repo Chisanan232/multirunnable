@@ -4,7 +4,8 @@ from enum import Enum
 _Parallel_Package: str = ".parallel."
 _Concurrent_Package: str = ".concurrent."
 _Coroutine_Package: str = ".coroutine."
-_Feature_Package: str = "features"
+_Synchronization_Package: str = "synchronization"
+_Queue_Package: str = "queue"
 _Strategy_Package: str = "strategy"
 
 
@@ -29,28 +30,28 @@ _Pool_Strategy_Class: str = "PoolStrategy"
 class FeatureMode(Enum):
 
     Parallel = {
-        "module": _Parallel_Package + _Feature_Package,
+        "module": _Parallel_Package + _Synchronization_Package,
         "queue": _Parallel_Class + _Queue_Class,
         "lock": _Parallel_Class + _Lock_Class,
         "communication": _Parallel_Class + _Communication_Class
     }
 
     Concurrent = {
-        "module": _Concurrent_Package + _Feature_Package,
+        "module": _Concurrent_Package + _Synchronization_Package,
         "queue": _Concurrent_Class + _Queue_Class,
         "lock": _Concurrent_Class + _Lock_Class,
         "communication": _Concurrent_Class + _Communication_Class
     }
 
     GreenThread = {
-        "module": _Coroutine_Package + _Feature_Package,
+        "module": _Coroutine_Package + _Synchronization_Package,
         "queue": _GreenThread_Class + _Queue_Class,
         "lock": _GreenThread_Class + _Lock_Class,
         "communication": _GreenThread_Class + _Communication_Class
     }
 
     Asynchronous = {
-        "module": _Coroutine_Package + _Feature_Package,
+        "module": _Coroutine_Package + _Synchronization_Package,
         "queue": _Asynchronous_Class + _Queue_Class,
         "lock": _Asynchronous_Class + _Lock_Class,
         "communication": _Asynchronous_Class + _Communication_Class

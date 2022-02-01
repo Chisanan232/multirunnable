@@ -1,5 +1,5 @@
-from multirunnable.framework.features import PosixThreadLock, PosixThreadCommunication
-from multirunnable.coroutine.features import (
+from multirunnable.framework.synchronization import PosixThreadLock, PosixThreadCommunication
+from multirunnable.coroutine.synchronization import (
     GreenThreadLock, GreenThreadCommunication, GeventQueueType,
     AsynchronousLock, AsynchronousCommunication, AsynchronousQueueType
 )

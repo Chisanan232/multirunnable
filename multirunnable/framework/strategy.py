@@ -1,6 +1,6 @@
 from .adapter.collection import BaseList as _BaseList
 from .task import BaseQueueTask as _BaseQueueTask
-from .features import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
+from .synchronization import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
 from .result import MRResult as _MRResult, PoolResult as _PoolResult
 from ..mode import FeatureMode as _FeatureMode
 from ..types import MRTasks as _MRTasks

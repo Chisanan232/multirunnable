@@ -1,5 +1,5 @@
 from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
-from multirunnable.framework.features import (
+from multirunnable.framework.synchronization import (
     PosixThreadLock as _PosixThreadLock,
     PosixThreadCommunication as _PosixThreadCommunication,
     BaseQueueType as _BaseQueueType)

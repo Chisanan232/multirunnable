@@ -1,4 +1,4 @@
-from multirunnable.framework.features import PosixThreadLock as _PosixThreadLock
+from multirunnable.framework.synchronization import PosixThreadLock as _PosixThreadLock
 from multirunnable.mode import FeatureMode as _FeatureMode
 from multirunnable.api.manage import Globalize as _Globalize
 from multirunnable.types import (

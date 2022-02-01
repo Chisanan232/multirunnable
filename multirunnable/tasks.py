@@ -1,5 +1,5 @@
 from multirunnable.framework.task import BaseQueueTask as _BaseQueueTask
-from multirunnable.framework.features import BaseQueueType as _BaseQueueType
+from multirunnable.framework.synchronization import BaseQueueType as _BaseQueueType
 from multirunnable.framework.adapter.collection import BaseList as _BaseList
 from multirunnable.types import MRQueue as _MRQueue
 from multirunnable.adapter.queue import Queue as _Queue, QueueAdapter as _QueueAdapter

@@ -42,7 +42,7 @@ from .strategy import (
     GeneralRunnableStrategy,
     PoolRunnableStrategy,
     Resultable)
-from .features import (
+from .synchronization import (
     BaseQueueType,
     PosixThread,
     PosixThreadCommunication,

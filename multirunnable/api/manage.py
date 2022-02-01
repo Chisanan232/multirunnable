@@ -1,4 +1,4 @@
-from multirunnable.framework.features import BaseGlobalizeAPI as _BaseGlobalizeAPI
+from multirunnable.framework.synchronization import BaseGlobalizeAPI as _BaseGlobalizeAPI
 from multirunnable.types import (
     MRQueue as _MRQueue,
     MRLock as _MRLock,

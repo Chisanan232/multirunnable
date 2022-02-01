@@ -1,4 +1,4 @@
-from .features import BaseQueueType as _BaseQueueType
+from .synchronization import BaseQueueType as _BaseQueueType
 from ..types import MRQueue as _MRQueue
 import multirunnable._utils as _utils
 

@@ -1,5 +1,5 @@
-from multirunnable.framework.features import PosixThreadLock, PosixThreadCommunication
-from multirunnable.concurrent.features import ThreadLock, ThreadCommunication, ThreadQueueType
+from multirunnable.framework.synchronization import PosixThreadLock, PosixThreadCommunication
+from multirunnable.concurrent.synchronization import ThreadLock, ThreadCommunication, ThreadQueueType
 from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 
 from ..test_config import Semaphore_Value

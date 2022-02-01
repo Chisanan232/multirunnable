@@ -1,5 +1,5 @@
 from .task import BaseQueueTask as _BaseQueueTask
-from .features import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
+from .synchronization import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
 from .adapter.collection import BaseList as _BaseList
 from .result import MRResult as _MRResult
 from ..types import MRTasks as _MRTasks

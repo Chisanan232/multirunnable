@@ -1,4 +1,4 @@
-from multirunnable.framework.features import (
+from multirunnable.framework.synchronization import (
     PosixThreadLock,
     PosixThreadCommunication,
     BaseQueue)

@@ -1,4 +1,4 @@
-from multirunnable.coroutine.features import (
+from multirunnable.coroutine.synchronization import (
     GeventQueueType, GreenThreadLock, GreenThreadCommunication,
     AsynchronousQueueType, AsynchronousLock, AsynchronousCommunication)
 from multirunnable.coroutine.strategy import (
