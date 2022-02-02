@@ -163,9 +163,17 @@ class _BaseRetry:
     def _get_retry_instance(cls, function: Callable):
         _qualname_function_name = function.__qualname__
         _is_bounded = False
-        _class_function_format = re.search(r"\w{1,32}\.\w{1,32}", str(_qualname_function_name))
-        if _class_function_format is not None:
-            _class_name = _class_function_format.group(0).split(".")[0]
+
+        # # Method 1: For general scenario like ACls.func
+        # _class_function_format = re.search(r"\w{1,32}\.\w{1,32}", str(_qualname_function_name))
+        # if _class_function_format is not None:
+        #     _class_name = _class_function_format.group(0).split(".")[0]
+        #     _is_bounded = True
+
+        # # Method 2: For some special scenario like ACls.func.<local>._func
+        if "." in str(_qualname_function_name):
+            _qualname_function_name_list = str(_qualname_function_name).split(".")
+            _class_name = ".".join(_qualname_function_name_list[:-1])
             _is_bounded = True
 
         _source_code_line = inspect.getsource(function)
@@ -216,6 +224,9 @@ class _BaseRetry:
         return None
 
 
+_TimeoutValueError = ValueError("The value of option *timeout* should be bigger than 0. The smallest valid option value is 1.")
+_RetryTimeoutError = TimeoutError("Retry to run the target function running timeout.")
+
 
 class _RetryFunction(_BaseRetry):
 
@@ -233,6 +244,8 @@ class _RetryFunction(_BaseRetry):
         super().__init__(function, timeout)
         _cls = self._Retry_Object[function.__qualname__]
         _cls._Target_Function = function
+        if timeout <= 0:
+            raise _TimeoutValueError
         _cls._Running_Timeout = timeout
 
 
@@ -266,7 +279,7 @@ class _RetryFunction(_BaseRetry):
                     return __result
                 __running_counter += 1
         else:
-            __result = TimeoutError("The target function running timeout.")
+            __result = _RetryTimeoutError
 
         return __result
 
@@ -300,6 +313,8 @@ class _RetryBoundedFunction(_BaseRetry):
 
         _cls = self._Retry_Object[function.__qualname__]
         _cls._Target_Function = function
+        if timeout <= 0:
+            raise _TimeoutValueError
         _cls._Running_Timeout = timeout
 
         self.__Current_Function = function
@@ -342,7 +357,7 @@ class _RetryBoundedFunction(_BaseRetry):
                     return __result
                 __running_counter += 1
         else:
-            __result = TimeoutError("The target function running timeout.")
+            __result = _RetryTimeoutError
 
         return __result
 
@@ -506,6 +521,8 @@ class _AsyncRetryFunction(_BaseAsyncRetry):
         update_wrapper(self, function)
         _cls = self._Retry_Object[function.__qualname__]
         _cls._Target_Function = function
+        if timeout <= 0:
+            raise _TimeoutValueError
         _cls._Running_Timeout = timeout
 
 
@@ -539,7 +556,7 @@ class _AsyncRetryFunction(_BaseAsyncRetry):
                     return __result
                 __running_counter += 1
         else:
-            __result = TimeoutError("The target function running timeout.")
+            __result = _RetryTimeoutError
 
         return __result
 
@@ -575,6 +592,8 @@ class _AsyncRetryBoundedFunction(_BaseAsyncRetry):
         update_wrapper(self, function)
         _cls = self._Retry_Object[function.__qualname__]
         _cls._Target_Function = function
+        if timeout <= 0:
+            raise _TimeoutValueError
         _cls._Running_Timeout = timeout
 
         self.__Current_Function = function
@@ -617,7 +636,7 @@ class _AsyncRetryBoundedFunction(_BaseAsyncRetry):
                     return __result
                 __running_counter += 1
         else:
-            __result = TimeoutError("The target function running timeout.")
+            __result = _RetryTimeoutError
 
         return __result
 
