@@ -27,11 +27,11 @@ import logging
 
 class GreenThreadLock(_PosixThreadLock):
 
-    def get_lock(self) -> _Greenlet_Lock:
+    def get_lock(self, **kwargs) -> _Greenlet_Lock:
         return _Greenlet_Lock()
 
 
-    def get_rlock(self) -> _Greenlet_RLock:
+    def get_rlock(self, **kwargs) -> _Greenlet_RLock:
         return _Greenlet_RLock()
 
 
