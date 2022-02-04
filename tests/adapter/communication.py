@@ -42,11 +42,11 @@ class TestAdapterEvent:
     def test_feature_mode(self, mr_event: Event):
         _testing_mode = FeatureMode.Parallel
 
-        assert mr_event.feature_mode is None, f"The default value of FeatureMode of Event instance should be None."
+        assert mr_event.feature_mode is None, "The default value of FeatureMode of Event instance should be None."
         try:
             mr_event.feature_mode = _testing_mode
         except Exception as e:
-            assert False, f"It should set the FeatureMode into Event instance without any issue."
+            assert False, "It should set the FeatureMode into Event instance without any issue."
         else:
             _feature_mode = mr_event.feature_mode
             assert _feature_mode is _testing_mode, f"The mode we got from Event instance should be the same as we set '{_testing_mode}'."
@@ -56,24 +56,24 @@ class TestAdapterEvent:
         try:
             _event = mr_event.get_instance()
         except ValueError as ve:
-            assert "FeatureMode is None. Please configure it as one of 'multirunnable.mode.FeatureMode'." in str(ve), f"It should set the FeatureMode first."
+            assert "FeatureMode is None. Please configure it as one of 'multirunnable.mode.FeatureMode'." in str(ve), "It should set the FeatureMode first."
 
         mr_event.feature_mode = FeatureMode.Parallel
         _event = mr_event.get_instance()
         from multiprocessing.synchronize import Event
-        assert _event is not None and isinstance(_event, Event) is True, f"This type of Lock instance should be 'multiprocessing.synchronize.Event'."
+        assert _event is not None and isinstance(_event, Event) is True, "This type of Lock instance should be 'multiprocessing.synchronize.Event'."
 
 
     def test_get_instance_with_concurrent_mode(self, mr_event: Event):
         try:
             _event = mr_event.get_instance()
         except ValueError as ve:
-            assert "FeatureMode is None. Please configure it as one of 'multirunnable.mode.FeatureMode'." in str(ve), f"It should set the FeatureMode first."
+            assert "FeatureMode is None. Please configure it as one of 'multirunnable.mode.FeatureMode'." in str(ve), "It should set the FeatureMode first."
 
         mr_event.feature_mode = FeatureMode.Concurrent
         _event = mr_event.get_instance()
         from threading import Event
-        assert _event is not None and isinstance(_event, Event) is True, f"This type of Event instance should be 'threading.Event'."
+        assert _event is not None and isinstance(_event, Event) is True, "This type of Event instance should be 'threading.Event'."
 
 
     @pytest.mark.skip(reason="Still thinking about implementing Event, Condition feature of Coroutine.")
@@ -97,23 +97,23 @@ class TestAdapterEvent:
         try:
             _event = mr_event.get_instance()
         except ValueError as ve:
-            assert "FeatureMode is None. Please configure it as one of 'multirunnable.mode.FeatureMode'." in str(ve), f"It should set the FeatureMode first."
+            assert "FeatureMode is None. Please configure it as one of 'multirunnable.mode.FeatureMode'." in str(ve), "It should set the FeatureMode first."
 
         mr_event.feature_mode = FeatureMode.Asynchronous
         _event = mr_event.get_instance(event_loop=new_event_loop())
-        assert _event is not None and isinstance(_event, Event) is True, f"This type of Event instance should be 'asyncio.locks.Event'."
+        assert _event is not None and isinstance(_event, Event) is True, "This type of Event instance should be 'asyncio.locks.Event'."
 
 
     def test_globalize_instance(self, mr_event: Event):
         from multirunnable.api.manage import Running_Event
-        assert Running_Event is None, f"It should be None before we do anything."
+        assert Running_Event is None, "It should be None before we do anything."
 
         mr_event.feature_mode = FeatureMode.Parallel
         _event = mr_event.get_instance()
         mr_event.globalize_instance(_event)
 
         from multirunnable.api.manage import Running_Event
-        assert Running_Event is _event, f"It should be the instance we instantiated."
+        assert Running_Event is _event, "It should be the instance we instantiated."
 
 
 
@@ -143,11 +143,11 @@ class TestAdapterCondition:
     def test_feature_mode(self, mr_condition: Condition):
         _testing_mode = FeatureMode.Parallel
 
-        assert mr_condition.feature_mode is None, f"The default value of FeatureMode of Condition instance should be None."
+        assert mr_condition.feature_mode is None, "The default value of FeatureMode of Condition instance should be None."
         try:
             mr_condition.feature_mode = _testing_mode
         except Exception as e:
-            assert False, f"It should set the FeatureMode into Condition instance without any issue."
+            assert False, "It should set the FeatureMode into Condition instance without any issue."
         else:
             _feature_mode = mr_condition.feature_mode
             assert _feature_mode is _testing_mode, f"The mode we got from Condition instance should be the same as we set '{_testing_mode}'."
@@ -157,24 +157,24 @@ class TestAdapterCondition:
         try:
             _condition = mr_condition.get_instance()
         except ValueError as ve:
-            assert "FeatureMode is None. Please configure it as one of 'multirunnable.mode.FeatureMode'." in str(ve), f"It should set the FeatureMode first."
+            assert "FeatureMode is None. Please configure it as one of 'multirunnable.mode.FeatureMode'." in str(ve), "It should set the FeatureMode first."
 
         mr_condition.feature_mode = FeatureMode.Parallel
         _condition = mr_condition.get_instance()
         from multiprocessing.synchronize import Condition
-        assert _condition is not None and isinstance(_condition, Condition) is True, f"This type of Condition instance should be 'multiprocessing.synchronize.Condition'."
+        assert _condition is not None and isinstance(_condition, Condition) is True, "This type of Condition instance should be 'multiprocessing.synchronize.Condition'."
 
 
     def test_get_instance_with_concurrent_mode(self, mr_condition: Condition):
         try:
             _condition = mr_condition.get_instance()
         except ValueError as ve:
-            assert "FeatureMode is None. Please configure it as one of 'multirunnable.mode.FeatureMode'." in str(ve), f"It should set the FeatureMode first."
+            assert "FeatureMode is None. Please configure it as one of 'multirunnable.mode.FeatureMode'." in str(ve), "It should set the FeatureMode first."
 
         mr_condition.feature_mode = FeatureMode.Concurrent
         _condition = mr_condition.get_instance()
         from threading import Condition
-        assert _condition is not None and isinstance(_condition, Condition) is True, f"This type of Condition instance should be 'threading.Condition'."
+        assert _condition is not None and isinstance(_condition, Condition) is True, "This type of Condition instance should be 'threading.Condition'."
 
 
     @pytest.mark.skip(reason="Still thinking about implementing Event, Condition feature of Coroutine.")
@@ -198,21 +198,21 @@ class TestAdapterCondition:
         try:
             _condition = mr_condition.get_instance()
         except ValueError as ve:
-            assert "FeatureMode is None. Please configure it as one of 'multirunnable.mode.FeatureMode'." in str(ve), f"It should set the FeatureMode first."
+            assert "FeatureMode is None. Please configure it as one of 'multirunnable.mode.FeatureMode'." in str(ve), "It should set the FeatureMode first."
 
         mr_condition.feature_mode = FeatureMode.Asynchronous
         _condition = mr_condition.get_instance(event_loop=new_event_loop())
-        assert _condition is not None and isinstance(_condition, Condition) is True, f"This type of Condition instance should be 'asyncio.locks.Condition'."
+        assert _condition is not None and isinstance(_condition, Condition) is True, "This type of Condition instance should be 'asyncio.locks.Condition'."
 
 
     def test_globalize_instance(self, mr_condition: Condition):
         from multirunnable.api.manage import Running_Condition
-        assert Running_Condition is None, f"It should be None before we do anything."
+        assert Running_Condition is None, "It should be None before we do anything."
 
         mr_condition.feature_mode = FeatureMode.Parallel
         _condition = mr_condition.get_instance()
         mr_condition.globalize_instance(_condition)
 
         from multirunnable.api.manage import Running_Condition
-        assert Running_Condition is _condition, f"It should be the instance we instantiated."
+        assert Running_Condition is _condition, "It should be the instance we instantiated."
 

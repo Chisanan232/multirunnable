@@ -35,9 +35,9 @@ class _TestFaoMainThread:
         for thread in thread_list:
             thread.join()
 
-        self._fao.save_as_csv(file=f"for_testing_all.csv", mode="a+", data=Run_Result_Data_List)
+        self._fao.save_as_csv(file="for_testing_all.csv", mode="a+", data=Run_Result_Data_List)
         if self._strategy == SavingStrategy.ONE_THREAD_ONE_FILE_AND_COMPRESS_ALL:
-            self._fao.compress_as_zip(file=f"for_testing.zip", mode="a", data=Run_Result_Data_List)
+            self._fao.compress_as_zip(file="for_testing.zip", mode="a", data=Run_Result_Data_List)
 
 
 
@@ -107,7 +107,7 @@ class TestFao:
         tmt = _TestFaoMainThread(strategy=SavingStrategy.ALL_THREADS_ONE_FILE)
         tmt.process()
 
-        file_name = f"./for_testing_all.csv"
+        file_name = "./for_testing_all.csv"
         exist_file = os.path.exists(file_name)
         assert exist_file is True, f"It should exist .csv file {file_name}"
         os.remove(file_name)
@@ -119,7 +119,7 @@ class TestFao:
         tmt = _TestFaoMainThread(strategy=SavingStrategy.ONE_THREAD_ONE_FILE_AND_COMPRESS_ALL)
         tmt.process()
 
-        file_name = f"./for_testing.zip"
+        file_name = "./for_testing.zip"
         exist_file = os.path.exists(file_name)
         assert exist_file is True, f"It should exist .zip file {file_name}"
         os.remove(file_name)

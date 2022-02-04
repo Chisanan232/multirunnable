@@ -21,19 +21,19 @@ def mr_queue():
 class TestThreadQueue:
 
     def test_queue(self, mr_queue: ThreadQueueType):
-        assert isinstance(mr_queue.Queue.value, Queue) is True, f"This type of instance should be 'queue.Queue'."
+        assert isinstance(mr_queue.Queue.value, Queue) is True, "This type of instance should be 'queue.Queue'."
 
 
     if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
         def test_simple_queue(self, mr_queue: ThreadQueueType):
-            assert isinstance(mr_queue.SimpleQueue.value, SimpleQueue) is True, f"This type of instance should be 'queue.SimpleQueue'."
+            assert isinstance(mr_queue.SimpleQueue.value, SimpleQueue) is True, "This type of instance should be 'queue.SimpleQueue'."
 
 
     def test_priority_queue(self, mr_queue: ThreadQueueType):
-        assert isinstance(mr_queue.PriorityQueue.value, PriorityQueue) is True, f"This type of instance should be 'queue.PriorityQueue'."
+        assert isinstance(mr_queue.PriorityQueue.value, PriorityQueue) is True, "This type of instance should be 'queue.PriorityQueue'."
 
 
     def test_lifo_queue(self, mr_queue: ThreadQueueType):
-        assert isinstance(mr_queue.LifoQueue.value, LifoQueue) is True, f"This type of instance should be 'queue.LifoQueue'."
+        assert isinstance(mr_queue.LifoQueue.value, LifoQueue) is True, "This type of instance should be 'queue.LifoQueue'."
 
 

@@ -25,18 +25,18 @@ class TestPersistenceDatabaseOneConnection:
 
     def test_connect_database(self, single_connection_strategy: MySQLSingleConnection):
         _connection = single_connection_strategy.connection
-        assert _connection is not None, f"It should return a database connection instance."
+        assert _connection is not None, "It should return a database connection instance."
 
 
     def test_database_config(self, single_connection_strategy: MySQLSingleConnection):
         _db_config = single_connection_strategy.database_config
-        assert _db_config == Database_Config, f"It should return the database configuration back to us which we set."
+        assert _db_config == Database_Config, "It should return the database configuration back to us which we set."
 
 
     def test_update_database_config(self, single_connection_strategy: MySQLSingleConnection):
         single_connection_strategy.update_database_config(key="host", value="localhost")
-        assert "host" in single_connection_strategy.database_config.keys(), f"The key 'host' should be set in keys of database configuration."
-        assert "localhost" in single_connection_strategy.database_config.values(), f"The value of key 'host' should be 'localhost'."
+        assert "host" in single_connection_strategy.database_config.keys(), "The key 'host' should be set in keys of database configuration."
+        assert "localhost" in single_connection_strategy.database_config.values(), "The value of key 'host' should be 'localhost'."
 
 
     def test_reconnect(self, single_connection_strategy: MySQLSingleConnection):
@@ -44,15 +44,15 @@ class TestPersistenceDatabaseOneConnection:
         try:
             _connection = single_connection_strategy.reconnect(timeout=1)
         except ConnectionError as ce:
-            assert "It's timeout to retry" in str(ce) and "Cannot reconnect to database" in str(ce), f"It should raise an exception about retry timeout."
+            assert "It's timeout to retry" in str(ce) and "Cannot reconnect to database" in str(ce), "It should raise an exception about retry timeout."
         except Exception as ce:
-            assert True, f"It should raise some exceptions which be annotated by database package."
+            assert True, "It should raise some exceptions which be annotated by database package."
         else:
-            assert False, f"It should raise something exceptions because the IP is invalid."
+            assert False, "It should raise something exceptions because the IP is invalid."
 
         single_connection_strategy.update_database_config(key="host", value="127.0.0.1")
         _connection = single_connection_strategy.reconnect()
-        assert _connection is not None, f"It should return a database connection instance."
+        assert _connection is not None, "It should return a database connection instance."
 
 
     @pytest.mark.skip(reason="Consider this feature testing logic.")
@@ -65,9 +65,9 @@ class TestPersistenceDatabaseOneConnection:
         try:
             single_connection_strategy.close()
         except Exception as e:
-            assert False, f"It should close the database connection and cursor instances normally."
+            assert False, "It should close the database connection and cursor instances normally."
         else:
-            assert True, f"It closes the database connection and cursor instances normally."
+            assert True, "It closes the database connection and cursor instances normally."
 
 
 
@@ -82,13 +82,13 @@ class TestPersistenceDatabaseConnectionPool:
 
     def test_database_config(self, connection_pool_strategy: MySQLDriverConnectionPool):
         _db_config = connection_pool_strategy.database_config
-        assert _db_config == Database_Pool_Config, f"It should return the database configuration back to us which we set."
+        assert _db_config == Database_Pool_Config, "It should return the database configuration back to us which we set."
 
 
     def test_update_database_config(self, connection_pool_strategy: MySQLDriverConnectionPool):
         connection_pool_strategy.update_database_config(key="host", value="localhost")
-        assert "host" in connection_pool_strategy.database_config.keys(), f""
-        assert "localhost" in connection_pool_strategy.database_config.values(), f""
+        assert "host" in connection_pool_strategy.database_config.keys(), ""
+        assert "localhost" in connection_pool_strategy.database_config.values(), ""
 
 
     def test_get_current_pool_name(self, connection_pool_strategy: MySQLDriverConnectionPool):
@@ -115,9 +115,9 @@ class TestPersistenceDatabaseConnectionPool:
         try:
             connection_pool_strategy.pool_size = -10
         except ValueError as ve:
-            assert "The database connection pool size cannot less than 0" in str(ve), f"It should raise an exception about the pool size value is invalid."
+            assert "The database connection pool size cannot less than 0" in str(ve), "It should raise an exception about the pool size value is invalid."
         else:
-            assert False, f"It should raise an exception about the pool size value is invalid."
+            assert False, "It should raise an exception about the pool size value is invalid."
         connection_pool_strategy.pool_size = Test_Pool_Size
 
 
@@ -126,15 +126,15 @@ class TestPersistenceDatabaseConnectionPool:
         try:
             _connection = connection_pool_strategy.reconnect(timeout=1)
         except ConnectionError as ce:
-            assert "Cannot reconnect to database" in str(ce), f"It should raise an exception about retry timeout."
+            assert "Cannot reconnect to database" in str(ce), "It should raise an exception about retry timeout."
         except Exception as ce:
-            assert True, f"It should raise some exceptions which be annotated by database package."
+            assert True, "It should raise some exceptions which be annotated by database package."
         else:
-            assert False, f"It should raise something exceptions because the IP is invalid."
+            assert False, "It should raise something exceptions because the IP is invalid."
 
         connection_pool_strategy.update_database_config(key="host", value="127.0.0.1")
         _connection = connection_pool_strategy.reconnect()
-        assert _connection is not None, f"It should return a database connection instance."
+        assert _connection is not None, "It should return a database connection instance."
 
 
     def test_get_one_connection(self, connection_pool_strategy: MySQLDriverConnectionPool):
@@ -142,9 +142,9 @@ class TestPersistenceDatabaseConnectionPool:
             _conn = connection_pool_strategy.get_one_connection()
         except ConnectionError as ce:
             assert "Cannot get the one connection instance from connection pool because it doesn't exist the connection pool with the name" in str(ce), \
-                f"It should raise an exception about cannot find the connection pool with the target pool name."
+                "It should raise an exception about cannot find the connection pool with the target pool name."
         else:
-            assert False, f"It should find nothing by the pool name ''."
+            assert False, "It should find nothing by the pool name ''."
 
         _conn = connection_pool_strategy.get_one_connection(pool_name=Test_Pool_Name)
         assert _conn is not None, f"It should get a connection instance from the pool with pool name '{Test_Pool_Name}'."

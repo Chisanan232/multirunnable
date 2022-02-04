@@ -13,9 +13,9 @@ class TestGlobalize:
         try:
             Globalize.queue(name=_test_name, queue=None)
         except GlobalizeObjectError as e:
-            assert "Cannot globalize target object because it is None object" in str(e), f"It should raise an exception about target object could not be a None object."
+            assert "Cannot globalize target object because it is None object" in str(e), "It should raise an exception about target object could not be a None object."
         else:
-            assert False, f"It should raise an exception if the value is None."
+            assert False, "It should raise an exception if the value is None."
 
 
     def test_queue_with_normal_value(self):
@@ -25,9 +25,9 @@ class TestGlobalize:
         try:
             Globalize.queue(name=_test_name, queue=None)
         except GlobalizeObjectError as e:
-            assert "Cannot globalize target object because it is None object" in str(e), f"It should raise an exception about target object could not be a None object."
+            assert "Cannot globalize target object because it is None object" in str(e), "It should raise an exception about target object could not be a None object."
         else:
-            assert False, f"It should raise an exception if the value is None."
+            assert False, "It should raise an exception if the value is None."
 
         Globalize.queue(name=_test_name, queue=_test_value)
         from multirunnable.api.manage import Running_Queue
@@ -39,9 +39,9 @@ class TestGlobalize:
         try:
             Globalize.lock(lock=None)
         except GlobalizeObjectError as e:
-            assert "Cannot globalize target object because it is None object" in str(e), f"It should raise an exception about target object could not be a None object."
+            assert "Cannot globalize target object because it is None object" in str(e), "It should raise an exception about target object could not be a None object."
         else:
-            assert False, f"It should raise an exception if the value is None."
+            assert False, "It should raise an exception if the value is None."
 
 
     def test_lock_with_normal_value(self):
@@ -50,16 +50,16 @@ class TestGlobalize:
 
         Globalize.lock(lock=Lock())
         from multirunnable.api.manage import Running_Lock
-        assert isinstance(Running_Lock, synchronize_Lock) is True, f"It should save instance to the target global variable *Running_Lock*."
+        assert isinstance(Running_Lock, synchronize_Lock) is True, "It should save instance to the target global variable *Running_Lock*."
 
 
     def test_rlock_with_none_value(self):
         try:
             Globalize.rlock(rlock=None)
         except GlobalizeObjectError as e:
-            assert "Cannot globalize target object because it is None object" in str(e), f"It should raise an exception about target object could not be a None object."
+            assert "Cannot globalize target object because it is None object" in str(e), "It should raise an exception about target object could not be a None object."
         else:
-            assert False, f"It should raise an exception if the value is None."
+            assert False, "It should raise an exception if the value is None."
 
 
     def test_rlock_with_normal_value(self):
@@ -68,16 +68,16 @@ class TestGlobalize:
 
         Globalize.rlock(rlock=RLock())
         from multirunnable.api.manage import Running_RLock
-        assert isinstance(Running_RLock, synchronize_RLock) is True, f"It should save instance to the target global variable *Running_RLock*."
+        assert isinstance(Running_RLock, synchronize_RLock) is True, "It should save instance to the target global variable *Running_RLock*."
 
 
     def test_semaphore_with_none_value(self):
         try:
             Globalize.semaphore(smp=None)
         except GlobalizeObjectError as e:
-            assert "Cannot globalize target object because it is None object" in str(e), f"It should raise an exception about target object could not be a None object."
+            assert "Cannot globalize target object because it is None object" in str(e), "It should raise an exception about target object could not be a None object."
         else:
-            assert False, f"It should raise an exception if the value is None."
+            assert False, "It should raise an exception if the value is None."
 
 
     def test_semaphore_with_normal_value(self):
@@ -86,16 +86,16 @@ class TestGlobalize:
 
         Globalize.semaphore(smp=Semaphore())
         from multirunnable.api.manage import Running_Semaphore
-        assert isinstance(Running_Semaphore, synchronize_Semaphore) is True, f"It should save instance to the target global variable *Running_Semaphore*."
+        assert isinstance(Running_Semaphore, synchronize_Semaphore) is True, "It should save instance to the target global variable *Running_Semaphore*."
 
 
     def test_bounded_semaphore_with_none_value(self):
         try:
             Globalize.bounded_semaphore(bsmp=None)
         except GlobalizeObjectError as e:
-            assert "Cannot globalize target object because it is None object" in str(e), f"It should raise an exception about target object could not be a None object."
+            assert "Cannot globalize target object because it is None object" in str(e), "It should raise an exception about target object could not be a None object."
         else:
-            assert False, f"It should raise an exception if the value is None."
+            assert False, "It should raise an exception if the value is None."
 
 
     def test_bounded_semaphore_with_normal_value(self):
@@ -104,16 +104,16 @@ class TestGlobalize:
 
         Globalize.bounded_semaphore(bsmp=BoundedSemaphore())
         from multirunnable.api.manage import Running_Bounded_Semaphore
-        assert isinstance(Running_Bounded_Semaphore, synchronize_Semaphore) is True, f"It should save instance to the target global variable *Running_Bounded_Semaphore*."
+        assert isinstance(Running_Bounded_Semaphore, synchronize_Semaphore) is True, "It should save instance to the target global variable *Running_Bounded_Semaphore*."
 
 
     def test_event_with_none_value(self):
         try:
             Globalize.event(event=None)
         except GlobalizeObjectError as e:
-            assert "Cannot globalize target object because it is None object" in str(e), f"It should raise an exception about target object could not be a None object."
+            assert "Cannot globalize target object because it is None object" in str(e), "It should raise an exception about target object could not be a None object."
         else:
-            assert False, f"It should raise an exception if the value is None."
+            assert False, "It should raise an exception if the value is None."
 
 
     def test_event_with_normal_value(self):
@@ -122,16 +122,16 @@ class TestGlobalize:
 
         Globalize.event(event=Event())
         from multirunnable.api.manage import Running_Event
-        assert isinstance(Running_Event, synchronize_Event) is True, f"It should save instance to the target global variable *Running_Event*."
+        assert isinstance(Running_Event, synchronize_Event) is True, "It should save instance to the target global variable *Running_Event*."
 
 
     def test_condition_with_none_value(self):
         try:
             Globalize.condition(condition=None)
         except GlobalizeObjectError as e:
-            assert "Cannot globalize target object because it is None object" in str(e), f"It should raise an exception about target object could not be a None object."
+            assert "Cannot globalize target object because it is None object" in str(e), "It should raise an exception about target object could not be a None object."
         else:
-            assert False, f"It should raise an exception if the value is None."
+            assert False, "It should raise an exception if the value is None."
 
 
     def test_condition_with_normal_value(self):
@@ -140,5 +140,5 @@ class TestGlobalize:
 
         Globalize.condition(condition=Condition())
         from multirunnable.api.manage import Running_Condition
-        assert isinstance(Running_Condition, synchronize_Condition) is True, f"It should save instance to the target global variable *Running_Condition*."
+        assert isinstance(Running_Condition, synchronize_Condition) is True, "It should save instance to the target global variable *Running_Condition*."
 

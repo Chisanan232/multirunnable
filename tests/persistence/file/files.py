@@ -45,9 +45,9 @@ class TestFiles:
         try:
             Checking()
         except RuntimeError as re:
-            assert "All methods in class 'CheckingUtils' is static method, you shouldn't new this class." in str(re), f""
+            assert "All methods in class 'CheckingUtils' is static method, you shouldn't new this class." in str(re), ""
         else:
-            assert False, f"It should raise a RuntimeError if you try to instantiate it."
+            assert False, "It should raise a RuntimeError if you try to instantiate it."
 
 
     def test_save_as_csv(self, csv_formatter: CSVFormatter):
@@ -70,9 +70,9 @@ class TestFiles:
         try:
             TestFiles._save_process(_file_format=csv_formatter, _file_path=_test_file_path, _data=Test_Error_Data_List)
         except ValueError as ve:
-            assert True, f"It work finely."
+            assert True, "It work finely."
         else:
-            assert False, f"It should raise ValueError if the data which we save as target file format is invalid."
+            assert False, "It should raise ValueError if the data which we save as target file format is invalid."
         os.remove(_test_file_path)
 
 
@@ -98,7 +98,7 @@ class TestFiles:
             for _row, _data_row in zip(_sheet.iter_rows(min_row=_sheet.min_row, max_row=_sheet.max_row, min_col=_sheet.min_column, max_col=_sheet.max_column), Test_Data_List):
                 for _cell, _data_content in zip(_row, _data_row):
                     _value = _cell.value
-                    assert _value == _data_content, f"Each values in the data row should be the same."
+                    assert _value == _data_content, "Each values in the data row should be the same."
 
         os.remove(_test_file_path)
 
@@ -111,8 +111,8 @@ class TestFiles:
         assert _exist_file is True, "It should exist a .json file."
         with open(_test_file_path, "r") as json_file:
             _data = json.load(json_file)
-            assert "data" in _data.keys(), f"The key 'data' should be in the JSON format data."
-            assert _data["data"] is not None and len(_data["data"]) != 0, f"It should has some data row with the key 'data' in JSON format content."
+            assert "data" in _data.keys(), "The key 'data' should be in the JSON format data."
+            assert _data["data"] is not None and len(_data["data"]) != 0, "It should has some data row with the key 'data' in JSON format content."
             for index, d in enumerate(_data["data"]):
                 for ele_d, ele_o in zip(d, Test_Data_List[index]):
                     assert str(ele_d) == str(ele_o), "Each values in the data row should be the same."
@@ -123,7 +123,7 @@ class TestFiles:
     def test_json_format_stream(self, json_formatter: JSONFormatter):
         _data_stream = json_formatter.stream(data=Test_Data_List)
         for _d, _td in zip(json.loads(_data_stream), Test_Data_List):
-            assert _d == _td, f"Each values in the data row should be the same."
+            assert _d == _td, "Each values in the data row should be the same."
 
 
     @staticmethod
@@ -138,9 +138,9 @@ class TestFiles:
         except ValueError as e:
             raise e
         except Exception as e:
-            assert False, f"It should work finely without any issue."
+            assert False, "It should work finely without any issue."
         else:
-            assert True, f"It work finely!"
+            assert True, "It work finely!"
 
         assert _file_format.file_path == _file_path, f"It should be '{_file_format.file_path}' we set."
         assert _file_format.mode == "a+", f"It should be '{_file_format.mode}' we set."

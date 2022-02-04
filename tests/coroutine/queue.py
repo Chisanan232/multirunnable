@@ -44,43 +44,43 @@ def mr_async_queue() -> Type[AsynchronousQueueType]:
 class TestGreenThreadQueue:
 
     def test_queue(self, mr_gevent_queue: GeventQueueType):
-        assert isinstance(mr_gevent_queue.Queue.value, gevent_Queue) is True, f"This type of instance should be 'gevent.queue.Queue'."
+        assert isinstance(mr_gevent_queue.Queue.value, gevent_Queue) is True, "This type of instance should be 'gevent.queue.Queue'."
 
 
     if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
         def test_simple_queue(self, mr_gevent_queue: GeventQueueType):
-            assert isinstance(mr_gevent_queue.SimpleQueue.value, gevent_SimpleQueue) is True, f"This type of instance should be 'gevent.queue.SimpleQueue'."
+            assert isinstance(mr_gevent_queue.SimpleQueue.value, gevent_SimpleQueue) is True, "This type of instance should be 'gevent.queue.SimpleQueue'."
 
 
     def test_priority_queue(self, mr_gevent_queue: GeventQueueType):
-        assert isinstance(mr_gevent_queue.PriorityQueue.value, gevent_PriorityQueue) is True, f"This type of instance should be 'gevent.queue.PriorityQueue'."
+        assert isinstance(mr_gevent_queue.PriorityQueue.value, gevent_PriorityQueue) is True, "This type of instance should be 'gevent.queue.PriorityQueue'."
 
 
     def test_lifo_queue(self, mr_gevent_queue: GeventQueueType):
-        assert isinstance(mr_gevent_queue.LifoQueue.value, gevent_LifoQueue) is True, f"This type of instance should be 'gevent.queue.LifoQueue'."
+        assert isinstance(mr_gevent_queue.LifoQueue.value, gevent_LifoQueue) is True, "This type of instance should be 'gevent.queue.LifoQueue'."
 
 
     def test_joinable_queue(self, mr_gevent_queue: GeventQueueType):
-        assert isinstance(mr_gevent_queue.JoinableQueue.value, gevent_JoinableQueue) is True, f"This type of instance should be 'gevent.queue.JoinableQueue'."
+        assert isinstance(mr_gevent_queue.JoinableQueue.value, gevent_JoinableQueue) is True, "This type of instance should be 'gevent.queue.JoinableQueue'."
 
 
     def test_unbounded_queue(self, mr_gevent_queue: GeventQueueType):
         pass
-        # assert isinstance(mr_queue.value, gevent_UnboundQueue) is True, f"This type of instance should be 'gevent.queue.UnboundQueue'."
+        # assert isinstance(mr_queue.value, gevent_UnboundQueue) is True, "This type of instance should be 'gevent.queue.UnboundQueue'."
 
 
 
 class TestAsynchronousQueue:
 
     def test_queue(self, mr_async_queue: AsynchronousQueueType):
-        assert isinstance(mr_async_queue.Queue.value, async_Queue) is True, f"This type of instance should be 'asyncio.queues.Queue'."
+        assert isinstance(mr_async_queue.Queue.value, async_Queue) is True, "This type of instance should be 'asyncio.queues.Queue'."
 
 
     def test_priority_queue(self, mr_async_queue: AsynchronousQueueType):
-        assert isinstance(mr_async_queue.PriorityQueue.value, async_PriorityQueue) is True, f"This type of instance should be 'asyncio.queues.PriorityQueue'."
+        assert isinstance(mr_async_queue.PriorityQueue.value, async_PriorityQueue) is True, "This type of instance should be 'asyncio.queues.PriorityQueue'."
 
 
     def test_lifo_queue(self, mr_async_queue: AsynchronousQueueType):
-        assert isinstance(mr_async_queue.LifoQueue.value, async_LifoQueue) is True, f"This type of instance should be 'asyncio.queues.LifoQueue'."
+        assert isinstance(mr_async_queue.LifoQueue.value, async_LifoQueue) is True, "This type of instance should be 'asyncio.queues.LifoQueue'."
 
 

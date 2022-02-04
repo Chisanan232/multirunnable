@@ -59,9 +59,9 @@ def pool_target_fun(*args, **kwargs) -> str:
         Pool_Running_Count += 1
 
         if args:
-            assert args == Test_Function_Args, f"The argument *args* should be same as the input outside."
+            assert args == Test_Function_Args, "The argument *args* should be same as the input outside."
         if kwargs:
-            assert kwargs == Test_Function_Kwargs, f"The argument *kwargs* should be same as the input outside."
+            assert kwargs == Test_Function_Kwargs, "The argument *kwargs* should be same as the input outside."
 
         _pid = os.getpid()
         _ppid = os.getppid()
@@ -92,11 +92,11 @@ def map_target_fun(*args, **kwargs):
         Pool_Running_Count += 1
 
         if args:
-            assert set(args) <= set(Test_Function_Args), f"The argument *args* should be one of element of the input outside."
+            assert set(args) <= set(Test_Function_Args), "The argument *args* should be one of element of the input outside."
             if len(args) > 1:
-                assert args == Test_Function_Args, f"The argument *args* should be same as the global variable 'Test_Function_Args'."
+                assert args == Test_Function_Args, "The argument *args* should be same as the global variable 'Test_Function_Args'."
         if kwargs:
-            assert kwargs is None or kwargs == {}, f"The argument *kwargs* should be empty or None value."
+            assert kwargs is None or kwargs == {}, "The argument *kwargs* should be empty or None value."
 
         _pid = os.getpid()
         _ppid = os.getppid()
@@ -148,24 +148,24 @@ class TestSimplePool:
         process_pool._initial_running_strategy()
 
         from multirunnable.pool import Pool_Runnable_Strategy
-        assert Pool_Runnable_Strategy is not None, f"It should be assign running-strategy instance."
-        assert isinstance(Pool_Runnable_Strategy, ProcessPoolStrategy), f"It should be an sub-instance of 'ProcessPoolStrategy'."
+        assert Pool_Runnable_Strategy is not None, "It should be assign running-strategy instance."
+        assert isinstance(Pool_Runnable_Strategy, ProcessPoolStrategy), "It should be an sub-instance of 'ProcessPoolStrategy'."
 
 
     def test_initial_running_strategy_with_concurrent(self, thread_pool: SimplePool):
         thread_pool._initial_running_strategy()
 
         from multirunnable.pool import Pool_Runnable_Strategy
-        assert Pool_Runnable_Strategy is not None, f"It should be assign running-strategy instance."
-        assert isinstance(Pool_Runnable_Strategy, ThreadPoolStrategy), f"It should be an sub-instance of 'ThreadPoolStrategy'."
+        assert Pool_Runnable_Strategy is not None, "It should be assign running-strategy instance."
+        assert isinstance(Pool_Runnable_Strategy, ThreadPoolStrategy), "It should be an sub-instance of 'ThreadPoolStrategy'."
 
 
     def test_initial_running_strategy_with_coroutine(self, green_thread_pool: SimplePool):
         green_thread_pool._initial_running_strategy()
 
         from multirunnable.pool import Pool_Runnable_Strategy
-        assert Pool_Runnable_Strategy is not None, f"It should be assign running-strategy instance."
-        assert isinstance(Pool_Runnable_Strategy, GreenThreadPoolStrategy), f"It should be an sub-instance of 'GreenThreadPoolStrategy'."
+        assert Pool_Runnable_Strategy is not None, "It should be assign running-strategy instance."
+        assert isinstance(Pool_Runnable_Strategy, GreenThreadPoolStrategy), "It should be an sub-instance of 'GreenThreadPoolStrategy'."
 
 
     def test_apply(self, thread_pool: SimplePool):
@@ -314,9 +314,9 @@ class TestSimplePool:
             thread_pool.async_apply(tasks_size=Task_Size, function=lambda a: a+a, args=(1,))
             thread_pool.terminal()
         except Exception as e:
-            assert False, f"It should work finely without any issue. Please check it."
+            assert False, "It should work finely without any issue. Please check it."
         else:
-            assert True, f"It work finely without any issue."
+            assert True, "It work finely without any issue."
 
 
     def test_close(self, thread_pool: SimplePool):
@@ -325,9 +325,9 @@ class TestSimplePool:
             thread_pool.async_apply(tasks_size=Task_Size, function=lambda a: a+a, args=(1,))
             thread_pool.close()
         except Exception as e:
-            assert False, f"It should work finely without any issue. Please check it."
+            assert False, "It should work finely without any issue. Please check it."
         else:
-            assert True, f"It work finely without any issue."
+            assert True, "It work finely without any issue."
 
 
     @pytest.mark.skip(reason="Not implement testing logic.")
@@ -347,13 +347,6 @@ class TestSimplePool:
 
     @staticmethod
     def _chk_blocking_record():
-        print(f"[DEBUG] Running_PPIDs: {Running_PPIDs}")
-        print(f"[DEBUG] Running_Parent_PID: {Running_Parent_PID}")
-        print(f"[DEBUG] Pool_Running_Count.value: {Pool_Running_Count}")
-        print(f"[DEBUG] _Task_Size: {_Task_Size}")
-        print(f"[DEBUG] Running_Thread_IDs: {Running_Thread_IDs}")
-        print(f"[DEBUG] Running_Current_Threads: {Running_Current_Threads}")
-        print(f"[DEBUG] Running_Finish_Timestamp: {Running_Finish_Timestamp}")
         # PoolRunningTestSpec._chk_ppid_info(ppid_list=Running_PPIDs, running_parent_pid=Running_Parent_PID)
         PoolRunningTestSpec._chk_process_record_blocking(
             pool_running_cnt=Pool_Running_Count,
@@ -367,13 +360,6 @@ class TestSimplePool:
 
     @staticmethod
     def _chk_record():
-        print(f"[DEBUG] Running_PPIDs: {Running_PPIDs}")
-        print(f"[DEBUG] Running_Parent_PID: {Running_Parent_PID}")
-        print(f"[DEBUG] Pool_Running_Count.value: {Pool_Running_Count}")
-        print(f"[DEBUG] _Task_Size: {_Task_Size}")
-        print(f"[DEBUG] Running_Thread_IDs: {Running_Thread_IDs}")
-        print(f"[DEBUG] Running_Current_Threads: {Running_Current_Threads}")
-        print(f"[DEBUG] Running_Finish_Timestamp: {Running_Finish_Timestamp}")
         # PoolRunningTestSpec._chk_ppid_info(ppid_list=Running_PPIDs, running_parent_pid=Running_Parent_PID)
         PoolRunningTestSpec._chk_process_record(
             pool_running_cnt=Pool_Running_Count,

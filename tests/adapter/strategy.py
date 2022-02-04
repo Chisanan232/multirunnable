@@ -38,25 +38,25 @@ class TestAdapterExecuteStrategy:
     def test_get_simple_with_parallel(self):
         _strategy_adapter = ExecutorStrategyAdapter(mode=RunningMode.Parallel, executors=_Worker_Size)
         _strategy = _strategy_adapter.get_simple()
-        assert isinstance(_strategy, ProcessStrategy) is True, f"The type of strategy instance should be 'ProcessStrategy'."
+        assert isinstance(_strategy, ProcessStrategy) is True, "The type of strategy instance should be 'ProcessStrategy'."
 
 
     def test_get_simple_with_concurrent(self):
         _strategy_adapter = ExecutorStrategyAdapter(mode=RunningMode.Concurrent, executors=_Worker_Size)
         _strategy = _strategy_adapter.get_simple()
-        assert isinstance(_strategy, ThreadStrategy) is True, f"The type of strategy instance should be 'ThreadStrategy'."
+        assert isinstance(_strategy, ThreadStrategy) is True, "The type of strategy instance should be 'ThreadStrategy'."
 
 
     def test_get_simple_with_coroutine(self):
         _strategy_adapter = ExecutorStrategyAdapter(mode=RunningMode.GreenThread, executors=_Worker_Size)
         _strategy = _strategy_adapter.get_simple()
-        assert isinstance(_strategy, GreenThreadStrategy) is True, f"The type of strategy instance should be 'GreenThreadStrategy'."
+        assert isinstance(_strategy, GreenThreadStrategy) is True, "The type of strategy instance should be 'GreenThreadStrategy'."
 
 
     def test_get_simple_with_asynchronous(self):
         _strategy_adapter = ExecutorStrategyAdapter(mode=RunningMode.Asynchronous, executors=_Worker_Size)
         _strategy = _strategy_adapter.get_simple()
-        assert isinstance(_strategy, AsynchronousStrategy) is True, f"The type of strategy instance should be 'AsynchronousStrategy'."
+        assert isinstance(_strategy, AsynchronousStrategy) is True, "The type of strategy instance should be 'AsynchronousStrategy'."
 
 
 
@@ -65,17 +65,17 @@ class TestAdapterPoolStrategy:
     def test_get_simple_with_parallel(self):
         _strategy_adapter = PoolStrategyAdapter(mode=RunningMode.Parallel, pool_size=_Worker_Pool_Size)
         _strategy = _strategy_adapter.get_simple()
-        assert isinstance(_strategy, ProcessPoolStrategy) is True, f"The type of strategy instance should be 'ProcessPoolStrategy'."
+        assert isinstance(_strategy, ProcessPoolStrategy) is True, "The type of strategy instance should be 'ProcessPoolStrategy'."
 
 
     def test_get_simple_with_concurrent(self):
         _strategy_adapter = PoolStrategyAdapter(mode=RunningMode.Concurrent, pool_size=_Worker_Pool_Size)
         _strategy = _strategy_adapter.get_simple()
-        assert isinstance(_strategy, ThreadPoolStrategy) is True, f"The type of strategy instance should be 'ThreadPoolStrategy'."
+        assert isinstance(_strategy, ThreadPoolStrategy) is True, "The type of strategy instance should be 'ThreadPoolStrategy'."
 
 
     def test_get_simple_with_coroutine(self):
         _strategy_adapter = PoolStrategyAdapter(mode=RunningMode.GreenThread, pool_size=_Worker_Pool_Size)
         _strategy = _strategy_adapter.get_simple()
-        assert isinstance(_strategy, GreenThreadPoolStrategy) is True, f"The type of strategy instance should be 'GreenThreadPoolStrategy'."
+        assert isinstance(_strategy, GreenThreadPoolStrategy) is True, "The type of strategy instance should be 'GreenThreadPoolStrategy'."
 

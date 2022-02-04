@@ -66,9 +66,9 @@ def target_fun(*args, **kwargs) -> str:
         Running_Count += 1
 
         if args:
-            assert args == Test_Function_Args, f"The argument *args* should be same as the input outside."
+            assert args == Test_Function_Args, "The argument *args* should be same as the input outside."
         if kwargs:
-            assert kwargs == Test_Function_Kwargs, f"The argument *kwargs* should be same as the input outside."
+            assert kwargs == Test_Function_Kwargs, "The argument *kwargs* should be same as the input outside."
 
         _pid = os.getpid()
         _ppid = os.getppid()
@@ -96,9 +96,9 @@ def pool_target_fun(*args, **kwargs) -> str:
         Pool_Running_Count += 1
 
         if args:
-            assert args == Test_Function_Args, f"The argument *args* should be same as the input outside."
+            assert args == Test_Function_Args, "The argument *args* should be same as the input outside."
         if kwargs:
-            assert kwargs == Test_Function_Kwargs, f"The argument *kwargs* should be same as the input outside."
+            assert kwargs == Test_Function_Kwargs, "The argument *kwargs* should be same as the input outside."
 
         _pid = os.getpid()
         _ppid = os.getppid()
@@ -129,11 +129,11 @@ def map_target_fun(*args, **kwargs):
         Pool_Running_Count += 1
 
         if args:
-            assert set(args) <= set(Test_Function_Args), f"The argument *args* should be one of element of the input outside."
+            assert set(args) <= set(Test_Function_Args), "The argument *args* should be one of element of the input outside."
             if len(args) > 1:
-                assert args == Test_Function_Args, f"The argument *args* should be same as the global variable 'Test_Function_Args'."
+                assert args == Test_Function_Args, "The argument *args* should be same as the global variable 'Test_Function_Args'."
         if kwargs:
-            assert kwargs is None or kwargs == {}, f"The argument *kwargs* should be empty or None value."
+            assert kwargs is None or kwargs == {}, "The argument *kwargs* should be empty or None value."
 
         _pid = os.getpid()
         _ppid = os.getppid()
@@ -236,7 +236,7 @@ def pool_strategy():
 
 
 _Generate_Worker_Error_Msg = \
-    f"The instances which be created by method 'generate_worker' should be an instance of 'threading.Thread'."
+    "The instances which be created by method 'generate_worker' should be an instance of 'threading.Thread'."
 
 
 class TestThread(GeneralRunningTestSpec):
@@ -696,18 +696,18 @@ class TestThread(GeneralRunningTestSpec):
             args=Test_Function_Args)
 
         _result = strategy.get_result()
-        assert _result is not None and _result != [], f"The running result should not be empty."
-        assert type(_result) is list, f"The result should be a list type object."
+        assert _result is not None and _result != [], "The running result should not be empty."
+        assert type(_result) is list, "The result should be a list type object."
         for _r in _result:
-            assert isinstance(_r, ConcurrentResult) is True, f"The element of result should be instance of object 'ConcurrentResult'."
-            assert _r.pid, f"The PID should exists in list we record."
-            assert _r.worker_name, f"It should have thread name."
-            assert _r.worker_ident, f"It should have thread identity."
+            assert isinstance(_r, ConcurrentResult) is True, "The element of result should be instance of object 'ConcurrentResult'."
+            assert _r.pid, "The PID should exists in list we record."
+            assert _r.worker_name, "It should have thread name."
+            assert _r.worker_ident, "It should have thread identity."
             if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION >= 8:
-                assert _r.native_id, f"It should have thread native ID."
+                assert _r.native_id, "It should have thread native ID."
             assert _r.data == f"result_{_r.worker_ident}", f"Its data should be same as we expect 'result_{_r.pid}'."
-            assert _r.state == "successful", f"Its state should be 'successful'."
-            assert _r.exception is None, f"It should have nothing exception."
+            assert _r.state == "successful", "Its state should be 'successful'."
+            assert _r.exception is None, "It should have nothing exception."
 
 
     def test_get_failure_result(self, strategy: ThreadStrategy):
@@ -717,18 +717,18 @@ class TestThread(GeneralRunningTestSpec):
             target_fun=target_error_fun)
 
         _result = strategy.get_result()
-        assert _result is not None and _result != [], f""
-        assert type(_result) is list, f""
+        assert _result is not None and _result != [], ""
+        assert type(_result) is list, ""
         for _r in _result:
-            assert isinstance(_r, ConcurrentResult) is True, f""
-            assert _r.pid, f"It should have PID."
-            assert _r.worker_name, f"It should have thread name."
-            assert _r.worker_ident, f"It should have thread identity."
+            assert isinstance(_r, ConcurrentResult) is True, ""
+            assert _r.pid, "It should have PID."
+            assert _r.worker_name, "It should have thread name."
+            assert _r.worker_ident, "It should have thread identity."
             if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION >= 8:
-                assert _r.native_id, f"It should have thread native ID."
-            assert _r.data is None, f"Its data should be None."
-            assert _r.state == "fail", f"Its state should be 'fail'."
-            assert isinstance(_r.exception, Exception) and "Testing result raising an exception" in str(_r.exception), f"It should have an exception and error message is 'Testing result raising an exception'."
+                assert _r.native_id, "It should have thread native ID."
+            assert _r.data is None, "Its data should be None."
+            assert _r.state == "fail", "Its state should be 'fail'."
+            assert isinstance(_r.exception, Exception) and "Testing result raising an exception" in str(_r.exception), "It should have an exception and error message is 'Testing result raising an exception'."
 
 
     def _initial(self):
@@ -1419,16 +1419,16 @@ class TestThreadPool(PoolRunningTestSpec):
         try:
             pool_strategy.close()
         except Exception as e:
-            assert e is not None, f"It should work finely without any issue."
+            assert e is not None, "It should work finely without any issue."
         else:
-            assert True, f"It work finely."
+            assert True, "It work finely."
 
 
     def test_terminal(self, pool_strategy: ThreadPoolStrategy):
         try:
             pool_strategy.terminal()
         except Exception as e:
-            assert e is not None, f"It should work finely without any issue."
+            assert e is not None, "It should work finely without any issue."
         else:
-            assert True, f"It work finely."
+            assert True, "It work finely."
 

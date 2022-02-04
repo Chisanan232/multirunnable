@@ -47,16 +47,16 @@ class TestDaoWithSingleConnection:
 
     def test_database_opt(self, db_opt_single: TargetSingleDao):
         _db_opt = db_opt_single.database_opt
-        assert isinstance(_db_opt, MySQLOperator) is True, f""
+        assert isinstance(_db_opt, MySQLOperator) is True, ""
 
 
     def test_execute(self, db_opt_single: TargetSingleDao):
         try:
             db_opt_single.execute(_Test_SQL)
         except Exception as e:
-            assert False, f"It should work finely without any issue."
+            assert False, "It should work finely without any issue."
         else:
-            assert True, f"It work finely!"
+            assert True, "It work finely!"
 
         _data = db_opt_single.fetch_all()
         assert _data is not None and len(_data) == _Data_Row_Number, f"It should get the data from the cursor instance with target SQL and the data row number should be '{_Data_Row_Number}'."
@@ -66,9 +66,9 @@ class TestDaoWithSingleConnection:
         try:
             db_opt_single.execute_many(_Test_SQL)
         except Exception as e:
-            assert False, f"It should work finely without any issue."
+            assert False, "It should work finely without any issue."
         else:
-            assert True, f"It work finely!"
+            assert True, "It work finely!"
 
 
     def test_fetch_one(self, db_opt_single: TargetSingleDao):
@@ -76,7 +76,7 @@ class TestDaoWithSingleConnection:
 
         db_opt_single.execute(_Test_SQL)
         _data = db_opt_single.fetch_one()
-        assert _data is not None and _data != [], f"It should get the data row (only one) from the cursor instance with target SQL."
+        assert _data is not None and _data != [], "It should get the data row (only one) from the cursor instance with target SQL."
         _row_number += 1
 
         while _data is not None or _data != []:
@@ -95,7 +95,7 @@ class TestDaoWithSingleConnection:
         _data = db_opt_single.fetch_many(size=_Test_SQL_Fetch_Size)
         assert _data is not None and _data != [], f"It should get the data row (row number as '{_Test_SQL_Fetch_Size}') from the cursor instance with target SQL."
         if _Test_SQL_Fetch_Size < _Data_Row_Number and _Data_Row_Number > 1:
-            assert len(_data) < _Data_Row_Number and len(_data) == _Test_SQL_Fetch_Size, f"The data row number should be equal to fetch size and less than the limit data row number."
+            assert len(_data) < _Data_Row_Number and len(_data) == _Test_SQL_Fetch_Size, "The data row number should be equal to fetch size and less than the limit data row number."
         _row_number += len(_data)
 
         while _data is not None or _data != []:
@@ -123,25 +123,25 @@ class TestDaoWithConnectionPool:
 
     def test_database_opt(self, db_opt_pool: TargetPoolDao):
         _db_opt = db_opt_pool.database_opt
-        assert isinstance(_db_opt, MySQLOperator) is True, f""
+        assert isinstance(_db_opt, MySQLOperator) is True, ""
 
 
     def test_execute(self, db_opt_pool: TargetPoolDao):
         try:
             db_opt_pool.execute(_Test_SQL)
         except Exception as e:
-            assert False, f""
+            assert False, ""
         else:
-            assert True, f""
+            assert True, ""
 
 
     def test_execute_many(self, db_opt_pool: TargetPoolDao):
         try:
             db_opt_pool.execute_many(_Test_SQL)
         except Exception as e:
-            assert False, f""
+            assert False, ""
         else:
-            assert True, f""
+            assert True, ""
 
 
     def test_fetch_one(self, db_opt_pool: TargetPoolDao):
@@ -149,7 +149,7 @@ class TestDaoWithConnectionPool:
 
         db_opt_pool.execute(_Test_SQL)
         _data = db_opt_pool.fetch_one()
-        assert _data is not None and _data != [], f"It should get the data row (only one) from the cursor instance with target SQL."
+        assert _data is not None and _data != [], "It should get the data row (only one) from the cursor instance with target SQL."
         _row_number += 1
 
         while _data is not None or _data != []:
@@ -168,7 +168,7 @@ class TestDaoWithConnectionPool:
         _data = db_opt_pool.fetch_many(size=_Test_SQL_Fetch_Size)
         assert _data is not None and _data != [], f"It should get the data row (row number as '{_Test_SQL_Fetch_Size}') from the cursor instance with target SQL."
         if _Test_SQL_Fetch_Size < _Data_Row_Number and _Data_Row_Number > 1:
-            assert len(_data) < _Data_Row_Number and len(_data) == _Test_SQL_Fetch_Size, f"The data row number should be equal to fetch size and less than the limit data row number."
+            assert len(_data) < _Data_Row_Number and len(_data) == _Test_SQL_Fetch_Size, "The data row number should be equal to fetch size and less than the limit data row number."
         _row_number += len(_data)
 
         while _data is not None or _data != []:

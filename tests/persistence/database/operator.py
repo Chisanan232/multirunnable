@@ -38,17 +38,17 @@ def opts_with_conn_pool_strategy() -> MySQLOperator:
 class TestPersistenceDatabaseOperatorWithSingleConnection:
 
     def test__connection(self, opts_with_single_conn_strategy: MySQLOperator):
-        assert opts_with_single_conn_strategy._connection is _Single_Strategy.connection, f"For SingleConnection strategy, it shuold initial a database connection instance after we instantiate it."
+        assert opts_with_single_conn_strategy._connection is _Single_Strategy.connection, "For SingleConnection strategy, it shuold initial a database connection instance after we instantiate it."
 
 
     def test_initial_cursor(self, opts_with_single_conn_strategy: MySQLOperator):
         _conn = opts_with_single_conn_strategy._db_connection
         _cursor = opts_with_single_conn_strategy.initial_cursor(connection=_conn)
-        assert _cursor is not None, f"For SingleConnection strategy, it shuold initial a database cursor instance after we instantiate strategy."
+        assert _cursor is not None, "For SingleConnection strategy, it shuold initial a database cursor instance after we instantiate strategy."
 
 
     def test__cursor(self, opts_with_single_conn_strategy: MySQLOperator):
-        assert opts_with_single_conn_strategy._db_cursor is not None, f"For SingleConnection strategy, it shuold initial a database cursor instance when we call the '_cursor' property."
+        assert opts_with_single_conn_strategy._db_cursor is not None, "For SingleConnection strategy, it shuold initial a database cursor instance when we call the '_cursor' property."
 
 
     @pytest.mark.skip(reason="Not implement testing logic. Consider about the feature's necessary.")
@@ -70,9 +70,9 @@ class TestPersistenceDatabaseOperatorWithSingleConnection:
         try:
             opts_with_single_conn_strategy.execute(_Test_SQL)
         except Exception as e:
-            assert False, f"It should work finely without any issue."
+            assert False, "It should work finely without any issue."
         else:
-            assert True, f"It work finely!"
+            assert True, "It work finely!"
 
         _data = opts_with_single_conn_strategy.fetch_all()
         assert _data is not None and len(_data) == _Data_Row_Number, f"It should get the data from the cursor instance with target SQL and the data row number should be '{_Data_Row_Number}'."
@@ -83,9 +83,9 @@ class TestPersistenceDatabaseOperatorWithSingleConnection:
         try:
             opts_with_single_conn_strategy.execute_many(_Test_SQL)
         except Exception as e:
-            assert False, f"It should work finely without any issue."
+            assert False, "It should work finely without any issue."
         else:
-            assert True, f"It work finely!"
+            assert True, "It work finely!"
 
         _data = opts_with_single_conn_strategy.fetch_all()
         assert _data is not None and len(_data) == _Data_Row_Number, f"It should get the data from the cursor instance with target SQL and the data row number should be '{_Data_Row_Number}'."
@@ -95,7 +95,7 @@ class TestPersistenceDatabaseOperatorWithSingleConnection:
     def test_fetch(self, opts_with_single_conn_strategy: MySQLOperator):
         opts_with_single_conn_strategy.execute(_Test_SQL)
         _data = opts_with_single_conn_strategy.fetch()
-        assert _data is not None, f""
+        assert _data is not None, ""
 
 
     def test_fetch_one(self, opts_with_single_conn_strategy: MySQLOperator):
@@ -103,7 +103,7 @@ class TestPersistenceDatabaseOperatorWithSingleConnection:
 
         opts_with_single_conn_strategy.execute(_Test_SQL)
         _data = opts_with_single_conn_strategy.fetch_one()
-        assert _data is not None and _data != [], f"It should get the data row (only one) from the cursor instance with target SQL."
+        assert _data is not None and _data != [], "It should get the data row (only one) from the cursor instance with target SQL."
         _row_number += 1
 
         while _data is not None or _data != []:
@@ -122,7 +122,7 @@ class TestPersistenceDatabaseOperatorWithSingleConnection:
         _data = opts_with_single_conn_strategy.fetch_many(size=_Fetch_Size)
         assert _data is not None and _data != [], f"It should get the data row (row number as '{_Fetch_Size}') from the cursor instance with target SQL."
         if _Fetch_Size < _Data_Row_Number and _Data_Row_Number > 1:
-            assert len(_data) < _Data_Row_Number and len(_data) == _Fetch_Size, f"The data row number should be equal to fetch size and less than the limit data row number."
+            assert len(_data) < _Data_Row_Number and len(_data) == _Fetch_Size, "The data row number should be equal to fetch size and less than the limit data row number."
         _row_number += len(_data)
 
         while _data is not None or _data != []:
@@ -150,9 +150,9 @@ class TestPersistenceDatabaseOperatorWithSingleConnection:
         try:
             opts_with_single_conn_strategy.close()
         except Exception as e:
-            assert False, f""
+            assert False, ""
         else:
-            assert True, f""
+            assert True, ""
 
 
 
@@ -160,18 +160,18 @@ class TestPersistenceDatabaseOperatorWithConnectionPool:
 
     def test_initial(self, opts_with_conn_pool_strategy: MySQLOperator):
         _all_conn_pools = database_connection_pools()
-        assert _all_conn_pools != {}, f"The database connection pools should not be empty."
-        assert Test_Pool_Name in _all_conn_pools.keys(), f"The pool name should be in the database connection pools."
-        assert _all_conn_pools[Test_Pool_Name] is not None, f"The database connection pool should exist with the pool name (from database_connection_pools)."
-        assert get_connection_pool(pool_name=Test_Pool_Name) is not None, f"The database connection pool should exist with the pool name (from get_connection_pool)."
+        assert _all_conn_pools != {}, "The database connection pools should not be empty."
+        assert Test_Pool_Name in _all_conn_pools.keys(), "The pool name should be in the database connection pools."
+        assert _all_conn_pools[Test_Pool_Name] is not None, "The database connection pool should exist with the pool name (from database_connection_pools)."
+        assert get_connection_pool(pool_name=Test_Pool_Name) is not None, "The database connection pool should exist with the pool name (from get_connection_pool)."
 
 
     def test__connection(self, opts_with_conn_pool_strategy: MySQLOperator):
-        assert opts_with_conn_pool_strategy._connection is not None, f"The database connection should be instantiate."
+        assert opts_with_conn_pool_strategy._connection is not None, "The database connection should be instantiate."
 
 
     def test__cursor(self, opts_with_conn_pool_strategy: MySQLOperator):
-        assert opts_with_conn_pool_strategy._cursor is not None, f"The database cursor should be instantiate."
+        assert opts_with_conn_pool_strategy._cursor is not None, "The database cursor should be instantiate."
 
 
     @pytest.mark.skip(reason="Not implement testing logic. Consider about the feature's necessary.")
@@ -193,9 +193,9 @@ class TestPersistenceDatabaseOperatorWithConnectionPool:
         try:
             opts_with_conn_pool_strategy.execute(_Test_SQL)
         except Exception as e:
-            assert False, f"It should work finely without any issue."
+            assert False, "It should work finely without any issue."
         else:
-            assert True, f"It work finely!"
+            assert True, "It work finely!"
 
         _data = opts_with_conn_pool_strategy.fetch_all()
         assert _data is not None and len(_data) == _Data_Row_Number, f"It should get the data from the cursor instance with target SQL and the data row number should be '{_Data_Row_Number}'."
@@ -206,9 +206,9 @@ class TestPersistenceDatabaseOperatorWithConnectionPool:
         try:
             opts_with_conn_pool_strategy.execute_many(_Test_SQL)
         except Exception as e:
-            assert False, f"It should work finely without any issue."
+            assert False, "It should work finely without any issue."
         else:
-            assert True, f"It work finely!"
+            assert True, "It work finely!"
 
         _data = opts_with_conn_pool_strategy.fetch_all()
         assert _data is not None and len(_data) == _Data_Row_Number, f"It should get the data from the cursor instance with target SQL and the data row number should be '{_Data_Row_Number}'."
@@ -218,7 +218,7 @@ class TestPersistenceDatabaseOperatorWithConnectionPool:
     def test_fetch(self, opts_with_conn_pool_strategy: MySQLOperator):
         opts_with_conn_pool_strategy.execute(_Test_SQL)
         _data = opts_with_conn_pool_strategy.fetch()
-        assert _data is not None, f""
+        assert _data is not None, ""
 
 
     def test_fetch_one(self, opts_with_conn_pool_strategy: MySQLOperator):
@@ -226,7 +226,7 @@ class TestPersistenceDatabaseOperatorWithConnectionPool:
 
         opts_with_conn_pool_strategy.execute(_Test_SQL)
         _data = opts_with_conn_pool_strategy.fetch_one()
-        assert _data is not None and _data != [], f"It should get the data row (only one) from the cursor instance with target SQL."
+        assert _data is not None and _data != [], "It should get the data row (only one) from the cursor instance with target SQL."
         _row_number += 1
 
         while _data is not None or _data != []:
@@ -245,7 +245,7 @@ class TestPersistenceDatabaseOperatorWithConnectionPool:
         _data = opts_with_conn_pool_strategy.fetch_many(size=_Fetch_Size)
         assert _data is not None and _data != [], f"It should get the data row (row number as '{_Fetch_Size}') from the cursor instance with target SQL."
         if _Fetch_Size < _Data_Row_Number and _Data_Row_Number > 1:
-            assert len(_data) < _Data_Row_Number and len(_data) == _Fetch_Size, f"The data row number should be equal to fetch size and less than the limit data row number."
+            assert len(_data) < _Data_Row_Number and len(_data) == _Fetch_Size, "The data row number should be equal to fetch size and less than the limit data row number."
         _row_number += len(_data)
 
         while _data is not None or _data != []:
@@ -273,7 +273,7 @@ class TestPersistenceDatabaseOperatorWithConnectionPool:
         try:
             opts_with_conn_pool_strategy.close()
         except Exception as e:
-            assert False, f""
+            assert False, ""
         else:
-            assert True, f""
+            assert True, ""
 

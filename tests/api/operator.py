@@ -193,7 +193,7 @@ class TestLockAdapterOperator(TestOperator):
     def test_get_feature_instance_with_parallel(self, lock_opts: LockAdapterOperator):
         _lock = instantiate_lock(FeatureMode.Parallel)
         _feature_instn = lock_opts._get_feature_instance()
-        assert _feature_instn is _lock, f"The feature property should be the 'Lock' instance we set."
+        assert _feature_instn is _lock, "The feature property should be the 'Lock' instance we set."
 
 
     def test_feature_instance_property_with_parallel(self, lock_opts: LockAdapterOperator):
@@ -212,9 +212,9 @@ class TestLockAdapterOperator(TestOperator):
         try:
             _feature_instn = lock_opts._feature_instance
         except ValueError as ve:
-            assert False, f"It must to raise a ValueError exception when we try to get feature instance without FeatureMode."
+            assert False, "It must to raise a ValueError exception when we try to get feature instance without FeatureMode."
         else:
-            assert _feature_instn is _lock, f"The feature property should be the 'Lock' instance we set."
+            assert _feature_instn is _lock, "The feature property should be the 'Lock' instance we set."
 
 
     @pytest.mark.skip(reason="Not finish this testing implementation yet.")
@@ -225,7 +225,7 @@ class TestLockAdapterOperator(TestOperator):
             lock_opts.acquire()
             pass
             lock_opts.release()
-            assert False, f""
+            assert False, ""
 
         # # # # Run multiple workers and save something info at the right time
         run_multi_process(_function=_target_testing)
@@ -264,10 +264,9 @@ class TestLockAdapterOperator(TestOperator):
                     _time = float(time.time())
                     _done_timestamp[_thread_id] = _time
             except Exception as e:
-                assert False, f"Occur something unexpected issue. Please check it. \n" \
-                              f"Exception: {e}"
+                assert False, f"Occur something unexpected issue. Please check it. Exception: {e}"
             else:
-                assert True, f"Testing code successfully."
+                assert True, "Testing code successfully."
 
         # # # # Run multiple workers and save something info at the right time
         run_multi_threads(_function=_target_testing)
@@ -309,10 +308,9 @@ class TestLockAdapterOperator(TestOperator):
                     _time = float(time.time())
                     _done_timestamp[_thread_id] = _time
             except Exception as e:
-                assert False, f"Occur something unexpected issue. Please check it. \n" \
-                              f"Exception: {e}"
+                assert False, f"Occur something unexpected issue. Please check it. Exception: {e}"
             else:
-                assert True, f"Testing code successfully."
+                assert True, "Testing code successfully."
 
         # # # # Run multiple workers and save something info at the right time
         run_multi_green_thread(_function=_target_testing)
@@ -366,10 +364,9 @@ class TestLockAdapterOperator(TestOperator):
                     _time = float(time.time())
                     _done_timestamp[_async_task_id] = _time
             except Exception as e:
-                assert False, f"Occur something unexpected issue. Please check it. \n" \
-                              f"Exception: {e}"
+                assert False, f"Occur something unexpected issue. Please check it. Exception: {e}"
             else:
-                assert True, f"Testing code successfully."
+                assert True, "Testing code successfully."
 
         # # # # Run multiple workers and save something info at the right time
         run_async(_function=_target_testing, _feature=Lock())
@@ -396,7 +393,7 @@ class TestRLockAdapterOperator(TestOperator):
     def test_get_feature_instance_with_parallel(self, rlock_opts: RLockOperator):
         _rlock = instantiate_rlock(FeatureMode.Parallel)
         _feature_instn = rlock_opts._get_feature_instance()
-        assert _feature_instn is _rlock, f"The feature property should be the 'RLock' instance we set."
+        assert _feature_instn is _rlock, "The feature property should be the 'RLock' instance we set."
 
 
     def test_feature_instance_property_with_parallel(self, rlock_opts: RLockOperator):
@@ -404,9 +401,9 @@ class TestRLockAdapterOperator(TestOperator):
         try:
             _feature_instn = rlock_opts._feature_instance
         except ValueError as ve:
-            assert False, f"It must to raise a ValueError exception when we try to get feature instance without FeatureMode."
+            assert False, "It must to raise a ValueError exception when we try to get feature instance without FeatureMode."
         else:
-            assert _feature_instn is _rlock, f"The feature property should be the 'RLock' instance we set."
+            assert _feature_instn is _rlock, "The feature property should be the 'RLock' instance we set."
 
 
     def test_feature_in_concurrent(self, rlock_opts: RLockOperator):
@@ -444,10 +441,9 @@ class TestRLockAdapterOperator(TestOperator):
                     _time = float(time.time())
                     _done_timestamp[_thread_id] = _time
             except Exception as e:
-                assert False, f"Occur something unexpected issue. Please check it. \n" \
-                              f"Exception: {e}"
+                assert False, f"Occur something unexpected issue. Please check it. Exception: {e}"
             else:
-                assert True, f"Testing code successfully."
+                assert True, "Testing code successfully."
 
         # # # # Run multiple workers and save something info at the right time
         run_multi_threads(_function=_target_testing)
@@ -492,10 +488,9 @@ class TestRLockAdapterOperator(TestOperator):
                     _time = float(time.time())
                     _done_timestamp[_thread_id] = _time
             except Exception as e:
-                assert False, f"Occur something unexpected issue. Please check it. \n" \
-                              f"Exception: {e}"
+                assert False, f"Occur something unexpected issue. Please check it. Exception: {e}"
             else:
-                assert True, f"Testing code successfully."
+                assert True, "Testing code successfully."
 
         # # # # Run multiple workers and save something info at the right time
         run_multi_green_thread(_function=_target_testing)
@@ -522,7 +517,7 @@ class TestSemaphoreAdapterOperator(TestOperator):
     def test_get_feature_instance_with_parallel(self, semaphore_opts: SemaphoreOperator):
         _semaphore = instantiate_semaphore(FeatureMode.Parallel)
         _feature_instn = semaphore_opts._get_feature_instance()
-        assert _feature_instn is _semaphore, f"The feature property should be the 'Semaphore' instance we set."
+        assert _feature_instn is _semaphore, "The feature property should be the 'Semaphore' instance we set."
 
 
     def test_feature_instance_property_with_parallel(self, semaphore_opts: SemaphoreOperator):
@@ -530,9 +525,9 @@ class TestSemaphoreAdapterOperator(TestOperator):
         try:
             _feature_instn = semaphore_opts._feature_instance
         except ValueError as ve:
-            assert False, f"It must to raise a ValueError exception when we try to get feature instance without FeatureMode."
+            assert False, "It must to raise a ValueError exception when we try to get feature instance without FeatureMode."
         else:
-            assert _feature_instn is _semaphore, f"The feature property should be the 'Semaphore' instance we set."
+            assert _feature_instn is _semaphore, "The feature property should be the 'Semaphore' instance we set."
 
 
     @pytest.mark.skip(reason="Has something issue in testing code.")
@@ -573,10 +568,9 @@ class TestSemaphoreAdapterOperator(TestOperator):
                     _time = float(time.time())
                     _done_timestamp[_thread_id] = _time
             except Exception as e:
-                assert False, f"Occur something unexpected issue. Please check it. \n" \
-                              f"Exception: {e}"
+                assert False, f"Occur something unexpected issue. Please check it. Exception: {e}"
             else:
-                assert True, f"Testing code successfully."
+                assert True, "Testing code successfully."
 
         # # # # Run multiple workers and save something info at the right time
         run_multi_threads(_function=_target_testing)
@@ -619,10 +613,9 @@ class TestSemaphoreAdapterOperator(TestOperator):
                     _time = float(time.time())
                     _done_timestamp[_thread_id] = _time
             except Exception as e:
-                assert False, f"Occur something unexpected issue. Please check it. \n" \
-                              f"Exception: {e}"
+                assert False, f"Occur something unexpected issue. Please check it. Exception: {e}"
             else:
-                assert True, f"Testing code successfully."
+                assert True, "Testing code successfully."
 
         # # # # Run multiple workers and save something info at the right time
         run_multi_green_thread(_function=_target_testing)
@@ -674,10 +667,9 @@ class TestSemaphoreAdapterOperator(TestOperator):
                     _time = float(time.time())
                     _done_timestamp[_async_task_id] = _time
             except Exception as e:
-                assert False, f"Occur something unexpected issue. Please check it. \n" \
-                              f"Exception: {e}"
+                assert False, f"Occur something unexpected issue. Please check it. Exception: {e}"
             else:
-                assert True, f"Testing code successfully."
+                assert True, "Testing code successfully."
 
         # # # # Run multiple workers and save something info at the right time
         run_async(_function=_target_testing, _feature=Semaphore(value=_Semaphore_Value))
@@ -712,7 +704,7 @@ class TestBoundedSemaphoreAdapterOperator(TestOperator):
     def test_get_feature_instance_with_parallel(self, bounded_semaphore_opts: BoundedSemaphoreOperator):
         _bounded_semaphore = instantiate_bounded_semaphore(FeatureMode.Parallel)
         _feature_instn = bounded_semaphore_opts._get_feature_instance()
-        assert _feature_instn is _bounded_semaphore, f"The feature property should be the 'BoundedSemaphore' instance we set."
+        assert _feature_instn is _bounded_semaphore, "The feature property should be the 'BoundedSemaphore' instance we set."
 
 
     def test_feature_instance_property_with_parallel(self, bounded_semaphore_opts: BoundedSemaphoreOperator):
@@ -720,9 +712,9 @@ class TestBoundedSemaphoreAdapterOperator(TestOperator):
         try:
             _feature_instn = bounded_semaphore_opts._feature_instance
         except ValueError as ve:
-            assert False, f"It must to raise a ValueError exception when we try to get feature instance without FeatureMode."
+            assert False, "It must to raise a ValueError exception when we try to get feature instance without FeatureMode."
         else:
-            assert _feature_instn is _bounded_semaphore, f"The feature property should be the 'BoundedSemaphore' instance we set."
+            assert _feature_instn is _bounded_semaphore, "The feature property should be the 'BoundedSemaphore' instance we set."
 
 
     @pytest.mark.skip(reason="Has something issue in testing code.")
@@ -763,10 +755,9 @@ class TestBoundedSemaphoreAdapterOperator(TestOperator):
                     _time = float(time.time())
                     _done_timestamp[_thread_id] = _time
             except Exception as e:
-                assert False, f"Occur something unexpected issue. Please check it. \n" \
-                              f"Exception: {e}"
+                assert False, f"Occur something unexpected issue. Please check it. Exception: {e}"
             else:
-                assert True, f"Testing code successfully."
+                assert True, "Testing code successfully."
 
         # # # # Run multiple workers and save something info at the right time
         run_multi_threads(_function=_target_testing)
@@ -808,10 +799,9 @@ class TestBoundedSemaphoreAdapterOperator(TestOperator):
                     _time = float(time.time())
                     _done_timestamp[_thread_id] = _time
             except Exception as e:
-                assert False, f"Occur something unexpected issue. Please check it. \n" \
-                              f"Exception: {e}"
+                assert False, f"Occur something unexpected issue. Please check it. Exception: {e}"
             else:
-                assert True, f"Testing code successfully."
+                assert True, "Testing code successfully."
 
         # # # # Run multiple workers and save something info at the right time
         run_multi_green_thread(_function=_target_testing)
@@ -863,10 +853,9 @@ class TestBoundedSemaphoreAdapterOperator(TestOperator):
                     _time = float(time.time())
                     _done_timestamp[_async_task_id] = _time
             except Exception as e:
-                assert False, f"Occur something unexpected issue. Please check it. \n" \
-                              f"Exception: {e}"
+                assert False, f"Occur something unexpected issue. Please check it. Exception: {e}"
             else:
-                assert True, f"Testing code successfully."
+                assert True, "Testing code successfully."
 
         # # # # Run multiple workers and save something info at the right time
         run_async(_function=_target_testing, _feature=BoundedSemaphore(value=_Semaphore_Value))
@@ -901,7 +890,7 @@ class TestEventAdapterOperator(TestOperator):
     def test_get_feature_instance_with_parallel(self, event_opts: EventOperator):
         _event = instantiate_event(FeatureMode.Parallel)
         _feature_instn = event_opts._get_feature_instance()
-        assert _feature_instn is _event, f"The feature property should be the 'Event' instance we set."
+        assert _feature_instn is _event, "The feature property should be the 'Event' instance we set."
 
 
     def test_feature_instance_property_with_parallel(self, event_opts: EventOperator):
@@ -909,9 +898,9 @@ class TestEventAdapterOperator(TestOperator):
         try:
             _feature_instn = event_opts._event_instance
         except ValueError as ve:
-            assert False, f"It must to raise a ValueError exception when we try to get feature instance without FeatureMode."
+            assert False, "It must to raise a ValueError exception when we try to get feature instance without FeatureMode."
         else:
-            assert _feature_instn is _event, f"The feature property should be the 'Event' instance we set."
+            assert _feature_instn is _event, "The feature property should be the 'Event' instance we set."
 
 
     def test_feature_in_concurrent(self, event_opts: EventOperator):
@@ -1006,9 +995,9 @@ class TestEventAdapterOperator(TestOperator):
 
     @staticmethod
     def _chk_info(_thread_ids: dict, _thread_flag: dict):
-        assert len(set(_thread_ids.values())) == 2, f"The amount of thread ID (de-duplicate) should be equal to amount of functions '2'."
-        assert len(_thread_flag["producer"]) == 3, f"The amount of producer's flags should be equal to '3'."
-        assert len(_thread_flag["consumer"]) == 3, f"The amount of consumer's flags should be equal to '3'."
+        assert len(set(_thread_ids.values())) == 2, "The amount of thread ID (de-duplicate) should be equal to amount of functions '2'."
+        assert len(_thread_flag["producer"]) == 3, "The amount of producer's flags should be equal to '3'."
+        assert len(_thread_flag["consumer"]) == 3, "The amount of consumer's flags should be equal to '3'."
 
         for _p_index in _thread_flag["producer"]:
             assert _Random_Start_Time <= _p_index <= _Random_End_Time, f"All index of producer set should be in range '{_Random_Start_Time}' and '{_Random_End_Time}'."
@@ -1030,7 +1019,7 @@ class TestConditionAdapterOperator(TestOperator):
     def test_get_feature_instance_with_parallel(self, condition_opts: ConditionOperator):
         _condition = instantiate_condition(FeatureMode.Parallel)
         _feature_instn = condition_opts._get_feature_instance()
-        assert _feature_instn is _condition, f"The feature property should be the 'Condition' instance we set."
+        assert _feature_instn is _condition, "The feature property should be the 'Condition' instance we set."
 
 
     def test_feature_instance_property_with_parallel(self, condition_opts: ConditionOperator):
@@ -1038,9 +1027,9 @@ class TestConditionAdapterOperator(TestOperator):
         try:
             _feature_instn = condition_opts._feature_instance
         except ValueError as ve:
-            assert False, f"It must to raise a ValueError exception when we try to get feature instance without FeatureMode."
+            assert False, "It must to raise a ValueError exception when we try to get feature instance without FeatureMode."
         else:
-            assert _feature_instn is _condition, f"The feature property should be the 'Condition' instance we set."
+            assert _feature_instn is _condition, "The feature property should be the 'Condition' instance we set."
 
 
     def test_feature_in_concurrent(self, condition_opts: ConditionOperator):
@@ -1237,9 +1226,9 @@ class TestConditionAdapterOperator(TestOperator):
 
     @staticmethod
     def _chk_info(_thread_ids: dict, _thread_flag: dict):
-        assert len(set(_thread_ids.values())) == 2, f"The amount of thread ID (de-duplicate) should be equal to amount of functions '2'."
-        assert len(_thread_flag["producer"]) == 3, f"The amount of producer's flags should be equal to '3'."
-        assert len(_thread_flag["consumer"]) == 3, f"The amount of consumer's flags should be equal to '3'."
+        assert len(set(_thread_ids.values())) == 2, "The amount of thread ID (de-duplicate) should be equal to amount of functions '2'."
+        assert len(_thread_flag["producer"]) == 3, "The amount of producer's flags should be equal to '3'."
+        assert len(_thread_flag["consumer"]) == 3, "The amount of consumer's flags should be equal to '3'."
 
         for _p_index in _thread_flag["producer"]:
             assert _Random_Start_Time <= _p_index <= _Random_End_Time, f"All index of producer set should be in range '{_Random_Start_Time}' and '{_Random_End_Time}'."

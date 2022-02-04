@@ -18,13 +18,13 @@ def mr_queue():
 class TestProcessQueue:
 
     def test_queue(self, mr_queue: ProcessQueueType):
-        assert isinstance(mr_queue.Queue.value, Queue) is True, f"This type of instance should be 'multiprocessing.Queue'."
+        assert isinstance(mr_queue.Queue.value, Queue) is True, "This type of instance should be 'multiprocessing.Queue'."
 
 
     def test_simple_queue(self, mr_queue: ProcessQueueType):
-        assert isinstance(mr_queue.SimpleQueue.value, SimpleQueue) is True, f"This type of instance should be 'multiprocessing.SimpleQueue'."
+        assert isinstance(mr_queue.SimpleQueue.value, SimpleQueue) is True, "This type of instance should be 'multiprocessing.SimpleQueue'."
 
 
     def test_joinable_queue(self, mr_queue: ProcessQueueType):
-        assert isinstance(mr_queue.JoinableQueue.value, JoinableQueue) is True, f"This type of instance should be 'multiprocessing.JoinableQueue'."
+        assert isinstance(mr_queue.JoinableQueue.value, JoinableQueue) is True, "This type of instance should be 'multiprocessing.JoinableQueue'."
 

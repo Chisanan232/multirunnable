@@ -2,7 +2,6 @@
 A unittest for pyocean.task module
 """
 
-from multirunnable.mode import RunningMode
 from multirunnable.tasks import QueueTask
 from multirunnable.parallel import ProcessQueueType
 from multirunnable.concurrent import ThreadQueueType
@@ -91,14 +90,14 @@ class TestQueueTask(QueueTaskTestCases):
         try:
             _queue.put(_test_value)
         except Exception as e:
-            assert e is None, f"Occur something unexpected error. Testing fail."
+            assert e is None, "Occur something unexpected error. Testing fail."
         else:
             assert True, f"This object has attribute 'put' and could save value '{_test_value}'."
 
         try:
             _value = _queue.get()
         except Exception as e:
-            assert e is None, f"Occur something unexpected error. Testing fail."
+            assert e is None, "Occur something unexpected error. Testing fail."
         else:
             assert True, f"This object has attribute 'get' and could get value '{_value}'."
             assert _value == _test_value, f"Value should be same as '{_test_value}' we appointed."
@@ -129,9 +128,10 @@ class TestQueueTask(QueueTaskTestCases):
         _under_test_queue = Running_Queue[_queue_task_name]
         assert _under_test_queue is not None, f"The queue value in global value should not be empty (None value) with name '{_queue_task_name}'."
         _queue_one_value = _under_test_queue.get()
-        assert _queue_one_value is not None, f"The queue value should not be empty (None value)."
+        assert _queue_one_value is not None, "The queue value should not be empty (None value)."
 
 
+    @pytest.mark.skip("Not implement testing logic.")
     def test_async_init_queue_with_value(self, queue_task):
         pass
         # _queue_task.async_init_queue_with_values()

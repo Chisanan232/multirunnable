@@ -5,7 +5,6 @@ from multirunnable.coroutine.strategy import GreenThreadStrategy, AsynchronousSt
 
 from .test_config import Worker_Size, Running_Diff_Time, Test_Function_Sleep_Time
 
-from abc import ABCMeta, abstractmethod
 from typing import List
 import threading
 import pytest
@@ -80,32 +79,32 @@ class TestSimpleExecutor:
         executor_as_process._initial_running_strategy()
 
         from multirunnable.executor import General_Runnable_Strategy
-        assert General_Runnable_Strategy is not None, f"It should be assign running-strategy instance."
-        assert isinstance(General_Runnable_Strategy, ProcessStrategy), f"It should be an sub-instance of 'ProcessStrategy'."
+        assert General_Runnable_Strategy is not None, "It should be assign running-strategy instance."
+        assert isinstance(General_Runnable_Strategy, ProcessStrategy), "It should be an sub-instance of 'ProcessStrategy'."
 
 
     def test_initial_running_strategy_with_concurrent(self, executor_as_thread: SimpleExecutor):
         executor_as_thread._initial_running_strategy()
 
         from multirunnable.executor import General_Runnable_Strategy
-        assert General_Runnable_Strategy is not None, f"It should be assign running-strategy instance."
-        assert isinstance(General_Runnable_Strategy, ThreadStrategy), f"It should be an sub-instance of 'ThreadStrategy'."
+        assert General_Runnable_Strategy is not None, "It should be assign running-strategy instance."
+        assert isinstance(General_Runnable_Strategy, ThreadStrategy), "It should be an sub-instance of 'ThreadStrategy'."
 
 
     def test_initial_running_strategy_with_coroutine(self, executor_as_green_thread: SimpleExecutor):
         executor_as_green_thread._initial_running_strategy()
 
         from multirunnable.executor import General_Runnable_Strategy
-        assert General_Runnable_Strategy is not None, f"It should be assign running-strategy instance."
-        assert isinstance(General_Runnable_Strategy, GreenThreadStrategy), f"It should be an sub-instance of 'GreenThreadStrategy'."
+        assert General_Runnable_Strategy is not None, "It should be assign running-strategy instance."
+        assert isinstance(General_Runnable_Strategy, GreenThreadStrategy), "It should be an sub-instance of 'GreenThreadStrategy'."
 
 
     def test_initial_running_strategy_with_asynchronous(self, executor_as_asynchronous: SimpleExecutor):
         executor_as_asynchronous._initial_running_strategy()
 
         from multirunnable.executor import General_Runnable_Strategy
-        assert General_Runnable_Strategy is not None, f"It should be assign running-strategy instance."
-        assert isinstance(General_Runnable_Strategy, AsynchronousStrategy), f"It should be an sub-instance of 'AsynchronousStrategy'."
+        assert General_Runnable_Strategy is not None, "It should be assign running-strategy instance."
+        assert isinstance(General_Runnable_Strategy, AsynchronousStrategy), "It should be an sub-instance of 'AsynchronousStrategy'."
 
 
     @pytest.mark.skip(reason="Not implement testing logic.")
@@ -163,13 +162,13 @@ class TestSimpleExecutor:
 
                 if args:
                     if len(args) == 1:
-                        assert {args} <= set(_args), f"The argument *args* should be one of element of the input outside."
+                        assert {args} <= set(_args), "The argument *args* should be one of element of the input outside."
                     else:
-                        assert set(args) <= set(_args), f"The argument *args* should be one of element of the input outside."
+                        assert set(args) <= set(_args), "The argument *args* should be one of element of the input outside."
                     if len(args) > 1:
-                        assert args == _args, f"The argument *args* should be same as the global variable 'Test_Function_Args'."
+                        assert args == _args, "The argument *args* should be same as the global variable 'Test_Function_Args'."
                 if kwargs:
-                    assert kwargs is None or kwargs == {}, f"The argument *kwargs* should be empty or None value."
+                    assert kwargs is None or kwargs == {}, "The argument *kwargs* should be empty or None value."
 
                 _pid = os.getpid()
                 _ppid = os.getppid()
@@ -234,18 +233,18 @@ class TestSimpleExecutor:
         try:
             executor_as_thread.terminal()
         except Exception as e:
-            assert False, f"It should work finely without any issue. Please check it."
+            assert False, "It should work finely without any issue. Please check it."
         else:
-            assert True, f"It work finely without any issue."
+            assert True, "It work finely without any issue."
 
 
     def test_kill(self, executor_as_thread: SimpleExecutor):
         try:
             executor_as_thread.kill()
         except Exception as e:
-            assert False, f"It should work finely without any issue. Please check it."
+            assert False, "It should work finely without any issue. Please check it."
         else:
-            assert True, f"It work finely without any issue."
+            assert True, "It work finely without any issue."
 
 
     @pytest.mark.skip(reason="Not implement testing logic.")
@@ -265,52 +264,52 @@ class TestSimpleExecutor:
 
     @staticmethod
     def _chk_run_record():
-        assert Running_Count == _Worker_Size, f"The running count should be the same as the process pool size."
+        assert Running_Count == _Worker_Size, "The running count should be the same as the process pool size."
 
         _ppid_list = Running_PPIDs[:]
         _thread_id_list = Running_Thread_IDs[:]
         _current_thread_list = Running_Current_Threads[:]
         _timestamp_list = Running_Finish_Timestamp[:]
 
-        # assert len(set(_ppid_list)) == 1, f"The PPID of each process should be the same."
+        # assert len(set(_ppid_list)) == 1, "The PPID of each process should be the same."
         # assert _ppid_list[0] == Running_Parent_PID, f"The PPID should equal to {Running_Parent_PID}. But it got {_ppid_list[0]}."
-        assert len(_thread_id_list) == _Worker_Size, f"The count of PID (no de-duplicate) should be the same as the count of processes."
-        assert len(set(_thread_id_list)) == _Worker_Size, f"The count of PID (de-duplicate) should be the same as the count of processes."
-        assert len(_thread_id_list) == len(_current_thread_list), f"The count of current process name (no de-duplicate) should be equal to count of PIDs."
-        assert len(set(_thread_id_list)) == len(set(_current_thread_list)), f"The count of current process name (de-duplicate) should be equal to count of PIDs."
+        assert len(_thread_id_list) == _Worker_Size, "The count of PID (no de-duplicate) should be the same as the count of processes."
+        assert len(set(_thread_id_list)) == _Worker_Size, "The count of PID (de-duplicate) should be the same as the count of processes."
+        assert len(_thread_id_list) == len(_current_thread_list), "The count of current process name (no de-duplicate) should be equal to count of PIDs."
+        assert len(set(_thread_id_list)) == len(set(_current_thread_list)), "The count of current process name (de-duplicate) should be equal to count of PIDs."
 
         _max_timestamp = max(_timestamp_list)
         _min_timestamp = min(_timestamp_list)
         _diff_timestamp = _max_timestamp - _min_timestamp
-        assert _diff_timestamp <= Running_Diff_Time, f"Processes should be run in the same time period."
+        assert _diff_timestamp <= Running_Diff_Time, "Processes should be run in the same time period."
 
 
     @staticmethod
     def _chk_map_record(_argument_size):
-        assert Running_Count == _argument_size, f"The running count should be the same as the process pool size."
+        assert Running_Count == _argument_size, "The running count should be the same as the process pool size."
 
         _ppid_list = Running_PPIDs[:]
         _thread_id_list = Running_Thread_IDs[:]
         _current_thread_list = Running_Current_Threads[:]
         _timestamp_list = Running_Finish_Timestamp[:]
 
-        # assert len(set(_ppid_list)) == 1, f"The PPID of each process should be the same."
+        # assert len(set(_ppid_list)) == 1, "The PPID of each process should be the same."
         # assert _ppid_list[0] == Running_Parent_PID, f"The PPID should equal to {Running_Parent_PID}. But it got {_ppid_list[0]}."
-        assert len(_thread_id_list) == _argument_size, f"The count of PID (no de-duplicate) should be the same as the count of processes."
-        assert len(set(_thread_id_list)) == _argument_size, f"The count of PID (de-duplicate) should be the same as the count of processes."
-        assert len(_thread_id_list) == len(_current_thread_list), f"The count of current process name (no de-duplicate) should be equal to count of PIDs."
-        assert len(set(_thread_id_list)) == len(set(_current_thread_list)), f"The count of current process name (de-duplicate) should be equal to count of PIDs."
+        assert len(_thread_id_list) == _argument_size, "The count of PID (no de-duplicate) should be the same as the count of processes."
+        assert len(set(_thread_id_list)) == _argument_size, "The count of PID (de-duplicate) should be the same as the count of processes."
+        assert len(_thread_id_list) == len(_current_thread_list), "The count of current process name (no de-duplicate) should be equal to count of PIDs."
+        assert len(set(_thread_id_list)) == len(set(_current_thread_list)), "The count of current process name (de-duplicate) should be equal to count of PIDs."
 
         _max_timestamp = max(_timestamp_list)
         _min_timestamp = min(_timestamp_list)
         _diff_timestamp = _max_timestamp - _min_timestamp
-        assert _diff_timestamp <= Running_Diff_Time, f"Processes should be run in the same time period."
+        assert _diff_timestamp <= Running_Diff_Time, "Processes should be run in the same time period."
 
 
     @staticmethod
     def _chk_map_with_function(_functions, _function_a_flag, _function_b_flag, _thread_ids, _threads, _done_timestamp):
-        assert _function_a_flag == 1, f"The running count should be the same as the amount of function '_target_a'."
-        assert _function_b_flag == 1, f"The running count should be the same as the amount of function '_target_b'."
+        assert _function_a_flag == 1, "The running count should be the same as the amount of function '_target_a'."
+        assert _function_b_flag == 1, "The running count should be the same as the amount of function '_target_b'."
 
         _thread_id_list = _thread_ids[:]
         _current_thread_list = _threads[:]
@@ -318,13 +317,13 @@ class TestSimpleExecutor:
 
         _function_amount = len(_functions)
 
-        assert len(_thread_id_list) == _function_amount, f"The count of PID (no de-duplicate) should be the same as the count of processes."
-        assert len(set(_thread_id_list)) == _function_amount, f"The count of PID (de-duplicate) should be the same as the count of processes."
-        assert len(_thread_id_list) == len(_current_thread_list), f"The count of current process name (no de-duplicate) should be equal to count of PIDs."
-        assert len(set(_thread_id_list)) == len(set(_current_thread_list)), f"The count of current process name (de-duplicate) should be equal to count of PIDs."
+        assert len(_thread_id_list) == _function_amount, "The count of PID (no de-duplicate) should be the same as the count of processes."
+        assert len(set(_thread_id_list)) == _function_amount, "The count of PID (de-duplicate) should be the same as the count of processes."
+        assert len(_thread_id_list) == len(_current_thread_list), "The count of current process name (no de-duplicate) should be equal to count of PIDs."
+        assert len(set(_thread_id_list)) == len(set(_current_thread_list)), "The count of current process name (de-duplicate) should be equal to count of PIDs."
 
         _max_timestamp = max(_timestamp_list)
         _min_timestamp = min(_timestamp_list)
         _diff_timestamp = _max_timestamp - _min_timestamp
-        assert _diff_timestamp <= Running_Diff_Time, f"Processes should be run in the same time period."
+        assert _diff_timestamp <= Running_Diff_Time, "Processes should be run in the same time period."
 

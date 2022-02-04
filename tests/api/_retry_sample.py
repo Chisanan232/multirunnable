@@ -368,7 +368,6 @@ class TargetBoundedFunction:
         global Running_Target_Function_Counter, Retry_Method_Flag
         Running_Target_Function_Counter += 1
         Retry_Method_Flag = True
-        print(f"[DEBUG] Running_Target_Function_Counter: {Running_Target_Function_Counter}")
         raise _Test_Exception
 
 

@@ -45,9 +45,9 @@ class TestArchiver:
             zip_archiver.compress(data_map_list=[_zip_data])
             zip_archiver.close()
         except Exception as e:
-            assert False, f""
+            assert False, ""
         else:
-            assert True, f""
+            assert True, ""
 
         _exist_file = os.path.exists(_test_file_path)
         assert _exist_file is True, "It should exist a .zip file."

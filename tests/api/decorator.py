@@ -25,7 +25,6 @@ import threading
 import asyncio
 import pytest
 import time
-import re
 import os
 
 
@@ -145,11 +144,11 @@ class TestRetryMechanism:
         _result = target_function_with_default()
         _process_flag = get_process_flag()
 
-        assert _process_flag.Running_Target_Function_Counter == _Default_Value, F"The running counter flag should be '{_Default_Value}'"
-        assert _process_flag.Initial_Handling_Flag_Counter == 0, F"The initial handling flag should be '0'."
-        assert _process_flag.Done_Handling_Flag_Counter == 0, F"The done handling flag should be '0'"
-        assert _process_flag.Final_Handling_Flag_Counter == 0, F"The final handling flag should be '0'"
-        assert _process_flag.Error_Handling_Flag_Counter == 0, F"The error handling flag should be '0'"
+        assert _process_flag.Running_Target_Function_Counter == _Default_Value, f"The running counter flag should be '{_Default_Value}'"
+        assert _process_flag.Initial_Handling_Flag_Counter == 0, "The initial handling flag should be '0'."
+        assert _process_flag.Done_Handling_Flag_Counter == 0, "The done handling flag should be '0'"
+        assert _process_flag.Final_Handling_Flag_Counter == 0, "The final handling flag should be '0'"
+        assert _process_flag.Error_Handling_Flag_Counter == 0, "The error handling flag should be '0'"
         assert _result == _Test_Return_Value, f"The return value should be the same as '{_Test_Return_Value}'."
 
 
@@ -159,18 +158,18 @@ class TestRetryMechanism:
         try:
             target_function_raising_exception_with_default()
         except Exception as e:
-            assert e is _Test_Exception, f""
-            assert "Test for raising exception" in str(e), f""
+            assert e is _Test_Exception, ""
+            assert "Test for raising exception" in str(e), ""
         else:
-            assert False, f"It should doesn't handle the exception and raise it out again."
+            assert False, "It should doesn't handle the exception and raise it out again."
 
         _process_flag = get_process_flag()
 
-        assert _process_flag.Running_Target_Function_Counter == _Default_Value, F"The running counter flag should be '{_Default_Value}'"
-        assert _process_flag.Initial_Handling_Flag_Counter == 0, F"The initial handling flag should be '0'."
-        assert _process_flag.Done_Handling_Flag_Counter == 0, F"The done handling flag should be '0'"
-        assert _process_flag.Final_Handling_Flag_Counter == 0, F"The final handling flag should be '0'"
-        assert _process_flag.Error_Handling_Flag_Counter == 0, F"The error handling flag should be '0'"
+        assert _process_flag.Running_Target_Function_Counter == _Default_Value, f"The running counter flag should be '{_Default_Value}'"
+        assert _process_flag.Initial_Handling_Flag_Counter == 0, "The initial handling flag should be '0'."
+        assert _process_flag.Done_Handling_Flag_Counter == 0, "The done handling flag should be '0'"
+        assert _process_flag.Final_Handling_Flag_Counter == 0, "The final handling flag should be '0'"
+        assert _process_flag.Error_Handling_Flag_Counter == 0, "The error handling flag should be '0'"
 
 
     def test_retry_decorating_at_function(self):
@@ -179,11 +178,11 @@ class TestRetryMechanism:
         _result = target_function()
         _process_flag = get_process_flag()
 
-        assert _process_flag.Running_Target_Function_Counter == _Default_Value, F"The running counter flag should be '{_Default_Value}'"
-        assert _process_flag.Initial_Handling_Flag_Counter == _Default_Value, F"The initial handling flag should be '{_Default_Value}'."
-        assert _process_flag.Done_Handling_Flag_Counter == _Default_Value, F"The done handling flag should be '{_Default_Value}'"
-        assert _process_flag.Final_Handling_Flag_Counter == _Default_Value, F"The final handling flag should be '{_Default_Value}'"
-        assert _process_flag.Error_Handling_Flag_Counter == 0, F"The error handling flag should be 'False'"
+        assert _process_flag.Running_Target_Function_Counter == _Default_Value, f"The running counter flag should be '{_Default_Value}'"
+        assert _process_flag.Initial_Handling_Flag_Counter == _Default_Value, f"The initial handling flag should be '{_Default_Value}'."
+        assert _process_flag.Done_Handling_Flag_Counter == _Default_Value, f"The done handling flag should be '{_Default_Value}'"
+        assert _process_flag.Final_Handling_Flag_Counter == _Default_Value, f"The final handling flag should be '{_Default_Value}'"
+        assert _process_flag.Error_Handling_Flag_Counter == 0, "The error handling flag should be 'False'"
         assert _result == _Test_Return_Value, f"The return value should be the same as '{_Test_Return_Value}'."
 
 
@@ -193,11 +192,11 @@ class TestRetryMechanism:
         target_function_raising_exception()
         _process_flag = get_process_flag()
 
-        assert _process_flag.Running_Target_Function_Counter == _Retry_Time, F"The running counter flag should be '{_Retry_Time}'"
-        assert _process_flag.Initial_Handling_Flag_Counter == _Retry_Time, F"The initial handling flag should be '{_Retry_Time}'."
-        assert _process_flag.Done_Handling_Flag_Counter == 0, F"The done handling flag should be '0'"
-        assert _process_flag.Final_Handling_Flag_Counter == _Retry_Time, F"The final handling flag should be '{_Retry_Time}'"
-        assert _process_flag.Error_Handling_Flag_Counter == _Retry_Time, F"The error handling flag should be '{_Retry_Time}'"
+        assert _process_flag.Running_Target_Function_Counter == _Retry_Time, f"The running counter flag should be '{_Retry_Time}'"
+        assert _process_flag.Initial_Handling_Flag_Counter == _Retry_Time, f"The initial handling flag should be '{_Retry_Time}'."
+        assert _process_flag.Done_Handling_Flag_Counter == 0, "The done handling flag should be '0'"
+        assert _process_flag.Final_Handling_Flag_Counter == _Retry_Time, f"The final handling flag should be '{_Retry_Time}'"
+        assert _process_flag.Error_Handling_Flag_Counter == _Retry_Time, f"The error handling flag should be '{_Retry_Time}'"
 
 
     def test_retry_decorating_at_bounded_function_with_default(self, target_bounded_function: TargetBoundedFunction):
@@ -206,11 +205,11 @@ class TestRetryMechanism:
         _result = target_bounded_function.target_method_with_default()
         _process_flag = get_process_flag()
 
-        assert _process_flag.Running_Target_Function_Counter == _Default_Value, f"The running counter flag should be '0'."
-        assert _process_flag.Initial_Handling_Flag_Counter == 0, F"The initial handling flag should be '0'."
-        assert _process_flag.Done_Handling_Flag_Counter == 0, F"The done handling flag should be '0'"
-        assert _process_flag.Final_Handling_Flag_Counter == 0, F"The final handling flag should be '0'"
-        assert _process_flag.Error_Handling_Flag_Counter == 0, F"The error handling flag should be '0'"
+        assert _process_flag.Running_Target_Function_Counter == _Default_Value, "The running counter flag should be '0'."
+        assert _process_flag.Initial_Handling_Flag_Counter == 0, "The initial handling flag should be '0'."
+        assert _process_flag.Done_Handling_Flag_Counter == 0, "The done handling flag should be '0'"
+        assert _process_flag.Final_Handling_Flag_Counter == 0, "The final handling flag should be '0'"
+        assert _process_flag.Error_Handling_Flag_Counter == 0, "The error handling flag should be '0'"
         assert _result == _Test_Return_Value, f"The return value should be the same as '{_Test_Return_Value}'."
 
 
@@ -220,18 +219,18 @@ class TestRetryMechanism:
         try:
             _result = target_bounded_function.target_method_raising_exception_with_default()
         except Exception as e:
-            assert e is _Test_Exception, f""
-            assert "Test for raising exception" in str(e), f""
+            assert e is _Test_Exception, ""
+            assert "Test for raising exception" in str(e), ""
         else:
-            assert False, f"It should doesn't handle the exception and raise it out again."
+            assert False, "It should doesn't handle the exception and raise it out again."
 
         _process_flag = get_process_flag()
 
         assert _process_flag.Running_Target_Function_Counter == _Default_Retry_Time, f"The running counter flag should be '{_Default_Retry_Time}'."
-        assert _process_flag.Initial_Handling_Flag_Counter == 0, F"The default timeout value is '{_Default_Retry_Time}' so that initial handling flag should be '0'."
-        assert _process_flag.Done_Handling_Flag_Counter == 0, F"The default timeout value is '{_Default_Retry_Time}' so that done handling flag should be '0'"
-        assert _process_flag.Final_Handling_Flag_Counter == 0, F"The default timeout value is '{_Default_Retry_Time}' so that final handling flag should be '0'"
-        assert _process_flag.Error_Handling_Flag_Counter == 0, F"The default timeout value is '{_Default_Retry_Time}' so that error handling flag should be '0'"
+        assert _process_flag.Initial_Handling_Flag_Counter == 0, f"The default timeout value is '{_Default_Retry_Time}' so that initial handling flag should be '0'."
+        assert _process_flag.Done_Handling_Flag_Counter == 0, f"The default timeout value is '{_Default_Retry_Time}' so that done handling flag should be '0'"
+        assert _process_flag.Final_Handling_Flag_Counter == 0, f"The default timeout value is '{_Default_Retry_Time}' so that final handling flag should be '0'"
+        assert _process_flag.Error_Handling_Flag_Counter == 0, f"The default timeout value is '{_Default_Retry_Time}' so that error handling flag should be '0'"
 
 
     def test_retry_decorating_at_bounded_function(self, target_bounded_function: TargetBoundedFunction):
@@ -241,10 +240,10 @@ class TestRetryMechanism:
         _process_flag = get_process_flag()
 
         assert _process_flag.Running_Target_Function_Counter == _Default_Value, f"The running counter flag should be '{_Default_Value}'."
-        assert _process_flag.Initial_Handling_Flag_Counter == _Default_Value, F"The initial handling flag should be '{_Default_Value}'."
-        assert _process_flag.Done_Handling_Flag_Counter == _Default_Value, F"The done handling flag should be '{_Default_Value}'"
-        assert _process_flag.Final_Handling_Flag_Counter == _Default_Value, F"The final handling flag should be '{_Default_Value}'"
-        assert _process_flag.Error_Handling_Flag_Counter == 0, F"The error handling flag should be '0'"
+        assert _process_flag.Initial_Handling_Flag_Counter == _Default_Value, f"The initial handling flag should be '{_Default_Value}'."
+        assert _process_flag.Done_Handling_Flag_Counter == _Default_Value, f"The done handling flag should be '{_Default_Value}'"
+        assert _process_flag.Final_Handling_Flag_Counter == _Default_Value, f"The final handling flag should be '{_Default_Value}'"
+        assert _process_flag.Error_Handling_Flag_Counter == 0, "The error handling flag should be '0'"
         assert _result == _Test_Return_Value, f"The return value should be the same as '{_Test_Return_Value}'."
 
 
@@ -255,10 +254,10 @@ class TestRetryMechanism:
         _process_flag = get_process_flag()
 
         assert _process_flag.Running_Target_Function_Counter == _Retry_Time, f"The running counter flag should be '{_Retry_Time}'."
-        assert _process_flag.Initial_Handling_Flag_Counter == _Retry_Time, F"The initial handling flag should be '{_Retry_Time}'."
-        assert _process_flag.Done_Handling_Flag_Counter == 0, F"The done handling flag should be '0'"
-        assert _process_flag.Final_Handling_Flag_Counter == _Retry_Time, F"The final handling flag should be '{_Retry_Time}'"
-        assert _process_flag.Error_Handling_Flag_Counter == _Retry_Time, F"The error handling flag should be '{_Retry_Time}'"
+        assert _process_flag.Initial_Handling_Flag_Counter == _Retry_Time, f"The initial handling flag should be '{_Retry_Time}'."
+        assert _process_flag.Done_Handling_Flag_Counter == 0, "The done handling flag should be '0'"
+        assert _process_flag.Final_Handling_Flag_Counter == _Retry_Time, f"The final handling flag should be '{_Retry_Time}'"
+        assert _process_flag.Error_Handling_Flag_Counter == _Retry_Time, f"The error handling flag should be '{_Retry_Time}'"
 
 
 
@@ -270,11 +269,11 @@ class TestAsyncRetryMechanism:
         async_strategy.run(function=async_target_function_with_default)
         _process_flag = get_process_flag()
 
-        assert _process_flag.Running_Target_Function_Counter == _Default_Value * _Worker_Size, F"The running counter flag should be '{_Default_Value}'"
-        assert _process_flag.Initial_Handling_Flag_Counter == 0, F"The initial handling flag should be '0'."
-        assert _process_flag.Done_Handling_Flag_Counter == 0, F"The done handling flag should be '0'"
-        assert _process_flag.Final_Handling_Flag_Counter == 0, F"The final handling flag should be '0'"
-        assert _process_flag.Error_Handling_Flag_Counter == 0, F"The error handling flag should be '0'"
+        assert _process_flag.Running_Target_Function_Counter == _Default_Value * _Worker_Size, f"The running counter flag should be '{_Default_Value}'"
+        assert _process_flag.Initial_Handling_Flag_Counter == 0, "The initial handling flag should be '0'."
+        assert _process_flag.Done_Handling_Flag_Counter == 0, "The done handling flag should be '0'"
+        assert _process_flag.Final_Handling_Flag_Counter == 0, "The final handling flag should be '0'"
+        assert _process_flag.Error_Handling_Flag_Counter == 0, "The error handling flag should be '0'"
 
         _result = async_strategy.get_result()
         _result_content = [_r.data for _r in _result]
@@ -301,10 +300,10 @@ class TestAsyncRetryMechanism:
         _process_flag = get_process_flag()
 
         assert _process_flag.Running_Target_Function_Counter == _Default_Value * _Worker_Size, F"The running counter flag should be '{_Default_Value}'"
-        assert _process_flag.Initial_Handling_Flag_Counter == 0, F"The initial handling flag should be '0'."
-        assert _process_flag.Done_Handling_Flag_Counter == 0, F"The done handling flag should be '0'"
-        assert _process_flag.Final_Handling_Flag_Counter == 0, F"The final handling flag should be '0'"
-        assert _process_flag.Error_Handling_Flag_Counter == 0, F"The error handling flag should be '0'"
+        assert _process_flag.Initial_Handling_Flag_Counter == 0, "The initial handling flag should be '0'."
+        assert _process_flag.Done_Handling_Flag_Counter == 0, "The done handling flag should be '0'"
+        assert _process_flag.Final_Handling_Flag_Counter == 0, "The final handling flag should be '0'"
+        assert _process_flag.Error_Handling_Flag_Counter == 0, "The error handling flag should be '0'"
 
 
     def test_async_retry_decorating_at_function(self, async_strategy: AsynchronousStrategy):
@@ -314,11 +313,11 @@ class TestAsyncRetryMechanism:
 
         _process_flag = get_process_flag()
 
-        assert _process_flag.Running_Target_Function_Counter == _Default_Value * _Worker_Size, F"The running counter flag should be '{_Default_Value}'"
-        assert _process_flag.Initial_Handling_Flag_Counter == _Default_Value * _Worker_Size, F"The initial handling flag should be '{_Default_Value}'."
-        assert _process_flag.Done_Handling_Flag_Counter == _Default_Value * _Worker_Size, F"The done handling flag should be '{_Default_Value}'"
-        assert _process_flag.Final_Handling_Flag_Counter == _Default_Value * _Worker_Size, F"The final handling flag should be '{_Default_Value}'"
-        assert _process_flag.Error_Handling_Flag_Counter == 0, F"The error handling flag should be 'False'"
+        assert _process_flag.Running_Target_Function_Counter == _Default_Value * _Worker_Size, f"The running counter flag should be '{_Default_Value}'"
+        assert _process_flag.Initial_Handling_Flag_Counter == _Default_Value * _Worker_Size, f"The initial handling flag should be '{_Default_Value}'."
+        assert _process_flag.Done_Handling_Flag_Counter == _Default_Value * _Worker_Size, f"The done handling flag should be '{_Default_Value}'"
+        assert _process_flag.Final_Handling_Flag_Counter == _Default_Value * _Worker_Size, f"The final handling flag should be '{_Default_Value}'"
+        assert _process_flag.Error_Handling_Flag_Counter == 0, "The error handling flag should be 'False'"
 
         _result = async_strategy.get_result()
         _result_content = [_r.data for _r in _result]
@@ -334,11 +333,11 @@ class TestAsyncRetryMechanism:
 
         _process_flag = get_process_flag()
 
-        assert _process_flag.Running_Target_Function_Counter == _Retry_Time * _Worker_Size, F"The running counter flag should be '{_Retry_Time}'"
-        assert _process_flag.Initial_Handling_Flag_Counter == _Retry_Time * _Worker_Size, F"The initial handling flag should be '{_Retry_Time}'."
-        assert _process_flag.Done_Handling_Flag_Counter == 0, F"The done handling flag should be '0'"
-        assert _process_flag.Final_Handling_Flag_Counter == _Retry_Time * _Worker_Size, F"The final handling flag should be '{_Retry_Time}'"
-        assert _process_flag.Error_Handling_Flag_Counter == _Retry_Time * _Worker_Size, F"The error handling flag should be '{_Retry_Time}'"
+        assert _process_flag.Running_Target_Function_Counter == _Retry_Time * _Worker_Size, f"The running counter flag should be '{_Retry_Time}'"
+        assert _process_flag.Initial_Handling_Flag_Counter == _Retry_Time * _Worker_Size, f"The initial handling flag should be '{_Retry_Time}'."
+        assert _process_flag.Done_Handling_Flag_Counter == 0, "The done handling flag should be '0'"
+        assert _process_flag.Final_Handling_Flag_Counter == _Retry_Time * _Worker_Size, f"The final handling flag should be '{_Retry_Time}'"
+        assert _process_flag.Error_Handling_Flag_Counter == _Retry_Time * _Worker_Size, f"The error handling flag should be '{_Retry_Time}'"
 
 
     def test_async_retry_decorating_at_bounded_function_with_default(self, async_strategy: AsynchronousStrategy, target_bounded_async_function: TargetBoundedAsyncFunction):
@@ -349,10 +348,10 @@ class TestAsyncRetryMechanism:
         _process_flag = get_process_flag()
 
         assert _process_flag.Running_Target_Function_Counter == _Worker_Size, f"The running counter flag should be '{_Worker_Size}'."
-        assert _process_flag.Initial_Handling_Flag_Counter == 0, F"The count of initial handling flag should be '{_Worker_Size}'."
-        assert _process_flag.Done_Handling_Flag_Counter == 0, F"The count of done handling flag should be '{_Worker_Size}'"
-        assert _process_flag.Final_Handling_Flag_Counter == 0, F"The count of final handling flag should be '{_Worker_Size}'"
-        assert _process_flag.Error_Handling_Flag_Counter == 0, F"The count of error handling flag should be '0'"
+        assert _process_flag.Initial_Handling_Flag_Counter == 0, f"The count of initial handling flag should be '{_Worker_Size}'."
+        assert _process_flag.Done_Handling_Flag_Counter == 0, f"The count of done handling flag should be '{_Worker_Size}'"
+        assert _process_flag.Final_Handling_Flag_Counter == 0, f"The count of final handling flag should be '{_Worker_Size}'"
+        assert _process_flag.Error_Handling_Flag_Counter == 0, "The count of error handling flag should be '0'"
 
 
     def test_async_retry_decorating_at_bounded_function_raising_exception_with_default(self, async_strategy: AsynchronousStrategy, target_bounded_async_function: TargetBoundedAsyncFunction):
@@ -363,10 +362,10 @@ class TestAsyncRetryMechanism:
         _process_flag = get_process_flag()
 
         assert _process_flag.Running_Target_Function_Counter == _Worker_Size, f"The running counter flag should be '{_Worker_Size}'."
-        assert _process_flag.Initial_Handling_Flag_Counter == 0, F"The default timeout value is '{_Default_Retry_Time}' so that count of initial handling flag should be '{_Default_Retry_Time * _Worker_Size}'."
-        assert _process_flag.Done_Handling_Flag_Counter == 0, F"The default timeout value is '{_Default_Retry_Time}' so that count of done handling flag should be 'False'"
-        assert _process_flag.Final_Handling_Flag_Counter == 0, F"The default timeout value is '{_Default_Retry_Time}' so that count of final handling flag should be '{_Default_Retry_Time * _Worker_Size}'"
-        assert _process_flag.Error_Handling_Flag_Counter == 0, F"The default timeout value is '{_Default_Retry_Time}' so that count of error handling flag should be '{_Default_Retry_Time * _Worker_Size}'"
+        assert _process_flag.Initial_Handling_Flag_Counter == 0, f"The default timeout value is '{_Default_Retry_Time}' so that count of initial handling flag should be '{_Default_Retry_Time * _Worker_Size}'."
+        assert _process_flag.Done_Handling_Flag_Counter == 0, f"The default timeout value is '{_Default_Retry_Time}' so that count of done handling flag should be 'False'"
+        assert _process_flag.Final_Handling_Flag_Counter == 0, f"The default timeout value is '{_Default_Retry_Time}' so that count of final handling flag should be '{_Default_Retry_Time * _Worker_Size}'"
+        assert _process_flag.Error_Handling_Flag_Counter == 0, f"The default timeout value is '{_Default_Retry_Time}' so that count of error handling flag should be '{_Default_Retry_Time * _Worker_Size}'"
 
 
     def test_async_retry_decorating_at_bounded_function(self, async_strategy: AsynchronousStrategy, target_bounded_async_function: TargetBoundedAsyncFunction):
@@ -377,10 +376,10 @@ class TestAsyncRetryMechanism:
         _process_flag = get_process_flag()
 
         assert _process_flag.Running_Target_Function_Counter == _Worker_Size, f"The running counter flag should be '{_Worker_Size}'."
-        assert _process_flag.Initial_Handling_Flag_Counter == _Worker_Size, F"The count of initial handling flag should be '{_Worker_Size}'."
-        assert _process_flag.Done_Handling_Flag_Counter == _Worker_Size, F"The count of done handling flag should be '{_Worker_Size}'"
-        assert _process_flag.Final_Handling_Flag_Counter == _Worker_Size, F"The count of final handling flag should be '{_Worker_Size}'"
-        assert _process_flag.Error_Handling_Flag_Counter == 0, F"The count of error handling flag should be '0'"
+        assert _process_flag.Initial_Handling_Flag_Counter == _Worker_Size, f"The count of initial handling flag should be '{_Worker_Size}'."
+        assert _process_flag.Done_Handling_Flag_Counter == _Worker_Size, f"The count of done handling flag should be '{_Worker_Size}'"
+        assert _process_flag.Final_Handling_Flag_Counter == _Worker_Size, f"The count of final handling flag should be '{_Worker_Size}'"
+        assert _process_flag.Error_Handling_Flag_Counter == 0, "The count of error handling flag should be '0'"
 
 
     def test_async_retry_decorating_at_bounded_function_raising_exception(self, async_strategy: AsynchronousStrategy, target_bounded_async_function: TargetBoundedAsyncFunction):
@@ -391,10 +390,10 @@ class TestAsyncRetryMechanism:
         _process_flag = get_process_flag()
 
         assert _process_flag.Running_Target_Function_Counter == _Retry_Time * _Worker_Size, f"The running counter flag should be '{_Worker_Size}'."
-        assert _process_flag.Initial_Handling_Flag_Counter == _Retry_Time * _Worker_Size, F"The count of initial handling flag should be '{_Retry_Time * _Worker_Size}'."
-        assert _process_flag.Done_Handling_Flag_Counter == 0, F"The count of done handling flag should be 'False'"
-        assert _process_flag.Final_Handling_Flag_Counter == _Retry_Time * _Worker_Size, F"The count of final handling flag should be '{_Retry_Time * _Worker_Size}'"
-        assert _process_flag.Error_Handling_Flag_Counter == _Retry_Time * _Worker_Size, F"The count of error handling flag should be '{_Retry_Time * _Worker_Size}'"
+        assert _process_flag.Initial_Handling_Flag_Counter == _Retry_Time * _Worker_Size, f"The count of initial handling flag should be '{_Retry_Time * _Worker_Size}'."
+        assert _process_flag.Done_Handling_Flag_Counter == 0, "The count of done handling flag should be 'False'"
+        assert _process_flag.Final_Handling_Flag_Counter == _Retry_Time * _Worker_Size, f"The count of final handling flag should be '{_Retry_Time * _Worker_Size}'"
+        assert _process_flag.Error_Handling_Flag_Counter == _Retry_Time * _Worker_Size, f"The count of error handling flag should be '{_Retry_Time * _Worker_Size}'"
 
 
 
@@ -561,10 +560,9 @@ class TestFeaturesDecorator:
                 _time = float(time.time())
                 _done_timestamp[_process_id] = _time
             except Exception as e:
-                assert False, f"Occur something unexpected issue. Please check it. \n" \
-                              f"Exception: {e}"
+                assert False, f"Occur something unexpected issue. Please check it. Exception: {e}"
             else:
-                assert True, f"Testing code successfully."
+                assert True, "Testing code successfully."
 
         # # # # Run multiple workers and save something info at the right time
         run_multi_process(_function=_target_testing)
@@ -585,10 +583,9 @@ class TestFeaturesDecorator:
                 _time = float(time.time())
                 _done_timestamp[_thread_id] = _time
             except Exception as e:
-                assert False, f"Occur something unexpected issue. Please check it. \n" \
-                              f"Exception: {e}"
+                assert False, f"Occur something unexpected issue. Please check it. Exception: {e}"
             else:
-                assert True, f"Testing code successfully."
+                assert True, "Testing code successfully."
 
         # # # # Run multiple workers and save something info at the right time
         run_multi_threads(_function=_target_testing)
@@ -609,10 +606,9 @@ class TestFeaturesDecorator:
                 _time = float(time.time())
                 _done_timestamp[_thread_id] = _time
             except Exception as e:
-                assert False, f"Occur something unexpected issue. Please check it. \n" \
-                              f"Exception: {e}"
+                assert False, f"Occur something unexpected issue. Please check it. Exception: {e}"
             else:
-                assert True, f"Testing code successfully."
+                assert True, "Testing code successfully."
 
         # # # # Run multiple workers and save something info at the right time
         run_multi_green_thread(_function=_target_testing)
@@ -726,10 +722,9 @@ class TestAsyncFeaturesDecorator:
                 _time = float(time.time())
                 _done_timestamp[_current_task_id] = _time
             except Exception as e:
-                assert False, f"Occur something unexpected issue. Please check it. \n" \
-                              f"Exception: {e}"
+                assert False, f"Occur something unexpected issue. Please check it. Exception: {e}"
             else:
-                assert True, f"Testing code successfully."
+                assert True, "Testing code successfully."
 
         # # # # Run multiple workers and save something info at the right time
         run_async(_function=_target_testing, _feature=BoundedSemaphore(value=_Semaphore_Value))

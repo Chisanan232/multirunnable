@@ -76,9 +76,9 @@ def target_fun(*args, **kwargs) -> str:
         Running_Count += 1
 
         if args:
-            assert args == Test_Function_Args, f"The argument *args* should be same as the input outside."
+            assert args == Test_Function_Args, "The argument *args* should be same as the input outside."
         if kwargs:
-            assert kwargs == Test_Function_Kwargs, f"The argument *kwargs* should be same as the input outside."
+            assert kwargs == Test_Function_Kwargs, "The argument *kwargs* should be same as the input outside."
 
         _pid = os.getpid()
         _ppid = os.getppid()
@@ -102,9 +102,9 @@ def pool_target_fun(*args, **kwargs) -> str:
         Pool_Running_Count += 1
 
         if args:
-            assert args == Test_Function_Args, f"The argument *args* should be same as the input outside."
+            assert args == Test_Function_Args, "The argument *args* should be same as the input outside."
         if kwargs:
-            assert kwargs == Test_Function_Kwargs, f"The argument *kwargs* should be same as the input outside."
+            assert kwargs == Test_Function_Kwargs, "The argument *kwargs* should be same as the input outside."
 
         _pid = os.getpid()
         _ppid = os.getppid()
@@ -139,11 +139,11 @@ def map_target_fun(*args, **kwargs):
         Pool_Running_Count += 1
 
         if args:
-            assert set(args) <= set(Test_Function_Args), f"The argument *args* should be one of element of the input outside."
+            assert set(args) <= set(Test_Function_Args), "The argument *args* should be one of element of the input outside."
             if len(args) > 1:
-                assert args == Test_Function_Args, f"The argument *args* should be same as the global variable 'Test_Function_Args'."
+                assert args == Test_Function_Args, "The argument *args* should be same as the global variable 'Test_Function_Args'."
         if kwargs:
-            assert kwargs is None or kwargs == {}, f"The argument *kwargs* should be empty or None value."
+            assert kwargs is None or kwargs == {}, "The argument *kwargs* should be empty or None value."
 
         _pid = os.getpid()
         _ppid = os.getppid()
@@ -174,11 +174,11 @@ def map_target_fun_with_diff_args(*args, **kwargs):
         Pool_Running_Count += 1
 
         if args:
-            assert {args} <= set(Test_Function_Multiple_Diff_Args), f"The argument *args* should be one of element of the input outside."
+            assert {args} <= set(Test_Function_Multiple_Diff_Args), "The argument *args* should be one of element of the input outside."
             # if len(args) > 1:
-            #     assert args == Test_Function_Args, f"The argument *args* should be same as the global variable 'Test_Function_Args'."
+            #     assert args == Test_Function_Args, "The argument *args* should be same as the global variable 'Test_Function_Args'."
         if kwargs:
-            assert kwargs is None or kwargs == {}, f"The argument *kwargs* should be empty or None value."
+            assert kwargs is None or kwargs == {}, "The argument *kwargs* should be empty or None value."
 
         _pid = os.getpid()
         _ppid = os.getppid()
@@ -214,9 +214,9 @@ async def target_async_fun(*args, **kwargs) -> str:
         Running_Count += 1
 
         if args:
-            assert args == Test_Function_Args, f"The argument *args* should be same as the input outside."
+            assert args == Test_Function_Args, "The argument *args* should be same as the input outside."
         if kwargs:
-            assert kwargs == Test_Function_Kwargs, f"The argument *kwargs* should be same as the input outside."
+            assert kwargs == Test_Function_Kwargs, "The argument *kwargs* should be same as the input outside."
 
         _pid = os.getpid()
         _ppid = os.getppid()
@@ -344,8 +344,8 @@ def async_strategy() -> AsynchronousStrategy:
     return AsynchronousStrategy(executors=Green_Thread_Size)
 
 
-_Generate_Worker_Error_Msg = f"" \
-                             f"The instances which be created by method 'generate_worker' should be an instance of 'multiprocessing.Process'."
+_Generate_Worker_Error_Msg = "" \
+                             "The instances which be created by method 'generate_worker' should be an instance of 'multiprocessing.Process'."
 
 
 class TestGreenThread(GeneralRunningTestSpec):
@@ -805,20 +805,20 @@ class TestGreenThread(GeneralRunningTestSpec):
             args=Test_Function_Args)
 
         _result = strategy.get_result()
-        assert _result is not None and _result != [], f"The running result should not be empty."
-        assert type(_result) is list, f"The result should be a list type object."
+        assert _result is not None and _result != [], "The running result should not be empty."
+        assert type(_result) is list, "The result should be a list type object."
         for _r in _result:
-            assert isinstance(_r, CoroutineResult) is True, f"The element of result should be instance of object 'ConcurrentResult'."
-            assert _r.pid, f"The PID should exists in list we record."
-            assert _r.worker_name, f"It should have thread name."
-            assert _r.worker_ident, f"It should have thread identity."
-            # assert _r.loop, f""
-            assert _r.parent, f""
-            assert _r.args is not None, f""
-            assert _r.kwargs is not None, f""
+            assert isinstance(_r, CoroutineResult) is True, "The element of result should be instance of object 'ConcurrentResult'."
+            assert _r.pid, "The PID should exists in list we record."
+            assert _r.worker_name, "It should have thread name."
+            assert _r.worker_ident, "It should have thread identity."
+            # assert _r.loop, ""
+            assert _r.parent, ""
+            assert _r.args is not None, ""
+            assert _r.kwargs is not None, ""
             assert _r.data == f"result_{_r.worker_ident}", f"Its data should be same as we expect 'result_{_r.pid}'."
-            assert _r.state == "successful", f"Its state should be 'successful'."
-            assert _r.exception is None, f"It should have nothing exception."
+            assert _r.state == "successful", "Its state should be 'successful'."
+            assert _r.exception is None, "It should have nothing exception."
 
 
     def test_get_failure_result(self, strategy: GreenThreadStrategy):
@@ -828,21 +828,20 @@ class TestGreenThread(GeneralRunningTestSpec):
             target_fun=target_error_fun)
 
         _result = strategy.get_result()
-        assert _result is not None and _result != [], f""
-        assert type(_result) is list, f""
+        assert _result is not None and _result != [], ""
+        assert type(_result) is list, ""
         for _r in _result:
-            assert isinstance(_r, CoroutineResult) is True, f""
-            assert _r.pid, f"It should have PID."
-            assert _r.worker_name, f"It should have thread name."
-            assert _r.worker_ident, f"It should have thread identity."
-            # assert _r.loop, f""
-            assert _r.parent, f""
-            assert _r.args is not None, f""
-            assert _r.kwargs is not None, f""
-            assert _r.data is None, f"Its data should be None."
-            assert _r.state == "fail", f"Its state should be 'fail'."
-            print(f"[DEBUG] _r.exception: {_r.exception}")
-            assert isinstance(_r.exception, Exception) and "Testing result raising an exception" in str(_r.exception), f"It should have an exception and error message is 'Testing result raising an exception'."
+            assert isinstance(_r, CoroutineResult) is True, ""
+            assert _r.pid, "It should have PID."
+            assert _r.worker_name, "It should have thread name."
+            assert _r.worker_ident, "It should have thread identity."
+            # assert _r.loop, ""
+            assert _r.parent, ""
+            assert _r.args is not None, ""
+            assert _r.kwargs is not None, ""
+            assert _r.data is None, "Its data should be None."
+            assert _r.state == "fail", "Its state should be 'fail'."
+            assert isinstance(_r.exception, Exception) and "Testing result raising an exception" in str(_r.exception), "It should have an exception and error message is 'Testing result raising an exception'."
 
 
     @pytest.mark.skip(reason="Not implement testing logic.")
@@ -851,19 +850,19 @@ class TestGreenThread(GeneralRunningTestSpec):
         # process_strategy.close(self.__Processes)
         # _active_children_list = mp.active_children()
         # print(len(_active_children_list) == 0)
-        # # assert len(_active_children_list) == 0, f"Processes should be closed finely."
+        # # assert len(_active_children_list) == 0, "Processes should be closed finely."
         #
         # # Test for parameters with '*args'
         # process_strategy.close(self.__Processes_With_Args)
         # _active_children_list = mp.active_children()
         # print(len(_active_children_list) == 0)
-        # # assert len(_active_children_list) == 0, f"Processes should be closed finely."
+        # # assert len(_active_children_list) == 0, "Processes should be closed finely."
         #
         # # Test for parameters with '**kwargs'
         # process_strategy.close(self.__Processes_With_Kwargs)
         # _active_children_list = mp.active_children()
         # print(len(_active_children_list) == 0)
-        # assert len(_active_children_list) == 0, f"Processes should be closed finely."
+        # assert len(_active_children_list) == 0, "Processes should be closed finely."
         pass
 
 
@@ -1494,18 +1493,18 @@ class TestGreenThreadPool(PoolRunningTestSpec):
         try:
             pool_strategy.close()
         except Exception as e:
-            assert e is not None, f"It should work finely without any issue."
+            assert e is not None, "It should work finely without any issue."
         else:
-            assert True, f"It work finely."
+            assert True, "It work finely."
 
 
     def test_terminal(self, pool_strategy: GreenThreadPoolStrategy):
         try:
             pool_strategy.terminal()
         except Exception as e:
-            assert e is not None, f"It should work finely without any issue."
+            assert e is not None, "It should work finely without any issue."
         else:
-            assert True, f"It work finely."
+            assert True, "It work finely."
 
 
     def _initial(self):
@@ -1551,7 +1550,7 @@ class TestGreenThreadPool(PoolRunningTestSpec):
 
 
 _Async_Generate_Worker_Error_Msg = \
-    f"The instances which be created by method 'generate_worker' should be an instance of 'multiprocessing.Process'."
+    "The instances which be created by method 'generate_worker' should be an instance of 'multiprocessing.Process'."
 
 
 class TestAsynchronous(GeneralRunningTestSpec):
@@ -2027,8 +2026,8 @@ class TestAsynchronous(GeneralRunningTestSpec):
         GeneralRunningTestSpec._chk_running_cnt(running_cnt=Running_Count, worker_size=Green_Thread_Size)
 
         _current_process_list = Running_Current_Threads[:]
-        assert len(_current_process_list) == Green_Thread_Size, f"The count of PID (no de-duplicate) should be the same as the count of processes."
-        assert len(set(_current_process_list)) == Green_Thread_Size, f"The count of PID (de-duplicate) should be the same as the count of processes."
+        assert len(_current_process_list) == Green_Thread_Size, "The count of PID (no de-duplicate) should be the same as the count of processes."
+        assert len(set(_current_process_list)) == Green_Thread_Size, "The count of PID (de-duplicate) should be the same as the count of processes."
 
         GeneralRunningTestSpec._chk_done_timestamp(timestamp_list=Running_Finish_Timestamp[:])
 
@@ -2049,14 +2048,14 @@ class TestAsynchronous(GeneralRunningTestSpec):
 
         _result = async_strategy.get_result()
         for _r in _result:
-            assert _r.pid, f"The PID should exists in list we record."
-            assert _r.worker_name, f"It should have thread name."
-            assert _r.worker_ident, f"It should have thread identity."
-            assert _r.data, f"It should not be an empty value."
+            assert _r.pid, "The PID should exists in list we record."
+            assert _r.worker_name, "It should have thread name."
+            assert _r.worker_ident, "It should have thread identity."
+            assert _r.data, "It should not be an empty value."
             _chksum = re.search(r"result_[0-9]{1,64}", str(_r.data))
-            assert _chksum is not None, f""
-            assert _r.state == "successful", f"Its state should be 'successful'."
-            assert _r.exception is None, f"It should have nothing exception."
+            assert _chksum is not None, ""
+            assert _r.state == "successful", "Its state should be 'successful'."
+            assert _r.exception is None, "It should have nothing exception."
 
 
     @pytest.mark.skip(reason="Not implement testing logic.")
@@ -2065,19 +2064,19 @@ class TestAsynchronous(GeneralRunningTestSpec):
         # process_strategy.close(self.__Processes)
         # _active_children_list = mp.active_children()
         # print(len(_active_children_list) == 0)
-        # # assert len(_active_children_list) == 0, f"Processes should be closed finely."
+        # # assert len(_active_children_list) == 0, "Processes should be closed finely."
         #
         # # Test for parameters with '*args'
         # process_strategy.close(self.__Processes_With_Args)
         # _active_children_list = mp.active_children()
         # print(len(_active_children_list) == 0)
-        # # assert len(_active_children_list) == 0, f"Processes should be closed finely."
+        # # assert len(_active_children_list) == 0, "Processes should be closed finely."
         #
         # # Test for parameters with '**kwargs'
         # process_strategy.close(self.__Processes_With_Kwargs)
         # _active_children_list = mp.active_children()
         # print(len(_active_children_list) == 0)
-        # assert len(_active_children_list) == 0, f"Processes should be closed finely."
+        # assert len(_active_children_list) == 0, "Processes should be closed finely."
         pass
 
 

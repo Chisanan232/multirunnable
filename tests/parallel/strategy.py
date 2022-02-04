@@ -69,9 +69,9 @@ def target_fun(*args, **kwargs) -> str:
         Running_Count.value += 1
 
         if args:
-            assert args == Test_Function_Args, f"The argument *args* should be same as the input outside."
+            assert args == Test_Function_Args, "The argument *args* should be same as the input outside."
         if kwargs:
-            assert kwargs == Test_Function_Kwargs, f"The argument *kwargs* should be same as the input outside."
+            assert kwargs == Test_Function_Kwargs, "The argument *kwargs* should be same as the input outside."
 
         _pid = os.getpid()
         _ppid = os.getppid()
@@ -98,9 +98,9 @@ def pool_target_fun(*args, **kwargs) -> str:
         Pool_Running_Count.value += 1
 
         if args:
-            assert args == Test_Function_Args, f"The argument *args* should be same as the input outside."
+            assert args == Test_Function_Args, "The argument *args* should be same as the input outside."
         if kwargs:
-            assert kwargs == Test_Function_Kwargs, f"The argument *kwargs* should be same as the input outside."
+            assert kwargs == Test_Function_Kwargs, "The argument *kwargs* should be same as the input outside."
 
         _pid = os.getpid()
         _ppid = os.getppid()
@@ -130,11 +130,11 @@ def map_target_fun(*args, **kwargs):
         Pool_Running_Count.value += 1
 
         if args:
-            assert set(args) <= set(Test_Function_Args), f"The argument *args* should be one of element of the input outside."
+            assert set(args) <= set(Test_Function_Args), "The argument *args* should be one of element of the input outside."
             if len(args) > 1:
-                assert args == Test_Function_Args, f"The argument *args* should be same as the global variable 'Test_Function_Args'."
+                assert args == Test_Function_Args, "The argument *args* should be same as the global variable 'Test_Function_Args'."
         if kwargs:
-            assert kwargs is None or kwargs == {}, f"The argument *kwargs* should be empty or None value."
+            assert kwargs is None or kwargs == {}, "The argument *kwargs* should be empty or None value."
 
         _pid = os.getpid()
         _ppid = os.getppid()
@@ -236,7 +236,7 @@ def process_pool_strategy():
 
 
 _Generate_Worker_Error_Msg = \
-    f"The instances which be created by method 'generate_worker' should be an instance of 'multiprocessing.Process'."
+    "The instances which be created by method 'generate_worker' should be an instance of 'multiprocessing.Process'."
 
 
 class TestProcess(GeneralRunningTestSpec):
@@ -711,18 +711,18 @@ class TestProcess(GeneralRunningTestSpec):
             args=Test_Function_Args)
 
         _result = process_strategy.get_result()
-        assert _result is not None and _result != [], f"The running result should not be empty."
-        assert type(_result) is list, f"The result should be a list type object."
+        assert _result is not None and _result != [], "The running result should not be empty."
+        assert type(_result) is list, "The result should be a list type object."
         for _r in _result:
-            assert isinstance(_r, ParallelResult) is True, f"The element of result should be instance of object 'ParallelResult'."
-            assert _r.ppid == Running_Parent_PID, f"The PPID should be the same as we recorded."
-            assert _r.pid in Running_PIDs, f"The PID should exists in list we record."
-            assert _r.worker_name, f"It should have process name."
-            assert _r.worker_ident, f"It should have process identity."
+            assert isinstance(_r, ParallelResult) is True, "The element of result should be instance of object 'ParallelResult'."
+            assert _r.ppid == Running_Parent_PID, "The PPID should be the same as we recorded."
+            assert _r.pid in Running_PIDs, "The PID should exists in list we record."
+            assert _r.worker_name, "It should have process name."
+            assert _r.worker_ident, "It should have process identity."
             assert _r.data == f"result_{_r.pid}", f"Its data should be same as we expect 'result_{_r.pid}'."
-            assert _r.state == "successful", f"Its state should be 'successful'."
-            assert _r.exit_code is None, f"The exit code should be None (it return multiprocessing.current_process.exitcode)."
-            assert _r.exception is None, f"It should have nothing exception."
+            assert _r.state == "successful", "Its state should be 'successful'."
+            assert _r.exit_code is None, "The exit code should be None (it return multiprocessing.current_process.exitcode)."
+            assert _r.exception is None, "It should have nothing exception."
 
 
     def test_get_failure_result(self, process_strategy: ProcessStrategy):
@@ -732,18 +732,18 @@ class TestProcess(GeneralRunningTestSpec):
             target_fun=target_error_fun)
 
         _result = process_strategy.get_result()
-        assert _result is not None and _result != [], f""
-        assert type(_result) is list, f""
+        assert _result is not None and _result != [], ""
+        assert type(_result) is list, ""
         for _r in _result:
-            assert isinstance(_r, ParallelResult) is True, f""
-            assert _r.ppid, f"It should have PPID."
-            assert _r.pid, f"It should have PID."
-            assert _r.worker_name, f"It should have process name."
-            assert _r.worker_ident, f"It should have process identity."
-            assert _r.data is None, f"Its data should be None."
-            assert _r.state == "fail", f"Its state should be 'fail'."
-            assert _r.exit_code is None, f"The exit code should not be None (it return multiprocessing.current_process.exitcode)."
-            assert isinstance(_r.exception, Exception) and "Testing result raising an exception" in str(_r.exception), f"It should have an exception and error message is 'Testing result raising an exception'."
+            assert isinstance(_r, ParallelResult) is True, ""
+            assert _r.ppid, "It should have PPID."
+            assert _r.pid, "It should have PID."
+            assert _r.worker_name, "It should have process name."
+            assert _r.worker_ident, "It should have process identity."
+            assert _r.data is None, "Its data should be None."
+            assert _r.state == "fail", "Its state should be 'fail'."
+            assert _r.exit_code is None, "The exit code should not be None (it return multiprocessing.current_process.exitcode)."
+            assert isinstance(_r.exception, Exception) and "Testing result raising an exception" in str(_r.exception), "It should have an exception and error message is 'Testing result raising an exception'."
 
 
     def _initial(self):
@@ -1377,18 +1377,18 @@ class TestProcessPool(PoolRunningTestSpec):
         try:
             process_pool_strategy.close()
         except Exception as e:
-            assert e is not None, f"It should work finely without any issue."
+            assert e is not None, "It should work finely without any issue."
         else:
-            assert True, f"It work finely."
+            assert True, "It work finely."
 
 
     def test_terminal(self, process_pool_strategy: ProcessPoolStrategy):
         try:
             process_pool_strategy.terminal()
         except Exception as e:
-            assert e is not None, f"It should work finely without any issue."
+            assert e is not None, "It should work finely without any issue."
         else:
-            assert True, f"It work finely."
+            assert True, "It work finely."
 
 
     def _initial(self):
@@ -1402,13 +1402,6 @@ class TestProcessPool(PoolRunningTestSpec):
 
     @staticmethod
     def _chk_blocking_record():
-        print(f"[DEBUG] Running_PPIDs: {Running_PPIDs}")
-        print(f"[DEBUG] Running_Parent_PID: {Running_Parent_PID}")
-        print(f"[DEBUG] Pool_Running_Count.value: {Pool_Running_Count.value}")
-        print(f"[DEBUG] Task_Size: {Task_Size}")
-        print(f"[DEBUG] Running_PIDs: {Running_PIDs}")
-        print(f"[DEBUG] Running_Current_Processes: {Running_Current_Processes}")
-        print(f"[DEBUG] Running_Finish_Timestamp: {Running_Finish_Timestamp}")
         PoolRunningTestSpec._chk_ppid_info(ppid_list=Running_PPIDs, running_parent_pid=Running_Parent_PID)
         PoolRunningTestSpec._chk_process_record_blocking(
             pool_running_cnt=Pool_Running_Count.value,
@@ -1421,13 +1414,6 @@ class TestProcessPool(PoolRunningTestSpec):
 
     @staticmethod
     def _chk_record():
-        print(f"[DEBUG] Running_PPIDs: {Running_PPIDs}")
-        print(f"[DEBUG] Running_Parent_PID: {Running_Parent_PID}")
-        print(f"[DEBUG] Pool_Running_Count.value: {Pool_Running_Count.value}")
-        print(f"[DEBUG] Task_Size: {Task_Size}")
-        print(f"[DEBUG] Running_PIDs: {Running_PIDs}")
-        print(f"[DEBUG] Running_Current_Processes: {Running_Current_Processes}")
-        print(f"[DEBUG] Running_Finish_Timestamp: {Running_Finish_Timestamp}")
         PoolRunningTestSpec._chk_ppid_info(ppid_list=Running_PPIDs, running_parent_pid=Running_Parent_PID)
         PoolRunningTestSpec._chk_process_record(
             pool_running_cnt=Pool_Running_Count.value,

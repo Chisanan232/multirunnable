@@ -97,27 +97,27 @@ class GeneralRunningTestSpec(RunningStrategyTestSpec):
 
     @staticmethod
     def _chk_running_cnt(running_cnt: int, worker_size: int):
-        assert running_cnt == worker_size, f"The running count should be the same as the process pool size."
+        assert running_cnt == worker_size, "The running count should be the same as the process pool size."
 
 
     @staticmethod
     def _chk_ppid_info(ppid_list: List[str], running_parent_pid: str):
-        assert len(set(ppid_list)) == 1, f"The PPID of each process should be the same."
+        assert len(set(ppid_list)) == 1, "The PPID of each process should be the same."
         assert ppid_list[0] == running_parent_pid, f"The PPID should equal to {running_parent_pid}. But it got {ppid_list[0]}."
 
 
     @staticmethod
     def _chk_worker_id_size(worker_id_list: List[str], worker_size: int, de_duplicate: bool = True):
-        assert len(worker_id_list) == worker_size, f"The count of PID (no de-duplicate) should be the same as the count of processes."
+        assert len(worker_id_list) == worker_size, "The count of PID (no de-duplicate) should be the same as the count of processes."
         if de_duplicate is True:
-            assert len(set(worker_id_list)) == worker_size, f"The count of PID (de-duplicate) should be the same as the count of processes."
+            assert len(set(worker_id_list)) == worker_size, "The count of PID (de-duplicate) should be the same as the count of processes."
 
 
     @staticmethod
     def _chk_current_worker(worker_id_list: List[str], current_worker_list: List[str], de_duplicate: bool = True):
-        assert len(worker_id_list) == len(current_worker_list), f"The count of current process name (no de-duplicate) should be equal to count of PIDs."
+        assert len(worker_id_list) == len(current_worker_list), "The count of current process name (no de-duplicate) should be equal to count of PIDs."
         if de_duplicate is True:
-            assert len(set(worker_id_list)) == len(set(current_worker_list)), f"The count of current process name (de-duplicate) should be equal to count of PIDs."
+            assert len(set(worker_id_list)) == len(set(current_worker_list)), "The count of current process name (de-duplicate) should be equal to count of PIDs."
 
 
     @staticmethod
@@ -125,7 +125,7 @@ class GeneralRunningTestSpec(RunningStrategyTestSpec):
         _max_timestamp = max(timestamp_list)
         _min_timestamp = min(timestamp_list)
         _diff_timestamp = _max_timestamp - _min_timestamp
-        assert _diff_timestamp <= Running_Diff_Time, f"Processes should be run in the same time period."
+        assert _diff_timestamp <= Running_Diff_Time, "Processes should be run in the same time period."
 
 
 
@@ -248,7 +248,7 @@ class PoolRunningTestSpec(RunningStrategyTestSpec, ABC):
         _max_timestamp = max(timestamp_list)
         _min_timestamp = min(timestamp_list)
         _diff_timestamp = _max_timestamp - _min_timestamp
-        assert _diff_timestamp <= (Test_Function_Sleep_Time * Worker_Pool_Size) + Running_Diff_Time, f"Processes should be run in the same time period."
+        assert _diff_timestamp <= (Test_Function_Sleep_Time * Worker_Pool_Size) + Running_Diff_Time, "Processes should be run in the same time period."
 
 
     @staticmethod
@@ -293,21 +293,21 @@ class PoolRunningTestSpec(RunningStrategyTestSpec, ABC):
 
     @staticmethod
     def _chk_getting_success_result(results):
-        assert results is not None and results != [], f""
-        assert type(results) is list, f""
+        assert results is not None and results != [], ""
+        assert type(results) is list, ""
         for _r in results:
-            assert _r.data is not None, f""
+            assert _r.data is not None, ""
             _chksum = re.search(r"result_[0-9]{1,64}", str(_r.data))
-            assert _chksum is not None, f""
-            assert _r.is_successful is True, f""
+            assert _chksum is not None, ""
+            assert _r.is_successful is True, ""
 
 
     @staticmethod
     def _chk_getting_failure_result(results):
-        assert results is not None and results != [], f""
-        assert type(results) is list, f""
+        assert results is not None and results != [], ""
+        assert type(results) is list, ""
         for _r in results:
-            assert _r.data is not None, f""
-            assert isinstance(_r.data, Exception) is True and "Testing result raising an exception" in str(_r.data), f""
-            assert _r.is_successful is False, f""
+            assert _r.data is not None, ""
+            assert isinstance(_r.data, Exception) is True and "Testing result raising an exception" in str(_r.data), ""
+            assert _r.is_successful is False, ""
 
