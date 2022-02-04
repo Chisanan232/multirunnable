@@ -6,7 +6,6 @@ from ..types import MRTasks as _MRTasks
 
 from abc import ABCMeta, abstractmethod
 from typing import List, Tuple, Dict, Optional, Union, Callable as CallableType, Iterable as IterableType
-from types import MethodType, FunctionType
 from collections.abc import Callable
 
 
@@ -53,15 +52,6 @@ class BaseExecutor(metaclass=ABCMeta):
         pass
 
 
-    # @abstractmethod
-    # def async_run(self,
-    #               function: CallableType,
-    #               args_iter: IterableType = [],
-    #               queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
-    #               features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
-    #     pass
-
-
     @abstractmethod
     def map(self,
             function: CallableType,
@@ -81,16 +71,6 @@ class BaseExecutor(metaclass=ABCMeta):
         :return:
         """
         pass
-
-
-    # @abstractmethod
-    # def async_map(self) -> None:
-    #     """
-    #     Description:
-    #         Asynchronous version of map.
-    #     :return:
-    #     """
-    #     pass
 
 
     @abstractmethod

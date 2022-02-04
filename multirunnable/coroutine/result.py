@@ -1,7 +1,5 @@
 from multirunnable.framework.result import MRResult as _MRResult, PoolResult as _PoolResult
 
-from typing import List, Any
-
 
 
 class CoroutineResult(_MRResult):

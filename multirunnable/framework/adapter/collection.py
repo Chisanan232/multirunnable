@@ -1,5 +1,3 @@
-# from pyocean.framework.features import BaseFeatureAdapterFactory
-
 from abc import ABCMeta, abstractmethod
 from typing import List, TypeVar, Generic
 

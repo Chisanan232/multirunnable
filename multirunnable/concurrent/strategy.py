@@ -1,7 +1,7 @@
 from abc import ABC
 from os import getpid
 from types import FunctionType, MethodType
-from typing import List, Dict, Callable, Iterable as IterableType, Optional, Union, Tuple, cast
+from typing import List, Dict, Callable, Iterable as IterableType, Optional, Union, Tuple
 from functools import wraps, partial as PartialFunction
 from collections.abc import Iterable
 from multipledispatch import dispatch

@@ -3,7 +3,7 @@ from multirunnable.exceptions import GlobalizeObjectError
 from multirunnable._utils import get_cls_name as _get_cls_name
 
 from abc import ABC, abstractmethod
-from typing import List, Tuple, Dict, Any, TypeVar, Generic, cast, Union
+from typing import Dict, Any, TypeVar, Generic, cast, Union
 from multiprocessing import cpu_count
 import logging
 

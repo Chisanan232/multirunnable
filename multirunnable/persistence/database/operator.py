@@ -1,8 +1,8 @@
 from multirunnable.persistence.interface import BasePersistence
 from multirunnable.persistence.database.strategy import BaseDatabaseConnection as _BaseDataBaseConnection
 
-from abc import ABCMeta, ABC, abstractmethod
-from typing import Tuple, Dict, Type, TypeVar, Generic, Any, Union, Optional
+from abc import ABC, abstractmethod
+from typing import Tuple, Dict, TypeVar, Generic, Any
 
 
 T = TypeVar("T")

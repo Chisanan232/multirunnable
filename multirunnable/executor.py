@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Tuple, Dict, Optional, Union, List, Callable as CallableType, Iterable as IterableType, NewType
+from typing import Tuple, Dict, Optional, Union, List, Callable as CallableType, Iterable as IterableType
 from collections.abc import Callable
 
 from .framework import (

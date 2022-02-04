@@ -1,6 +1,6 @@
 from multirunnable._singletons import NamedSingletonABCMeta
 
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
 
 
 

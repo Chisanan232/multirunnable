@@ -7,7 +7,7 @@ from multirunnable.mode import RunningMode as _RunningMode
 from multirunnable._import_utils import ImportMultiRunnable as _ImportMultiRunnable
 
 from abc import ABCMeta
-from typing import Dict, Union, Type, cast
+from typing import Dict, Union
 
 
 

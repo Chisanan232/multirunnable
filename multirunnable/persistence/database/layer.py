@@ -1,8 +1,8 @@
 from multirunnable.persistence.interface import DataPersistenceLayer
 from multirunnable.persistence.database.operator import DatabaseOperator
 
-from abc import ABCMeta, ABC, abstractmethod
-from typing import Tuple, TypeVar, Type, Generic, Any, Optional
+from abc import ABC, abstractmethod
+from typing import Tuple, TypeVar, Generic, Any
 
 
 T = TypeVar("T")

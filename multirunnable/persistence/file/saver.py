@@ -9,7 +9,7 @@ from .archivers import BaseArchiver as _BaseArchiver
 from .mediator import BaseMediator as _BaseMediator
 
 from abc import ABCMeta, abstractmethod
-from typing import List, Union, Optional
+from typing import List
 from collections import namedtuple
 import logging
 

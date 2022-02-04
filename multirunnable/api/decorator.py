@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from types import MethodType, FunctionType, LambdaType
+from types import MethodType, FunctionType
 from typing import List, Callable, Type, Any, Union, Optional
 from inspect import isclass as inspect_isclass
 from functools import wraps
