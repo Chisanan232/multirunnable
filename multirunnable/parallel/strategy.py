@@ -12,13 +12,15 @@ from multirunnable.mode import FeatureMode as _FeatureMode
 from multirunnable.parallel.result import ParallelResult as _ParallelResult, ProcessPoolResult as _ProcessPoolResult
 from multirunnable.parallel.share import Global_Manager, activate_manager_server
 from multirunnable.framework import (
-    BaseList as _BaseList,
     BaseQueueTask as _BaseQueueTask,
-    BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory,
     GeneralRunnableStrategy as _GeneralRunnableStrategy,
     PoolRunnableStrategy as _PoolRunnableStrategy,
     Resultable as _Resultable,
     ResultState as _ResultState
+)
+from multirunnable.framework.factory import (
+    BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory,
+    BaseList as _BaseList
 )
 
 

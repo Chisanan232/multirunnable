@@ -2,16 +2,18 @@ from abc import ABC
 from typing import List, Tuple, Dict, Iterable, Callable, Optional, Union
 
 from .framework import (
-    BaseList as _BaseList,
     BaseQueueTask as _BaseQueueTask,
     BasePool as _BasePool,
-    BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory,
     PoolRunnableStrategy as _PoolRunnableStrategy,
     Resultable as _Resultable,
     PoolResult as _PoolResult
 )
+from .framework.factory import (
+    BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory,
+    BaseList as _BaseList
+)
 from .mode import RunningMode as _RunningMode
-from .adapter.strategy import PoolStrategyAdapter as _PoolStrategyAdapter
+from .factory.strategy import PoolStrategyAdapter as _PoolStrategyAdapter
 from ._config import set_mode
 from ._utils import get_cls_name as _get_cls_name
 

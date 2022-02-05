@@ -3,16 +3,18 @@ from typing import Tuple, Dict, Optional, Union, List, Callable as CallableType,
 from collections.abc import Callable
 
 from .framework import (
-    BaseList as _BaseList,
     BaseQueueTask as _BaseQueueTask,
-    BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory,
     BaseExecutor as _BaseExecutor,
     GeneralRunnableStrategy as _GeneralRunnableStrategy,
     Resultable as _Resultable,
     MRResult as _MRResult
 )
+from .framework.factory import (
+    BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory,
+    BaseList as _BaseList
+)
 from .mode import RunningMode as _RunningMode
-from .adapter.strategy import ExecutorStrategyAdapter as _ExecutorStrategyAdapter
+from .factory.strategy import ExecutorStrategyAdapter as _ExecutorStrategyAdapter
 from .types import MRTasks as _MRTasks
 from ._config import set_mode
 from ._utils import get_cls_name as _get_cls_name

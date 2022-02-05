@@ -6,19 +6,19 @@ from multirunnable.types import (
     MRRLock as _MRRLock,
     MRSemaphore as _MRSemaphore,
     MRBoundedSemaphore as _MRBoundedSemaphore)
-from multirunnable.adapter.base import FeatureAdapterFactory as _FeatureAdapterFactory
-from multirunnable.adapter._utils import _ModuleFactory
+from multirunnable.factory.base import FeatureAdapterFactory as _FeatureAdapterFactory
+from multirunnable.factory._utils import _ModuleFactory
 
 
 
-class Lock(_FeatureAdapterFactory):
+class LockFactory(_FeatureAdapterFactory):
 
     def __str__(self):
-        return super(Lock, self).__str__().replace("TargetObject", "Lock")
+        return super(LockFactory, self).__str__().replace("TargetObject", "Lock")
 
 
     def __repr__(self):
-        return super(Lock, self).__repr__().replace("TargetObject", "Lock")
+        return super(LockFactory, self).__repr__().replace("TargetObject", "Lock")
 
 
     def get_instance(self, **kwargs) -> _MRLock:
@@ -35,14 +35,14 @@ class Lock(_FeatureAdapterFactory):
 
 
 
-class RLock(_FeatureAdapterFactory):
+class RLockFactory(_FeatureAdapterFactory):
 
     def __str__(self):
-        return super(RLock, self).__str__().replace("TargetObject", "RLock")
+        return super(RLockFactory, self).__str__().replace("TargetObject", "RLock")
 
 
     def __repr__(self):
-        return super(RLock, self).__repr__().replace("TargetObject", "RLock")
+        return super(RLockFactory, self).__repr__().replace("TargetObject", "RLock")
 
 
     def get_instance(self, **kwargs) -> _MRRLock:
@@ -59,15 +59,15 @@ class RLock(_FeatureAdapterFactory):
 
 
 
-class Semaphore(_FeatureAdapterFactory):
+class SemaphoreFactory(_FeatureAdapterFactory):
 
     def __init__(self, value: int):
-        super(Semaphore, self).__init__()
+        super(SemaphoreFactory, self).__init__()
         self.__semaphore_value = value
 
 
     def __str__(self):
-        return super(Semaphore, self).__str__().replace("TargetObject", "Semaphore")
+        return super(SemaphoreFactory, self).__str__().replace("TargetObject", "Semaphore")
 
 
     def __repr__(self):
@@ -94,15 +94,15 @@ class Semaphore(_FeatureAdapterFactory):
 
 
 
-class BoundedSemaphore(_FeatureAdapterFactory):
+class BoundedSemaphoreFactory(_FeatureAdapterFactory):
 
     def __init__(self, value: int):
-        super(BoundedSemaphore, self).__init__()
+        super(BoundedSemaphoreFactory, self).__init__()
         self.__semaphore_value = value
 
 
     def __str__(self):
-        return super(BoundedSemaphore, self).__str__().replace("TargetObject", "Bounded Semaphore")
+        return super(BoundedSemaphoreFactory, self).__str__().replace("TargetObject", "Bounded Semaphore")
 
 
     def __repr__(self):

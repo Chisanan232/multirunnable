@@ -20,13 +20,15 @@ from multirunnable.coroutine.result import (
     AsynchronousResult as _AsynchronousResult)
 from multirunnable.framework import (
     BaseQueueTask as _BaseQueueTask,
-    BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory,
-    BaseList as _BaseList,
     GeneralRunnableStrategy as _GeneralRunnableStrategy,
     PoolRunnableStrategy as _PoolRunnableStrategy,
     AsyncRunnableStrategy as _AsyncRunnableStrategy,
     Resultable as _Resultable,
     ResultState as _ResultState
+)
+from multirunnable.framework.factory import (
+    BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory,
+    BaseList as _BaseList
 )
 
 

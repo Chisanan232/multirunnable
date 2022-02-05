@@ -1,7 +1,7 @@
 from multirunnable.api.manage import Globalize as _Globalize
 from multirunnable.types import MRQueue as _MRQueue
-from multirunnable.adapter.base import QueueAdapterFactory as _QueueAdapterFactory
-from multirunnable.adapter._utils import _ModuleFactory
+from multirunnable.factory.base import QueueAdapterFactory as _QueueAdapterFactory
+from multirunnable.factory._utils import _ModuleFactory
 
 
 

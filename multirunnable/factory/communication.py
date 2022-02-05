@@ -2,19 +2,19 @@ from multirunnable.framework.synchronization import PosixThreadCommunication as 
 from multirunnable.mode import FeatureMode as _FeatureMode
 from multirunnable.api.manage import Globalize as _Globalize
 from multirunnable.types import MREvent as _MREvent, MRCondition as _MRCondition
-from multirunnable.adapter.base import FeatureAdapterFactory as _FeatureAdapterFactory
-from multirunnable.adapter._utils import _ModuleFactory, _AsyncUtils
+from multirunnable.factory.base import FeatureAdapterFactory as _FeatureAdapterFactory
+from multirunnable.factory._utils import _ModuleFactory, _AsyncUtils
 
 
 
-class Event(_FeatureAdapterFactory):
+class EventFactory(_FeatureAdapterFactory):
 
     def __str__(self):
-        return super(Event, self).__str__().replace("TargetObject", "Event")
+        return super(EventFactory, self).__str__().replace("TargetObject", "Event")
 
 
     def __repr__(self):
-        return super(Event, self).__repr__().replace("TargetObject", "Event")
+        return super(EventFactory, self).__repr__().replace("TargetObject", "Event")
 
 
     def get_instance(self, **kwargs) -> _MREvent:
@@ -31,10 +31,10 @@ class Event(_FeatureAdapterFactory):
 
 
 
-class Condition(_FeatureAdapterFactory):
+class ConditionFactory(_FeatureAdapterFactory):
 
     def __str__(self):
-        return super(Condition, self).__str__().replace("TargetObject", "Condition")
+        return super(ConditionFactory, self).__str__().replace("TargetObject", "Condition")
 
 
     def __repr__(self):

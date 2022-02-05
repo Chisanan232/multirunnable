@@ -1,6 +1,7 @@
 from multirunnable.framework.task import BaseQueueTask as _BaseQueueTask
-from multirunnable.framework.adapter.collection import BaseList as _BaseList, BaseIterator as _BaseIterator
-from multirunnable.framework.synchronization import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
+from multirunnable.framework.factory import (
+    BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory,
+    BaseList as _BaseList, BaseIterator as _BaseIterator)
 
 from typing import List
 

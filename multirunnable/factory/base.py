@@ -1,8 +1,9 @@
-from multirunnable.framework.synchronization import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory
-from multirunnable.framework.adapter.collection import BaseList as _BaseList
+from multirunnable.framework.factory import (
+    BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory,
+    BaseList as _BaseList)
 from multirunnable.mode import FeatureMode as _FeatureMode
-from multirunnable.adapter.collection import FeatureList as _FeatureList
-from multirunnable.adapter._utils import _AsyncUtils
+from multirunnable.factory.collection import FeatureList as _FeatureList
+from multirunnable.factory._utils import _AsyncUtils
 
 from abc import ABC
 

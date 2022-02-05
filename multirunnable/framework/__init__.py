@@ -44,16 +44,15 @@ from .strategy import (
     Resultable)
 from .synchronization import (
     PosixThread,
-    PosixThreadCommunication,
-    BaseFeatureAdapterFactory,
-    BaseGlobalizeAPI as BaseGlobalizeSyncAPI)
+    PosixThreadCommunication)
+# from .factory import BaseFeatureAdapterFactory, BaseGlobalizeAPI as BaseGlobalizeSyncAPI
+# from .factory import BaseIterator, BaseList
 from .queue import (
     BaseQueueType,
     BaseGlobalizeAPI as BaseGlobalizeQueueAPI)
 from .result import MRResult, PoolResult, ResultState
 
-from .api import (
-    AdapterOperator, BaseLockAdapterOperator,
-    AsyncAdapterOperator, BaseAsyncLockAdapterOperator)
+# from .api import (
+#     AdapterOperator, BaseLockAdapterOperator,
+#     AsyncAdapterOperator, BaseAsyncLockAdapterOperator)
 
-from .adapter import BaseIterator, BaseList
