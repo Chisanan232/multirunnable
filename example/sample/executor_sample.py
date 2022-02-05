@@ -1,11 +1,11 @@
-# Import package pyocean
+# Import package multirunnable
 import pathlib
 import random
 import time
 import sys
 
-package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute())
-sys.path.append(package_pyocean_path)
+package_path = str(pathlib.Path(__file__).parent.parent.parent.absolute())
+sys.path.append(package_path)
 
 from multirunnable import SimpleExecutor, RunningMode
 

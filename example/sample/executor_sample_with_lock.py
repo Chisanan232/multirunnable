@@ -2,12 +2,12 @@ import pathlib
 import time
 import sys
 
-package_pyocean_path = str(pathlib.Path(__file__).parent.parent.parent.absolute())
-sys.path.append(package_pyocean_path)
+package_path = str(pathlib.Path(__file__).parent.parent.parent.absolute())
+sys.path.append(package_path)
 
 from multirunnable import SimpleExecutor, RunningMode
 from multirunnable.api import RunWith
-from multirunnable.adapter import Lock
+from multirunnable.adapter import LockFactory
 
 Thread_Number = 5
 
@@ -20,13 +20,11 @@ def lock_function():
 
 if __name__ == '__main__':
     # Initialize Lock object
-    __lock = Lock()
+    __lock = LockFactory()
 
     # # # # Initial Executor object
     __executor = SimpleExecutor(mode=RunningMode.Concurrent, executors=Thread_Number)
 
     # # # # Running the Executor
-    __executor.run(
-        function=lock_function,
-        features=__lock)
+    __executor.run(function=lock_function, features=__lock)
 
