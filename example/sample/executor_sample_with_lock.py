@@ -7,7 +7,7 @@ sys.path.append(package_path)
 
 from multirunnable import SimpleExecutor, RunningMode
 from multirunnable.api import RunWith
-from multirunnable.adapter import LockFactory
+from multirunnable.factory import LockFactory
 
 Thread_Number = 5
 
