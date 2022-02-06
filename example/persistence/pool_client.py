@@ -14,8 +14,8 @@ if DEVELOPMENT_MODE:
 
 # multirunnable package
 from multirunnable import SimplePool, QueueTask, RunningMode
-from multirunnable.adapter import Lock, BoundedSemaphore
-from multirunnable.parallel import ProcessQueueType
+from multirunnable.factory import LockFactory, BoundedSemaphoreFactory
+from multirunnable.parallel import Queue
 from multirunnable.persistence.file import SavingStrategy
 
 # code component
@@ -67,15 +67,15 @@ class ExamplePoolClient:
     def __init_queue(self):
         _queue_task = QueueTask()
         _queue_task.name = "test_sql_task"
-        _queue_task.queue_type = ProcessQueueType.Queue
+        _queue_task.queue_type = Queue()
         sql_query = "select * from stock_data_2330 limit 3;"
         _queue_task.value = [sql_query for _ in range(20)]
         return _queue_task
 
 
     def __init_features(self):
-        _lock = Lock()
-        _bounded_semaphore = BoundedSemaphore(value=2)
+        _lock = LockFactory()
+        _bounded_semaphore = BoundedSemaphoreFactory(value=2)
         _features = _lock + _bounded_semaphore
         return _features
 

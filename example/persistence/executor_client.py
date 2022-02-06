@@ -14,10 +14,10 @@ if DEVELOPMENT_MODE:
 
 # multirunnable package
 from multirunnable import SimpleExecutor, QueueTask, RunningMode
-from multirunnable.adapter import Lock, BoundedSemaphore
-from multirunnable.parallel import ProcessQueueType
-from multirunnable.concurrent import ThreadQueueType
-from multirunnable.coroutine import GeventQueueType, AsynchronousQueueType
+from multirunnable.factory import LockFactory, BoundedSemaphoreFactory
+from multirunnable.parallel import Queue as Process_Queue
+from multirunnable.concurrent import Thread_Queue
+from multirunnable.coroutine import Greenlet_Queue
 from multirunnable.persistence.file import SavingStrategy
 
 # code component
@@ -76,18 +76,17 @@ class ExampleExecutorClient:
     def __init_queue(self):
         _queue_task = QueueTask()
         _queue_task.name = "test_sql_task"
-        _queue_task.queue_type = ProcessQueueType.Queue
-        # _queue_task.queue_type = ThreadQueueType.Queue
-        # _queue_task.queue_type = GeventQueueType.Queue
-        # _queue_task.queue_type = AsynchronousQueueType.Queue
+        _queue_task.queue_type = Process_Queue()
+        # _queue_task.queue_type = Thread_Queue
+        # _queue_task.queue_type = Greenlet_Queue
         sql_query = "select * from stock_data_2330 limit 3;"
         _queue_task.value = [sql_query for _ in range(20)]
         return _queue_task
 
 
     def __init_features(self):
-        _lock = Lock()
-        _bounded_semaphore = BoundedSemaphore(value=2)
+        _lock = LockFactory()
+        _bounded_semaphore = BoundedSemaphoreFactory(value=2)
         _features = _lock + _bounded_semaphore
         return _features
 
