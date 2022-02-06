@@ -1,4 +1,4 @@
-from multirunnable.coroutine.queue import GeventQueueType, AsynchronousQueueType
+# from multirunnable.coroutine.queue import GeventQueueType, AsynchronousQueueType
 from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 
 from ..test_config import Semaphore_Value
@@ -30,41 +30,51 @@ import pytest
 _Semaphore_Value = Semaphore_Value
 
 
-@pytest.fixture(scope="class")
-def mr_gevent_queue() -> Type[GeventQueueType]:
-    return GeventQueueType
-
-
-@pytest.fixture(scope="class")
-def mr_async_queue() -> Type[AsynchronousQueueType]:
-    return AsynchronousQueueType
+# @pytest.fixture(scope="class")
+# def mr_gevent_queue() -> Type[GeventQueueType]:
+#     return GeventQueueType
+#
+#
+# @pytest.fixture(scope="class")
+# def mr_async_queue() -> Type[AsynchronousQueueType]:
+#     return AsynchronousQueueType
 
 
 
 class TestGreenThreadQueue:
 
-    def test_queue(self, mr_gevent_queue: GeventQueueType):
-        assert isinstance(mr_gevent_queue.Queue.value, gevent_Queue) is True, "This type of instance should be 'gevent.queue.Queue'."
+    def test_queue(self):
+        from multirunnable.coroutine.queue import Greenlet_Queue
+        _queue = Greenlet_Queue()
+        assert isinstance(_queue, gevent_Queue) is True, "This type of instance should be 'gevent.queue.Queue'."
 
 
     if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
-        def test_simple_queue(self, mr_gevent_queue: GeventQueueType):
-            assert isinstance(mr_gevent_queue.SimpleQueue.value, gevent_SimpleQueue) is True, "This type of instance should be 'gevent.queue.SimpleQueue'."
+        def test_simple_queue(self):
+            from multirunnable.coroutine.queue import Greenlet_SimpleQueue
+            _queue = Greenlet_SimpleQueue()
+            assert isinstance(_queue, gevent_SimpleQueue) is True, "This type of instance should be 'gevent.queue.SimpleQueue'."
 
 
-    def test_priority_queue(self, mr_gevent_queue: GeventQueueType):
-        assert isinstance(mr_gevent_queue.PriorityQueue.value, gevent_PriorityQueue) is True, "This type of instance should be 'gevent.queue.PriorityQueue'."
+    def test_priority_queue(self):
+        from multirunnable.coroutine.queue import Greenlet_PriorityQueue
+        _queue = Greenlet_PriorityQueue()
+        assert isinstance(_queue, gevent_PriorityQueue) is True, "This type of instance should be 'gevent.queue.PriorityQueue'."
 
 
-    def test_lifo_queue(self, mr_gevent_queue: GeventQueueType):
-        assert isinstance(mr_gevent_queue.LifoQueue.value, gevent_LifoQueue) is True, "This type of instance should be 'gevent.queue.LifoQueue'."
+    def test_lifo_queue(self):
+        from multirunnable.coroutine.queue import Greenlet_LifoQueue
+        _queue = Greenlet_LifoQueue()
+        assert isinstance(_queue, gevent_LifoQueue) is True, "This type of instance should be 'gevent.queue.LifoQueue'."
 
 
-    def test_joinable_queue(self, mr_gevent_queue: GeventQueueType):
-        assert isinstance(mr_gevent_queue.JoinableQueue.value, gevent_JoinableQueue) is True, "This type of instance should be 'gevent.queue.JoinableQueue'."
+    def test_joinable_queue(self):
+        from multirunnable.coroutine.queue import Greenlet_JoinableQueue
+        _queue = Greenlet_JoinableQueue()
+        assert isinstance(_queue, gevent_JoinableQueue) is True, "This type of instance should be 'gevent.queue.JoinableQueue'."
 
 
-    def test_unbounded_queue(self, mr_gevent_queue: GeventQueueType):
+    def test_unbounded_queue(self):
         pass
         # assert isinstance(mr_queue.value, gevent_UnboundQueue) is True, "This type of instance should be 'gevent.queue.UnboundQueue'."
 
@@ -72,15 +82,21 @@ class TestGreenThreadQueue:
 
 class TestAsynchronousQueue:
 
-    def test_queue(self, mr_async_queue: AsynchronousQueueType):
-        assert isinstance(mr_async_queue.Queue.value, async_Queue) is True, "This type of instance should be 'asyncio.queues.Queue'."
+    def test_queue(self):
+        from multirunnable.coroutine.queue import Async_Queue
+        _queue = Async_Queue()
+        assert isinstance(_queue, async_Queue) is True, "This type of instance should be 'asyncio.queues.Queue'."
 
 
-    def test_priority_queue(self, mr_async_queue: AsynchronousQueueType):
-        assert isinstance(mr_async_queue.PriorityQueue.value, async_PriorityQueue) is True, "This type of instance should be 'asyncio.queues.PriorityQueue'."
+    def test_priority_queue(self):
+        from multirunnable.coroutine.queue import Async_PriorityQueue
+        _queue = Async_PriorityQueue()
+        assert isinstance(_queue, async_PriorityQueue) is True, "This type of instance should be 'asyncio.queues.PriorityQueue'."
 
 
-    def test_lifo_queue(self, mr_async_queue: AsynchronousQueueType):
-        assert isinstance(mr_async_queue.LifoQueue.value, async_LifoQueue) is True, "This type of instance should be 'asyncio.queues.LifoQueue'."
+    def test_lifo_queue(self):
+        from multirunnable.coroutine.queue import Async_LifoQueue
+        _queue = Async_LifoQueue()
+        assert isinstance(_queue, async_LifoQueue) is True, "This type of instance should be 'asyncio.queues.LifoQueue'."
 
 

@@ -1,4 +1,4 @@
-from multirunnable.framework.strategy import GeneralRunnableStrategy, PoolRunnableStrategy, AsyncRunnableStrategy
+from multirunnable.framework.runnable.strategy import GeneralRunnableStrategy, PoolRunnableStrategy, AsyncRunnableStrategy
 
 from ..test_config import Worker_Pool_Size, Running_Diff_Time, Test_Function_Sleep_Time
 

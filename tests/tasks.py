@@ -3,9 +3,9 @@ A unittest for pyocean.task module
 """
 
 from multirunnable.tasks import QueueTask
-from multirunnable.parallel import ProcessQueueType
-from multirunnable.concurrent import ThreadQueueType
-from multirunnable.coroutine import GeventQueueType, AsynchronousQueueType
+from multirunnable.parallel import Queue as Process_Queue
+from multirunnable.concurrent import Thread_Queue
+from multirunnable.coroutine import Greenlet_Queue, Async_Queue
 
 from abc import ABCMeta, abstractmethod
 import random
@@ -14,7 +14,7 @@ import pytest
 
 _Testing_Queue_Task_Name = "pytest_queue_task"
 _Testing_Global_Queue_Task_Name = "testing_global"
-_Testing_Queue_Task_Type = ProcessQueueType.Queue
+_Testing_Queue_Task_Type = Process_Queue()
 _Testing_Queue_Task_Value = [random.randrange(1, 20) for _ in range(10)]
 
 

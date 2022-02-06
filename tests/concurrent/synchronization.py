@@ -1,4 +1,4 @@
-from multirunnable.framework.synchronization import PosixThreadLock, PosixThreadCommunication
+from multirunnable.framework.runnable.synchronization import PosixThreadLock, PosixThreadCommunication
 from multirunnable.concurrent.synchronization import ThreadLock, ThreadCommunication
 
 from ..test_config import Semaphore_Value

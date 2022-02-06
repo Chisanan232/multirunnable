@@ -1,4 +1,4 @@
-from multirunnable.framework.synchronization import PosixThreadLock, PosixThreadCommunication
+from multirunnable.framework.runnable.synchronization import PosixThreadLock, PosixThreadCommunication
 from multirunnable.coroutine.synchronization import (
     GreenThreadLock, GreenThreadCommunication,
     AsynchronousLock, AsynchronousCommunication
