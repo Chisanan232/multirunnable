@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
-from ..types import (
+from multirunnable.types import (
     MRLock as _MRLock, MRRLock as _MRRLock,
     MRSemaphore as _MRSemaphore, MRBoundedSemaphore as _MRBoundedSemaphore,
     MREvent as _MREvent, MRCondition as _MRCondition

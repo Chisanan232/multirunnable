@@ -1,4 +1,4 @@
 from multirunnable.concurrent.strategy import ConcurrentStrategy, ThreadStrategy, ThreadPoolStrategy
 from multirunnable.concurrent.synchronization import ThreadLock, ThreadCommunication
-from multirunnable.concurrent.queue import ThreadQueueType
+from multirunnable.concurrent.queue import Thread_Queue
 from multirunnable.concurrent.result import ConcurrentResult

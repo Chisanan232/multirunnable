@@ -13,9 +13,9 @@ from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 from multirunnable.mode import FeatureMode as _FeatureMode
 from multirunnable.types import MRTasks as _MRTasks
 from multirunnable.concurrent.result import ConcurrentResult as _ConcurrentResult, ThreadPoolResult as _ThreadPoolResult
-from multirunnable.framework import (
+from multirunnable.framework import BaseQueueTask as _BaseQueueTask
+from multirunnable.framework.runnable import (
     MRResult as _MRResult,
-    BaseQueueTask as _BaseQueueTask,
     GeneralRunnableStrategy as _GeneralRunnableStrategy,
     PoolRunnableStrategy as _PoolRunnableStrategy,
     Resultable as _Resultable,

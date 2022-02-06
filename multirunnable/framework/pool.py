@@ -1,4 +1,4 @@
-from .result import MRResult as _MRResult
+from multirunnable.framework.runnable.result import MRResult as _MRResult
 from ..types import MRTasks as _MRTasks
 
 from abc import ABCMeta, abstractmethod

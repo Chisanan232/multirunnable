@@ -33,26 +33,6 @@ The framework section code:
 """
 
 from .task import BaseQueueTask
-
 from .executor import BaseExecutor
 from .pool import BasePool
-from .strategy import (
-    RunnableStrategy,
-    AsyncRunnableStrategy,
-    GeneralRunnableStrategy,
-    PoolRunnableStrategy,
-    Resultable)
-from .synchronization import (
-    PosixThread,
-    PosixThreadCommunication)
-# from .factory import BaseFeatureAdapterFactory, BaseGlobalizeAPI as BaseGlobalizeSyncAPI
-# from .factory import BaseIterator, BaseList
-from .queue import (
-    BaseQueueType,
-    BaseGlobalizeAPI as BaseGlobalizeQueueAPI)
-from .result import MRResult, PoolResult, ResultState
-
-# from .api import (
-#     AdapterOperator, BaseLockAdapterOperator,
-#     AsyncAdapterOperator, BaseAsyncLockAdapterOperator)
 

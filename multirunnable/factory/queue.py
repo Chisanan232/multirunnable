@@ -38,7 +38,7 @@ class QueueAdapter(_QueueAdapterFactory):
 
 
     def get_instance(self) -> _MRQueue:
-        __queue = self._qtype.value
+        __queue = self._qtype
         return __queue
 
 

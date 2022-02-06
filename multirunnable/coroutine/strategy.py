@@ -18,8 +18,8 @@ from multirunnable.coroutine.result import (
     CoroutineResult as _CoroutineResult,
     GreenThreadPoolResult as _GreenThreadPoolResult,
     AsynchronousResult as _AsynchronousResult)
-from multirunnable.framework import (
-    BaseQueueTask as _BaseQueueTask,
+from multirunnable.framework import BaseQueueTask as _BaseQueueTask
+from multirunnable.framework.runnable import (
     GeneralRunnableStrategy as _GeneralRunnableStrategy,
     PoolRunnableStrategy as _PoolRunnableStrategy,
     AsyncRunnableStrategy as _AsyncRunnableStrategy,

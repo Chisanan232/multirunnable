@@ -5,6 +5,8 @@ from collections.abc import Callable
 from .framework import (
     BaseQueueTask as _BaseQueueTask,
     BaseExecutor as _BaseExecutor,
+)
+from .framework.runnable import (
     GeneralRunnableStrategy as _GeneralRunnableStrategy,
     Resultable as _Resultable,
     MRResult as _MRResult

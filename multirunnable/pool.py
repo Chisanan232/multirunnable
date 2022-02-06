@@ -4,6 +4,8 @@ from typing import List, Tuple, Dict, Iterable, Callable, Optional, Union
 from .framework import (
     BaseQueueTask as _BaseQueueTask,
     BasePool as _BasePool,
+)
+from .framework.runnable import (
     PoolRunnableStrategy as _PoolRunnableStrategy,
     Resultable as _Resultable,
     PoolResult as _PoolResult

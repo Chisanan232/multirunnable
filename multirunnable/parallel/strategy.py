@@ -11,8 +11,8 @@ from multiprocessing.pool import Pool, AsyncResult, ApplyResult
 from multirunnable.mode import FeatureMode as _FeatureMode
 from multirunnable.parallel.result import ParallelResult as _ParallelResult, ProcessPoolResult as _ProcessPoolResult
 from multirunnable.parallel.share import Global_Manager, activate_manager_server
-from multirunnable.framework import (
-    BaseQueueTask as _BaseQueueTask,
+from multirunnable.framework import BaseQueueTask as _BaseQueueTask
+from multirunnable.framework.runnable import (
     GeneralRunnableStrategy as _GeneralRunnableStrategy,
     PoolRunnableStrategy as _PoolRunnableStrategy,
     Resultable as _Resultable,

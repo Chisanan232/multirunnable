@@ -1,4 +1,4 @@
-from multirunnable.framework.synchronization import PosixThreadCommunication as _PosixThreadCommunication
+from multirunnable.framework.runnable.synchronization import PosixThreadCommunication as _PosixThreadCommunication
 from multirunnable.mode import FeatureMode as _FeatureMode
 from multirunnable.api.manage import Globalize as _Globalize
 from multirunnable.types import MREvent as _MREvent, MRCondition as _MRCondition

@@ -1,4 +1,4 @@
-from multirunnable.framework.result import MRResult as _MRResult, PoolResult as _PoolResult
+from multirunnable.framework.runnable.result import MRResult as _MRResult, PoolResult as _PoolResult
 
 
 

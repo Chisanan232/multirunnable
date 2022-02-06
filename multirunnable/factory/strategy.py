@@ -1,4 +1,4 @@
-from multirunnable.framework.strategy import (
+from multirunnable.framework.runnable.strategy import (
     RunnableStrategy as _RunnableStrategy,
     GeneralRunnableStrategy as _GeneralRunnableStrategy,
     PoolRunnableStrategy as _PoolRunnableStrategy,

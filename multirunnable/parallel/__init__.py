@@ -39,5 +39,5 @@ if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) >= (3, 9):
 
 from multirunnable.parallel.strategy import ParallelStrategy, ProcessStrategy, ProcessPoolStrategy
 from multirunnable.parallel.synchronization import ProcessLock, ProcessCommunication
-from multirunnable.parallel.queue import ProcessQueueType
+from multirunnable.parallel.queue import Queue, SimpleQueue
 from multirunnable.parallel.result import ParallelResult

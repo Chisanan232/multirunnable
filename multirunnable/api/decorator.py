@@ -4,7 +4,7 @@ from typing import List, Callable, Type, Any, Union, Optional
 from inspect import isclass as inspect_isclass
 from functools import wraps
 
-from multirunnable.framework.result import MRResult as _MRResult
+from multirunnable.framework.runnable.result import MRResult as _MRResult
 from multirunnable.api.operator import (
     LockAdapterOperator as _LockOperator,
     RLockOperator as _RLockOperator,

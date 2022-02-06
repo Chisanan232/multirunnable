@@ -1,9 +1,9 @@
-from .task import BaseQueueTask as _BaseQueueTask
-from .factory import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory, BaseList as _BaseList
+from ..task import BaseQueueTask as _BaseQueueTask
+from ..factory import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory, BaseList as _BaseList
 from .result import MRResult as _MRResult, PoolResult as _PoolResult
-from ..mode import FeatureMode as _FeatureMode
-from ..types import MRTasks as _MRTasks
-from ..api._retry import _BaseRetry
+from multirunnable.mode import FeatureMode as _FeatureMode
+from multirunnable.types import MRTasks as _MRTasks
+from multirunnable.api._retry import _BaseRetry
 import multirunnable._utils as _utils
 
 from abc import ABCMeta, ABC, abstractmethod
