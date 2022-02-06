@@ -13,7 +13,7 @@ if DEVELOPMENT_MODE:
 # multirunnable package
 from multirunnable import RunningMode, SimpleExecutor, async_sleep
 from multirunnable.api import async_retry, AsyncRunWith
-from multirunnable.adapter import Semaphore
+from multirunnable.factory import SemaphoreFactory
 
 
 
@@ -29,7 +29,7 @@ class ExampleAsyncTargetFunction:
         return "You are 87."
 
 
-    @async_retry
+    @async_retry.bounded_function
     @AsyncRunWith.Semaphore
     async def lock_function(self):
         print("This is testing process with Lock and sleep for 3 seconds.")
@@ -73,7 +73,7 @@ class ExampleExecutor:
 
     def main_run(self):
         # Initialize Lock object
-        __semaphore = Semaphore(value=2)
+        __semaphore = SemaphoreFactory(value=2)
 
         # # # # Initial Executor object
         __executor = SimpleExecutor(mode=RunningMode.Asynchronous, executors=self.__Executor_Number)

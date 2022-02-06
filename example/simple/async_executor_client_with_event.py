@@ -14,7 +14,7 @@ if DEVELOPMENT_MODE:
 # multirunnable package
 from multirunnable import SimpleExecutor, RunningMode, sleep, async_sleep
 from multirunnable.api import EventAsyncOperator
-from multirunnable.adapter import Event
+from multirunnable.factory import EventFactory
 
 
 
@@ -63,7 +63,7 @@ class ExampleExecutor:
     @classmethod
     def main_run(cls):
         # Initialize Event object
-        __event = Event()
+        __event = EventFactory()
 
         # # # # Initialize and run ocean-simple-executor
         __exe = SimpleExecutor(mode=RunningMode.Asynchronous, executors=cls.__Executor_Number)

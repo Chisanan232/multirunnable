@@ -13,7 +13,7 @@ if DEVELOPMENT_MODE:
 # multirunnable package
 from multirunnable import RunningMode, SimpleExecutor, sleep
 from multirunnable.api import RLockOperator
-from multirunnable.adapter import RLock
+from multirunnable.factory import RLockFactory
 
 
 
@@ -54,7 +54,7 @@ class ExampleExecutor:
 
     def main_run(self):
         # Initialize Lock object
-        __rlock = RLock()
+        __rlock = RLockFactory()
 
         # # # # Initial Executor object
         __executor = SimpleExecutor(mode=RunningMode.Parallel, executors=self.__Executor_Number)

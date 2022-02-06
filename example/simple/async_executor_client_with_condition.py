@@ -13,8 +13,8 @@ if DEVELOPMENT_MODE:
 # multirunnable package
 from multirunnable import SimpleExecutor, RunningMode, QueueTask, sleep, async_sleep
 from multirunnable.api import ConditionOperator, ConditionAsyncOperator, QueueOperator
-from multirunnable.adapter import Condition
-from multirunnable.coroutine import AsynchronousQueueType
+from multirunnable.factory import ConditionFactory
+from multirunnable.coroutine import Async_Queue
 
 
 
@@ -101,12 +101,12 @@ class ExampleExecutor:
     @classmethod
     def main_run(cls):
         # Initialize Condition object
-        __condition = Condition()
+        __condition = ConditionFactory()
 
         # Initialize Queue object
         __task = QueueTask()
         __task.name = "test_queue"
-        __task.queue_type = AsynchronousQueueType.Queue
+        __task.queue_type = Async_Queue()
         __task.value = []
 
         # Initialize and run ocean-simple-executor

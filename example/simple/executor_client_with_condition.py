@@ -13,10 +13,10 @@ if DEVELOPMENT_MODE:
 # multirunnable package
 from multirunnable import SimpleExecutor, RunningMode, QueueTask, sleep, async_sleep
 from multirunnable.api import ConditionOperator, ConditionAsyncOperator, QueueOperator
-from multirunnable.adapter import Condition
-from multirunnable.parallel import ProcessQueueType
-from multirunnable.concurrent import ThreadQueueType
-from multirunnable.coroutine import AsynchronousQueueType
+from multirunnable.factory import ConditionFactory
+from multirunnable.parallel import Queue as Process_Queue
+from multirunnable.concurrent import Thread_Queue
+from multirunnable.coroutine import Greenlet_Queue, Async_Queue
 
 
 
@@ -149,14 +149,14 @@ class ExampleExecutor:
     @classmethod
     def main_run(cls):
         # Initialize Condition object
-        __condition = Condition()
+        __condition = ConditionFactory()
 
         # Initialize Queue object
         __task = QueueTask()
         __task.name = "test_queue"
-        # __task.queue_type = MultiProcessingQueueType.Queue
-        __task.queue_type = ThreadQueueType.Queue
-        # __task.queue_type = AsynchronousQueueType.Queue
+        # __task.queue_type =Process_Queue()
+        __task.queue_type = Thread_Queue()
+        # __task.queue_type = Async_Queue()
         __task.value = []
 
         # Initialize and run ocean-simple-executor
