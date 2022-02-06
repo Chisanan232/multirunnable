@@ -67,7 +67,7 @@ class ExamplePoolClient:
     def __init_queue(self):
         _queue_task = QueueTask()
         _queue_task.name = "test_sql_task"
-        _queue_task.queue_type = Queue()
+        _queue_task.queue_instance = Queue()
         sql_query = "select * from stock_data_2330 limit 3;"
         _queue_task.value = [sql_query for _ in range(20)]
         return _queue_task

@@ -76,9 +76,9 @@ class ExampleExecutorClient:
     def __init_queue(self):
         _queue_task = QueueTask()
         _queue_task.name = "test_sql_task"
-        _queue_task.queue_type = Process_Queue()
-        # _queue_task.queue_type = Thread_Queue
-        # _queue_task.queue_type = Greenlet_Queue
+        _queue_task.queue_instance = Process_Queue()
+        # _queue_task.queue_instance = Thread_Queue
+        # _queue_task.queue_instance = Greenlet_Queue
         sql_query = "select * from stock_data_2330 limit 3;"
         _queue_task.value = [sql_query for _ in range(20)]
         return _queue_task
