@@ -1,5 +1,5 @@
 from multirunnable.mode import RunningMode
-from multirunnable.adapter.strategy import StrategyAdapter, ExecutorStrategyAdapter, PoolStrategyAdapter
+from multirunnable.factory.strategy import StrategyAdapter, ExecutorStrategyAdapter, PoolStrategyAdapter
 from multirunnable.parallel.strategy import ProcessStrategy, ProcessPoolStrategy
 from multirunnable.concurrent.strategy import ThreadStrategy, ThreadPoolStrategy
 from multirunnable.coroutine.strategy import GreenThreadStrategy, GreenThreadPoolStrategy, AsynchronousStrategy

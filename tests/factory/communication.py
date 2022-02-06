@@ -1,24 +1,24 @@
 from multirunnable.mode import FeatureMode
-from multirunnable.adapter.communication import Event, Condition
+from multirunnable.factory.communication import EventFactory, ConditionFactory
 
 import pytest
 import re
 
 
 @pytest.fixture(scope="function")
-def mr_event() -> Event:
-    return Event()
+def mr_event() -> EventFactory:
+    return EventFactory()
 
 
 @pytest.fixture(scope="function")
-def mr_condition() -> Condition:
-    return Condition()
+def mr_condition() -> ConditionFactory:
+    return ConditionFactory()
 
 
 
 class TestAdapterEvent:
 
-    def test__str__(self, mr_event: Event):
+    def test__str__(self, mr_event: EventFactory):
         _lock_str = str(mr_event)
         _chksum = re.search(r"<Event Adapter object with [a-zA-Z]{4,64} mode at [0-9]{10,30}>", _lock_str)
         assert _chksum is not None, f"The '__str__' format is incorrect. Please check its value. \n" \
@@ -26,7 +26,7 @@ class TestAdapterEvent:
                                     f"But it got *{_lock_str}*."
 
 
-    def test__repr__(self, mr_event: Event):
+    def test__repr__(self, mr_event: EventFactory):
         _lock_repr = repr(mr_event)
         _chksum = re.search(r"<Event\(\) Adapter object with [a-zA-Z]{4,64} mode at [0-9]{10,30}>", _lock_repr)
         assert _chksum is not None, f"The '__repr__' format is incorrect. Please check its value. \n" \
@@ -35,11 +35,11 @@ class TestAdapterEvent:
 
 
     @pytest.mark.skip(reason="not implement testing logic.")
-    def test__add__(self, mr_event: Event):
+    def test__add__(self, mr_event: EventFactory):
         pass
 
 
-    def test_feature_mode(self, mr_event: Event):
+    def test_feature_mode(self, mr_event: EventFactory):
         _testing_mode = FeatureMode.Parallel
 
         assert mr_event.feature_mode is None, "The default value of FeatureMode of Event instance should be None."
@@ -52,7 +52,7 @@ class TestAdapterEvent:
             assert _feature_mode is _testing_mode, f"The mode we got from Event instance should be the same as we set '{_testing_mode}'."
 
 
-    def test_get_instance_with_parallel_mode(self, mr_event: Event):
+    def test_get_instance_with_parallel_mode(self, mr_event: EventFactory):
         try:
             _event = mr_event.get_instance()
         except ValueError as ve:
@@ -64,7 +64,7 @@ class TestAdapterEvent:
         assert _event is not None and isinstance(_event, Event) is True, "This type of Lock instance should be 'multiprocessing.synchronize.Event'."
 
 
-    def test_get_instance_with_concurrent_mode(self, mr_event: Event):
+    def test_get_instance_with_concurrent_mode(self, mr_event: EventFactory):
         try:
             _event = mr_event.get_instance()
         except ValueError as ve:
@@ -77,7 +77,7 @@ class TestAdapterEvent:
 
 
     @pytest.mark.skip(reason="Still thinking about implementing Event, Condition feature of Coroutine.")
-    def test_get_instance_with_coroutine_mode(self, mr_event: Event):
+    def test_get_instance_with_coroutine_mode(self, mr_event: EventFactory):
         pass
         # try:
         #     _lock = mr_event.get_instance()
@@ -90,7 +90,7 @@ class TestAdapterEvent:
         # assert _lock is not None and isinstance(_lock, Lock) is True, f"This type of Lock instance should be 'gevent.threading.Lock'."
 
 
-    def test_get_instance_with_asynchronous_mode(self, mr_event: Event):
+    def test_get_instance_with_asynchronous_mode(self, mr_event: EventFactory):
         from asyncio.locks import Event
         from asyncio import new_event_loop
 
@@ -104,7 +104,7 @@ class TestAdapterEvent:
         assert _event is not None and isinstance(_event, Event) is True, "This type of Event instance should be 'asyncio.locks.Event'."
 
 
-    def test_globalize_instance(self, mr_event: Event):
+    def test_globalize_instance(self, mr_event: EventFactory):
         from multirunnable.api.manage import Running_Event
         assert Running_Event is None, "It should be None before we do anything."
 
@@ -119,7 +119,7 @@ class TestAdapterEvent:
 
 class TestAdapterCondition:
 
-    def test__str__(self, mr_condition: Condition):
+    def test__str__(self, mr_condition: ConditionFactory):
         _lock_str = str(mr_condition)
         _chksum = re.search(r"<Condition Adapter object with [a-zA-Z]{4,64} mode at [0-9]{10,30}>", _lock_str)
         assert _chksum is not None, f"The '__str__' format is incorrect. Please check its value. \n" \
@@ -127,7 +127,7 @@ class TestAdapterCondition:
                                     f"But it got *{_lock_str}*."
 
 
-    def test__repr__(self, mr_condition: Condition):
+    def test__repr__(self, mr_condition: ConditionFactory):
         _lock_repr = repr(mr_condition)
         _chksum = re.search(r"<Condition Adapter object with [a-zA-Z]{4,64} mode at [0-9]{10,30}>", _lock_repr)
         assert _chksum is not None, f"The '__repr__' format is incorrect. Please check its value. \n" \
@@ -136,11 +136,11 @@ class TestAdapterCondition:
 
 
     @pytest.mark.skip(reason="not implement testing logic.")
-    def test__add__(self, mr_condition: Condition):
+    def test__add__(self, mr_condition: ConditionFactory):
         pass
 
 
-    def test_feature_mode(self, mr_condition: Condition):
+    def test_feature_mode(self, mr_condition: ConditionFactory):
         _testing_mode = FeatureMode.Parallel
 
         assert mr_condition.feature_mode is None, "The default value of FeatureMode of Condition instance should be None."
@@ -153,7 +153,7 @@ class TestAdapterCondition:
             assert _feature_mode is _testing_mode, f"The mode we got from Condition instance should be the same as we set '{_testing_mode}'."
 
 
-    def test_get_instance_with_parallel_mode(self, mr_condition: Condition):
+    def test_get_instance_with_parallel_mode(self, mr_condition: ConditionFactory):
         try:
             _condition = mr_condition.get_instance()
         except ValueError as ve:
@@ -165,7 +165,7 @@ class TestAdapterCondition:
         assert _condition is not None and isinstance(_condition, Condition) is True, "This type of Condition instance should be 'multiprocessing.synchronize.Condition'."
 
 
-    def test_get_instance_with_concurrent_mode(self, mr_condition: Condition):
+    def test_get_instance_with_concurrent_mode(self, mr_condition: ConditionFactory):
         try:
             _condition = mr_condition.get_instance()
         except ValueError as ve:
@@ -178,7 +178,7 @@ class TestAdapterCondition:
 
 
     @pytest.mark.skip(reason="Still thinking about implementing Event, Condition feature of Coroutine.")
-    def test_get_instance_with_coroutine_mode(self, mr_condition: Condition):
+    def test_get_instance_with_coroutine_mode(self, mr_condition: ConditionFactory):
         pass
         # try:
         #     _lock = mr_event.get_instance()
@@ -191,7 +191,7 @@ class TestAdapterCondition:
         # assert _lock is not None and isinstance(_lock, Lock) is True, f"This type of Condition instance should be 'gevent.threading.Lock'."
 
 
-    def test_get_instance_with_asynchronous_mode(self, mr_condition: Condition):
+    def test_get_instance_with_asynchronous_mode(self, mr_condition: ConditionFactory):
         from asyncio.locks import Condition
         from asyncio import new_event_loop
 
@@ -205,7 +205,7 @@ class TestAdapterCondition:
         assert _condition is not None and isinstance(_condition, Condition) is True, "This type of Condition instance should be 'asyncio.locks.Condition'."
 
 
-    def test_globalize_instance(self, mr_condition: Condition):
+    def test_globalize_instance(self, mr_condition: ConditionFactory):
         from multirunnable.api.manage import Running_Condition
         assert Running_Condition is None, "It should be None before we do anything."
 
