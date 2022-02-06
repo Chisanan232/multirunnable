@@ -3,9 +3,9 @@ from multirunnable.mode import RunningMode, FeatureMode
 from multirunnable.api.decorator import (
     RunWith, AsyncRunWith
 )
-from multirunnable.adapter.lock import Lock, RLock, Semaphore, BoundedSemaphore
-from multirunnable.adapter.communication import Event, Condition
-from multirunnable.adapter.strategy import ExecutorStrategyAdapter
+from multirunnable.factory.lock import LockFactory, RLockFactory, SemaphoreFactory, BoundedSemaphoreFactory
+from multirunnable.factory.communication import EventFactory, ConditionFactory
+from multirunnable.factory.strategy import ExecutorStrategyAdapter
 from multirunnable.coroutine.strategy import AsynchronousStrategy
 
 from ..test_config import Worker_Size, Worker_Pool_Size, Task_Size, Semaphore_Value
@@ -42,32 +42,32 @@ _Default_Value: int = 1
 
 
 def instantiate_lock(_mode, **kwargs):
-    _lock = Lock()
+    _lock = LockFactory()
     return _initial(_lock, _mode, **kwargs)
 
 
 def instantiate_rlock(_mode, **kwargs):
-    _rlock = RLock()
+    _rlock = RLockFactory()
     return _initial(_rlock, _mode, **kwargs)
 
 
 def instantiate_semaphore(_mode, **kwargs):
-    _semaphore = Semaphore(value=_Semaphore_Value)
+    _semaphore = SemaphoreFactory(value=_Semaphore_Value)
     return _initial(_semaphore, _mode, **kwargs)
 
 
 def instantiate_bounded_semaphore(_mode, **kwargs):
-    _bounded_semaphore = BoundedSemaphore(value=_Semaphore_Value)
+    _bounded_semaphore = BoundedSemaphoreFactory(value=_Semaphore_Value)
     return _initial(_bounded_semaphore, _mode, **kwargs)
 
 
 def instantiate_event(_mode, **kwargs):
-    _event = Event()
+    _event = EventFactory()
     return _initial(_event, _mode, **kwargs)
 
 
 def instantiate_condition(_mode, **kwargs):
-    _condition = Condition()
+    _condition = ConditionFactory()
     return _initial(_condition, _mode, **kwargs)
 
 
@@ -674,7 +674,7 @@ class TestAsyncFeaturesDecorator:
             _done_timestamp[_current_task_id] = _time
 
         # # # # Run multiple workers and save something info at the right time
-        run_async(_function=_target_testing, _feature=Lock())
+        run_async(_function=_target_testing, _feature=LockFactory())
         TestAsyncFeaturesDecorator._chk_done_timestamp_by_lock(_done_timestamp)
 
 
@@ -698,7 +698,7 @@ class TestAsyncFeaturesDecorator:
             _done_timestamp[_current_task_id] = _time
 
         # # # # Run multiple workers and save something info at the right time
-        run_async(_function=_target_testing, _feature=Semaphore(value=_Semaphore_Value))
+        run_async(_function=_target_testing, _feature=SemaphoreFactory(value=_Semaphore_Value))
         TestAsyncFeaturesDecorator._chk_done_timestamp_by_semaphore(_done_timestamp)
 
 
@@ -727,7 +727,7 @@ class TestAsyncFeaturesDecorator:
                 assert True, "Testing code successfully."
 
         # # # # Run multiple workers and save something info at the right time
-        run_async(_function=_target_testing, _feature=BoundedSemaphore(value=_Semaphore_Value))
+        run_async(_function=_target_testing, _feature=BoundedSemaphoreFactory(value=_Semaphore_Value))
         TestAsyncFeaturesDecorator._chk_done_timestamp_by_semaphore(_done_timestamp)
 
 
