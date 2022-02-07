@@ -285,26 +285,26 @@ async def async_target_function_raising_exception():
 
 
 @async_target_function_raising_exception.initialization
-async def _initial_func(*args, **kwargs):
+async def _async_initial_func(*args, **kwargs):
     global Initial_Handling_Flag_Counter
     Initial_Handling_Flag_Counter += 1
 
 
 @async_target_function_raising_exception.done_handling
-async def _done_func(result):
+async def _async_done_func(result):
     global Done_Handling_Flag_Counter
     Done_Handling_Flag_Counter += 1
     return result
 
 
 @async_target_function_raising_exception.final_handling
-async def _final_func():
+async def _async_final_func():
     global Final_Handling_Flag_Counter
     Final_Handling_Flag_Counter += 1
 
 
 @async_target_function_raising_exception.error_handling
-async def _error_func(e: Exception):
+async def _async_error_func(e: Exception):
     global Error_Handling_Flag_Counter
     Error_Handling_Flag_Counter += 1
     return e
@@ -372,27 +372,27 @@ class TargetBoundedFunction:
 
 
     @target_method_raising_exception.initialization
-    def initial_function(self, *args, **kwargs):
+    def raising_exception_initial_function(self, *args, **kwargs):
         global Initial_Handling_Flag_Counter
         Initial_Handling_Flag_Counter += 1
 
 
     @target_method_raising_exception.done_handling
-    def done_function(self, result):
+    def raising_exception_done_function(self, result):
         global Done_Handling_Flag_Counter
         Done_Handling_Flag_Counter += 1
         return result
 
 
     @target_method_raising_exception.error_handling
-    def error_function(self, e: Exception):
+    def raising_exception_error_function(self, e: Exception):
         global Error_Handling_Flag_Counter
         Error_Handling_Flag_Counter += 1
         return e
 
 
     @target_method_raising_exception.final_handling
-    def final_function(self):
+    def raising_exception_final_function(self):
         global Final_Handling_Flag_Counter
         Final_Handling_Flag_Counter += 1
 
@@ -425,26 +425,26 @@ class TargetBoundedAsyncFunction:
 
 
     @target_method.initialization
-    async def initial_function(self, *args, **kwargs):
+    async def async_initial_function(self, *args, **kwargs):
         global Initial_Handling_Flag_Counter
         Initial_Handling_Flag_Counter += 1
 
 
     @target_method.done_handling
-    async def done_function(self, result):
+    async def async_done_function(self, result):
         global Done_Handling_Flag_Counter
         Done_Handling_Flag_Counter += 1
         return result
 
 
     @target_method.final_handling
-    async def final_function(self):
+    async def async_final_function(self):
         global Final_Handling_Flag_Counter
         Final_Handling_Flag_Counter += 1
 
 
     @target_method.error_handling
-    async def error_function(self, e: Exception):
+    async def async_error_function(self, e: Exception):
         global Error_Handling_Flag_Counter
         Error_Handling_Flag_Counter += 1
         return e
@@ -459,26 +459,26 @@ class TargetBoundedAsyncFunction:
 
 
     @target_method_raising_exception.initialization
-    async def initial_function(self, *args, **kwargs):
+    async def async_raising_exception_initial_function(self, *args, **kwargs):
         global Initial_Handling_Flag_Counter
         Initial_Handling_Flag_Counter += 1
 
 
     @target_method_raising_exception.done_handling
-    async def done_function(self, result):
+    async def async_raising_exception_done_function(self, result):
         global Done_Handling_Flag_Counter
         Done_Handling_Flag_Counter += 1
         return result
 
 
     @target_method_raising_exception.final_handling
-    async def final_function(self):
+    async def async_raising_exception_final_function(self):
         global Final_Handling_Flag_Counter
         Final_Handling_Flag_Counter += 1
 
 
     @target_method_raising_exception.error_handling
-    async def error_function(self, e: Exception):
+    async def async_raising_exception_error_function(self, e: Exception):
         global Error_Handling_Flag_Counter
         Error_Handling_Flag_Counter += 1
         return e
