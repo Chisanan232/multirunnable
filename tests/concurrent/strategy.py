@@ -11,7 +11,6 @@ from ..test_config import (
 
 from typing import List, Tuple, Dict, Callable
 import threading
-import datetime
 import pytest
 import time
 import os
@@ -73,7 +72,6 @@ def target_fun(*args, **kwargs) -> str:
         _pid = os.getpid()
         _ppid = os.getppid()
         _ident = threading.get_ident()
-        # _time = str(datetime.datetime.now())
         _time = int(time.time())
 
         Running_Thread_IDs.append(_ident)
@@ -103,7 +101,6 @@ def pool_target_fun(*args, **kwargs) -> str:
         _pid = os.getpid()
         _ppid = os.getppid()
         _ident = threading.get_ident()
-        # _time = str(datetime.datetime.now())
         _time = int(time.time())
 
         Running_Thread_IDs.append(_ident)
@@ -138,7 +135,6 @@ def map_target_fun(*args, **kwargs):
         _pid = os.getpid()
         _ppid = os.getppid()
         _ident = threading.get_ident()
-        # _time = str(datetime.datetime.now())
         _time = int(time.time())
 
         Running_Thread_IDs.append(_ident)

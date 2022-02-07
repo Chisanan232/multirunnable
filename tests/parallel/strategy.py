@@ -10,11 +10,9 @@ from ..test_config import (
 
 from typing import List, Tuple, Dict, Callable
 import multiprocessing as mp
-import datetime
 import pytest
 import time
 import os
-import re
 
 
 Process_Size: int = Worker_Size
@@ -39,13 +37,11 @@ Pool_Running_Count = mp.Value("i", 0)
 def reset_running_flag() -> None:
     global Running_Count
     Running_Count = _Manager.Value("i", 0)
-    # Running_Count = 0
 
 
 def reset_pool_running_value() -> None:
     global Pool_Running_Count
     Pool_Running_Count.value = 0
-    # Pool_Running_Count = mp.Value("i", 0)
 
 
 def reset_running_timer() -> None:
@@ -75,7 +71,6 @@ def target_fun(*args, **kwargs) -> str:
 
         _pid = os.getpid()
         _ppid = os.getppid()
-        # _time = str(datetime.datetime.now())
         _time = int(time.time())
 
         Running_PIDs.append(_pid)
@@ -104,7 +99,6 @@ def pool_target_fun(*args, **kwargs) -> str:
 
         _pid = os.getpid()
         _ppid = os.getppid()
-        # _time = str(datetime.datetime.now())
         _time = int(time.time())
 
         Running_PIDs.append(_pid)
@@ -138,7 +132,6 @@ def map_target_fun(*args, **kwargs):
 
         _pid = os.getpid()
         _ppid = os.getppid()
-        # _time = str(datetime.datetime.now())
         _time = int(time.time())
 
         Running_PIDs.append(_pid)

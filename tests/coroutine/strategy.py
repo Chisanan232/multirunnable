@@ -12,12 +12,10 @@ from ..test_config import (
 from typing import List, Tuple, Dict, Callable
 from gevent.threading import get_ident as get_green_thread_ident, getcurrent as get_current_green_thread, Lock as GeventLock
 from asyncio.locks import Lock as AsyncLock
-import datetime
 import asyncio
 import gevent
 import pytest
 import time
-import sys
 import os
 import re
 
@@ -83,7 +81,6 @@ def target_fun(*args, **kwargs) -> str:
         _pid = os.getpid()
         _ppid = os.getppid()
         _ident = __get_current_thread_ident()
-        # _time = str(datetime.datetime.now())
         _time = int(time.time())
 
         Running_GreenThread_IDs.append(_ident)
@@ -109,7 +106,6 @@ def pool_target_fun(*args, **kwargs) -> str:
         _pid = os.getpid()
         _ppid = os.getppid()
         _ident = __get_current_thread_ident()
-        # _time = str(datetime.datetime.now())
         _time = int(time.time())
 
         Running_GreenThread_IDs.append(_ident)
@@ -2058,25 +2054,8 @@ class TestAsynchronous(GeneralRunningTestSpec):
             assert _r.exception is None, "It should have nothing exception."
 
 
-    @pytest.mark.skip(reason="Not implement testing logic.")
+    @pytest.mark.skip(reason="For coroutine with asynchronous, it doesn't support feature 'close'.")
     def test_close(self, strategy: GreenThreadStrategy):
-        # Test for no any parameters
-        # process_strategy.close(self.__Processes)
-        # _active_children_list = mp.active_children()
-        # print(len(_active_children_list) == 0)
-        # # assert len(_active_children_list) == 0, "Processes should be closed finely."
-        #
-        # # Test for parameters with '*args'
-        # process_strategy.close(self.__Processes_With_Args)
-        # _active_children_list = mp.active_children()
-        # print(len(_active_children_list) == 0)
-        # # assert len(_active_children_list) == 0, "Processes should be closed finely."
-        #
-        # # Test for parameters with '**kwargs'
-        # process_strategy.close(self.__Processes_With_Kwargs)
-        # _active_children_list = mp.active_children()
-        # print(len(_active_children_list) == 0)
-        # assert len(_active_children_list) == 0, "Processes should be closed finely."
         pass
 
 
