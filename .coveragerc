@@ -5,6 +5,7 @@ source=
 omit =
 #    */__init__.py
     ./_version.py
+    ./_utils.py
 
 
 [report]
