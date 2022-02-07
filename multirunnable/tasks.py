@@ -37,13 +37,13 @@ class QueueTask(_BaseQueueTask):
 
 
     @property
-    def queue_type(self) -> _BaseQueueType:
-        return self._Queue_Type
+    def queue_instance(self) -> _BaseQueueType:
+        return self._Queue_Instance
 
 
-    @queue_type.setter
-    def queue_type(self, qtype: _BaseQueueType) -> None:
-        self._Queue_Type = qtype
+    @queue_instance.setter
+    def queue_instance(self, qinst: _BaseQueueType) -> None:
+        self._Queue_Instance = qinst
 
 
     @property
@@ -57,7 +57,7 @@ class QueueTask(_BaseQueueTask):
 
 
     def get_queue(self) -> _MRQueue:
-        self.__Queue_Adapter = _QueueAdapter(name=self.name, qtype=self.queue_type)
+        self.__Queue_Adapter = _QueueAdapter(name=self.name, qtype=self.queue_instance)
         __queue_obj = self.__Queue_Adapter.get_instance()
         return __queue_obj
 

@@ -70,8 +70,8 @@ class TestQueueTask(QueueTaskTestCases):
 
 
     def test_queue_type_operator(self, queue_task: QueueTask):
-        queue_task.queue_type = _Testing_Queue_Task_Type
-        _queue_task_type = queue_task.queue_type
+        queue_task.queue_instance = _Testing_Queue_Task_Type
+        _queue_task_type = queue_task.queue_instance
         assert _queue_task_type == _Testing_Queue_Task_Type, f"The queue task type should be {_Testing_Queue_Task_Type}."
 
 
@@ -83,7 +83,7 @@ class TestQueueTask(QueueTaskTestCases):
 
     def test_get_queue(self, queue_task: QueueTask):
         queue_task.name = _Testing_Queue_Task_Name
-        queue_task.queue_type = _Testing_Queue_Task_Type
+        queue_task.queue_instance = _Testing_Queue_Task_Type
         _queue = queue_task.get_queue()
 
         _test_value = "This_is_testing_value"
@@ -105,7 +105,7 @@ class TestQueueTask(QueueTaskTestCases):
 
     def test_globalize(self, queue_task: QueueTask):
         queue_task.name = _Testing_Global_Queue_Task_Name
-        queue_task.queue_type = _Testing_Queue_Task_Type
+        queue_task.queue_instance = _Testing_Queue_Task_Type
         queue_task.value = _Testing_Queue_Task_Value
         _queue = queue_task.get_queue()
         queue_task.globalize(obj=_queue)
@@ -118,7 +118,7 @@ class TestQueueTask(QueueTaskTestCases):
 
     def test_init_queue_with_value(self, queue_task: QueueTask):
         queue_task.name = _Testing_Queue_Task_Name
-        queue_task.queue_type = _Testing_Queue_Task_Type
+        queue_task.queue_instance = _Testing_Queue_Task_Type
         queue_task.value = _Testing_Queue_Task_Value
         queue_task.init_queue_with_values()
 

@@ -1,4 +1,3 @@
-# from .runnable.queue import BaseQueueType as _BaseQueueType
 from ..types import MRQueue as _MRQueue
 import multirunnable._utils as _utils
 
@@ -10,7 +9,7 @@ from typing import Iterable
 class BaseQueueTask(metaclass=ABCMeta):
 
     _Name: str = ""
-    _Queue_Type: _MRQueue = None
+    _Queue_Instance: _MRQueue = None
     _Value: Iterable = None
 
     def __str__(self):
@@ -31,7 +30,7 @@ class BaseQueueTask(metaclass=ABCMeta):
         if __cls_name != "":
             __instance_info = f"{__cls_name} with " \
                               f"name={self.name}, " \
-                              f"queue_type={self.queue_type}, " \
+                              f"queue_type={self.queue_instance}, " \
                               f"value={self.value}"
         else:
             __instance_info = __cls_str
@@ -46,7 +45,7 @@ class BaseQueueTask(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def queue_type(self) -> _MRQueue:
+    def queue_instance(self) -> _MRQueue:
         pass
 
 
