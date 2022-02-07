@@ -24,7 +24,7 @@ It needs to configure 'set_start_method' value to be 'fork' to
 let it work around.
 """
 
-from multiprocessing import set_start_method as set_multiprocessing_start_method, current_process
+from multiprocessing import set_start_method as set_multiprocessing_start_method, get_start_method
 from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 from platform import system as runtime_os
 import logging
@@ -35,7 +35,7 @@ if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) >= (3, 9):
     if re.search(re.escape(runtime_os()), "Windows", re.IGNORECASE) is not None:
         set_multiprocessing_start_method('spawn', force=True)
     else:
-        set_multiprocessing_start_method('fork')
+        set_multiprocessing_start_method('fork', force=True)
 
 from multirunnable.parallel.strategy import ParallelStrategy, ProcessStrategy, ProcessPoolStrategy
 from multirunnable.parallel.synchronization import ProcessLock, ProcessCommunication
