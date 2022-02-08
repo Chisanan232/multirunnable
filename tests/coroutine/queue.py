@@ -1,4 +1,3 @@
-# from multirunnable.coroutine.queue import GeventQueueType, AsynchronousQueueType
 from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 
 from ..test_config import Semaphore_Value
@@ -23,7 +22,7 @@ from asyncio.queues import (
     Queue as async_Queue,
     LifoQueue as async_LifoQueue,
     PriorityQueue as async_PriorityQueue)
-from typing import Type
+import asyncio
 import pytest
 
 
@@ -74,9 +73,11 @@ class TestGreenThreadQueue:
         assert isinstance(_queue, gevent_JoinableQueue) is True, "This type of instance should be 'gevent.queue.JoinableQueue'."
 
 
+    @pytest.mark.skip(reason="Not implement this testing logic.")
     def test_unbounded_queue(self):
-        pass
-        # assert isinstance(mr_queue.value, gevent_UnboundQueue) is True, "This type of instance should be 'gevent.queue.UnboundQueue'."
+        from multirunnable.coroutine.queue import Greenlet_UnboundQueue
+        _queue = Greenlet_UnboundQueue()
+        assert isinstance(_queue, gevent_UnboundQueue) is True, "This type of instance should be 'gevent.queue.UnboundQueue'."
 
 
 
@@ -84,18 +85,30 @@ class TestAsynchronousQueue:
 
     def test_queue(self):
         from multirunnable.coroutine.queue import Async_Queue
+
+        _new_event_loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(_new_event_loop)
+
         _queue = Async_Queue()
         assert isinstance(_queue, async_Queue) is True, "This type of instance should be 'asyncio.queues.Queue'."
 
 
     def test_priority_queue(self):
         from multirunnable.coroutine.queue import Async_PriorityQueue
+
+        _new_event_loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(_new_event_loop)
+
         _queue = Async_PriorityQueue()
         assert isinstance(_queue, async_PriorityQueue) is True, "This type of instance should be 'asyncio.queues.PriorityQueue'."
 
 
     def test_lifo_queue(self):
         from multirunnable.coroutine.queue import Async_LifoQueue
+
+        _new_event_loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(_new_event_loop)
+
         _queue = Async_LifoQueue()
         assert isinstance(_queue, async_LifoQueue) is True, "This type of instance should be 'asyncio.queues.LifoQueue'."
 
