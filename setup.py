@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="MultiRunnable",
-    version="0.17.0a1.dev1",
+    version="0.17.0a1.dev2",
     author="Liu, Bryant",
     author_email="chi10211201@cycu.org.tw",
     url="https://multirunnable.readthedocs.io",
@@ -14,7 +14,7 @@ setuptools.setup(
     description="A Python framework integrates running multiple tasks simultaneously with different strategy.",
     long_description=readme,
     long_description_content_type="text/markdown",
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages("multirunnable"),
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
