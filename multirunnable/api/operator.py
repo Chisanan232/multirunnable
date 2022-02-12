@@ -82,13 +82,13 @@ class SemaphoreOperator(_BaseLockAdapterOperator):
         __kwargs = {}
         __kwargs.get("blocking", blocking)
         __kwargs.get("timeout", timeout)
-        self._feature_instance.acquire(**__kwargs)
+        return self._feature_instance.acquire(**__kwargs)
 
     # __enter__ = acquire
 
     def release(self, n: int = 1) -> None:
         # Needs to double check
-        self._feature_instance.release(n=n)
+        return self._feature_instance.release(n=n)
 
 
 
