@@ -61,7 +61,7 @@ class RLockFactory(_FeatureAdapterFactory):
 
 class SemaphoreFactory(_FeatureAdapterFactory):
 
-    def __init__(self, value: int):
+    def __init__(self, value: int = 1):
         super(SemaphoreFactory, self).__init__()
         self.__semaphore_value = value
 
@@ -96,7 +96,7 @@ class SemaphoreFactory(_FeatureAdapterFactory):
 
 class BoundedSemaphoreFactory(_FeatureAdapterFactory):
 
-    def __init__(self, value: int):
+    def __init__(self, value: int = 1):
         super(BoundedSemaphoreFactory, self).__init__()
         self.__semaphore_value = value
 
