@@ -18,7 +18,7 @@ from .framework.factory import (
 from .mode import RunningMode as _RunningMode
 from .factory.strategy import ExecutorStrategyAdapter as _ExecutorStrategyAdapter
 from .types import MRTasks as _MRTasks
-from ._config import set_mode
+from ._config import set_mode, get_current_mode
 from ._utils import get_cls_name as _get_cls_name
 
 
@@ -110,9 +110,15 @@ class Executor(ABC, _BaseExecutor):
 
 class SimpleExecutor(Executor):
 
-    def __init__(self, mode: _RunningMode, executors: int):
-        set_mode(mode=mode)
-        self._mode = mode
+    def __init__(self, executors: int, mode: _RunningMode = None):
+        if mode is not None:
+            if isinstance(mode, _RunningMode) is not True:
+                raise TypeError("The option *mode* should be one of 'multirunnable.mode.RunningMode'.")
+
+            set_mode(mode=mode)
+            self._mode = mode
+        else:
+            self._mode = get_current_mode(force=True)
 
         super().__init__(executors=executors)
         self._initial_running_strategy()
