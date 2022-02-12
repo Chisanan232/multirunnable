@@ -19,16 +19,16 @@ class FeatureAdapterFactory(_BaseFeatureAdapterFactory, ABC):
 
 
     def __str__(self):
-        return f"<TargetObject Adapter object with {self._Mode} mode at {id(self)}>"
+        return f"<TargetObject object with {self._Mode} mode at {id(self)}e>"
 
 
     def __repr__(self):
         __mode = self._Mode
         if self._Mode is _FeatureMode.Asynchronous:
             __loop = self._kwargs.get("loop", None)
-            return f"<TargetObject(loop={__loop}) Adapter object with {__mode} mode at {id(self)}>"
+            return f"<TargetObject(loop={__loop}) object with {__mode} mode at {id(self)}>"
         else:
-            return f"<TargetObject() Adapter object with {__mode} mode at {id(self)}>"
+            return f"<TargetObject() object with {__mode} mode at {id(self)}>"
 
 
     def __add__(self, other) -> _BaseList:
