@@ -1,4 +1,5 @@
 from multirunnable.framework.runnable import PosixThreadLock as _PosixThreadLock
+from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 from multirunnable.mode import FeatureMode as _FeatureMode
 from multirunnable.api.manage import Globalize as _Globalize
 from multirunnable.types import (
@@ -22,7 +23,9 @@ class LockFactory(_FeatureAdapterFactory):
 
 
     def get_instance(self, **kwargs) -> _MRLock:
-        self._chk_param_by_mode(**kwargs)
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) < (3, 10):
+            self._chk_param_by_mode(**kwargs)
+
         if self.feature_mode is None:
             raise ValueError("FeatureMode is None. Please configure it as one of 'multirunnable.mode.FeatureMode'.")
 
