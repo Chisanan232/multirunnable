@@ -57,7 +57,7 @@ class FinalProveResult:
 
     @staticmethod
     def running_mode_key():
-        return "strategy_module", "class_key", "executor_strategy", "pool_strategy"
+        return "strategy_module", "class_key", "executor_strategy", "pool_strategy", "feature"
 
 
     @staticmethod
