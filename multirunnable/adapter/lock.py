@@ -1,16 +1,12 @@
 __all__ = ["Lock", "RLock", "Semaphore", "BoundedSemaphore"]
 
-from typing import Union
-
 from ..framework.adapter import BaseLockAdapter, BaseAsyncLockAdapter
 from ..factory import LockFactory, RLockFactory, SemaphoreFactory, BoundedSemaphoreFactory
 from ..api import (
     LockOperator, RLockOperator, SemaphoreOperator, BoundedSemaphoreOperator,
     LockAsyncOperator, SemaphoreAsyncOperator, BoundedSemaphoreAsyncOperator
 )
-from ..framework.api import BaseLockAdapterOperator, BaseAsyncLockAdapterOperator
-from ..framework.factory import BaseFeatureAdapterFactory
-from ..types import MRLock, MRRLock, MRSemaphore, MRBoundedSemaphore, MREvent, MRCondition
+
 
 
 class Lock(BaseLockAdapter):
@@ -73,11 +69,11 @@ class Semaphore(BaseLockAdapter):
         __kwargs = {}
         __kwargs.get("blocking", blocking)
         __kwargs.get("timeout", timeout)
-        self._feature_operator.acquire(**__kwargs)
+        return self._feature_operator.acquire(**__kwargs)
 
 
     def release(self, n: int = 1) -> None:
-        self._feature_operator.release(n=n)
+        return self._feature_operator.release(n=n)
 
 
 
@@ -98,26 +94,57 @@ class BoundedSemaphore(Semaphore):
 
 class AsyncLock(BaseAsyncLockAdapter):
 
+    def _instantiate_factory(self) -> LockAsyncOperator:
+        return LockFactory()
+
+
+    def _instantiate_operator(self) -> LockAsyncOperator:
+        return LockAsyncOperator()
+
+
     async def acquire(self, *args, **kwargs) -> None:
-        pass
+        await self._feature_operator.acquire()
 
 
     def release(self, *args, **kwargs) -> None:
-        pass
+        self._feature_operator.release()
 
 
-    def _instantiate_factory(self) -> BaseFeatureAdapterFactory:
-        pass
+
+class AsyncSemaphore(BaseAsyncLockAdapter):
+
+    def __init__(self, value: int = 1, **kwargs):
+        self._value = value
+        super().__init__(**kwargs)
 
 
-    def _instantiate_operator(self) -> Union[BaseLockAdapterOperator, BaseAsyncLockAdapterOperator]:
-        pass
+    def _instantiate_factory(self) -> LockAsyncOperator:
+        return SemaphoreFactory(value=self._value)
 
 
-    def get_instance(self) -> Union[MRLock, MRRLock, MRSemaphore, MRBoundedSemaphore, MREvent, MRCondition]:
-        pass
+    def _instantiate_operator(self) -> LockAsyncOperator:
+        return SemaphoreAsyncOperator()
 
 
-    def globalize(self, obj: Union[MRLock, MRRLock, MRSemaphore, MRBoundedSemaphore, MREvent, MRCondition]) -> None:
-        pass
+    async def acquire(self, *args, **kwargs) -> None:
+        await self._feature_operator.acquire()
+
+
+    def release(self, *args, **kwargs) -> None:
+        self._feature_operator.release()
+
+
+
+class AsyncBoundedSemaphore(AsyncSemaphore):
+
+    def _instantiate_factory(self) -> LockAsyncOperator:
+        return BoundedSemaphoreFactory(value=self._value)
+
+
+    def _instantiate_operator(self) -> LockAsyncOperator:
+        return BoundedSemaphoreAsyncOperator()
+
+
+    def release(self, *args, **kwargs) -> None:
+        self._feature_operator.release()
 
