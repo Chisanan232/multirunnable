@@ -16,10 +16,10 @@ class BaseFeatureAdapter(metaclass=ABCMeta):
     _Feature_Operator_Inst: Union[BaseLockAdapterOperator, BaseAsyncLockAdapterOperator] = None
 
 
-    def __init__(self, **kwargs):
+    def __init__(self, mode: Union[RunningMode, FeatureMode] = None, init: bool = False, **kwargs):
+        self._run_init_flag = init
+        self._feature_mode = mode
         self._lock_params = kwargs
-        self._run_init_flag = kwargs.get("init", False)
-        self._feature_mode = kwargs.get("mode", None)
 
         if self._feature_mode is None:
             _current_running_mode = get_current_mode(force=True)
@@ -92,7 +92,7 @@ class BaseFeatureAdapter(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def get_instance(self) -> Union[MRLock, MRRLock, MRSemaphore, MRBoundedSemaphore, MREvent, MRCondition]:
+    def get_instance(self, **kwargs) -> Union[MRLock, MRRLock, MRSemaphore, MRBoundedSemaphore, MREvent, MRCondition]:
         """
         Description:
             Return the instance by RunningMode. For example, it would
@@ -116,10 +116,10 @@ class BaseFeatureAdapter(metaclass=ABCMeta):
 
 class BaseLockAdapter(BaseFeatureAdapter):
 
-    def __init__(self, **kwargs):
-        if kwargs.get("mode", None) is not None and kwargs.get("mode") is RunningMode.Asynchronous:
-            raise TypeError("")
-        super().__init__(**kwargs)
+    def __init__(self, mode: Union[RunningMode, FeatureMode] = None, init: bool = False, **kwargs):
+        if mode is not None and (mode is RunningMode.Asynchronous or mode is FeatureMode.Asynchronous):
+            raise TypeError(f"This object {__class__} doesn't receive Asynchronous mode.")
+        super().__init__(mode=mode, init=init, **kwargs)
 
 
     def __repr__(self):
@@ -168,10 +168,10 @@ class BaseLockAdapter(BaseFeatureAdapter):
 
 class BaseCommunicationAdapter(BaseFeatureAdapter):
 
-    def __init__(self, **kwargs):
-        if kwargs.get("mode", None) is not None and kwargs.get("mode") is RunningMode.Asynchronous:
-            raise TypeError("")
-        super().__init__(**kwargs)
+    def __init__(self, mode: Union[RunningMode, FeatureMode] = None, init: bool = False, **kwargs):
+        if mode is not None and (mode is RunningMode.Asynchronous or mode is FeatureMode.Asynchronous):
+            raise TypeError(f"This object {__class__} doesn't receive Asynchronous mode.")
+        super().__init__(mode=mode, init=init, **kwargs)
 
 
     def __repr__(self):
@@ -187,17 +187,17 @@ class BaseCommunicationAdapter(BaseFeatureAdapter):
 
 
     @abstractmethod
-    def wait(self, timeout: int = None) -> Optional[Any]:
+    def wait(self, **kwargs) -> Optional[Any]:
         pass
 
 
 
 class BaseAsyncLockAdapter(BaseFeatureAdapter):
 
-    def __init__(self, **kwargs):
-        if kwargs.get("mode", None) is not None and kwargs.get("mode") is not RunningMode.Asynchronous:
-            raise TypeError("")
-        super().__init__(**kwargs)
+    def __init__(self, mode: Union[RunningMode, FeatureMode] = None, init: bool = False, **kwargs):
+        if mode is not None and (mode is not RunningMode.Asynchronous and mode is not FeatureMode.Asynchronous):
+            raise TypeError(f"This object {__class__} only receives Asynchronous mode.")
+        super().__init__(mode=mode, init=init, **kwargs)
 
 
     def __repr__(self):
@@ -205,20 +205,28 @@ class BaseAsyncLockAdapter(BaseFeatureAdapter):
 
 
     def __await__(self):
-        return self._operators.__await__()
+        return self._feature_operator.__await__()
 
 
     async def __aenter__(self):
-        return await self._operators.__aenter__()
+        return await self._feature_operator.__aenter__()
 
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
-        await self._operators.__aexit__(exc_type, exc_val, exc_tb)
+        await self._feature_operator.__aexit__(exc_type, exc_val, exc_tb)
 
 
     async def __acquire_ctx(self):
         await self.acquire()
         return _AsyncContextManager(self)
+
+
+    def get_instance(self, **kwargs) -> Union[MRLock, MRRLock, MRSemaphore, MRBoundedSemaphore, MREvent, MRCondition]:
+        return self._feature_factory.get_instance(**kwargs)
+
+
+    def globalize(self, obj: Union[MRLock, MRRLock, MRSemaphore, MRBoundedSemaphore, MREvent, MRCondition]) -> None:
+        self._feature_factory.globalize_instance(obj=obj)
 
 
     @abstractmethod
@@ -234,40 +242,26 @@ class BaseAsyncLockAdapter(BaseFeatureAdapter):
 
 class BaseAsyncCommunicationAdapter(BaseFeatureAdapter):
 
-    def __init__(self, **kwargs):
-        if kwargs.get("mode", None) is not None and kwargs.get("mode") is not RunningMode.Asynchronous:
-            raise TypeError("")
-        super().__init__(**kwargs)
+    def __init__(self, mode: Union[RunningMode, FeatureMode] = None, init: bool = False, **kwargs):
+        if mode is not None and (mode is not RunningMode.Asynchronous and mode is not FeatureMode.Asynchronous):
+            raise TypeError(f"This object {__class__} only receives Asynchronous mode.")
+        super().__init__(mode=mode, init=init, **kwargs)
 
 
     def __repr__(self):
         return f"<{self.__class__} object as Adapter with {self._feature_mode} mode at {id(self)}>"
 
 
-    def __await__(self):
-        return self._operators.__await__()
+    def get_instance(self, **kwargs) -> Union[MRLock, MRRLock, MRSemaphore, MRBoundedSemaphore, MREvent, MRCondition]:
+        return self._feature_factory.get_instance(**kwargs)
 
 
-    async def __aenter__(self):
-        return await self._operators.__aenter__()
-
-
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
-        await self._operators.__aexit__(exc_type, exc_val, exc_tb)
-
-
-    async def __acquire_ctx(self):
-        await self.acquire()
-        return _AsyncContextManager(self)
+    def globalize(self, obj: Union[MRLock, MRRLock, MRSemaphore, MRBoundedSemaphore, MREvent, MRCondition]) -> None:
+        self._feature_factory.globalize_instance(obj=obj)
 
 
     @abstractmethod
-    async def acquire(self, *args, **kwargs) -> None:
-        pass
-
-
-    @abstractmethod
-    def release(self, *args, **kwargs) -> None:
+    async def wait(self, *args, **kwargs) -> None:
         pass
 
 
