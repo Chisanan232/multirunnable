@@ -1,1 +1,1 @@
-from .lock import BaseLockAdapter, BaseCommunicationAdapter, BaseAsyncLockAdapter
+from .lock import BaseLockAdapter, BaseCommunicationAdapter, BaseAsyncLockAdapter, BaseAsyncCommunicationAdapter
