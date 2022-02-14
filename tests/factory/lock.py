@@ -31,21 +31,25 @@ def mr_bounded_semaphore() -> BoundedSemaphoreFactory:
 
 
 
-class TestAdapterLock:
+class TestLockFactory:
 
     def test__str__(self, mr_lock: LockFactory):
+        _testing_mode = FeatureMode.Parallel
+        mr_lock.feature_mode = _testing_mode
         _lock_str = str(mr_lock)
-        _chksum = re.search(r"<Lock Adapter object with [a-zA-Z]{4,64} mode at [0-9]{10,30}>", _lock_str)
+        _chksum = re.search(r"<Lock object with FeatureMode\.[a-zA-Z]{4,32} mode at \w{10,30}>", _lock_str)
         assert _chksum is not None, f"The '__str__' format is incorrect. Please check its value. \n" \
-                                    f"Its format should be like *<Lock Adapter object with <Feature Mode> mode at <ID of instance>>*. \n" \
+                                    f"Its format should be like *<Lock object with <Feature Mode> mode at <ID of instance>>*. \n" \
                                     f"But it got *{_lock_str}*."
 
 
     def test__repr__(self, mr_lock: LockFactory):
+        _testing_mode = FeatureMode.Parallel
+        mr_lock.feature_mode = _testing_mode
         _lock_repr = repr(mr_lock)
-        _chksum = re.search(r"<Lock\(\) Adapter object with [a-zA-Z]{4,64} mode at [0-9]{10,30}>", _lock_repr)
+        _chksum = re.search(r"<Lock\(\) object with FeatureMode\.[a-zA-Z]{4,32} mode at \w{10,30}>", _lock_repr)
         assert _chksum is not None, f"The '__repr__' format is incorrect. Please check its value. \n" \
-                                    f"Its format should be like *<Lock() Adapter object with <Feature Mode> mode at <ID of instance>>*. \n" \
+                                    f"Its format should be like *<Lock() object with <Feature Mode> mode at <ID of instance>>*. \n" \
                                     f"But it got *{_lock_repr}*."
 
 
@@ -130,27 +134,26 @@ class TestAdapterLock:
 
 
 
-class TestAdapterRLock:
+class TestRLockFactory:
 
     def test__str__(self, mr_rlock: RLockFactory):
+        _testing_mode = FeatureMode.Parallel
+        mr_rlock.feature_mode = _testing_mode
         _rlock_str = str(mr_rlock)
-        _chksum = re.search(r"<RLock Adapter object with [a-zA-Z]{4,64} mode at [0-9]{10,30}>", _rlock_str)
+        _chksum = re.search(r"<RLock object with FeatureMode\.[a-zA-Z]{4,32} mode at \w{10,30}>", _rlock_str)
         assert _chksum is not None, f"The '__str__' format is incorrect. Please check its value. \n" \
-                                    f"Its format should be like *<RLock Adapter object with <Feature Mode> mode at <ID of instance>>*. \n" \
+                                    f"Its format should be like *<RLock object with <Feature Mode> mode at <ID of instance>>*. \n" \
                                     f"But it got *{_rlock_str}*."
 
 
     def test__repr__(self, mr_rlock: RLockFactory):
+        _testing_mode = FeatureMode.Parallel
+        mr_rlock.feature_mode = _testing_mode
         _rlock_repr = repr(mr_rlock)
-        _chksum = re.search(r"<RLock\(\) Adapter object with [a-zA-Z]{4,64} mode at [0-9]{10,30}>", _rlock_repr)
+        _chksum = re.search(r"<RLock\(\) object with FeatureMode\.[a-zA-Z]{4,32} mode at \w{10,30}>", _rlock_repr)
         assert _chksum is not None, f"The '__repr__' format is incorrect. Please check its value. \n" \
-                                    f"Its format should be like *<RLock() Adapter object with <Feature Mode> mode at <ID of instance>>*. \n" \
+                                    f"Its format should be like *<RLock() object with <Feature Mode> mode at <ID of instance>>*. \n" \
                                     f"But it got *{_rlock_repr}*."
-
-
-    @pytest.mark.skip(reason="not implement testing logic.")
-    def test__add__(self, mr_rlock: RLockFactory):
-        pass
 
 
     def test_feature_mode(self, mr_rlock: RLockFactory):
@@ -229,27 +232,26 @@ class TestAdapterRLock:
 
 
 
-class TestAdapterSemaphore:
+class TestSemaphoreFactory:
 
     def test__str__(self, mr_semaphore: SemaphoreFactory):
+        _testing_mode = FeatureMode.Parallel
+        mr_semaphore.feature_mode = _testing_mode
         _semaphore_str = str(mr_semaphore)
-        _chksum = re.search(r"<Semaphore Adapter object with [a-zA-Z]{4,64} mode at [0-9]{10,30}>", _semaphore_str)
+        _chksum = re.search(r"<Semaphore object with FeatureMode\.[a-zA-Z]{4,32} mode at \w{10,30}>", _semaphore_str)
         assert _chksum is not None, f"The '__str__' format is incorrect. Please check its value. \n" \
-                                    f"Its format should be like *<Semaphore Adapter object with <Feature Mode> mode at <ID of instance>>*. \n" \
+                                    f"Its format should be like *<Semaphore object with <Feature Mode> mode at <ID of instance>>*. \n" \
                                     f"But it got *{_semaphore_str}*."
 
 
     def test__repr__(self, mr_semaphore: SemaphoreFactory):
+        _testing_mode = FeatureMode.Parallel
+        mr_semaphore.feature_mode = _testing_mode
         _semaphore_repr = repr(mr_semaphore)
-        _chksum = re.search(r"<Semaphore\(value=[0-9]{1,4}\) object with [a-zA-Z]{4,64} mode at [0-9]{10,30}>", _semaphore_repr)
+        _chksum = re.search(r"<Semaphore\(value=[0-9]{1,4}\) object with FeatureMode\.[a-zA-Z]{4,32} mode at \w{10,30}>", _semaphore_repr)
         assert _chksum is not None, f"The '__repr__' format is incorrect. Please check its value. \n" \
                                     f"Its format should be like *<Semaphore(value=<Semaphore mount>) object with <Feature Mode> mode at <ID of instance>>*. \n" \
                                     f"But it got *{_semaphore_repr}*."
-
-
-    @pytest.mark.skip(reason="not implement testing logic.")
-    def test__add__(self, mr_semaphore: SemaphoreFactory):
-        pass
 
 
     def test_feature_mode(self, mr_semaphore: SemaphoreFactory):
@@ -328,27 +330,26 @@ class TestAdapterSemaphore:
 
 
 
-class TestAdapterBoundedSemaphore:
+class TestBoundedSemaphoreFactory:
 
     def test__str__(self, mr_bounded_semaphore: BoundedSemaphoreFactory):
+        _testing_mode = FeatureMode.Parallel
+        mr_bounded_semaphore.feature_mode = _testing_mode
         _bounded_semaphore_str = str(mr_bounded_semaphore)
-        _chksum = re.search(r"<Bounded Semaphore Adapter object with [a-zA-Z]{4,64} mode at [0-9]{10,30}>", _bounded_semaphore_str)
+        _chksum = re.search(r"<Bounded Semaphore object with FeatureMode\.[a-zA-Z]{4,32} mode at \w{10,30}>", _bounded_semaphore_str)
         assert _chksum is not None, f"The '__str__' format is incorrect. Please check its value. \n" \
-                                    f"Its format should be like *<Bounded Semaphore Adapter object with <Feature Mode> mode at <ID of instance>>*. \n" \
+                                    f"Its format should be like *<Bounded Semaphore object with <Feature Mode> mode at <ID of instance>>*. \n" \
                                     f"But it got *{_bounded_semaphore_str}*."
 
 
     def test__repr__(self, mr_bounded_semaphore: BoundedSemaphoreFactory):
+        _testing_mode = FeatureMode.Parallel
+        mr_bounded_semaphore.feature_mode = _testing_mode
         _bounded_semaphore_repr = repr(mr_bounded_semaphore)
-        _chksum = re.search(r"<BoundedSemaphore\(value=[0-9]{1,4}\) object with [a-zA-Z]{4,64} mode at [0-9]{10,30}>", _bounded_semaphore_repr)
+        _chksum = re.search(r"<BoundedSemaphore\(value=[0-9]{1,4}\) object with FeatureMode\.[a-zA-Z]{4,32} mode at \w{10,30}>", _bounded_semaphore_repr)
         assert _chksum is not None, f"The '__repr__' format is incorrect. Please check its value. \n" \
                                     f"Its format should be like *<BoundedSemaphore(value=<Semaphore mount>) object with <Feature Mode> mode at <ID of instance>>*. \n" \
                                     f"But it got *{_bounded_semaphore_repr}*."
-
-
-    @pytest.mark.skip(reason="not implement testing logic.")
-    def test__add__(self, mr_bounded_semaphore: SemaphoreFactory):
-        pass
 
 
     def test_feature_mode(self, mr_bounded_semaphore: BoundedSemaphoreFactory):

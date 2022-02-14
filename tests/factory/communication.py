@@ -19,24 +19,23 @@ def mr_condition() -> ConditionFactory:
 class TestAdapterEvent:
 
     def test__str__(self, mr_event: EventFactory):
+        _testing_mode = FeatureMode.Parallel
+        mr_event.feature_mode = _testing_mode
         _lock_str = str(mr_event)
-        _chksum = re.search(r"<Event Adapter object with [a-zA-Z]{4,64} mode at [0-9]{10,30}>", _lock_str)
+        _chksum = re.search(r"<Event object with FeatureMode.[a-zA-Z]{4,32} mode at \w{10,30}>", _lock_str)
         assert _chksum is not None, f"The '__str__' format is incorrect. Please check its value. \n" \
-                                    f"Its format should be like *<Event Adapter object with <Feature Mode> mode at <ID of instance>>*. \n" \
+                                    f"Its format should be like *<Event object with <Feature Mode> mode at <ID of instance>>*. \n" \
                                     f"But it got *{_lock_str}*."
 
 
     def test__repr__(self, mr_event: EventFactory):
+        _testing_mode = FeatureMode.Parallel
+        mr_event.feature_mode = _testing_mode
         _lock_repr = repr(mr_event)
-        _chksum = re.search(r"<Event\(\) Adapter object with [a-zA-Z]{4,64} mode at [0-9]{10,30}>", _lock_repr)
+        _chksum = re.search(r"<Event\(\) object with FeatureMode.[a-zA-Z]{4,32} mode at \w{10,30}>", _lock_repr)
         assert _chksum is not None, f"The '__repr__' format is incorrect. Please check its value. \n" \
-                                    f"Its format should be like *<Event() Adapter object with <Feature Mode> mode at <ID of instance>>*. \n" \
+                                    f"Its format should be like *<Event() object with <Feature Mode> mode at <ID of instance>>*. \n" \
                                     f"But it got *{_lock_repr}*."
-
-
-    @pytest.mark.skip(reason="not implement testing logic.")
-    def test__add__(self, mr_event: EventFactory):
-        pass
 
 
     def test_feature_mode(self, mr_event: EventFactory):
@@ -120,24 +119,23 @@ class TestAdapterEvent:
 class TestAdapterCondition:
 
     def test__str__(self, mr_condition: ConditionFactory):
+        _testing_mode = FeatureMode.Parallel
+        mr_condition.feature_mode = _testing_mode
         _lock_str = str(mr_condition)
-        _chksum = re.search(r"<Condition Adapter object with [a-zA-Z]{4,64} mode at [0-9]{10,30}>", _lock_str)
+        _chksum = re.search(r"<Condition object with FeatureMode.[a-zA-Z]{4,32} mode at \w{10,30}>", _lock_str)
         assert _chksum is not None, f"The '__str__' format is incorrect. Please check its value. \n" \
-                                    f"Its format should be like *<Condition Adapter object with <Feature Mode> mode at <ID of instance>>*. \n" \
+                                    f"Its format should be like *<Condition object with <Feature Mode> mode at <ID of instance>>*. \n" \
                                     f"But it got *{_lock_str}*."
 
 
     def test__repr__(self, mr_condition: ConditionFactory):
+        _testing_mode = FeatureMode.Parallel
+        mr_condition.feature_mode = _testing_mode
         _lock_repr = repr(mr_condition)
-        _chksum = re.search(r"<Condition Adapter object with [a-zA-Z]{4,64} mode at [0-9]{10,30}>", _lock_repr)
+        _chksum = re.search(r"<Condition object with FeatureMode.[a-zA-Z]{4,32} mode at \w{10,30}>", _lock_repr)
         assert _chksum is not None, f"The '__repr__' format is incorrect. Please check its value. \n" \
-                                    f"Its format should be like *<Condition() Adapter object with <Feature Mode> mode at <ID of instance>>*. \n" \
+                                    f"Its format should be like *<Condition() object with <Feature Mode> mode at <ID of instance>>*. \n" \
                                     f"But it got *{_lock_repr}*."
-
-
-    @pytest.mark.skip(reason="not implement testing logic.")
-    def test__add__(self, mr_condition: ConditionFactory):
-        pass
 
 
     def test_feature_mode(self, mr_condition: ConditionFactory):
