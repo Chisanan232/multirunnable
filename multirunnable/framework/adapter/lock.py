@@ -103,7 +103,7 @@ class BaseFeatureAdapter(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def globalize(self, obj: Union[MRLock, MRRLock, MRSemaphore, MRBoundedSemaphore, MREvent, MRCondition]) -> None:
+    def globalize_instance(self, obj: Union[MRLock, MRRLock, MRSemaphore, MRBoundedSemaphore, MREvent, MRCondition]) -> None:
         """
         Description:
             Globalize the object in package MultiRunnable.
@@ -151,7 +151,7 @@ class BaseLockAdapter(BaseFeatureAdapter):
         return self._feature_factory.get_instance()
 
 
-    def globalize(self, obj: Union[MRLock, MRRLock, MRSemaphore, MRBoundedSemaphore, MREvent, MRCondition]) -> None:
+    def globalize_instance(self, obj: Union[MRLock, MRRLock, MRSemaphore, MRBoundedSemaphore, MREvent, MRCondition]) -> None:
         self._feature_factory.globalize_instance(obj=obj)
 
 
@@ -182,7 +182,7 @@ class BaseCommunicationAdapter(BaseFeatureAdapter):
         return self._feature_factory.get_instance()
 
 
-    def globalize(self, obj: Union[MRLock, MRRLock, MRSemaphore, MRBoundedSemaphore, MREvent, MRCondition]) -> None:
+    def globalize_instance(self, obj: Union[MRLock, MRRLock, MRSemaphore, MRBoundedSemaphore, MREvent, MRCondition]) -> None:
         self._feature_factory.globalize_instance(obj=obj)
 
 
@@ -225,7 +225,7 @@ class BaseAsyncLockAdapter(BaseFeatureAdapter):
         return self._feature_factory.get_instance(**kwargs)
 
 
-    def globalize(self, obj: Union[MRLock, MRRLock, MRSemaphore, MRBoundedSemaphore, MREvent, MRCondition]) -> None:
+    def globalize_instance(self, obj: Union[MRLock, MRRLock, MRSemaphore, MRBoundedSemaphore, MREvent, MRCondition]) -> None:
         self._feature_factory.globalize_instance(obj=obj)
 
 
@@ -256,7 +256,7 @@ class BaseAsyncCommunicationAdapter(BaseFeatureAdapter):
         return self._feature_factory.get_instance(**kwargs)
 
 
-    def globalize(self, obj: Union[MRLock, MRRLock, MRSemaphore, MRBoundedSemaphore, MREvent, MRCondition]) -> None:
+    def globalize_instance(self, obj: Union[MRLock, MRRLock, MRSemaphore, MRBoundedSemaphore, MREvent, MRCondition]) -> None:
         self._feature_factory.globalize_instance(obj=obj)
 
 
