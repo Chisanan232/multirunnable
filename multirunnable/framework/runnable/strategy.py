@@ -1,5 +1,6 @@
 from ..task import BaseQueueTask as _BaseQueueTask
 from ..factory import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory, BaseList as _BaseList
+from ..adapter.lock import BaseFeatureAdapter
 from .result import MRResult as _MRResult, PoolResult as _PoolResult
 from multirunnable.mode import FeatureMode as _FeatureMode
 from multirunnable.types import MRTasks as _MRTasks
@@ -123,7 +124,7 @@ class RunnableInitialization:
             __queue_adapter.init_queue_with_values()
 
 
-    @dispatch(_BaseFeatureAdapterFactory)
+    @dispatch((_BaseFeatureAdapterFactory, BaseFeatureAdapter))
     def init_lock_or_communication_process(self, features: _BaseFeatureAdapterFactory, **kwargs) -> None:
         """
         Description:
