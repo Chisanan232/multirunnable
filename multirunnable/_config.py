@@ -2,7 +2,7 @@ from multirunnable.mode import RunningMode as _RunningMode
 import logging
 
 # # Current Running Mode
-RUNNING_MODE: _RunningMode
+RUNNING_MODE: _RunningMode = None
 
 
 def set_mode(mode: _RunningMode) -> None:
