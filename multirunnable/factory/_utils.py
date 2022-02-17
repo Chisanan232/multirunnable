@@ -1,12 +1,13 @@
 from multirunnable.framework.runnable import (
+    BaseContext,
     PosixThreadLock,
     PosixThreadCommunication,
     BaseQueue
 )
-from multirunnable.mode import FeatureMode
+from multirunnable.mode import ContextMode, FeatureMode
 from multirunnable._import_utils import ImportMultiRunnable
 
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Type, Union
 
 
 
@@ -34,7 +35,14 @@ class _ModuleFactory:
 
 
     @staticmethod
-    def get_module(mode: FeatureMode, cls: str) -> Tuple[str, str]:
+    def get_context(mode: ContextMode) -> Type[BaseContext]:
+        __module, __lock_cls_name = _ModuleFactory.get_module(mode=mode, cls="context")
+        lock_cls = ImportMultiRunnable.get_class(pkg_path=__module, cls_name=__lock_cls_name)
+        return lock_cls
+
+
+    @staticmethod
+    def get_module(mode: Union[FeatureMode, ContextMode], cls: str) -> Tuple[str, str]:
         _running_info: Dict[str, str] = mode.value
         __module: str = _running_info.get("module")
         __cls_name: str = _running_info.get(cls)
