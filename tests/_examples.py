@@ -1,6 +1,6 @@
 from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
-from multirunnable.mode import RunningMode, FeatureMode
-from multirunnable.factory.strategy import ExecutorStrategyAdapter, PoolStrategyAdapter
+from multirunnable.mode import RunningMode
+from multirunnable.factory.strategy import ExecutorStrategyAdapter
 
 from typing import List
 import asyncio
