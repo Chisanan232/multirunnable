@@ -346,11 +346,6 @@ _Generate_Worker_Error_Msg = "" \
 
 class TestGreenThread(GeneralRunningTestSpec):
 
-    @pytest.mark.skip(reason="Not implement testing logic.")
-    def test_initialization(self, strategy: GreenThreadStrategy):
-        pass
-
-
     def test_start_new_worker_with_function_with_no_argument(self, strategy: GreenThreadStrategy):
         self._start_new_worker(
             strategy=strategy,
@@ -840,28 +835,6 @@ class TestGreenThread(GeneralRunningTestSpec):
             assert isinstance(_r.exception, Exception) and "Testing result raising an exception" in str(_r.exception), "It should have an exception and error message is 'Testing result raising an exception'."
 
 
-    @pytest.mark.skip(reason="Not implement testing logic.")
-    def test_close(self, strategy: GreenThreadStrategy):
-        # Test for no any parameters
-        # process_strategy.close(self.__Processes)
-        # _active_children_list = mp.active_children()
-        # print(len(_active_children_list) == 0)
-        # # assert len(_active_children_list) == 0, "Processes should be closed finely."
-        #
-        # # Test for parameters with '*args'
-        # process_strategy.close(self.__Processes_With_Args)
-        # _active_children_list = mp.active_children()
-        # print(len(_active_children_list) == 0)
-        # # assert len(_active_children_list) == 0, "Processes should be closed finely."
-        #
-        # # Test for parameters with '**kwargs'
-        # process_strategy.close(self.__Processes_With_Kwargs)
-        # _active_children_list = mp.active_children()
-        # print(len(_active_children_list) == 0)
-        # assert len(_active_children_list) == 0, "Processes should be closed finely."
-        pass
-
-
     def _initial(self):
         # Test for parameters with '**kwargs'
         reset_running_flag()
@@ -884,11 +857,6 @@ class TestGreenThread(GeneralRunningTestSpec):
 
 
 class TestGreenThreadPool(PoolRunningTestSpec):
-
-    @pytest.mark.skip(reason="Not implement testing logic.")
-    def test_initialization(self, pool_strategy: GreenThreadPoolStrategy):
-        pass
-
 
     def test_apply_with_function_with_no_arguments(self, pool_strategy: GreenThreadPoolStrategy):
         self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=pool_target_fun)
@@ -1552,11 +1520,6 @@ _Async_Generate_Worker_Error_Msg = \
 class TestAsynchronous(GeneralRunningTestSpec):
 
     @pytest.mark.skip(reason="Not implement testing logic.")
-    def test_initialization(self, async_strategy: AsynchronousStrategy):
-        pass
-
-
-    @pytest.mark.skip(reason="Not implement testing logic.")
     def test_start_new_worker(self, async_strategy: AsynchronousStrategy):
         pass
 
@@ -2052,10 +2015,5 @@ class TestAsynchronous(GeneralRunningTestSpec):
             assert _chksum is not None, ""
             assert _r.state == "successful", "Its state should be 'successful'."
             assert _r.exception is None, "It should have nothing exception."
-
-
-    @pytest.mark.skip(reason="For coroutine with asynchronous, it doesn't support feature 'close'.")
-    def test_close(self, strategy: GreenThreadStrategy):
-        pass
 
 

@@ -237,11 +237,6 @@ _Generate_Worker_Error_Msg = \
 
 class TestThread(GeneralRunningTestSpec):
 
-    @pytest.mark.skip(reason="Not implement testing logic.")
-    def test_initialization(self, strategy: ThreadStrategy):
-        pass
-
-
     def test_start_new_worker_with_function_with_no_argument(self, strategy: ThreadStrategy):
         self._start_new_worker(
             strategy=strategy,
@@ -747,35 +742,8 @@ class TestThread(GeneralRunningTestSpec):
         )
 
 
-    @pytest.mark.skip(reason="Not implement testing logic.")
-    def test_close(self, strategy: ThreadStrategy):
-        # Test for no any parameters
-        # process_strategy.close(self.__Processes)
-        # _active_children_list = mp.active_children()
-        # print(len(_active_children_list) == 0)
-        # # assert len(_active_children_list) == 0, f"Processes should be closed finely."
-        #
-        # # Test for parameters with '*args'
-        # process_strategy.close(self.__Processes_With_Args)
-        # _active_children_list = mp.active_children()
-        # print(len(_active_children_list) == 0)
-        # # assert len(_active_children_list) == 0, f"Processes should be closed finely."
-        #
-        # # Test for parameters with '**kwargs'
-        # process_strategy.close(self.__Processes_With_Kwargs)
-        # _active_children_list = mp.active_children()
-        # print(len(_active_children_list) == 0)
-        # assert len(_active_children_list) == 0, f"Processes should be closed finely."
-        pass
-
-
 
 class TestThreadPool(PoolRunningTestSpec):
-
-    @pytest.mark.skip(reason="Not implement testing logic.")
-    def test_initialization(self, pool_strategy: ThreadPoolStrategy):
-        pass
-
 
     def test_apply_with_function_with_no_arguments(self, pool_strategy: ThreadPoolStrategy):
         self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=pool_target_fun)

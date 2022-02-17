@@ -10,14 +10,7 @@ import re
 
 class RunningStrategyTestSpec(metaclass=ABCMeta):
 
-    @abstractmethod
-    def test_initialization(self, **kwargs):
-        pass
-
-
-    @abstractmethod
-    def test_close(self, **kwargs):
-        pass
+    pass
 
 
 

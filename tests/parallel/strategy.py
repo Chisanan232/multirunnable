@@ -234,11 +234,6 @@ _Generate_Worker_Error_Msg = \
 
 class TestProcess(GeneralRunningTestSpec):
 
-    @pytest.mark.skip(reason="Not implement testing logic.")
-    def test_initialization(self, process_strategy: ProcessStrategy):
-        pass
-
-
     def test_start_new_worker_with_function_with_no_argument(self, process_strategy: ProcessStrategy):
         self._start_new_worker(
             strategy=process_strategy,
@@ -681,21 +676,6 @@ class TestProcess(GeneralRunningTestSpec):
         TestProcess._chk_record()
 
 
-    @pytest.mark.skip(reason="Not implement testing logic.")
-    def test_close(self, process_strategy: ProcessStrategy):
-        pass
-
-
-    @pytest.mark.skip(reason="Not implement testing logic.")
-    def test_terminal(self, process_strategy: ProcessStrategy):
-        pass
-
-
-    @pytest.mark.skip(reason="Not implement testing logic.")
-    def test_kill(self, process_strategy: ProcessStrategy):
-        pass
-
-
     def test_get_success_result(self, process_strategy: ProcessStrategy):
         self._activate_workers(
             strategy=process_strategy,
@@ -762,11 +742,6 @@ class TestProcess(GeneralRunningTestSpec):
 
 
 class TestProcessPool(PoolRunningTestSpec):
-
-    @pytest.mark.skip(reason="Not implement testing logic.")
-    def test_initialization(self, process_pool_strategy: ProcessPoolStrategy):
-        pass
-
 
     def test_apply_with_function_with_no_arguments(self, process_pool_strategy: ProcessPoolStrategy):
         self._apply(strategy=process_pool_strategy, tasks_size=Task_Size, target_fun=pool_target_fun)
