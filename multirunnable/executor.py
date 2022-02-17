@@ -92,14 +92,6 @@ class Executor(ABC, _BaseExecutor):
         General_Runnable_Strategy.close(workers)
 
 
-    def terminal(self) -> None:
-        General_Runnable_Strategy.terminal()
-
-
-    def kill(self) -> None:
-        General_Runnable_Strategy.kill()
-
-
     def result(self) -> List[_MRResult]:
         if isinstance(General_Runnable_Strategy, _Resultable):
             return General_Runnable_Strategy.get_result()
@@ -122,6 +114,12 @@ class SimpleExecutor(Executor):
 
         super().__init__(executors=executors)
         self._initial_running_strategy()
+
+        if self._mode is _RunningMode.Parallel:
+            self.terminal = General_Runnable_Strategy.terminal
+
+        if self._mode in [_RunningMode.Parallel, _RunningMode.GreenThread]:
+            self.terminal = General_Runnable_Strategy.kill
 
 
     def __repr__(self):
