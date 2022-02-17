@@ -75,18 +75,16 @@ class TestAdapterEvent:
         assert _event is not None and isinstance(_event, Event) is True, "This type of Event instance should be 'threading.Event'."
 
 
-    @pytest.mark.skip(reason="Still thinking about implementing Event, Condition feature of Coroutine.")
     def test_get_instance_with_coroutine_mode(self, mr_event: EventFactory):
-        pass
-        # try:
-        #     _lock = mr_event.get_instance()
-        # except ValueError as ve:
-        #     assert "FeatureMode is None. Please configure it as one of 'multirunnable.mode.FeatureMode'." in str(ve), f"It should set the FeatureMode first."
-        #
-        # mr_event.feature_mode = FeatureMode.GreenThread
-        # _lock = mr_event.get_instance()
-        # from gevent.threading import Lock
-        # assert _lock is not None and isinstance(_lock, Lock) is True, f"This type of Lock instance should be 'gevent.threading.Lock'."
+        try:
+            _event = mr_event.get_instance()
+        except ValueError as ve:
+            assert "FeatureMode is None. Please configure it as one of 'multirunnable.mode.FeatureMode'." in str(ve), f"It should set the FeatureMode first."
+
+        mr_event.feature_mode = FeatureMode.GreenThread
+        _event = mr_event.get_instance()
+        from gevent.event import Event
+        assert _event is not None and isinstance(_event, Event) is True, f"This type of Lock instance should be 'gevent.threading.Lock'."
 
 
     def test_get_instance_with_asynchronous_mode(self, mr_event: EventFactory):
@@ -175,18 +173,19 @@ class TestAdapterCondition:
         assert _condition is not None and isinstance(_condition, Condition) is True, "This type of Condition instance should be 'threading.Condition'."
 
 
-    @pytest.mark.skip(reason="Still thinking about implementing Event, Condition feature of Coroutine.")
     def test_get_instance_with_coroutine_mode(self, mr_condition: ConditionFactory):
-        pass
-        # try:
-        #     _lock = mr_event.get_instance()
-        # except ValueError as ve:
-        #     assert "FeatureMode is None. Please configure it as one of 'multirunnable.mode.FeatureMode'." in str(ve), f"It should set the FeatureMode first."
-        #
-        # mr_event.feature_mode = FeatureMode.GreenThread
-        # _lock = mr_event.get_instance()
-        # from gevent.threading import Lock
-        # assert _lock is not None and isinstance(_lock, Lock) is True, f"This type of Condition instance should be 'gevent.threading.Lock'."
+        try:
+            _lock = mr_condition.get_instance()
+        except ValueError as ve:
+            assert "FeatureMode is None. Please configure it as one of 'multirunnable.mode.FeatureMode'." in str(ve), f"It should set the FeatureMode first."
+
+        mr_condition.feature_mode = FeatureMode.GreenThread
+        try:
+            _lock = mr_condition.get_instance()
+        except RuntimeError as re:
+            assert "Greenlet doesn't have condition attribute" in str(re), f"It should raise an exception about it doesn't support this feature 'Condition'."
+        else:
+            assert False, f"It should raise an exception about it doesn't support this feature 'Condition'."
 
 
     def test_get_instance_with_asynchronous_mode(self, mr_condition: ConditionFactory):
