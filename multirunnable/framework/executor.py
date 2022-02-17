@@ -104,26 +104,6 @@ class BaseExecutor(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def terminal(self) -> None:
-        """
-        Description:
-            Terminate executor.
-        :return:
-        """
-        pass
-
-
-    @abstractmethod
-    def kill(self) -> None:
-        """
-        Description:
-            Kill executor.
-        :return:
-        """
-        pass
-
-
-    @abstractmethod
     def result(self) -> List[_MRResult]:
         """
         Description:

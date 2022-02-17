@@ -78,16 +78,6 @@ class BaseRunnableStrategy(metaclass=ABCMeta):
         pass
 
 
-    @abstractmethod
-    def terminal(self) -> None:
-        """
-        Description:
-            Terminate executor or pool.
-        :return:
-        """
-        pass
-
-
 
 class RunnableInitialization:
 
@@ -363,16 +353,6 @@ class GeneralRunnableStrategy(RunnableStrategy):
         pass
 
 
-    @abstractmethod
-    def kill(self) -> None:
-        """
-        Description:
-            Kill executor.
-        :return:
-        """
-        pass
-
-
 
 class PoolRunnableStrategy(RunnableStrategy):
 
@@ -508,6 +488,16 @@ class PoolRunnableStrategy(RunnableStrategy):
         """
         Description:
             Close and join pool.
+        :return:
+        """
+        pass
+
+
+    @abstractmethod
+    def terminal(self) -> None:
+        """
+        Description:
+            Terminate executor or pool.
         :return:
         """
         pass
