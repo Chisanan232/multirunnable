@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from os import getpid, getppid
 from types import FunctionType, MethodType
 from typing import List, Tuple, Dict, Iterable as IterableType, Union, Callable, Optional, cast
@@ -29,6 +29,16 @@ class ParallelStrategy(_Resultable, ABC):
 
     _Strategy_Feature_Mode = _FeatureMode.Parallel
     _Processors_Running_Result: List[Dict] = Global_Manager.list()
+
+
+    @abstractmethod
+    def terminal(self) -> None:
+        """
+        Description:
+            Terminate executor or pool.
+        :return:
+        """
+        pass
 
 
     @classmethod
