@@ -229,24 +229,6 @@ class TestSimpleExecutor:
         TestSimpleExecutor._chk_map_with_function(_functions, _function_a_flag, _function_b_flag, _thread_ids, _threads, _done_timestamp)
 
 
-    def test_terminal(self, executor_as_thread: SimpleExecutor):
-        try:
-            executor_as_thread.terminal()
-        except Exception as e:
-            assert False, "It should work finely without any issue. Please check it."
-        else:
-            assert True, "It work finely without any issue."
-
-
-    def test_kill(self, executor_as_thread: SimpleExecutor):
-        try:
-            executor_as_thread.kill()
-        except Exception as e:
-            assert False, "It should work finely without any issue. Please check it."
-        else:
-            assert True, "It work finely without any issue."
-
-
     @pytest.mark.skip(reason="Not implement testing logic.")
     def test_result(self, executor_as_thread: SimpleExecutor):
         executor_as_thread.result()
