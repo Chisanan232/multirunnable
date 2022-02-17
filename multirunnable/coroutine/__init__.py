@@ -1,10 +1,11 @@
-from multirunnable.coroutine.strategy import (
+from .context import green_thread_context, async_task_context
+from .strategy import (
     CoroutineStrategy,
     GreenThreadStrategy,
     GreenThreadPoolStrategy,
     AsynchronousStrategy)
-from multirunnable.coroutine.synchronization import (
+from .synchronization import (
     GreenThreadLock, GreenThreadCommunication,
     AsynchronousLock, AsynchronousCommunication)
-from multirunnable.coroutine.queue import Greenlet_Queue, Async_Queue
-from multirunnable.coroutine.result import CoroutineResult, AsynchronousResult
+from .queue import Greenlet_Queue, Async_Queue
+from .result import CoroutineResult, AsynchronousResult
