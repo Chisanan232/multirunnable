@@ -1,5 +1,5 @@
 from multirunnable.mode import RunningMode
-from multirunnable.factory.strategy import StrategyAdapter, ExecutorStrategyAdapter, PoolStrategyAdapter
+from multirunnable.factory.strategy import ExecutorStrategyAdapter, PoolStrategyAdapter
 from multirunnable.parallel.strategy import ProcessStrategy, ProcessPoolStrategy
 from multirunnable.concurrent.strategy import ThreadStrategy, ThreadPoolStrategy
 from multirunnable.coroutine.strategy import GreenThreadStrategy, GreenThreadPoolStrategy, AsynchronousStrategy
@@ -12,24 +12,6 @@ import pytest
 _Worker_Size = Worker_Size
 _Worker_Pool_Size = Worker_Pool_Size
 _Task_Size = Task_Size
-
-
-# @pytest.fixture(scope="class")
-# def executor_strategy() -> ExecutorStrategyAdapter:
-#     return ExecutorStrategyAdapter(mode=, executors=)
-#
-#
-# @pytest.fixture(scope="class")
-# def pool_strategy() -> PoolStrategyAdapter:
-#     return PoolStrategyAdapter(mode=, pool_size=, tasks_size=)
-
-
-
-class TestAdapterStrategy:
-
-    @pytest.mark.skip(reason="Possible deprecated")
-    def test_get_simple(self):
-        pass
 
 
 
