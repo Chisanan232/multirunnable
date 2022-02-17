@@ -7,11 +7,11 @@ from types import FunctionType, MethodType
 from typing import Tuple, Dict, Union
 from functools import wraps
 
-PYTHON_MAJOR_VERSION = int(version_info[0])
+PYTHON_MAJOR_VERSION = int(version_info.major)
 if PYTHON_MAJOR_VERSION < 3:
     from .exceptions import VersionError
     raise VersionError
-PYTHON_MINOR_VERSION = int(version_info[1])
+PYTHON_MINOR_VERSION = int(version_info.minor)
 PYTHON_VERSION = f"{PYTHON_MAJOR_VERSION}.{PYTHON_MINOR_VERSION}"
 
 from multirunnable._version import __github_tag_version__, __version__
