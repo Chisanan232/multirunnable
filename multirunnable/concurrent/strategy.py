@@ -143,14 +143,6 @@ class ThreadStrategy(ConcurrentStrategy, _GeneralRunnableStrategy):
             self.close(worker)
 
 
-    def kill(self) -> None:
-        pass
-
-
-    def terminal(self) -> None:
-        pass
-
-
     def get_result(self) -> List[_MRResult]:
         return self.result()
 
