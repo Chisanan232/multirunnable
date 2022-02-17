@@ -53,11 +53,6 @@ class TestLockFactory:
                                     f"But it got *{_lock_repr}*."
 
 
-    @pytest.mark.skip(reason="not implement testing logic.")
-    def test__add__(self, mr_lock: LockFactory):
-        pass
-
-
     def test_feature_mode(self, mr_lock: LockFactory):
         _testing_mode = FeatureMode.Parallel
 
