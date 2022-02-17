@@ -2,62 +2,58 @@
 A unittest for multirunnable.mode module
 """
 
-from multirunnable.mode import RunningMode, FeatureMode
+from multirunnable.mode import ContextMode, RunningMode, FeatureMode
+
+from typing import Union
 from abc import ABCMeta, abstractmethod
+import pytest
 
 
 
-class RunningModeTestCases(metaclass=ABCMeta):
+class ModeTestSpec(metaclass=ABCMeta):
 
     @abstractmethod
-    def test_parallel_mode(self):
+    def test_mode(self, mode):
         pass
 
 
-    @abstractmethod
-    def test_concurrent_mode(self):
+    def _check_mechanism(self, mode: Union[ContextMode, RunningMode, FeatureMode]):
+        __mode_cls_info = mode.value
+        ModeTestSpec.__check_data_type(mode_cls_info=__mode_cls_info)
+        self.__check_keys(mode_cls_info=__mode_cls_info)
+        ModeTestSpec.__check_values(mode_cls_info=__mode_cls_info)
+
+
+    @staticmethod
+    def __check_data_type(mode_cls_info: dict):
+        assert type(mode_cls_info) is dict
+
+
+    def __check_keys(self, mode_cls_info: dict):
+        assert tuple(mode_cls_info.keys()) == self.mode_keys()
+
+
+    def mode_keys(self):
         pass
 
 
-    @abstractmethod
-    def test_greenlet_mode(self):
-        pass
-
-
-    @abstractmethod
-    def test_asynchronous_mode(self):
-        pass
-
-
-
-class FeatureModeTestCases(metaclass=ABCMeta):
-
-    @abstractmethod
-    def test_parallel_mode(self):
-        pass
-
-
-    @abstractmethod
-    def test_concurrent_mode(self):
-        pass
-
-
-    @abstractmethod
-    def test_greenlet_mode(self):
-        pass
-
-
-    @abstractmethod
-    def test_asynchronous_mode(self):
-        pass
+    @staticmethod
+    def __check_values(mode_cls_info: dict):
+        for key, value in mode_cls_info.items():
+            assert value is not None and value != ""
 
 
 
 class FinalProveResult:
 
     @staticmethod
+    def context_mode_key():
+        return "module", "context"
+
+
+    @staticmethod
     def running_mode_key():
-        return "strategy_module", "class_key", "executor_strategy", "pool_strategy", "feature"
+        return "strategy_module", "class_key", "executor_strategy", "pool_strategy", "feature", "context"
 
 
     @staticmethod
@@ -66,79 +62,37 @@ class FinalProveResult:
 
 
 
-class TestRunningMode(RunningModeTestCases):
+class TestContextMode(ModeTestSpec):
 
-    def test_parallel_mode(self):
-        self.__check_mechanism(mode=RunningMode.Parallel)
-
-
-    def test_concurrent_mode(self):
-        self.__check_mechanism(mode=RunningMode.Concurrent)
+    @pytest.mark.parametrize("mode", [ContextMode.Parallel, ContextMode.Concurrent, ContextMode.GreenThread, ContextMode.Asynchronous])
+    def test_mode(self, mode):
+        self._check_mechanism(mode=mode)
 
 
-    def test_greenlet_mode(self):
-        self.__check_mechanism(mode=RunningMode.GreenThread)
-
-
-    def test_asynchronous_mode(self):
-        self.__check_mechanism(mode=RunningMode.Asynchronous)
-
-
-    def __check_mechanism(self, mode: RunningMode):
-        __mode_cls_info = mode.value
-        self.__check_data_type(mode_cls_info=__mode_cls_info)
-        self.__check_keys(mode_cls_info=__mode_cls_info)
-        self.__check_values(mode_cls_info=__mode_cls_info)
-
-
-    def __check_data_type(self, mode_cls_info: dict):
-        assert type(mode_cls_info) is dict
-
-
-    def __check_keys(self, mode_cls_info: dict):
-        assert tuple(mode_cls_info.keys()) == FinalProveResult.running_mode_key()
-
-
-    def __check_values(self, mode_cls_info: dict):
-        for key, value in mode_cls_info.items():
-            assert value is not None and value != ""
+    def mode_keys(self):
+        return FinalProveResult.context_mode_key()
 
 
 
-class TestFeatureMode(FeatureModeTestCases):
+class TestRunningMode(ModeTestSpec):
 
-    def test_parallel_mode(self):
-        self.__check_mechanism(mode=FeatureMode.Parallel)
-
-
-    def test_concurrent_mode(self):
-        self.__check_mechanism(mode=FeatureMode.Concurrent)
+    @pytest.mark.parametrize("mode", [RunningMode.Parallel, RunningMode.Concurrent, RunningMode.GreenThread, RunningMode.Asynchronous])
+    def test_mode(self, mode):
+        self._check_mechanism(mode=mode)
 
 
-    def test_greenlet_mode(self):
-        self.__check_mechanism(mode=FeatureMode.GreenThread)
+    def mode_keys(self):
+        return FinalProveResult.running_mode_key()
 
 
-    def test_asynchronous_mode(self):
-        self.__check_mechanism(mode=FeatureMode.Asynchronous)
+
+class TestFeatureMode(ModeTestSpec):
+
+    @pytest.mark.parametrize("mode", [FeatureMode.Parallel, FeatureMode.Concurrent, FeatureMode.GreenThread, FeatureMode.Asynchronous])
+    def test_mode(self, mode):
+        self._check_mechanism(mode=mode)
 
 
-    def __check_mechanism(self, mode: FeatureMode):
-        __mode_cls_info = mode.value
-        self.__check_data_type(mode_cls_info=__mode_cls_info)
-        self.__check_keys(mode_cls_info=__mode_cls_info)
-        self.__check_values(mode_cls_info=__mode_cls_info)
-
-
-    def __check_data_type(self, mode_cls_info: dict):
-        assert type(mode_cls_info) is dict
-
-
-    def __check_keys(self, mode_cls_info: dict):
-        assert tuple(mode_cls_info.keys()) == FinalProveResult.feature_mode_key()
-
-
-    def __check_values(self, mode_cls_info: dict):
-        for key, value in mode_cls_info.items():
-            assert value is not None and value != ""
+    def mode_keys(self):
+        return FinalProveResult.feature_mode_key()
 
