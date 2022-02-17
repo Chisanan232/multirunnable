@@ -194,10 +194,8 @@ class GreenThreadStrategy(BaseGreenThreadStrategy, _GeneralRunnableStrategy):
 
 
     def kill(self) -> None:
-        pass
-
-
-    def terminal(self) -> None:
+        # gevent.kill(greenlet=, exception=)
+        # gevent.killall(greenlets=, exception=, block=, timeout=)
         pass
 
 
@@ -725,6 +723,9 @@ class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
 
     @dispatch(Task)
     async def close(self, workers: Task) -> None:
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) <= (3, 6):
+            _event_loop = asyncio.get_event_loop()
+            _event_loop.close()
         pass
 
 
@@ -733,17 +734,8 @@ class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
         pass
 
 
-    def terminal(self) -> None:
-        pass
-
-
-    def kill(self) -> None:
-        pass
-
-
     def get_result(self) -> List[_AsynchronousResult]:
         __async_results = self._saving_process()
-        print(f"[DEBUG] self._Async_Running_Result: {self._Async_Running_Result}")
         self.reset_result()
         return __async_results
 
