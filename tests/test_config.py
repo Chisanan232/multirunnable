@@ -47,3 +47,18 @@ Database_Pool_Config = {
     "pool_size": Test_Pool_Size
 }
 
+Table_Columns = ('stock_date', 'trade_volume', 'turnover_price', 'opening_price', 'highest_price', 'lowest_price', 'closing_price', 'gross_spread', 'turnover_volume')
+
+SELECT_TEST_DATA_SQL = "SELECT * FROM tw_stock.stock_data_2330 WHERE stock_date = '0100-01-01 00:00:00';"
+INSERT_TEST_DATA_SQL = "INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume) VALUES ('0100-01-01 00:00:00' , 51255446 ,11006827093 ,212.0000 ,216.5000 , 211.0000 ,215.5000 ,+4.50 , 14098);"
+DELETE_TEST_DATA_SQL = "DELETE FROM tw_stock.stock_data_2330 WHERE stock_date = '0100-01-01 00:00:00';"
+
+TEST_DATA_ROWS = [
+    ('0100-01-01 00:00:00', 51255446, 11006827093, 212.0000, 216.5000, 211.0000, 215.5000, '+4.50', 14098),
+    ('0100-01-02 00:00:00', 51255446, 11006827093, 212.0000, 216.5000, 211.0000, 215.5000, '+4.50', 14098),
+    ('0100-01-03 00:00:00', 51255446, 11006827093, 212.0000, 216.5000, 211.0000, 215.5000, '+4.50', 14098)
+]
+
+SELECT_TEST_DATA_SQL_WITH_OPTION = "SELECT * FROM tw_stock.stock_data_2330 WHERE stock_date >= '0100-01-01 00:00:00' AND stock_date <= '0100-01-03 00:00:00';"
+INSERT_TEST_DATA_SQL_WITH_OPTION = "INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume) VALUES (%s, %s, %s ,%s ,%s ,%s ,%s ,%s ,%s);"
+DELETE_TEST_DATA_SQL_WITH_OPTION = "DELETE FROM tw_stock.stock_data_2330 WHERE stock_date >= '0100-01-01 00:00:00' AND stock_date <= '0100-01-03 00:00:00';"
