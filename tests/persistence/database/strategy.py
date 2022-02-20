@@ -132,13 +132,13 @@ class TestPersistenceDatabaseOneConnection:
             connection_strategy.commit()
 
 
-    def test_close(self, single_connection_strategy: MySQLSingleConnection):
+    def test_close_connection(self, single_connection_strategy: MySQLSingleConnection):
         _connection = single_connection_strategy.reconnect()
         _is_connected = _connection.is_connected()
         assert _is_connected is True, "The database connection instance should be connected."
 
         try:
-            single_connection_strategy.close()
+            single_connection_strategy.close_connection()
         except Exception as e:
             assert False, "It should close the database connection and cursor instances normally."
         else:
@@ -293,7 +293,7 @@ class TestPersistenceDatabaseConnectionPool:
             connection_strategy.commit(conn=conn)
 
 
-    def test_close(self, connection_pool_strategy: MySQLDriverConnectionPool):
+    def test_close_connection(self, connection_pool_strategy: MySQLDriverConnectionPool):
         _conn = connection_pool_strategy.get_one_connection(pool_name=Test_Pool_Name)
         _cursor = _conn.cursor()
         assert _cursor is not None, "It should get the cursor instance without any issue."
