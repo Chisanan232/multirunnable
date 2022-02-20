@@ -1,6 +1,5 @@
 from multirunnable.persistence.interface import BasePersistence
 from multirunnable.exceptions import GlobalizeObjectError
-from multirunnable._utils import get_cls_name as _get_cls_name
 
 from abc import ABC, abstractmethod
 from typing import Dict, Any, TypeVar, Generic, cast, Union
@@ -11,9 +10,6 @@ import logging
 T = TypeVar("T")
 
 _Database_Connection_Pools: Dict[str, Any] = {}
-_Database_Connection: Generic[T] = None
-_Database_Session: Generic[T] = None
-_Database_Cursor: Generic[T] = None
 
 
 def database_connection_pools() -> Dict[str, Any]:
@@ -37,45 +33,6 @@ def get_connection_pool(pool_name: str) -> Generic[T]:
         return None
     else:
         return _db_conn_pool
-
-
-class G:
-    """
-    Description:
-        Some operations about getting or setting global variable like connection, cursor or something else.
-    """
-
-    @classmethod
-    def get_connection(cls) -> Generic[T]:
-        return _Database_Connection
-
-
-    @classmethod
-    def set_connection(cls, conn: Generic[T]) -> None:
-        global _Database_Connection
-        _Database_Connection = conn
-
-
-    @classmethod
-    def get_session(cls) -> Generic[T]:
-        return _Database_Session
-
-
-    @classmethod
-    def set_session(cls, conn: Generic[T]) -> None:
-        global _Database_Session
-        _Database_Session = conn
-
-
-    @classmethod
-    def get_cursor(cls) -> Generic[T]:
-        return _Database_Cursor
-
-
-    @classmethod
-    def set_cursor(cls, conn: Generic[T]) -> None:
-        global _Database_Cursor
-        _Database_Cursor = conn
 
 
 
@@ -118,20 +75,8 @@ class BaseDatabaseConnection(BasePersistence):
         }
 
 
-    def __str__(self):
-        __instance_brief = None
-        # # self.__class__ value: <class '__main__.ACls'>
-        __cls_str = str(self.__class__)
-        __cls_name = _get_cls_name(cls_str=__cls_str)
-        if __cls_name != "":
-            __instance_brief = f"{__cls_name}({self._Database_Config})"
-        else:
-            __instance_brief = __cls_str
-        return __instance_brief
-
-
     def __repr__(self):
-        return f"{self.__str__()} at {id(self.__class__)}"
+        return f"{self.__class__.__name__}({self._Database_Config}) at {id(self.__class__)}"
 
 
     @property
@@ -165,7 +110,7 @@ class BaseDatabaseConnection(BasePersistence):
 
     @property
     @abstractmethod
-    def connection(self) -> Generic[T]:
+    def current_connection(self) -> Generic[T]:
         pass
 
 
@@ -211,20 +156,20 @@ class BaseDatabaseConnection(BasePersistence):
 
 
     @abstractmethod
-    def commit(self) -> None:
+    def commit(self, **kwargs) -> None:
         """
         Description:
-            Commit feature.
+            Commit the execution to database.
         :return:
         """
         pass
 
 
     @abstractmethod
-    def close(self) -> None:
+    def close_connection(self, **kwargs) -> None:
         """
         Description:
-            Close connection and cursor instance.
+            Commit the execution to database.
         :return:
         """
         pass
@@ -270,6 +215,17 @@ class BaseSingleConnection(BaseDatabaseConnection, ABC):
             self._database_connection = self.connect_database(**self.database_config)
 
 
+    @property
+    def current_connection(self) -> Generic[T]:
+        """
+        Note:
+            For resolving this issue, we should do something to avoid this issue.
+            However, it has exception about "TypeError: can't pickle _mysql_connector.MySQL objects" for database package.
+        :return:
+        """
+        return self._database_connection
+
+
     def reconnect(self, timeout: int = 3) -> Generic[T]:
         _running_time = 0
         _db_connect_error = None
@@ -297,6 +253,26 @@ class BaseSingleConnection(BaseDatabaseConnection, ABC):
         return self._database_connection
 
 
+    @abstractmethod
+    def commit(self) -> None:
+        """
+        Description:
+            Commit the execution to database.
+        :return:
+        """
+        pass
+
+
+    @abstractmethod
+    def close_connection(self) -> None:
+        """
+        Description:
+            Close connection instance.
+        :return:
+        """
+        pass
+
+
 
 class BaseConnectionPool(BaseDatabaseConnection):
 
@@ -315,6 +291,7 @@ class BaseConnectionPool(BaseDatabaseConnection):
             "pool_size": _pool_size
         })
         self.__Current_Pool_Name = _pool_name
+        self._current_db_conn: Generic[T] = None
 
         if initial is True:
             self.initial(**self.database_config)
@@ -354,9 +331,8 @@ class BaseConnectionPool(BaseDatabaseConnection):
 
 
     @property
-    def connection(self) -> Generic[T]:
-        _connection = self.get_one_connection(pool_name=self.__Current_Pool_Name)
-        return _connection
+    def current_connection(self) -> Generic[T]:
+        return self._current_db_conn
 
 
     @property
@@ -410,7 +386,8 @@ class BaseConnectionPool(BaseDatabaseConnection):
             if _db_pool is not None:
                 _pool_name = self.database_config.get("pool_name", "")
                 Globalize.connection_pool(name=_pool_name, pool=_db_pool)
-                return self.get_one_connection(pool_name=_pool_name)
+                self._current_db_conn = self.get_one_connection(pool_name=_pool_name)
+                return self._current_db_conn
 
             _running_time += 1
         else:
@@ -430,6 +407,26 @@ class BaseConnectionPool(BaseDatabaseConnection):
 
 
     @abstractmethod
+    def commit(self, conn: Any) -> None:
+        """
+        Description:
+            Commit the execution to database by the connection instance.
+        :return:
+        """
+        pass
+
+
+    @abstractmethod
+    def close_connection(self, conn: Any) -> None:
+        """
+        Description:
+            Close connection instance.
+        :return:
+        """
+        pass
+
+
+    @abstractmethod
     def close_pool(self, pool_name: str) -> None:
         """
         Description:
@@ -441,33 +438,6 @@ class BaseConnectionPool(BaseDatabaseConnection):
 
 
 class Globalize:
-
-    @staticmethod
-    def connection(conn: Generic[T]) -> None:
-        if conn is not None:
-            global _Database_Connection
-            _Database_Connection = conn
-        else:
-            raise GlobalizeObjectError
-
-
-    @staticmethod
-    def session(session: Generic[T]) -> None:
-        if session is not None:
-            global _Database_Session
-            _Database_Session = session
-        else:
-            raise GlobalizeObjectError
-
-
-    @staticmethod
-    def cursor(cursor: Generic[T]) -> None:
-        if cursor is not None:
-            global _Database_Cursor
-            _Database_Cursor = cursor
-        else:
-            raise GlobalizeObjectError
-
 
     @staticmethod
     def connection_pool(name: str, pool: Generic[T]) -> None:
