@@ -1,5 +1,6 @@
-from multirunnable.persistence.interface import DataPersistenceLayer
-from multirunnable.persistence.database.operator import DatabaseOperator
+from ..interface import DataPersistenceLayer
+from .strategy import BaseDatabaseConnection, BaseConnectionPool
+from .operator import DatabaseOperator
 
 from abc import ABC, abstractmethod
 from typing import Tuple, TypeVar, Generic, Any
@@ -9,40 +10,79 @@ T = TypeVar("T")
 
 
 class DatabaseAccessObject(DataPersistenceLayer, ABC):
-
-    def __init__(self, **kwargs):
-        super(DatabaseAccessObject, self).__init__(**kwargs)
+    pass
 
 
 
 class BaseDao(DatabaseAccessObject):
 
+    _Database_Connection_Strategy: BaseDatabaseConnection = None
+    _Database_Opts_Instance: DatabaseOperator = None
+
+    def __init__(self):
+        self._Database_Connection_Strategy = self._instantiate_strategy()
+        self._Database_Opts_Instance = self._instantiate_database_opts(strategy=self._Database_Connection_Strategy)
+
+
     @property
+    def database_opts(self) -> DatabaseOperator:
+        if self._Database_Opts_Instance is None:
+            self._Database_Connection_Strategy = self._instantiate_strategy()
+            self._Database_Opts_Instance = self._instantiate_database_opts(strategy=self._Database_Connection_Strategy)
+        return self._Database_Opts_Instance
+
+
     @abstractmethod
-    def database_opt(self) -> DatabaseOperator:
+    def _instantiate_strategy(self) -> BaseDatabaseConnection:
         pass
 
 
+    @abstractmethod
+    def _instantiate_database_opts(self, strategy: BaseDatabaseConnection) -> DatabaseOperator:
+        pass
+
+
+    def reconnect(self, timeout: int = 1) -> None:
+        self.database_opts.reconnect(timeout=timeout)
+
+
+    def commit(self) -> None:
+        _kwargs = {}
+        if isinstance(self._Database_Connection_Strategy, BaseConnectionPool):
+            _db_connection = getattr(self._Database_Opts_Instance, "_connection")
+            _kwargs["conn"] = _db_connection
+
+        self.database_opts.commit(**_kwargs)
+
+
     def execute(self, operator: Any, params: Tuple = None, multi: bool = False) -> Generic[T]:
-        return self.database_opt.execute(operator=operator, params=params, multi=multi)
+        return self.database_opts.execute(operator=operator, params=params, multi=multi)
 
 
     def execute_many(self, operator: Any, seq_params: Tuple = None) -> Generic[T]:
-        return self.database_opt.execute_many(operator=operator, seq_params=seq_params)
+        return self.database_opts.execute_many(operator=operator, seq_params=seq_params)
 
 
-    def fetch_one(self) -> Generic[T]:
-        return self.database_opt.fetch_one()
+    def fetch_one(self) -> list:
+        return self.database_opts.fetch_one()
 
 
-    def fetch_many(self, size: int = None) -> Generic[T]:
-        return self.database_opt.fetch_many(size=size)
+    def fetch_many(self, size: int = None) -> list:
+        return self.database_opts.fetch_many(size=size)
 
 
-    def fetch_all(self) -> Generic[T]:
-        return self.database_opt.fetch_all()
+    def fetch_all(self) -> list:
+        return self.database_opts.fetch_all()
 
 
-    def close(self) -> Generic[T]:
-        return self.database_opt.close()
+    def close_cursor(self) -> Generic[T]:
+        return self.database_opts.close_cursor()
+
+
+    def close_connection(self) -> Generic[T]:
+        _kwargs = {}
+        if isinstance(self._Database_Connection_Strategy, BaseConnectionPool):
+            _db_connection = getattr(self._Database_Opts_Instance, "_connection")
+            _kwargs["conn"] = _db_connection
+        self.database_opts.close_connection(**_kwargs)
 
