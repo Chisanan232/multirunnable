@@ -1,8 +1,10 @@
+from multirunnable.adapter.context import context
 from multirunnable.persistence.interface import BasePersistence
 from multirunnable.exceptions import GlobalizeObjectError
 
 from abc import ABC, abstractmethod
 from typing import Dict, Any, TypeVar, Generic, cast, Union
+from collections import defaultdict
 from multiprocessing import cpu_count
 import logging
 
@@ -45,38 +47,47 @@ class BaseDatabaseConnection(BasePersistence):
         Therefore it should consider about sharing instances between multiple different workers.
     """
 
-    _Database_Config: Dict[str, Union[str, int]] = {
-        "host": "",
-        "port": "",
-        "user": "",
-        "password": "",
-        "database": ""
+    _DB_Connection_Config: Dict[str, Dict[str, Any]] = None
+
+    _Default_Host: str = "127.0.0.1"
+    _Default_Port: str = None
+    _Default_User: str = "root"
+    _Default_Password: str = "password"
+    _Default_Database: str = "default"
+
+    _Default_DB_Conn_Config: Dict[str, Any] = {
+        "host": _Default_Host,
+        "port": _Default_Port,
+        "user": _Default_User,
+        "password": _Default_Password,
+        "database": _Default_Database,
     }
 
-    __Default_Host = "127.0.0.1"
-    __Default_Port = "8080"
-    __Default_User = "admin"
-    __Default_Password = "password"
-    __Default_Database = "default"
+    _Default_Reconnect_Timeout: int = 3
 
     def __init__(self, **kwargs):
-        _host = kwargs.get("host", self.__Default_Host)
-        _port = kwargs.get("port", self.__Default_Port)
-        _user = kwargs.get("user", self.__Default_User)
-        _password = kwargs.get("password", self.__Default_Password)
-        _database = kwargs.get("database", self.__Default_Database)
+        self._DB_Connection_Config = defaultdict(lambda: self._Default_DB_Conn_Config)
 
-        self.database_config = {
-            "host": _host,
-            "port": _port,
-            "user": _user,
-            "password": _password,
-            "database": _database
+        self._host = kwargs.get("host", self._Default_Host)
+        self._port = kwargs.get("port", self._Default_Port)
+        self._user = kwargs.get("user", self._Default_User)
+        self._password = kwargs.get("password", self._Default_Password)
+        self._database = kwargs.get("database", self._Default_Database)
+
+        self._current_database_config = {
+            "host": self._host,
+            "port": self._port,
+            "user": self._user,
+            "password": self._password,
+            "database": self._database
         }
+
+        _instance_cls_name = self.__class__.__name__
+        self._DB_Connection_Config.update({str(_instance_cls_name): self._current_database_config})
 
 
     def __repr__(self):
-        return f"{self.__class__.__name__}({self._Database_Config}) at {id(self.__class__)}"
+        return f"{self.__class__.__name__}({self.database_config}) at {id(self.__class__)}"
 
 
     @property
@@ -86,7 +97,9 @@ class BaseDatabaseConnection(BasePersistence):
             Get all database configuration content.
         :return:
         """
-        return self._Database_Config
+        _instance_cls_name = self.__class__.__name__
+        _db_config = self._DB_Connection_Config[_instance_cls_name]
+        return _db_config
 
 
     @database_config.setter
@@ -96,7 +109,8 @@ class BaseDatabaseConnection(BasePersistence):
             Get all database configuration content.
         :return:
         """
-        self._Database_Config.update(config)
+        _instance_cls_name = self.__class__.__name__
+        self._DB_Connection_Config.update({str(_instance_cls_name): config})
 
 
     def update_database_config(self, key: str, value: Any) -> None:
@@ -105,12 +119,22 @@ class BaseDatabaseConnection(BasePersistence):
             Get all database configuration content.
         :return:
         """
-        self._Database_Config[key] = value
+        _instance_cls_name = self.__class__.__name__
+        self._DB_Connection_Config[str(_instance_cls_name)][key] = value
+
+
+    def get_all_database_configs(self) -> Dict[str, Dict[str, Any]]:
+        """
+        Description:
+            Get all database configurations.
+        :return:
+        """
+        return self._DB_Connection_Config
 
 
     @property
     @abstractmethod
-    def current_connection(self) -> Generic[T]:
+    def current_connection(self) -> Union[Any, Dict[str, Any]]:
         pass
 
 
@@ -155,6 +179,15 @@ class BaseDatabaseConnection(BasePersistence):
         pass
 
 
+    def is_connected(self, **kwargs) -> bool:
+        """
+        Description:
+            It returns True if the connection instance is connected with database, or it returns False.
+        :return:
+        """
+        pass
+
+
     @abstractmethod
     def commit(self, **kwargs) -> None:
         """
@@ -182,6 +215,8 @@ class BaseSingleConnection(BaseDatabaseConnection, ABC):
         super(BaseSingleConnection, self).__init__(**kwargs)
         self._database_connection: Generic[T] = None
         self._database_cursor: Generic[T] = None
+        self._connection_is_connected: bool = False
+
         if initial is True:
             self.initial(**self.database_config)
 
@@ -209,10 +244,8 @@ class BaseSingleConnection(BaseDatabaseConnection, ABC):
         :param kwargs:
         :return:
         """
-        if kwargs:
-            self._database_connection = self.connect_database(**kwargs)
-        else:
-            self._database_connection = self.connect_database(**self.database_config)
+        self.database_config.update(kwargs)
+        self._database_connection = self.connect_database(**self.database_config)
 
 
     @property
@@ -226,7 +259,42 @@ class BaseSingleConnection(BaseDatabaseConnection, ABC):
         return self._database_connection
 
 
+    def is_connected(self) -> bool:
+        return self._connection_is_connected
+
+
+    def get_one_connection(self) -> Generic[T]:
+        if self._database_connection is not None and self.is_connected() is True:
+            return self._database_connection
+        self._database_connection = self.connect_database()
+        return self._database_connection
+
+
+    def connect_database(self, **kwargs) -> Generic[T]:
+        """
+        Description:
+            Connection to database and return the connection or connection pool instance.
+        :return:
+        """
+        _connection = self._connect_database(**kwargs)
+        self._connection_is_connected = True
+        return _connection
+
+
+    @abstractmethod
+    def _connect_database(self, **kwargs) -> Generic[T]:
+        """
+        Description:
+            Connection to database and return the connection or connection pool instance.
+        :return:
+        """
+        pass
+
+
     def reconnect(self, timeout: int = 3) -> Generic[T]:
+        if self._database_connection is not None and self.is_connected() is True:
+            return self._database_connection
+
         _running_time = 0
         _db_connect_error = None
         while _running_time <= timeout:
@@ -235,22 +303,16 @@ class BaseSingleConnection(BaseDatabaseConnection, ABC):
             except Exception as e:
                 _db_connect_error = e
                 logging.error(e)
-            if _db_connect_error is None and self._database_connection is not None:
-                return self._database_connection
+            else:
+                if self._database_connection is not None and self.is_connected() is True:
+                    return self._database_connection
 
             _running_time += 1
         else:
             if _db_connect_error is not None:
-                raise _db_connect_error
+                raise _db_connect_error from _db_connect_error
             raise ConnectionError(f"It's timeout to retry (Retry value is {timeout}). "
                                   f"Cannot reconnect to database.")
-
-
-    def get_one_connection(self) -> Generic[T]:
-        if self._database_connection is not None:
-            return self._database_connection
-        self._database_connection = self.connect_database()
-        return self._database_connection
 
 
     @abstractmethod
@@ -263,11 +325,20 @@ class BaseSingleConnection(BaseDatabaseConnection, ABC):
         pass
 
 
-    @abstractmethod
     def close_connection(self) -> None:
         """
         Description:
             Close connection instance.
+        :return:
+        """
+        self._close_connection()
+        self._connection_is_connected = False
+
+
+    def _close_connection(self) -> None:
+        """
+        Description:
+            The implementation of closing connection instance.
         :return:
         """
         pass
@@ -291,7 +362,8 @@ class BaseConnectionPool(BaseDatabaseConnection):
             "pool_size": _pool_size
         })
         self.__Current_Pool_Name = _pool_name
-        self._current_db_conn: Generic[T] = None
+        self._current_db_conn: Dict[str, Generic[T]] = defaultdict(lambda: None)
+        self._connection_is_connected: Dict[str, bool] = defaultdict(lambda: False)
 
         if initial is True:
             self.initial(**self.database_config)
@@ -312,7 +384,7 @@ class BaseConnectionPool(BaseDatabaseConnection):
         :param kwargs:
         :return:
         """
-        self.database_config = kwargs
+        self.database_config.update(kwargs)
         # Initialize the Database Connection Instances Pool.
         _db_pool = self.connect_database(**self.database_config)
         # Globalize object to share between different multiple processes
@@ -331,11 +403,6 @@ class BaseConnectionPool(BaseDatabaseConnection):
 
 
     @property
-    def current_connection(self) -> Generic[T]:
-        return self._current_db_conn
-
-
-    @property
     def pool_size(self) -> int:
         """
         Description:
@@ -345,13 +412,13 @@ class BaseConnectionPool(BaseDatabaseConnection):
             The number be suggested to be roughly equal to the CPUs amount of host which the program be run.
         :return:
         """
-        _db_conn_num = self._Database_Config["pool_size"]
+        _db_conn_num: int = int(str(self.database_config["pool_size"]))
         if _db_conn_num < 0:
             raise ValueError("The database connection pool size cannot less than 0.")
 
         if _db_conn_num is None or _db_conn_num == 0:
-            self._Database_Config["pool_size"] = cpu_count()
-            return self._Database_Config["pool_size"]
+            self.database_config["pool_size"] = cpu_count()
+            return cast(self.database_config["pool_size"], int)
         else:
             if _db_conn_num > cpu_count():
                 logging.warning("Warning about suggestion is the best "
@@ -370,7 +437,52 @@ class BaseConnectionPool(BaseDatabaseConnection):
         if pool_size < 0:
             raise ValueError("The database connection pool size cannot less than 0.")
 
-        self._Database_Config["pool_size"] = pool_size
+        self.database_config["pool_size"] = pool_size
+
+
+    @property
+    def current_connection(self) -> Dict[str, Any]:
+        _conn_key = BaseConnectionPool._get_connections_key()
+        return self._current_db_conn[_conn_key]
+
+
+    def is_connected(self) -> bool:
+        _conn_key = BaseConnectionPool._get_connections_key()
+        print(f"[DEBUG in is_connected] _conn_key: {_conn_key}")
+        print(f"[DEBUG in is_connected] self._connection_is_connected: {self._connection_is_connected}")
+        return self._connection_is_connected[_conn_key]
+
+
+    def get_one_connection(self, pool_name: str = "", **kwargs) -> Generic[T]:
+        """
+        Description:
+            Get one database connection instance.
+        :return:
+        """
+        _conn_key = BaseConnectionPool._get_connections_key()
+        _connection = self._get_one_connection(pool_name=pool_name, **kwargs)
+        self._connection_is_connected[_conn_key] = True
+        return _connection
+
+
+    @abstractmethod
+    def _get_one_connection(self, pool_name: str = "", **kwargs) -> Generic[T]:
+        """
+        Description:
+            Get one database connection instance.
+        :return:
+        """
+        pass
+
+
+    @abstractmethod
+    def connect_database(self, **kwargs) -> Generic[T]:
+        """
+        Description:
+            Connection to database and return the connection or connection pool instance.
+        :return:
+        """
+        pass
 
 
     def reconnect(self, timeout: int = 3) -> Generic[T]:
@@ -383,27 +495,30 @@ class BaseConnectionPool(BaseDatabaseConnection):
             except Exception as e:
                 logging.error(e)
                 _db_connect_error = e
-            if _db_pool is not None:
-                _pool_name = self.database_config.get("pool_name", "")
-                Globalize.connection_pool(name=_pool_name, pool=_db_pool)
-                self._current_db_conn = self.get_one_connection(pool_name=_pool_name)
-                return self._current_db_conn
+            else:
+                if _db_pool is not None:
+                    _pool_name = self.database_config.get("pool_name", "")
+                    Globalize.connection_pool(name=_pool_name, pool=_db_pool)
+
+                    _conn_key = BaseConnectionPool._get_connections_key()
+                    if self._current_db_conn[_conn_key] is None or self._connection_is_connected[_conn_key] is False:
+                        print(f"[DEBUG in reconnect] get_one_conn")
+                        self._current_db_conn[_conn_key] = self.get_one_connection(pool_name=_pool_name)
+
+                    print(f"[DEBUG in reconnect] self.database_config: {self.database_config}")
+                    print(f"[DEBUG in reconnect] self._current_db_conn: {self._current_db_conn}")
+                    print(f"[DEBUG in reconnect] _db_connect_error: {_db_connect_error}")
+                    print(f"[DEBUG in reconnect] self.is_connected(): {self.is_connected()}")
+                    if self._current_db_conn[_conn_key] is not None and \
+                            self.is_connected() is True:
+                        return self._current_db_conn[_conn_key]
 
             _running_time += 1
         else:
+            print(f"[DEBUG in reconnect] ")
             if _db_connect_error is not None:
-                raise _db_connect_error
+                raise _db_connect_error from _db_connect_error
             raise ConnectionError("Cannot reconnect to database.")
-
-
-    @abstractmethod
-    def get_one_connection(self, pool_name: str = "", **kwargs) -> Generic[T]:
-        """
-        Description:
-            Get one database connection instance.
-        :return:
-        """
-        pass
 
 
     @abstractmethod
@@ -416,11 +531,24 @@ class BaseConnectionPool(BaseDatabaseConnection):
         pass
 
 
-    @abstractmethod
-    def close_connection(self, conn: Any) -> None:
+    def close_connection(self, conn: Any = None) -> None:
         """
         Description:
             Close connection instance.
+        :return:
+        """
+        _conn_key = BaseConnectionPool._get_connections_key()
+        if conn is None:
+            conn = self._current_db_conn[_conn_key]
+        self._close_connection(conn=conn)
+        self._connection_is_connected[_conn_key] = False
+
+
+    @abstractmethod
+    def _close_connection(self, conn: Any) -> None:
+        """
+        Description:
+            The implementation of closing connection instance.
         :return:
         """
         pass
@@ -434,6 +562,12 @@ class BaseConnectionPool(BaseDatabaseConnection):
         :return:
         """
         pass
+
+
+    @staticmethod
+    def _get_connections_key() -> str:
+        _ident = context.get_current_worker_name()
+        return _ident
 
 
 
