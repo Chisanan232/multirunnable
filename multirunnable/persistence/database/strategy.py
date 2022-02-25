@@ -160,7 +160,7 @@ class BaseDatabaseConnection(BasePersistence):
 
 
     @abstractmethod
-    def reconnect(self, timeout: int = 3) -> Generic[T]:
+    def reconnect(self, timeout: int = 3, force: bool = False) -> Generic[T]:
         """
         Description:
             Reconnection to database and return the connection or connection pool instance.
@@ -202,7 +202,7 @@ class BaseDatabaseConnection(BasePersistence):
     def close_connection(self, **kwargs) -> None:
         """
         Description:
-            Commit the execution to database.
+            Close the database connection instance.
         :return:
         """
         pass
@@ -266,7 +266,7 @@ class BaseSingleConnection(BaseDatabaseConnection, ABC):
     def get_one_connection(self) -> Generic[T]:
         if self._database_connection is not None and self.is_connected() is True:
             return self._database_connection
-        self._database_connection = self.connect_database()
+        self._database_connection = self.connect_database(**self.database_config)
         return self._database_connection
 
 
@@ -291,8 +291,8 @@ class BaseSingleConnection(BaseDatabaseConnection, ABC):
         pass
 
 
-    def reconnect(self, timeout: int = 3) -> Generic[T]:
-        if self._database_connection is not None and self.is_connected() is True:
+    def reconnect(self, timeout: int = 3, force: bool = False) -> Generic[T]:
+        if force is False and self._database_connection is not None and self.is_connected() is True:
             return self._database_connection
 
         _running_time = 0
@@ -335,6 +335,7 @@ class BaseSingleConnection(BaseDatabaseConnection, ABC):
         self._connection_is_connected = False
 
 
+    @abstractmethod
     def _close_connection(self) -> None:
         """
         Description:
@@ -440,41 +441,6 @@ class BaseConnectionPool(BaseDatabaseConnection):
         self.database_config["pool_size"] = pool_size
 
 
-    @property
-    def current_connection(self) -> Dict[str, Any]:
-        _conn_key = BaseConnectionPool._get_connections_key()
-        return self._current_db_conn[_conn_key]
-
-
-    def is_connected(self) -> bool:
-        _conn_key = BaseConnectionPool._get_connections_key()
-        print(f"[DEBUG in is_connected] _conn_key: {_conn_key}")
-        print(f"[DEBUG in is_connected] self._connection_is_connected: {self._connection_is_connected}")
-        return self._connection_is_connected[_conn_key]
-
-
-    def get_one_connection(self, pool_name: str = "", **kwargs) -> Generic[T]:
-        """
-        Description:
-            Get one database connection instance.
-        :return:
-        """
-        _conn_key = BaseConnectionPool._get_connections_key()
-        _connection = self._get_one_connection(pool_name=pool_name, **kwargs)
-        self._connection_is_connected[_conn_key] = True
-        return _connection
-
-
-    @abstractmethod
-    def _get_one_connection(self, pool_name: str = "", **kwargs) -> Generic[T]:
-        """
-        Description:
-            Get one database connection instance.
-        :return:
-        """
-        pass
-
-
     @abstractmethod
     def connect_database(self, **kwargs) -> Generic[T]:
         """
@@ -485,7 +451,7 @@ class BaseConnectionPool(BaseDatabaseConnection):
         pass
 
 
-    def reconnect(self, timeout: int = 3) -> Generic[T]:
+    def reconnect(self, timeout: int = 3, force: bool = False) -> Generic[T]:
         _running_time = 0
         _db_connect_error = None
         while _running_time <= timeout:
@@ -501,31 +467,71 @@ class BaseConnectionPool(BaseDatabaseConnection):
                     Globalize.connection_pool(name=_pool_name, pool=_db_pool)
 
                     _conn_key = BaseConnectionPool._get_connections_key()
-                    if self._current_db_conn[_conn_key] is None or self._connection_is_connected[_conn_key] is False:
-                        print(f"[DEBUG in reconnect] get_one_conn")
+                    if force is True or self._current_db_conn[_conn_key] is None or self._connection_is_connected[_conn_key] is False:
                         self._current_db_conn[_conn_key] = self.get_one_connection(pool_name=_pool_name)
 
-                    print(f"[DEBUG in reconnect] self.database_config: {self.database_config}")
-                    print(f"[DEBUG in reconnect] self._current_db_conn: {self._current_db_conn}")
-                    print(f"[DEBUG in reconnect] _db_connect_error: {_db_connect_error}")
-                    print(f"[DEBUG in reconnect] self.is_connected(): {self.is_connected()}")
-                    if self._current_db_conn[_conn_key] is not None and \
-                            self.is_connected() is True:
+                    if self._current_db_conn[_conn_key] is not None and self._connection_is_connected[_conn_key] is True:
                         return self._current_db_conn[_conn_key]
 
             _running_time += 1
         else:
-            print(f"[DEBUG in reconnect] ")
             if _db_connect_error is not None:
                 raise _db_connect_error from _db_connect_error
             raise ConnectionError("Cannot reconnect to database.")
 
 
-    @abstractmethod
-    def commit(self, conn: Any) -> None:
+    @property
+    def current_connection(self) -> Dict[str, Any]:
+        _conn_key = BaseConnectionPool._get_connections_key()
+        return self._current_db_conn[_conn_key]
+
+
+    def is_connected(self) -> bool:
+        _conn_key = BaseConnectionPool._get_connections_key()
+        return self._connection_is_connected[_conn_key]
+
+
+    def get_one_connection(self, pool_name: str = "", **kwargs) -> Generic[T]:
         """
         Description:
-            Commit the execution to database by the connection instance.
+            Get one database connection instance.
+        :return:
+        """
+        _pools = database_connection_pools()
+        if pool_name not in _pools.keys():
+            raise ValueError(f"Cannot get the one connection instance from connection pool because it doesn't exist the connection pool with the name '{pool_name}'.")
+
+        _conn_key = BaseConnectionPool._get_connections_key()
+        _connection = self._get_one_connection(pool_name=pool_name, **kwargs)
+        self._current_db_conn[_conn_key] = _connection
+        self._connection_is_connected[_conn_key] = True
+        return _connection
+
+
+    @abstractmethod
+    def _get_one_connection(self, pool_name: str = "", **kwargs) -> Generic[T]:
+        """
+        Description:
+            The truly implementation to let sub-class to implement to get one database connection instance from connection pool.
+        :return:
+        """
+        pass
+
+
+    def commit(self, conn: Any = None) -> None:
+        _conn = conn
+        if _conn is None:
+            _conn_key = BaseConnectionPool._get_connections_key()
+            _conn = self._current_db_conn[_conn_key]
+            assert _conn is not None, f"The database connection instance with key '{_conn_key}' shouldn't be None object.'"
+        self._commit(conn=_conn)
+
+
+    @abstractmethod
+    def _commit(self, conn: Any) -> None:
+        """
+        Description:
+            The truly implementation to let sub-class to implement to commit the execution to database by the connection instance.
         :return:
         """
         pass
@@ -548,7 +554,7 @@ class BaseConnectionPool(BaseDatabaseConnection):
     def _close_connection(self, conn: Any) -> None:
         """
         Description:
-            The implementation of closing connection instance.
+            The truly implementation to let sub-class to implement to close connection instance.
         :return:
         """
         pass
@@ -566,6 +572,12 @@ class BaseConnectionPool(BaseDatabaseConnection):
 
     @staticmethod
     def _get_connections_key() -> str:
+        """
+        Description:
+            In the ConnectionPoolStrategy, it would save the connection instance by the worker name (ex: Process-1, Thread-1, etc).
+            This method responses of how it determine the key index to save it.
+        :return:
+        """
         _ident = context.get_current_worker_name()
         return _ident
 
