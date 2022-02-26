@@ -26,16 +26,21 @@ class MySQLDriverConnectionPoolProxy(NamespaceProxy):
 # @sharing_in_processes()
 class MySQLSingleConnection(BaseSingleConnection):
 
-    def connect_database(self, **kwargs) -> MySQLConnection:
+    def _connect_database(self, **kwargs) -> MySQLConnection:
         _connection = mysql.connector.connect(**kwargs)
         return _connection
+
+
+    def _is_connected(self) -> bool:
+        _cursor = self.current_connection.cursor()
+        return self.current_connection.is_connected()
 
 
     def commit(self) -> None:
         self.current_connection.commit()
 
 
-    def close_connection(self) -> None:
+    def _close_connection(self) -> None:
         if self.current_connection is not None and self.current_connection.is_connected() is True:
             self.current_connection.close()
 
@@ -48,7 +53,7 @@ class MySQLDriverConnectionPool(BaseConnectionPool):
         return connection_pool
 
 
-    def get_one_connection(self, pool_name: str = "", **kwargs) -> PooledMySQLConnection:
+    def _get_one_connection(self, pool_name: str = "", **kwargs) -> PooledMySQLConnection:
         while True:
             try:
                 __connection = get_connection_pool(pool_name=pool_name).get_connection()
@@ -63,11 +68,16 @@ class MySQLDriverConnectionPool(BaseConnectionPool):
                     raise ae
 
 
-    def commit(self, conn: PooledMySQLConnection) -> None:
+    def _is_connected(self, conn: PooledMySQLConnection) -> bool:
+        _cursor = conn.cursor()
+        return conn.is_connected()
+
+
+    def _commit(self, conn: PooledMySQLConnection) -> None:
         conn.commit()
 
 
-    def close_connection(self, conn: PooledMySQLConnection) -> None:
+    def _close_connection(self, conn: PooledMySQLConnection) -> None:
         if conn is not None:
             conn.close()
 
