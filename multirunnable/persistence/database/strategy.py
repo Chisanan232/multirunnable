@@ -413,13 +413,13 @@ class BaseConnectionPool(BaseDatabaseConnection):
             The number be suggested to be roughly equal to the CPUs amount of host which the program be run.
         :return:
         """
-        _db_conn_num: int = int(str(self.database_config["pool_size"]))
+        _db_conn_num: int = cast(int, self.database_config["pool_size"])
         if _db_conn_num < 0:
             raise ValueError("The database connection pool size cannot less than 0.")
 
         if _db_conn_num is None or _db_conn_num == 0:
             self.database_config["pool_size"] = cpu_count()
-            return cast(self.database_config["pool_size"], int)
+            return cast(int, self.database_config["pool_size"])
         else:
             if _db_conn_num > cpu_count():
                 logging.warning("Warning about suggestion is the best "
