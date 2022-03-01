@@ -1,3 +1,4 @@
+from ... import get_current_mode
 from ..interface import DataPersistenceLayer
 from .strategy import BaseDatabaseConnection, BaseConnectionPool
 from .operator import DatabaseOperator
@@ -21,6 +22,10 @@ class BaseDao(DatabaseAccessObject):
 
     def __init__(self):
         self._Database_Connection_Strategy = self._instantiate_strategy()
+        if isinstance(self._Database_Connection_Strategy, BaseConnectionPool):
+            _current_running_mode = get_current_mode()
+            if _current_running_mode is None:
+                raise ValueError("The RunningMode cannot be None object if it works persistence process as 'BaseConnectionPool'.")
         self._Database_Opts_Instance = self._instantiate_database_opts(strategy=self._Database_Connection_Strategy)
 
 
@@ -42,17 +47,12 @@ class BaseDao(DatabaseAccessObject):
         pass
 
 
-    def reconnect(self, timeout: int = 1) -> None:
-        self.database_opts.reconnect(timeout=timeout)
+    def reconnect(self, timeout: int = 1, force: bool = False) -> None:
+        self.database_opts.reconnect(timeout=timeout, force=force)
 
 
     def commit(self) -> None:
-        _kwargs = {}
-        if isinstance(self._Database_Connection_Strategy, BaseConnectionPool):
-            _db_connection = getattr(self._Database_Opts_Instance, "_connection")
-            _kwargs["conn"] = _db_connection
-
-        self.database_opts.commit(**_kwargs)
+        self.database_opts.commit()
 
 
     def execute(self, operator: Any, params: Tuple = None, multi: bool = False) -> Generic[T]:
@@ -80,9 +80,5 @@ class BaseDao(DatabaseAccessObject):
 
 
     def close_connection(self) -> Generic[T]:
-        _kwargs = {}
-        if isinstance(self._Database_Connection_Strategy, BaseConnectionPool):
-            _db_connection = getattr(self._Database_Opts_Instance, "_connection")
-            _kwargs["conn"] = _db_connection
-        self.database_opts.close_connection(**_kwargs)
+        self.database_opts.close_connection()
 
