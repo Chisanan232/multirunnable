@@ -32,7 +32,6 @@ class MySQLSingleConnection(BaseSingleConnection):
 
 
     def _is_connected(self) -> bool:
-        _cursor = self.current_connection.cursor()
         return self.current_connection.is_connected()
 
 
@@ -69,7 +68,6 @@ class MySQLDriverConnectionPool(BaseConnectionPool):
 
 
     def _is_connected(self, conn: PooledMySQLConnection) -> bool:
-        _cursor = conn.cursor()
         return conn.is_connected()
 
 
