@@ -1,7 +1,7 @@
-from multirunnable.persistence.database.strategy import database_connection_pools, get_connection_pool
+from multirunnable import set_mode
 
 from ...test_config import (
-    Test_Pool_Name, Test_Pool_Size,Database_Config, Database_Pool_Config,
+    Under_Test_RunningModes, Under_Test_RunningModes_Without_Greenlet, Test_Pool_Name, Test_Pool_Size, Database_Config, Database_Pool_Config,
     Table_Columns, TEST_DATA_ROWS, SELECT_TEST_DATA_SQL_WITH_OPTION, INSERT_TEST_DATA_SQL_WITH_OPTION, DELETE_TEST_DATA_SQL_WITH_OPTION
 )
 from ._test_db_implement import MySQLSingleConnection, MySQLDriverConnectionPool, MySQLOperator
@@ -28,8 +28,8 @@ def opts_with_single_conn_strategy() -> MySQLOperator:
 
 
 
-@pytest.fixture(scope="class")
-def opts_with_conn_pool_strategy() -> MySQLOperator:
+@pytest.fixture(scope="function")
+def opts_with_conn_pool_strategy(request) -> MySQLOperator:
     global _Pool_Strategy
     Database_Pool_Config.update({
         "pool_name": Test_Pool_Name,
@@ -38,6 +38,9 @@ def opts_with_conn_pool_strategy() -> MySQLOperator:
     _Pool_Strategy = MySQLDriverConnectionPool(initial=False, **Database_Pool_Config)
     # _Pool_Strategy = MySQLDriverConnectionPool(**Database_Pool_Config)
     _Pool_Strategy.current_pool_name = Test_Pool_Name
+
+    set_mode(mode=request.param)
+
     return MySQLOperator(conn_strategy=_Pool_Strategy, db_config=Database_Pool_Config)
 
 
@@ -46,6 +49,10 @@ class TestPersistenceDatabaseOperatorWithSingleConnection:
 
     def test__connection(self, opts_with_single_conn_strategy: MySQLOperator):
         assert opts_with_single_conn_strategy._connection is _Single_Strategy.current_connection, "For SingleConnection strategy, it shuold initial a database connection instance after we instantiate it."
+        assert opts_with_single_conn_strategy._connection is _Single_Strategy.current_connection, "For SingleConnection strategy, it shuold initial a database connection instance after we instantiate it."
+
+        setattr(opts_with_single_conn_strategy, "_db_connection", None)
+        assert opts_with_single_conn_strategy._connection is not None, "The database connection should be instantiate."
 
 
     def test_initial_cursor(self, opts_with_single_conn_strategy: MySQLOperator):
@@ -55,22 +62,25 @@ class TestPersistenceDatabaseOperatorWithSingleConnection:
 
 
     def test__cursor(self, opts_with_single_conn_strategy: MySQLOperator):
-        assert opts_with_single_conn_strategy._db_cursor is not None, "For SingleConnection strategy, it shuold initial a database cursor instance when we call the '_cursor' property."
+        assert opts_with_single_conn_strategy._cursor is not None, "For SingleConnection strategy, it shuold initial a database cursor instance when we call the '_cursor' property."
+
+        setattr(opts_with_single_conn_strategy, "_db_cursor", None)
+        assert opts_with_single_conn_strategy._cursor is not None, "The database connection should be instantiate."
 
 
-    def test_reconnect(self, opts_with_conn_pool_strategy: MySQLOperator):
-        _db_connection = getattr(opts_with_conn_pool_strategy, "_db_connection")
-        _db_cursor = getattr(opts_with_conn_pool_strategy, "_db_cursor")
+    def test_reconnect(self, opts_with_single_conn_strategy: MySQLOperator):
+        _db_connection = getattr(opts_with_single_conn_strategy, "_db_connection")
+        _db_cursor = getattr(opts_with_single_conn_strategy, "_db_cursor")
         assert _db_connection is not None, "Database connection instance should not be None."
         assert _db_cursor is not None, "Database cursor instance should not be None."
 
         _db_connection_id = id(_db_connection)
         _db_cursor_id = id(_db_cursor)
 
-        opts_with_conn_pool_strategy.reconnect()
+        opts_with_single_conn_strategy.reconnect(force=True)
 
-        _new_db_connection = getattr(opts_with_conn_pool_strategy, "_db_connection")
-        _new_db_cursor = getattr(opts_with_conn_pool_strategy, "_db_cursor")
+        _new_db_connection = getattr(opts_with_single_conn_strategy, "_db_connection")
+        _new_db_cursor = getattr(opts_with_single_conn_strategy, "_db_cursor")
         assert _new_db_connection is not None, "Database connection instance should not be None."
         assert _new_db_cursor is not None, "Database cursor instance should not be None."
 
@@ -81,10 +91,9 @@ class TestPersistenceDatabaseOperatorWithSingleConnection:
         assert _db_cursor_id != _new_db_cursor_id, "The memory store places of database cursor instance should be different."
 
 
-    def test_commit(self, opts_with_conn_pool_strategy: MySQLOperator):
-        _db_connection = getattr(opts_with_conn_pool_strategy, "_db_connection")
+    def test_commit(self, opts_with_single_conn_strategy: MySQLOperator):
         try:
-            opts_with_conn_pool_strategy.commit(conn=_db_connection)
+            opts_with_single_conn_strategy.commit()
         except Exception as e:
             assert False, f"It should work finely without any issue. \nThe exception message is {traceback.format_exc()}"
         else:
@@ -134,6 +143,7 @@ class TestPersistenceDatabaseOperatorWithSingleConnection:
     def test_execute_many(self, opts_with_single_conn_strategy: MySQLOperator):
         try:
             opts_with_single_conn_strategy.execute_many(INSERT_TEST_DATA_SQL_WITH_OPTION, TEST_DATA_ROWS)
+            opts_with_single_conn_strategy.commit()
         except Exception as e:
             assert False, f"It should work finely without any issue. \nThe exception message is {traceback.format_exc()}"
         else:
@@ -142,15 +152,19 @@ class TestPersistenceDatabaseOperatorWithSingleConnection:
         opts_with_single_conn_strategy.execute(SELECT_TEST_DATA_SQL_WITH_OPTION)
         _data = opts_with_single_conn_strategy.fetch_all()
         assert _data is not None and len(_data) == len(TEST_DATA_ROWS), f"It should get the data from the cursor instance with target SQL and the data row number should be '{_Data_Row_Number}'."
-        for _datarow, testing_datarow in zip(_data, TEST_DATA_ROWS):
-            for _d, _td in zip(_datarow, testing_datarow):
-                if isinstance(_d, datetime.datetime):
-                    _datetime = datetime.datetime.strptime(_td, '%Y-%m-%d %H:%M:%S')
-                    assert _d == _datetime, "Datetime value should be the same."
-                elif isinstance(_d, str):
-                    assert _d == str(_td), "String value should be the same."
-                else:
-                    assert float(_d) == float(_td), "Float value should be the same."
+        try:
+            for _datarow, testing_datarow in zip(_data, TEST_DATA_ROWS):
+                for _d, _td in zip(_datarow, testing_datarow):
+                    if isinstance(_d, datetime.datetime):
+                        _datetime = datetime.datetime.strptime(_td, '%Y-%m-%d %H:%M:%S')
+                        assert _d == _datetime, "Datetime value should be the same."
+                    elif isinstance(_d, str):
+                        assert _d == str(_td), "String value should be the same."
+                    else:
+                        assert float(_d) == float(_td), "Float value should be the same."
+        finally:
+            opts_with_single_conn_strategy.execute(DELETE_TEST_DATA_SQL_WITH_OPTION)
+            opts_with_single_conn_strategy.commit()
 
 
     def test_fetch_one(self, opts_with_single_conn_strategy: MySQLOperator):
@@ -230,23 +244,37 @@ class TestPersistenceDatabaseOperatorWithSingleConnection:
 
 class TestPersistenceDatabaseOperatorWithConnectionPool:
 
-    def test_initial(self, opts_with_conn_pool_strategy: MySQLOperator):
-        _all_conn_pools = database_connection_pools()
-        assert _all_conn_pools != {}, "The database connection pools should not be empty."
-        assert Test_Pool_Name in _all_conn_pools.keys(), "The pool name should be in the database connection pools."
-        assert _all_conn_pools[Test_Pool_Name] is not None, "The database connection pool should exist with the pool name (from database_connection_pools)."
-        assert get_connection_pool(pool_name=Test_Pool_Name) is not None, "The database connection pool should exist with the pool name (from get_connection_pool)."
-
-
+    @pytest.mark.parametrize(
+        argnames="opts_with_conn_pool_strategy",
+        argvalues=Under_Test_RunningModes_Without_Greenlet,
+        indirect=True
+    )
     def test__connection(self, opts_with_conn_pool_strategy: MySQLOperator):
         assert opts_with_conn_pool_strategy._connection is not None, "The database connection should be instantiate."
         assert opts_with_conn_pool_strategy._connection is _Pool_Strategy.current_connection, "For PoolConnection strategy, it shuold initial a database connection instance after we instantiate it."
 
+        opts_with_conn_pool_strategy.close_connection()
+        setattr(opts_with_conn_pool_strategy, "_db_connection", None)
+        assert opts_with_conn_pool_strategy._connection is not None, "The database connection should be instantiate."
 
+
+    @pytest.mark.parametrize(
+        argnames="opts_with_conn_pool_strategy",
+        argvalues=Under_Test_RunningModes,
+        indirect=True
+    )
     def test__cursor(self, opts_with_conn_pool_strategy: MySQLOperator):
         assert opts_with_conn_pool_strategy._cursor is not None, "The database cursor should be instantiate."
 
+        setattr(opts_with_conn_pool_strategy, "_db_cursor", None)
+        assert opts_with_conn_pool_strategy._cursor is not None, "The database cursor should be instantiate."
 
+
+    @pytest.mark.parametrize(
+        argnames="opts_with_conn_pool_strategy",
+        argvalues=Under_Test_RunningModes,
+        indirect=True
+    )
     def test_reconnect(self, opts_with_conn_pool_strategy: MySQLOperator):
         _db_connection = getattr(opts_with_conn_pool_strategy, "_db_connection")
         _db_cursor = getattr(opts_with_conn_pool_strategy, "_db_cursor")
@@ -256,7 +284,7 @@ class TestPersistenceDatabaseOperatorWithConnectionPool:
         _db_connection_id = id(_db_connection)
         _db_cursor_id = id(_db_cursor)
 
-        opts_with_conn_pool_strategy.reconnect()
+        opts_with_conn_pool_strategy.reconnect(force=True)
 
         _new_db_connection = getattr(opts_with_conn_pool_strategy, "_db_connection")
         _new_db_cursor = getattr(opts_with_conn_pool_strategy, "_db_cursor")
@@ -270,6 +298,11 @@ class TestPersistenceDatabaseOperatorWithConnectionPool:
         assert _db_cursor_id != _new_db_cursor_id, "The memory store places of database cursor instance should be different."
 
 
+    @pytest.mark.parametrize(
+        argnames="opts_with_conn_pool_strategy",
+        argvalues=Under_Test_RunningModes,
+        indirect=True
+    )
     def test_commit(self, opts_with_conn_pool_strategy: MySQLOperator):
         _db_connection = getattr(opts_with_conn_pool_strategy, "_db_connection")
         try:
@@ -280,6 +313,11 @@ class TestPersistenceDatabaseOperatorWithConnectionPool:
             assert True, "It works finely."
 
 
+    @pytest.mark.parametrize(
+        argnames="opts_with_conn_pool_strategy",
+        argvalues=Under_Test_RunningModes,
+        indirect=True
+    )
     def test_commit_without_option(self, opts_with_conn_pool_strategy: MySQLOperator):
         try:
             opts_with_conn_pool_strategy.commit()
@@ -288,9 +326,14 @@ class TestPersistenceDatabaseOperatorWithConnectionPool:
         except Exception as e:
             assert False, f"It should work finely without any issue. \nThe exception message is {traceback.format_exc()}"
         else:
-            assert False, "It should raise an exception about option *conn* cannot be None type."
+            assert True, "It still could work finely even it works with option *conn* as a None type."
 
 
+    @pytest.mark.parametrize(
+        argnames="opts_with_conn_pool_strategy",
+        argvalues=Under_Test_RunningModes,
+        indirect=True
+    )
     def test_column_names(self, opts_with_conn_pool_strategy: MySQLOperator):
         opts_with_conn_pool_strategy.execute(_Test_SQL)
         _column_names = opts_with_conn_pool_strategy.column_names
@@ -298,12 +341,22 @@ class TestPersistenceDatabaseOperatorWithConnectionPool:
             f"These collections which saves column names should be the same. It should be like {Table_Columns}, but we got {_column_names}."
 
 
+    @pytest.mark.parametrize(
+        argnames="opts_with_conn_pool_strategy",
+        argvalues=Under_Test_RunningModes,
+        indirect=True
+    )
     def test_row_count(self, opts_with_conn_pool_strategy: MySQLOperator):
         opts_with_conn_pool_strategy.execute(_Test_SQL)
         _row_count = opts_with_conn_pool_strategy.row_count
         assert _row_count == _Data_Row_Number, f"The data rows count should be {_Data_Row_Number}. But we got {_row_count}."
 
 
+    @pytest.mark.parametrize(
+        argnames="opts_with_conn_pool_strategy",
+        argvalues=Under_Test_RunningModes,
+        indirect=True
+    )
     def test_next(self, opts_with_conn_pool_strategy: MySQLOperator):
         opts_with_conn_pool_strategy.execute(_Test_SQL)
 
@@ -319,6 +372,11 @@ class TestPersistenceDatabaseOperatorWithConnectionPool:
         assert len(_all_daterow) == _Data_Row_Number, "The size of data rows should be the same."
 
 
+    @pytest.mark.parametrize(
+        argnames="opts_with_conn_pool_strategy",
+        argvalues=Under_Test_RunningModes,
+        indirect=True
+    )
     def test_execute(self, opts_with_conn_pool_strategy: MySQLOperator):
         try:
             opts_with_conn_pool_strategy.execute(_Test_SQL)
@@ -331,9 +389,15 @@ class TestPersistenceDatabaseOperatorWithConnectionPool:
         assert _data is not None and len(_data) == _Data_Row_Number, f"It should get the data from the cursor instance with target SQL and the data row number should be '{_Data_Row_Number}'."
 
 
+    @pytest.mark.parametrize(
+        argnames="opts_with_conn_pool_strategy",
+        argvalues=Under_Test_RunningModes,
+        indirect=True
+    )
     def test_execute_many(self, opts_with_conn_pool_strategy: MySQLOperator):
         try:
             opts_with_conn_pool_strategy.execute_many(INSERT_TEST_DATA_SQL_WITH_OPTION, TEST_DATA_ROWS)
+            opts_with_conn_pool_strategy.commit()
         except Exception as e:
             assert False, f"It should work finely without any issue. \nThe exception message is {traceback.format_exc()}"
         else:
@@ -342,17 +406,26 @@ class TestPersistenceDatabaseOperatorWithConnectionPool:
         opts_with_conn_pool_strategy.execute(SELECT_TEST_DATA_SQL_WITH_OPTION)
         _data = opts_with_conn_pool_strategy.fetch_all()
         assert _data is not None and len(_data) == len(TEST_DATA_ROWS), f"It should get the data from the cursor instance with target SQL and the data row number should be '{_Data_Row_Number}'."
-        for _datarow, testing_datarow in zip(_data, TEST_DATA_ROWS):
-            for _d, _td in zip(_datarow, testing_datarow):
-                if isinstance(_d, datetime.datetime):
-                    _datetime = datetime.datetime.strptime(_td, '%Y-%m-%d %H:%M:%S')
-                    assert _d == _datetime, "Datetime value should be the same."
-                elif isinstance(_d, str):
-                    assert _d == str(_td), "String value should be the same."
-                else:
-                    assert float(_d) == float(_td), "Float value should be the same."
+        try:
+            for _datarow, testing_datarow in zip(_data, TEST_DATA_ROWS):
+                for _d, _td in zip(_datarow, testing_datarow):
+                    if isinstance(_d, datetime.datetime):
+                        _datetime = datetime.datetime.strptime(_td, '%Y-%m-%d %H:%M:%S')
+                        assert _d == _datetime, "Datetime value should be the same."
+                    elif isinstance(_d, str):
+                        assert _d == str(_td), "String value should be the same."
+                    else:
+                        assert float(_d) == float(_td), "Float value should be the same."
+        finally:
+            opts_with_conn_pool_strategy.execute(DELETE_TEST_DATA_SQL_WITH_OPTION)
+            opts_with_conn_pool_strategy.commit()
 
 
+    @pytest.mark.parametrize(
+        argnames="opts_with_conn_pool_strategy",
+        argvalues=Under_Test_RunningModes,
+        indirect=True
+    )
     def test_fetch_one(self, opts_with_conn_pool_strategy: MySQLOperator):
         _row_number = 0
 
@@ -370,6 +443,11 @@ class TestPersistenceDatabaseOperatorWithConnectionPool:
         assert _row_number == _Data_Row_Number, f"It should get the data from the cursor instance with target SQL and the data row number should be '{_Data_Row_Number}'."
 
 
+    @pytest.mark.parametrize(
+        argnames="opts_with_conn_pool_strategy",
+        argvalues=Under_Test_RunningModes,
+        indirect=True
+    )
     def test_fetch_many(self, opts_with_conn_pool_strategy: MySQLOperator):
         _row_number = 0
 
@@ -389,12 +467,22 @@ class TestPersistenceDatabaseOperatorWithConnectionPool:
         assert _row_number == _Data_Row_Number, f"It should get the data from the cursor instance with target SQL and the data row number should be '{_Data_Row_Number}'."
 
 
+    @pytest.mark.parametrize(
+        argnames="opts_with_conn_pool_strategy",
+        argvalues=Under_Test_RunningModes,
+        indirect=True
+    )
     def test_fetch_all(self, opts_with_conn_pool_strategy: MySQLOperator):
         opts_with_conn_pool_strategy.execute(_Test_SQL)
         _data = opts_with_conn_pool_strategy.fetch_all()
         assert _data is not None and len(_data) == _Data_Row_Number, f"It should get the data from the cursor instance with target SQL and the data row number should be '{_Data_Row_Number}'."
 
 
+    @pytest.mark.parametrize(
+        argnames="opts_with_conn_pool_strategy",
+        argvalues=Under_Test_RunningModes,
+        indirect=True
+    )
     def test_close_cursor(self, opts_with_conn_pool_strategy: MySQLOperator):
         try:
             opts_with_conn_pool_strategy.close_cursor()
@@ -413,6 +501,11 @@ class TestPersistenceDatabaseOperatorWithConnectionPool:
             assert False, "It should raise an exception about cursor is not connected."
 
 
+    @pytest.mark.parametrize(
+        argnames="opts_with_conn_pool_strategy",
+        argvalues=Under_Test_RunningModes,
+        indirect=True
+    )
     def test_close_connection(self, opts_with_conn_pool_strategy: MySQLOperator):
         _db_connection = getattr(opts_with_conn_pool_strategy, "_db_connection")
         try:
@@ -428,6 +521,11 @@ class TestPersistenceDatabaseOperatorWithConnectionPool:
             assert "'NoneType' object has no attribute 'cursor'" in str(ae), f""
 
 
+    @pytest.mark.parametrize(
+        argnames="opts_with_conn_pool_strategy",
+        argvalues=Under_Test_RunningModes,
+        indirect=True
+    )
     def test_close_connection_without_option(self, opts_with_conn_pool_strategy: MySQLOperator):
         try:
             opts_with_conn_pool_strategy.close_connection()
@@ -436,5 +534,5 @@ class TestPersistenceDatabaseOperatorWithConnectionPool:
         except Exception as e:
             assert False, f"It should work finely without any issue. \nThe exception message is {traceback.format_exc()}"
         else:
-            assert False, "It should raise an exception about option *conn* cannot be None type."
+            assert True, "It still could work finely even it works with option *conn* as a None type."
 
