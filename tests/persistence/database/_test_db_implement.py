@@ -87,7 +87,34 @@ class MySQLDriverConnectionPool(BaseConnectionPool):
         pass
 
 
-# @sharing_in_processes()
+# @sharing_in_processes
+class ErrorConfigConnectionPool(BaseConnectionPool):
+
+    def connect_database(self, **kwargs) -> MySQLConnectionPool:
+        pass
+
+
+    def _get_one_connection(self, pool_name: str = "", **kwargs) -> PooledMySQLConnection:
+        pass
+
+
+    def _is_connected(self, conn: PooledMySQLConnection) -> bool:
+        pass
+
+
+    def _commit(self, conn: PooledMySQLConnection) -> None:
+        pass
+
+
+    def _close_connection(self, conn: PooledMySQLConnection) -> None:
+        pass
+
+
+    def close_pool(self, pool) -> None:
+        pass
+
+
+
 class MySQLOperator(DatabaseOperator):
 
     def __init__(self, conn_strategy: BaseDatabaseConnection, db_config: Dict = {}):
