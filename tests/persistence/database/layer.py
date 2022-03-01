@@ -1,6 +1,7 @@
+from multirunnable import set_mode
 from multirunnable.persistence.database.layer import BaseDao
 
-from ...test_config import Test_Pool_Name, Test_Pool_Size,Database_Config, Database_Pool_Config
+from ...test_config import Under_Test_RunningModes, Test_Pool_Name, Test_Pool_Size,Database_Config, Database_Pool_Config
 from ._test_db_implement import MySQLSingleConnection, MySQLDriverConnectionPool, MySQLOperator
 
 import traceback
@@ -46,7 +47,8 @@ def db_opt_single() -> TargetSingleDao:
 
 
 @pytest.fixture(scope="function")
-def db_opt_pool() -> TargetPoolDao:
+def db_opt_pool(request) -> TargetPoolDao:
+    set_mode(mode=request.param)
     return TargetPoolDao()
 
 
@@ -81,7 +83,7 @@ class TestDaoWithSingleConnection:
         _db_connection_id = id(_db_connection)
         _db_cursor_id = id(_db_cursor)
 
-        db_opt_single.reconnect()
+        db_opt_single.reconnect(force=True)
 
         _new_db_connection = getattr(_conn_opts, "_connection")
         _new_db_cursor = getattr(_conn_opts, "_cursor")
@@ -188,22 +190,52 @@ class TestDaoWithSingleConnection:
 
 class TestDaoWithConnectionPool:
 
+    def test_instantiate_without_running_mode(self):
+        set_mode(mode=None)
+        try:
+            TargetPoolDao()
+        except ValueError as ve:
+            assert "The RunningMode cannot be None object if it works persistence process as 'BaseConnectionPool'" in str(ve), "It should raise an exception if it instantiates object without any RunningMode."
+        else:
+            assert False, "It should raise an exception if it instantiates object without any RunningMode."
+
+
+    @pytest.mark.parametrize(
+        argnames="db_opt_pool",
+        argvalues=Under_Test_RunningModes,
+        indirect=True
+    )
     def test_database_opt(self, db_opt_pool: TargetPoolDao):
         _db_opt = db_opt_pool.database_opts
         assert isinstance(_db_opt, MySQLOperator) is True, "The return value we get should be an object which is sub-instance of 'MySQLOperator'."
 
 
+    @pytest.mark.parametrize(
+        argnames="db_opt_pool",
+        argvalues=Under_Test_RunningModes,
+        indirect=True
+    )
     def test__instantiate_strategy(self, db_opt_pool: TargetPoolDao):
         _db_conn_strategy = db_opt_pool._instantiate_strategy()
         assert isinstance(_db_conn_strategy, MySQLDriverConnectionPool) is True, "The return value we get should be an object which is sub-instance of 'MySQLDriverConnectionPool'."
 
 
+    @pytest.mark.parametrize(
+        argnames="db_opt_pool",
+        argvalues=Under_Test_RunningModes,
+        indirect=True
+    )
     def test__instantiate_database_opts(self, db_opt_pool: TargetPoolDao):
         _db_conn_strategy = db_opt_pool._instantiate_strategy()
         _db_opt = db_opt_pool._instantiate_database_opts(strategy=_db_conn_strategy)
         assert isinstance(_db_opt, MySQLOperator) is True, "The return value we get should be an object which is sub-instance of 'MySQLOperator'."
 
 
+    @pytest.mark.parametrize(
+        argnames="db_opt_pool",
+        argvalues=Under_Test_RunningModes,
+        indirect=True
+    )
     def test_reconnect(self, db_opt_pool: TargetPoolDao):
         _opts = db_opt_pool.database_opts
         assert _opts is not None, "This step to ensure that the protected variable '_Database_Connection_Strategy' is not None."
@@ -217,7 +249,7 @@ class TestDaoWithConnectionPool:
         _db_connection_id = id(_db_connection)
         _db_cursor_id = id(_db_cursor)
 
-        db_opt_pool.reconnect()
+        db_opt_pool.reconnect(force=True)
 
         _new_db_connection = getattr(_conn_opts, "_connection")
         _new_db_cursor = getattr(_conn_opts, "_cursor")
@@ -231,6 +263,11 @@ class TestDaoWithConnectionPool:
         assert _db_cursor_id != _new_db_cursor_id, "The memory store places of database cursor instance should be different."
 
 
+    @pytest.mark.parametrize(
+        argnames="db_opt_pool",
+        argvalues=Under_Test_RunningModes,
+        indirect=True
+    )
     def test_commit(self, db_opt_pool: TargetSingleDao):
         try:
             db_opt_pool.commit()
@@ -240,6 +277,11 @@ class TestDaoWithConnectionPool:
             assert True, "It works finely."
 
 
+    @pytest.mark.parametrize(
+        argnames="db_opt_pool",
+        argvalues=Under_Test_RunningModes,
+        indirect=True
+    )
     def test_execute(self, db_opt_pool: TargetPoolDao):
         try:
             db_opt_pool.execute(_Test_SQL)
@@ -249,6 +291,11 @@ class TestDaoWithConnectionPool:
             assert True, ""
 
 
+    @pytest.mark.parametrize(
+        argnames="db_opt_pool",
+        argvalues=Under_Test_RunningModes,
+        indirect=True
+    )
     def test_execute_many(self, db_opt_pool: TargetPoolDao):
         try:
             db_opt_pool.execute_many(_Test_SQL)
@@ -258,6 +305,11 @@ class TestDaoWithConnectionPool:
             assert True, ""
 
 
+    @pytest.mark.parametrize(
+        argnames="db_opt_pool",
+        argvalues=Under_Test_RunningModes,
+        indirect=True
+    )
     def test_fetch_one(self, db_opt_pool: TargetPoolDao):
         _row_number = 0
 
@@ -275,6 +327,11 @@ class TestDaoWithConnectionPool:
         assert _row_number == _Data_Row_Number, f"It should get the data from the cursor instance with target SQL and the data row number should be '{_Data_Row_Number}'."
 
 
+    @pytest.mark.parametrize(
+        argnames="db_opt_pool",
+        argvalues=Under_Test_RunningModes,
+        indirect=True
+    )
     def test_fetch_many(self, db_opt_pool: TargetPoolDao):
         _row_number = 0
 
@@ -294,12 +351,22 @@ class TestDaoWithConnectionPool:
         assert _row_number == _Data_Row_Number, f"It should get the data from the cursor instance with target SQL and the data row number should be '{_Data_Row_Number}'."
 
 
+    @pytest.mark.parametrize(
+        argnames="db_opt_pool",
+        argvalues=Under_Test_RunningModes,
+        indirect=True
+    )
     def test_fetch_all(self, db_opt_pool: TargetPoolDao):
         db_opt_pool.execute(_Test_SQL)
         _data = db_opt_pool.fetch_all()
         assert _data is not None and len(_data) == _Data_Row_Number, f"It should get the data from the cursor instance with target SQL and the data row number should be '{_Data_Row_Number}'."
 
 
+    @pytest.mark.parametrize(
+        argnames="db_opt_pool",
+        argvalues=Under_Test_RunningModes,
+        indirect=True
+    )
     def test_close_cursor(self, db_opt_pool: TargetPoolDao):
         db_opt_pool.close_cursor()
 
@@ -309,6 +376,11 @@ class TestDaoWithConnectionPool:
             assert "Cursor is not connected" in str(e), "It should raise an exception about cursor is not connected."
 
 
+    @pytest.mark.parametrize(
+        argnames="db_opt_pool",
+        argvalues=Under_Test_RunningModes,
+        indirect=True
+    )
     def test_close_connection(self, db_opt_pool: TargetPoolDao):
         db_opt_pool.close_connection()
 
