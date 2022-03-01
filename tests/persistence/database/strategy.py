@@ -1,11 +1,12 @@
+from multirunnable import set_mode, get_current_mode, RunningMode
 from multirunnable.persistence.database.strategy import get_connection_pool, database_connection_pools, Globalize
 from multirunnable.exceptions import GlobalizeObjectError
 
 from ...test_config import (
-    Test_Pool_Name, Test_Pool_Size,Database_Config, Database_Pool_Config,
+    Under_Test_RunningModes, Test_Pool_Name, Test_Pool_Size,Database_Config, Database_Pool_Config,
     SELECT_TEST_DATA_SQL, INSERT_TEST_DATA_SQL, DELETE_TEST_DATA_SQL
 )
-from ._test_db_implement import MySQLSingleConnection, MySQLDriverConnectionPool
+from ._test_db_implement import MySQLSingleConnection, MySQLDriverConnectionPool, ErrorConfigConnectionPool
 
 import pytest
 import re
@@ -26,15 +27,15 @@ def connection_pool_strategy():
     return MySQLDriverConnectionPool(**Database_Pool_Config)
 
 
+ErrorConfigConnectionPoolObj = ErrorConfigConnectionPool
+ErrorConfigConnectionPoolInstance: ErrorConfigConnectionPool = None
+
+
 def _select_data(_cursor) -> list:
     _cursor.execute(SELECT_TEST_DATA_SQL)
     _data = _cursor.fetchall()
     return _data
 
-
-def _close_instance(_conn, _cursor):
-    _cursor.close()
-    _conn.close()
 
 
 class TestPersistenceDatabaseOneConnection:
@@ -43,7 +44,7 @@ class TestPersistenceDatabaseOneConnection:
         _strategy_inst_repr = repr(single_connection_strategy)
         _chksum = re.search(
             re.escape(single_connection_strategy.__class__.__name__) +
-            "\(" + re.escape(str(single_connection_strategy.database_config)) + "\)" ,
+            r"\(" + re.escape(str(single_connection_strategy.database_config)) + r"\)" ,
             str(_strategy_inst_repr))
 
         assert _chksum is not None, "The __repr__ info should be map to the format."
@@ -52,6 +53,7 @@ class TestPersistenceDatabaseOneConnection:
     def test_connect_database(self, single_connection_strategy: MySQLSingleConnection):
         _connection = single_connection_strategy.current_connection
         assert _connection is not None, "It should return a database connection instance."
+        assert single_connection_strategy.is_connected() is True, "The connection instance should be connected."
         assert _connection.is_connected() is True, "The connection instance should be connected."
 
         _get_connection = single_connection_strategy.get_one_connection()
@@ -70,13 +72,14 @@ class TestPersistenceDatabaseOneConnection:
 
 
     def test_reconnect(self, single_connection_strategy: MySQLSingleConnection):
+        single_connection_strategy.close_connection()
         single_connection_strategy.update_database_config(key="host", value="1.1.1.1")
         try:
             _connection = single_connection_strategy.reconnect(timeout=1)
         except ConnectionError as ce:
             assert "It's timeout to retry" in str(ce) and "Cannot reconnect to database" in str(ce), "It should raise an exception about retry timeout."
         except Exception as ce:
-            assert True, "It should raise some exceptions which be annotated by database package."
+            assert "Can't connect to MySQL server on '1.1.1.1:3306'" in str(ce), "It should raise some exceptions which be annotated by database package."
         else:
             assert False, "It should raise something exceptions because the IP is invalid."
 
@@ -92,7 +95,7 @@ class TestPersistenceDatabaseOneConnection:
         _cursor = _connection.cursor()
 
         TestPersistenceDatabaseOneConnection._insert_data(cursor=_cursor, commit=False)
-        _close_instance(_conn=_connection, _cursor=_cursor)
+        TestPersistenceDatabaseOneConnection._close_instance(_strategy=single_connection_strategy, _cursor=_cursor)
 
         # # Select data to check. Insert data and commit it.
         _new_connection = single_connection_strategy.reconnect()
@@ -101,7 +104,7 @@ class TestPersistenceDatabaseOneConnection:
         _data = _select_data(_cursor=_new_cursor)
         assert _data == [], f"It should get an empty dataset right now."
         TestPersistenceDatabaseOneConnection._insert_data(cursor=_new_cursor, commit=True, connection_strategy=single_connection_strategy)
-        _close_instance(_conn=_new_connection, _cursor=_new_cursor)
+        TestPersistenceDatabaseOneConnection._close_instance(_strategy=single_connection_strategy, _cursor=_new_cursor)
 
         # # Select data to check. Delete testing data and commit it.
         _latest_connection = single_connection_strategy.reconnect()
@@ -110,7 +113,7 @@ class TestPersistenceDatabaseOneConnection:
         _data = _select_data(_cursor=_latest_cursor)
         assert _data != [] and len(_data) == 1, f"It should get an empty dataset right now."
         TestPersistenceDatabaseOneConnection._delete_data(cursor=_latest_cursor, connection_strategy=single_connection_strategy)
-        _close_instance(_conn=_latest_connection, _cursor=_latest_cursor)
+        TestPersistenceDatabaseOneConnection._close_instance(_strategy=single_connection_strategy, _cursor=_latest_cursor)
 
 
     @staticmethod
@@ -130,6 +133,12 @@ class TestPersistenceDatabaseOneConnection:
             if connection_strategy is None:
                 raise ValueError("ConnectionStrategy cannot be empty if option *commit* is True.")
             connection_strategy.commit()
+
+
+    @staticmethod
+    def _close_instance(_strategy: MySQLSingleConnection, _cursor):
+        _cursor.close()
+        _strategy.close_connection()
 
 
     def test_close_connection(self, single_connection_strategy: MySQLSingleConnection):
@@ -153,11 +162,24 @@ class TestPersistenceDatabaseOneConnection:
 
 class TestPersistenceDatabaseConnectionPool:
 
+    def instantiate_with_error_pool_size(self):
+        Database_Pool_Config.update({
+            "pool_name": "error_pool_size",
+            "pool_size": -10
+        })
+        try:
+            ErrorConfigConnectionPoolObj(initial=False, **Database_Pool_Config)
+        except ValueError as ve:
+            assert "The database connection pool size cannot less than 0" in str(ve), "It should raise an exception about pool size cannot less than 0."
+        else:
+            assert False, "It should raise an exception about pool size cannot less than 0."
+
+
     def test_repr(self, connection_pool_strategy: MySQLDriverConnectionPool):
         _strategy_inst_repr = repr(connection_pool_strategy)
         _chksum = re.search(
             re.escape(connection_pool_strategy.__class__.__name__) +
-            "\(" + re.escape(str(connection_pool_strategy.database_config)) + "\)" ,
+            r"\(" + re.escape(str(connection_pool_strategy.database_config)) + r"\)" ,
             str(_strategy_inst_repr))
 
         assert _chksum is not None, "The __repr__ info should be map to the format."
@@ -170,7 +192,7 @@ class TestPersistenceDatabaseConnectionPool:
         assert int(_conn_pool.pool_size) == int(Test_Pool_Size), f"The pool size we get from the connection pool instance should be equal to the number we set '{Test_Pool_Size}' before."
 
         _all_pools = database_connection_pools()
-        assert len(_all_pools) == 1, "The length should be '1' because we only instantiate one database connection pool object."
+        assert len(_all_pools) != 0, "The length should not be '0' because we only instantiate one database connection pool object."
         assert Test_Pool_Name in _all_pools.keys(), f"The pool name '{Test_Pool_Name} should be in the keys of {_all_pools}.'"
         assert _all_pools[Test_Pool_Name] is _conn_pool, f"The instances '{_all_pools[Test_Pool_Name]}' and '{_conn_pool}' should be the same."
 
@@ -203,6 +225,43 @@ class TestPersistenceDatabaseConnectionPool:
         assert _pool_size == Test_Pool_Size, f"It should return the pool size of database configuration back to us which we set '{Test_Pool_Size}'."
 
 
+    def test_get_pool_size_with_zero_size_value(self):
+        Database_Pool_Config.update({
+            "pool_name": "no_pool_size"
+        })
+        global ErrorConfigConnectionPoolInstance
+        ErrorConfigConnectionPoolInstance = ErrorConfigConnectionPool(initial=False)
+        _pool_size = ErrorConfigConnectionPoolInstance.pool_size
+        from multiprocessing import cpu_count
+        assert _pool_size == cpu_count(), "It should return the pool size which is equal to the count of CPU."
+
+
+    def test_get_pool_size_with_invalid_value(self):
+        global ErrorConfigConnectionPoolInstance
+        ErrorConfigConnectionPoolInstance.update_database_config(key="pool_size", value=-10)
+        try:
+            _pool_size = ErrorConfigConnectionPoolInstance.pool_size
+        except ValueError as ve:
+            assert "The database connection pool size cannot less than 0" in str(ve), "It should raise an exception about pool size cannot less than 0."
+        else:
+            assert False, "It should raise an exception about pool size cannot less than 0."
+
+
+    def test_get_pool_size_with_no_size_value(self):
+        global ErrorConfigConnectionPoolInstance
+        ErrorConfigConnectionPoolInstance.pool_size = 0
+        _pool_size = ErrorConfigConnectionPoolInstance.pool_size
+        from multiprocessing import cpu_count
+        assert _pool_size == cpu_count(), "It should return the pool size which is equal to the count of CPU."
+
+
+    def test_get_pool_size_with_exceed_size_value(self):
+        global ErrorConfigConnectionPoolInstance
+        ErrorConfigConnectionPoolInstance.pool_size = 100
+        _pool_size = ErrorConfigConnectionPoolInstance.pool_size
+        assert _pool_size == 100, "It should return the pool size which you set but log a warning message."
+
+
     def test_set_pool_size(self, connection_pool_strategy: MySQLDriverConnectionPool):
         _test_size = 10
         connection_pool_strategy.pool_size = _test_size
@@ -216,26 +275,36 @@ class TestPersistenceDatabaseConnectionPool:
         connection_pool_strategy.pool_size = Test_Pool_Size
 
 
-    def test_reconnect(self, connection_pool_strategy: MySQLDriverConnectionPool):
+    @pytest.mark.parametrize("mode", Under_Test_RunningModes)
+    def test_reconnect(self, mode: RunningMode, connection_pool_strategy: MySQLDriverConnectionPool):
+        set_mode(mode=mode)
+
         connection_pool_strategy.update_database_config(key="host", value="1.1.1.1")
         try:
             _connection = connection_pool_strategy.reconnect(timeout=1)
         except ConnectionError as ce:
             assert "Cannot reconnect to database" in str(ce), "It should raise an exception about retry timeout."
         except Exception as ce:
-            assert True, "It should raise some exceptions which be annotated by database package."
+            assert "Can't connect to MySQL server on '1.1.1.1:3306'" in str(ce), "It should raise some exceptions which be annotated by database package."
         else:
             assert False, "It should raise something exceptions because the IP is invalid."
 
         connection_pool_strategy.update_database_config(key="host", value="127.0.0.1")
+        connection_pool_strategy.update_database_config(key="pool_name", value="test_pool")
         _connection = connection_pool_strategy.reconnect()
         assert _connection is not None, "It should return a database connection instance."
+        connection_pool_strategy.close_connection(conn=_connection)
 
 
-    def test_get_one_connection(self, connection_pool_strategy: MySQLDriverConnectionPool):
+    @pytest.mark.parametrize("mode", Under_Test_RunningModes)
+    def test_get_one_connection(self, mode: RunningMode, connection_pool_strategy: MySQLDriverConnectionPool):
+        set_mode(mode=mode)
+
+        _pools = database_connection_pools()
+
         try:
             _conn = connection_pool_strategy.get_one_connection()
-        except ConnectionError as ce:
+        except ValueError as ce:
             assert "Cannot get the one connection instance from connection pool because it doesn't exist the connection pool with the name" in str(ce), \
                 "It should raise an exception about cannot find the connection pool with the target pool name."
         else:
@@ -244,16 +313,19 @@ class TestPersistenceDatabaseConnectionPool:
         _conn = connection_pool_strategy.get_one_connection(pool_name=Test_Pool_Name)
         assert _conn is not None, f"It should get a connection instance from the pool with pool name '{Test_Pool_Name}'."
         # # Release connection instance back to pool
-        _conn.close()
+        connection_pool_strategy.close_connection(conn=_conn)
 
 
-    def test_commit(self, connection_pool_strategy: MySQLDriverConnectionPool):
+    @pytest.mark.parametrize("mode", Under_Test_RunningModes)
+    def test_commit(self, mode: RunningMode, connection_pool_strategy: MySQLDriverConnectionPool):
+        set_mode(mode=mode)
+
         # # Insert data but doesn't commit it and close cursor and connection.
         _connection = connection_pool_strategy.get_one_connection(pool_name=Test_Pool_Name)
         _cursor = _connection.cursor()
 
         TestPersistenceDatabaseConnectionPool._insert_data(conn=_connection, cursor=_cursor, commit=False)
-        _close_instance(_conn=_connection, _cursor=_cursor)
+        TestPersistenceDatabaseConnectionPool._close_instance(_strategy=connection_pool_strategy, _conn=_connection, _cursor=_cursor)
 
         # # Select data to check. Insert data and commit it.
         _new_connection = connection_pool_strategy.reconnect()
@@ -262,7 +334,7 @@ class TestPersistenceDatabaseConnectionPool:
         _data = _select_data(_cursor=_new_cursor)
         assert _data == [], f"It should get an empty dataset right now."
         TestPersistenceDatabaseConnectionPool._insert_data(conn=_new_connection, cursor=_new_cursor, commit=True, connection_strategy=connection_pool_strategy)
-        _close_instance(_conn=_new_connection, _cursor=_new_cursor)
+        TestPersistenceDatabaseConnectionPool._close_instance(_strategy=connection_pool_strategy, _conn=_new_connection, _cursor=_new_cursor)
 
         # # Select data to check. Delete testing data and commit it.
         _latest_connection = connection_pool_strategy.reconnect()
@@ -271,7 +343,7 @@ class TestPersistenceDatabaseConnectionPool:
         _data = _select_data(_cursor=_latest_cursor)
         assert _data != [] and len(_data) == 1, f"It should get an empty dataset right now."
         TestPersistenceDatabaseConnectionPool._delete_data(conn=_latest_connection, cursor=_latest_cursor, connection_strategy=connection_pool_strategy)
-        _close_instance(_conn=_latest_connection, _cursor=_latest_cursor)
+        TestPersistenceDatabaseConnectionPool._close_instance(_strategy=connection_pool_strategy, _conn=_latest_connection, _cursor=_latest_cursor)
 
 
     @staticmethod
@@ -293,7 +365,16 @@ class TestPersistenceDatabaseConnectionPool:
             connection_strategy.commit(conn=conn)
 
 
-    def test_close_connection(self, connection_pool_strategy: MySQLDriverConnectionPool):
+    @staticmethod
+    def _close_instance(_strategy: MySQLDriverConnectionPool, _conn, _cursor):
+        _cursor.close()
+        _strategy.close_connection(conn=_conn)
+
+
+    @pytest.mark.parametrize("mode", Under_Test_RunningModes)
+    def test_close_connection(self, mode: RunningMode, connection_pool_strategy: MySQLDriverConnectionPool):
+        set_mode(mode=mode)
+
         _conn = connection_pool_strategy.get_one_connection(pool_name=Test_Pool_Name)
         _cursor = _conn.cursor()
         assert _cursor is not None, "It should get the cursor instance without any issue."
