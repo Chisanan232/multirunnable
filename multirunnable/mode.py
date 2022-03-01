@@ -116,7 +116,7 @@ class RunningMode(Enum):
         "executor_strategy": _GreenThread_Class + _Strategy_Class,
         "pool_strategy": _GreenThread_Class + _Pool_Strategy_Class,
         "feature": FeatureMode.GreenThread,
-        "context": ContextMode.Concurrent
+        "context": ContextMode.GreenThread
     }
 
     Asynchronous = {
