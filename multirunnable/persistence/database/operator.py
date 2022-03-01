@@ -9,17 +9,22 @@ T = TypeVar("T")
 
 class BaseDatabaseOperator:
 
-    def __init__(self, conn_strategy: _BaseDataBaseConnection, db_config: Dict = {}):
+    def __init__(self, conn_strategy: _BaseDataBaseConnection, db_config: Dict = {}, timeout: int = 1):
         self._conn_strategy = conn_strategy
+        self._db_conn_config = db_config
+
         self._db_connection: Generic[T] = self._conn_strategy.current_connection
 
         if self._db_connection is None:
-            self._conn_strategy.initial(**db_config)
+            self._conn_strategy.initial(**self._db_conn_config)
             if isinstance(self._conn_strategy, BaseConnectionPool) is True:
-                self._pool_name = db_config.get("pool_name", "")
+                self._pool_name = self._db_conn_config.get("pool_name", "")
                 self._db_connection = self._conn_strategy.get_one_connection(pool_name=self._pool_name)
             else:
                 self._db_connection = self._conn_strategy.get_one_connection()
+        else:
+            if self._conn_strategy.is_connected() is False:
+                self.reconnect(timeout=timeout, force=True)
 
         self._db_cursor: Generic[T] = self.initial_cursor(connection=self._db_connection)
 
@@ -28,11 +33,10 @@ class BaseDatabaseOperator:
     def _connection(self) -> Generic[T]:
         if self._db_connection is None:
             if isinstance(self._conn_strategy, BaseConnectionPool):
-                self._db_connection = self._conn_strategy.get_one_connection(pool_name=self._pool_name)
+                self._db_connection = self._conn_strategy.get_one_connection(pool_name=self._db_conn_config.get("pool_name", ""))
             else:
                 self._db_connection = self._conn_strategy.get_one_connection()
-            if self._db_connection is None:
-                self._db_connection = self._conn_strategy.reconnect(timeout=3)
+            assert self._db_connection is not None, "The database connection should not be None object."
         return self._db_connection
 
 
@@ -40,9 +44,23 @@ class BaseDatabaseOperator:
     def _cursor(self) -> Generic[T]:
         if self._db_cursor is None:
             self._db_cursor = self.initial_cursor(connection=self._connection)
-            if self._db_cursor is None:
-                raise ConnectionError("Cannot instantiate database cursor object.")
+            assert self._db_cursor is not None, "The cursor instance of database connection should not be None object."
         return self._db_cursor
+
+
+    @abstractmethod
+    def reconnect(self, timeout: int = 1, force: bool = False) -> None:
+        pass
+
+
+    @abstractmethod
+    def commit(self, **kwargs) -> None:
+        pass
+
+
+    @abstractmethod
+    def close_connection(self, **kwargs) -> None:
+        pass
 
 
     @abstractmethod
@@ -80,31 +98,15 @@ class BaseDatabaseOperator:
 
 class DatabaseOperator(BaseDatabaseOperator, ABC):
 
-    def reconnect(self, timeout: int = 1) -> None:
-        self._db_connection = self._conn_strategy.reconnect(timeout=timeout)
+    def reconnect(self, timeout: int = 1, force: bool = False) -> None:
+        self._db_connection = self._conn_strategy.reconnect(timeout=timeout, force=force)
         self._db_cursor = self.initial_cursor(connection=self._db_connection)
 
 
     def commit(self, **kwargs) -> None:
-        if isinstance(self._conn_strategy, BaseConnectionPool):
-            _conn = DatabaseOperator._chk_conn(**kwargs)
-            self._conn_strategy.commit(conn=_conn)
-        else:
-            self._conn_strategy.commit()
+        self._conn_strategy.commit(**kwargs)
 
 
-    def close_connection(self, **kwargs):
-        if isinstance(self._conn_strategy, BaseConnectionPool):
-            _conn = DatabaseOperator._chk_conn(**kwargs)
-            self._conn_strategy.close_connection(conn=_conn)
-        else:
-            self._conn_strategy.close_connection()
-
-
-    @staticmethod
-    def _chk_conn(**kwargs) -> Any:
-        _conn = kwargs.get("conn", None)
-        if _conn is None:
-            raise ValueError("Option *conn* cannot be None object if connection strategy is BaseConnectionPool type.")
-        return _conn
+    def close_connection(self, **kwargs) -> None:
+        self._conn_strategy.close_connection(**kwargs)
 
