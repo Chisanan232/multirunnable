@@ -31,7 +31,7 @@ class green_thread_context(BaseContext):
 
     @staticmethod
     def get_current_worker_name() -> str:
-        return str(gevent.getcurrent().name)
+        return str(gevent.threading.__threading__.current_thread().name).replace("Thread", "GreenThread")
 
 
     @staticmethod
