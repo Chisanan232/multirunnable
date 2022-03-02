@@ -1,3 +1,7 @@
+from ... import get_current_mode
+from ...framework.runnable.context import BaseContext
+from ...adapter.context import context as context_adapter
+
 from abc import ABCMeta, abstractmethod
 
 
@@ -13,6 +17,12 @@ class BaseMediator(metaclass=ABCMeta):
     @worker_id.setter
     @abstractmethod
     def worker_id(self, worker_id: str) -> None:
+        pass
+
+
+    @property
+    @abstractmethod
+    def activate_count(self) -> int:
         pass
 
 
@@ -65,6 +75,17 @@ class SavingMediator(BaseMediator):
     __Activate_Child_Worker: bool = False
     __Enable_Compress: bool = False
 
+
+    def __init__(self, context: BaseContext = None):
+        if context is None:
+            _rmode = get_current_mode()
+            if _rmode is None:
+                raise ValueError("The RunningMode in context cannot be None object if option *context* is None.")
+            self._context = context_adapter
+        else:
+            self._context = context
+
+
     @property
     def worker_id(self) -> str:
         return self.__Worker_ID
@@ -80,12 +101,13 @@ class SavingMediator(BaseMediator):
         del self.__Worker_ID
 
 
+    @property
+    def activate_count(self) -> int:
+        return self._context.active_workers_count()
+
+
     def is_super_worker(self) -> bool:
-        import threading
-        checksum = threading.current_thread() is threading.main_thread()
-        print(f"Main thread Checksum: {checksum}")
-        return checksum
-        # return re.search(r"", self.__Worker_ID, re.IGNORECASE) is not None
+        return self._context.current_worker_is_parent()
 
 
     @property
