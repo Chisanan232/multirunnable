@@ -466,7 +466,7 @@ class BaseConnectionPool(BaseDatabaseConnection):
                     _pool_name = self.database_config.get("pool_name", "")
                     Globalize.connection_pool(name=_pool_name, pool=_db_pool)
 
-                    _conn_key = BaseConnectionPool._get_connections_key()
+                    _conn_key = self._get_connections_key()
                     if force is True or self._current_db_conn[_conn_key] is None or self._connection_is_connected[_conn_key] is False:
                         self._current_db_conn[_conn_key] = self.get_one_connection(pool_name=_pool_name)
 
@@ -482,12 +482,12 @@ class BaseConnectionPool(BaseDatabaseConnection):
 
     @property
     def current_connection(self) -> Dict[str, Any]:
-        _conn_key = BaseConnectionPool._get_connections_key()
+        _conn_key = self._get_connections_key()
         return self._current_db_conn[_conn_key]
 
 
     def is_connected(self) -> bool:
-        _conn_key = BaseConnectionPool._get_connections_key()
+        _conn_key = self._get_connections_key()
         return self._connection_is_connected[_conn_key]
 
 
@@ -501,7 +501,7 @@ class BaseConnectionPool(BaseDatabaseConnection):
         if pool_name not in _pools.keys():
             raise ValueError(f"Cannot get the one connection instance from connection pool because it doesn't exist the connection pool with the name '{pool_name}'.")
 
-        _conn_key = BaseConnectionPool._get_connections_key()
+        _conn_key = self._get_connections_key()
         _connection = self._get_one_connection(pool_name=pool_name, **kwargs)
         self._current_db_conn[_conn_key] = _connection
         self._connection_is_connected[_conn_key] = True
@@ -521,7 +521,7 @@ class BaseConnectionPool(BaseDatabaseConnection):
     def commit(self, conn: Any = None) -> None:
         _conn = conn
         if _conn is None:
-            _conn_key = BaseConnectionPool._get_connections_key()
+            _conn_key = self._get_connections_key()
             _conn = self._current_db_conn[_conn_key]
             assert _conn is not None, f"The database connection instance with key '{_conn_key}' shouldn't be None object.'"
         self._commit(conn=_conn)
@@ -543,7 +543,7 @@ class BaseConnectionPool(BaseDatabaseConnection):
             Close connection instance.
         :return:
         """
-        _conn_key = BaseConnectionPool._get_connections_key()
+        _conn_key = self._get_connections_key()
         if conn is None:
             conn = self._current_db_conn[_conn_key]
         self._close_connection(conn=conn)
@@ -570,8 +570,7 @@ class BaseConnectionPool(BaseDatabaseConnection):
         pass
 
 
-    @staticmethod
-    def _get_connections_key() -> str:
+    def _get_connections_key(self) -> str:
         """
         Description:
             In the ConnectionPoolStrategy, it would save the connection instance by the worker name (ex: Process-1, Thread-1, etc).
@@ -579,7 +578,8 @@ class BaseConnectionPool(BaseDatabaseConnection):
         :return:
         """
         _ident = context.get_current_worker_name()
-        return _ident
+        _cls_name = self.__class__.__name__
+        return f"{_cls_name}_{_ident}"
 
 
 
