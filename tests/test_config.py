@@ -1,6 +1,11 @@
+from multirunnable import RunningMode
 from typing import Tuple, Dict
 import os
 
+
+Under_Test_RunningModes = [RunningMode.Parallel, RunningMode.Concurrent, RunningMode.GreenThread]
+
+Under_Test_RunningModes_Without_Greenlet = [RunningMode.Parallel, RunningMode.Concurrent]
 
 # # # # Base APIs setting
 Worker_Size: int = 7
@@ -22,6 +27,7 @@ Semaphore_Value = 2
 # # # # Persistence - Database setting
 Test_Pool_Name = "testing_pool"
 Test_Pool_Size = 2
+Test_Pool_Size_ZERO = 0
 
 database_host = (os.getenv("DB_HOST") or "127.0.0.1")
 database_port = (os.getenv("DB_PORT") or 3306)
