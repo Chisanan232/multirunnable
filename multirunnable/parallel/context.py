@@ -9,6 +9,8 @@ else:
 from typing import List
 
 
+_Main_Process_Name: str = "MainProcess"
+
 
 class context(BaseContext):
 
@@ -27,10 +29,7 @@ class context(BaseContext):
 
     @staticmethod
     def current_worker_is_parent() -> bool:
-        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 7):
-            return current_process() is parent_process()
-        else:
-            raise NotImplemented("It doesn't support to get parent process via APIs of multiprocessing less than Python 3.8.")
+        return current_process().name == _Main_Process_Name
 
 
     @staticmethod
