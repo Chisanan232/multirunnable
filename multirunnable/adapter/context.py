@@ -50,7 +50,7 @@ class context(BaseContext):
 
 
     @staticmethod
-    def active_workers_count() -> List[Union[BaseProcess, Thread, Greenlet, Task]]:
+    def active_workers_count() -> int:
         _cmode = context._get_cmode()
         return _ModuleFactory.get_context(mode=_cmode).active_workers_count()
 
