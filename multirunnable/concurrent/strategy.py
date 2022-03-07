@@ -201,18 +201,21 @@ class ThreadPoolStrategy(ConcurrentStrategy, _PoolRunnableStrategy, _Resultable)
         self.reset_result()
         __process_running_result = None
 
-        try:
-            __process_running_result = [
-                self._Thread_Pool.apply(func=function, args=args, kwds=kwargs)
-                for _ in range(tasks_size)]
-            __exception = None
-            __process_run_successful = True
-        except Exception as e:
-            __exception = e
-            __process_run_successful = False
+        self._Thread_List = [
+            self._Thread_Pool.apply(func=function, args=args, kwds=kwargs)
+            for _ in range(tasks_size)]
 
-        # Save Running result state and Running result value as dict
-        self._result_saving(successful=__process_run_successful, result=__process_running_result, exception=None)
+        for thread in self._Thread_List:
+            try:
+                __process_running_result = thread
+                __exception = None
+                __process_run_successful = True
+            except Exception as e:
+                __exception = e
+                __process_run_successful = False
+
+            # Save Running result state and Running result value as dict
+            self._result_saving(successful=__process_run_successful, result=__process_running_result, exception=__exception)
 
 
     def async_apply(self,
@@ -257,19 +260,22 @@ class ThreadPoolStrategy(ConcurrentStrategy, _PoolRunnableStrategy, _Resultable)
         if kwargs_iter is None:
             kwargs_iter = [{} for _ in functions_iter]
 
-        try:
-            __process_running_result = [
-                self._Thread_Pool.apply(func=_func, args=_args, kwds=_kwargs)
-                for _func, _args, _kwargs in zip(functions_iter, args_iter, kwargs_iter)
-            ]
-            __exception = None
-            __process_run_successful = True
-        except Exception as e:
-            __exception = e
-            __process_run_successful = False
+        self._Thread_List = [
+            self._Thread_Pool.apply(func=_func, args=_args, kwds=_kwargs)
+            for _func, _args, _kwargs in zip(functions_iter, args_iter, kwargs_iter)
+        ]
 
-        # Save Running result state and Running result value as dict
-        self._result_saving(successful=__process_run_successful, result=__process_running_result, exception=__exception)
+        for thread in self._Thread_List:
+            try:
+                __process_running_result = thread
+                __exception = None
+                __process_run_successful = True
+            except Exception as e:
+                __exception = e
+                __process_run_successful = False
+
+            # Save Running result state and Running result value as dict
+            self._result_saving(successful=__process_run_successful, result=__process_running_result, exception=__exception)
 
 
     def async_apply_with_iter(self,

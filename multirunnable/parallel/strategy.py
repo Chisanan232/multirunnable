@@ -237,18 +237,21 @@ class ProcessPoolStrategy(ParallelStrategy, _PoolRunnableStrategy, _Resultable):
         self.reset_result()
         __process_running_result = None
 
-        try:
-            __process_running_result = [
-                self._Processors_Pool.apply(func=function, args=args, kwds=kwargs)
-                for _ in range(tasks_size)]
-            __exception = None
-            __process_run_successful = True
-        except Exception as e:
-            __exception = e
-            __process_run_successful = False
+        self._Processors_List = [
+            self._Processors_Pool.apply(func=function, args=args, kwds=kwargs)
+            for _ in range(tasks_size)]
 
-        # Save Running result state and Running result value as dict
-        self._result_saving(successful=__process_run_successful, result=__process_running_result, exception=None)
+        for _p in self._Processors_List:
+            try:
+                __process_running_result = _p
+                __exception = None
+                __process_run_successful = True
+            except Exception as e:
+                __exception = e
+                __process_run_successful = False
+
+            # Save Running result state and Running result value as dict
+            self._result_saving(successful=__process_run_successful, result=__process_running_result, exception=__exception)
 
 
     def async_apply(self,
@@ -293,19 +296,22 @@ class ProcessPoolStrategy(ParallelStrategy, _PoolRunnableStrategy, _Resultable):
         if kwargs_iter is None:
             kwargs_iter = [{} for _ in functions_iter]
 
-        try:
-            __process_running_result = [
-                self._Processors_Pool.apply(func=_func, args=_args, kwds=_kwargs)
-                for _func, _args, _kwargs in zip(functions_iter, args_iter, kwargs_iter)
-            ]
-            __exception = None
-            __process_run_successful = True
-        except Exception as e:
-            __exception = e
-            __process_run_successful = False
+        self._Processors_List = [
+            self._Processors_Pool.apply(func=_func, args=_args, kwds=_kwargs)
+            for _func, _args, _kwargs in zip(functions_iter, args_iter, kwargs_iter)
+        ]
 
-        # Save Running result state and Running result value as dict
-        self._result_saving(successful=__process_run_successful, result=__process_running_result, exception=None)
+        for prcoess in self._Processors_List:
+            try:
+                __process_running_result = prcoess
+                __exception = None
+                __process_run_successful = True
+            except Exception as e:
+                __exception = e
+                __process_run_successful = False
+
+            # Save Running result state and Running result value as dict
+            self._result_saving(successful=__process_run_successful, result=__process_running_result, exception=__exception)
 
 
     def async_apply_with_iter(self,
@@ -500,6 +506,7 @@ class ProcessPoolStrategy(ParallelStrategy, _PoolRunnableStrategy, _Resultable):
             _pool_result = _ProcessPoolResult()
             _pool_result.is_successful = __result["successful"]
             _pool_result.data = __result["result"]
+            _pool_result.exception = __result["exception"]
             _pool_results.append(_pool_result)
         return _pool_results
 
