@@ -126,6 +126,7 @@ class PoolResult:
 
     _Data: List[Any] = None
     _Is_Successful: bool = None
+    _Exception: Any = None
 
     @property
     def data(self) -> List[Any]:
@@ -145,4 +146,14 @@ class PoolResult:
     @is_successful.setter
     def is_successful(self, successful) -> None:
         self._Is_Successful = successful
+
+
+    @property
+    def exception(self) -> Any:
+        return self._Exception
+
+
+    @exception.setter
+    def exception(self, exception) -> None:
+        self._Exception = exception
 
