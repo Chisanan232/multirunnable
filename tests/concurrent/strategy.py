@@ -26,9 +26,9 @@ _Thread_Lock = threading.Lock()
 
 Running_Parent_PID: str = None
 Running_Count = 0
-Running_Thread_IDs: List = []
+Running_Worker_IDs: List = []
 Running_PPIDs: List = []
-Running_Current_Threads: List = []
+Running_Current_Workers: List = []
 Running_Finish_Timestamp: List = []
 
 Pool_Running_Count = 0
@@ -45,10 +45,10 @@ def reset_pool_running_value() -> None:
 
 
 def reset_running_timer() -> None:
-    global Running_Thread_IDs, Running_PPIDs, Running_Current_Threads, Running_Finish_Timestamp
-    Running_Thread_IDs[:] = []
+    global Running_Worker_IDs, Running_PPIDs, Running_Current_Workers, Running_Finish_Timestamp
+    Running_Worker_IDs[:] = []
     Running_PPIDs[:] = []
-    Running_Current_Threads[:] = []
+    Running_Current_Workers[:] = []
     Running_Finish_Timestamp[:] = []
 
 
@@ -74,9 +74,9 @@ def target_fun(*args, **kwargs) -> str:
         _ident = threading.get_ident()
         _time = int(time.time())
 
-        Running_Thread_IDs.append(_ident)
+        Running_Worker_IDs.append(_ident)
         Running_PPIDs.append(_ppid)
-        Running_Current_Threads.append(str(threading.current_thread()))
+        Running_Current_Workers.append(str(threading.current_thread()))
         Running_Finish_Timestamp.append(_time)
 
     time.sleep(Test_Function_Sleep_Time)
@@ -103,9 +103,9 @@ def pool_target_fun(*args, **kwargs) -> str:
         _ident = threading.get_ident()
         _time = int(time.time())
 
-        Running_Thread_IDs.append(_ident)
+        Running_Worker_IDs.append(_ident)
         Running_PPIDs.append(_ppid)
-        Running_Current_Threads.append(str(threading.current_thread()))
+        Running_Current_Workers.append(str(threading.current_thread()))
         Running_Finish_Timestamp.append(_time)
 
     time.sleep(Test_Function_Sleep_Time)
@@ -137,9 +137,9 @@ def map_target_fun(*args, **kwargs):
         _ident = threading.get_ident()
         _time = int(time.time())
 
-        Running_Thread_IDs.append(_ident)
+        Running_Worker_IDs.append(_ident)
         Running_PPIDs.append(_ppid)
-        Running_Current_Threads.append(str(threading.current_thread()))
+        Running_Current_Workers.append(str(threading.current_thread()))
         Running_Finish_Timestamp.append(_time)
 
     time.sleep(Test_Function_Sleep_Time)
@@ -736,8 +736,8 @@ class TestThread(GeneralRunningTestSpec):
         GeneralRunningTestSpec._chk_process_record(
             running_cnt=Running_Count,
             worker_size=Thread_Size,
-            running_wokrer_ids=Running_Thread_IDs,
-            running_current_workers=Running_Current_Threads,
+            running_wokrer_ids=Running_Worker_IDs,
+            running_current_workers=Running_Current_Workers,
             running_finish_timestamps=Running_Finish_Timestamp
         )
 
@@ -1345,8 +1345,8 @@ class TestThreadPool(PoolRunningTestSpec):
         PoolRunningTestSpec._chk_process_record_blocking(
             pool_running_cnt=Pool_Running_Count,
             worker_size=Task_Size,
-            running_worker_ids=Running_Thread_IDs,
-            running_current_workers=Running_Current_Threads,
+            running_worker_ids=Running_Worker_IDs,
+            running_current_workers=Running_Current_Workers,
             running_finish_timestamps=Running_Finish_Timestamp,
             de_duplicate=False
         )
@@ -1357,8 +1357,8 @@ class TestThreadPool(PoolRunningTestSpec):
         PoolRunningTestSpec._chk_process_record(
             pool_running_cnt=Pool_Running_Count,
             worker_size=Task_Size,
-            running_worker_ids=Running_Thread_IDs,
-            running_current_workers=Running_Current_Threads,
+            running_worker_ids=Running_Worker_IDs,
+            running_current_workers=Running_Current_Workers,
             running_finish_timestamps=Running_Finish_Timestamp
         )
 
@@ -1368,8 +1368,8 @@ class TestThreadPool(PoolRunningTestSpec):
         PoolRunningTestSpec._chk_process_record_map(
             pool_running_cnt=Pool_Running_Count,
             function_args=Test_Function_Args,
-            running_worker_ids=Running_Thread_IDs,
-            running_current_workers=Running_Current_Threads,
+            running_worker_ids=Running_Worker_IDs,
+            running_current_workers=Running_Current_Workers,
             running_finish_timestamps=Running_Finish_Timestamp
         )
 

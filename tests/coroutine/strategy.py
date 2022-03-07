@@ -36,7 +36,7 @@ Running_Parent_PID = None
 Running_Count = 0
 Running_GreenThread_IDs: List = []
 Running_PPIDs: List = []
-Running_Current_Threads: List = []
+Running_Current_Workers: List = []
 Running_Finish_Timestamp: List = []
 
 Pool_Running_Count = 0
@@ -53,10 +53,10 @@ def reset_pool_running_value() -> None:
 
 
 def reset_running_timer() -> None:
-    global Running_GreenThread_IDs, Running_PPIDs, Running_Current_Threads, Running_Finish_Timestamp
+    global Running_GreenThread_IDs, Running_PPIDs, Running_Current_Workers, Running_Finish_Timestamp
     Running_GreenThread_IDs[:] = []
     Running_PPIDs[:] = []
-    Running_Current_Threads[:] = []
+    Running_Current_Workers[:] = []
     Running_Finish_Timestamp[:] = []
 
 
@@ -85,7 +85,7 @@ def target_fun(*args, **kwargs) -> str:
 
         Running_GreenThread_IDs.append(_ident)
         Running_PPIDs.append(_ppid)
-        Running_Current_Threads.append(__get_current_thread())
+        Running_Current_Workers.append(__get_current_thread())
         Running_Finish_Timestamp.append(_time)
 
     gevent.sleep(Test_Function_Sleep_Time)
@@ -110,7 +110,7 @@ def pool_target_fun(*args, **kwargs) -> str:
 
         Running_GreenThread_IDs.append(_ident)
         Running_PPIDs.append(_ppid)
-        Running_Current_Threads.append(__get_current_thread())
+        Running_Current_Workers.append(__get_current_thread())
         Running_Finish_Timestamp.append(_time)
 
     gevent.sleep(Test_Function_Sleep_Time)
@@ -149,7 +149,7 @@ def map_target_fun(*args, **kwargs):
 
         Running_GreenThread_IDs.append(_ident)
         Running_PPIDs.append(_ppid)
-        Running_Current_Threads.append(__get_current_thread())
+        Running_Current_Workers.append(__get_current_thread())
         Running_Finish_Timestamp.append(_time)
 
     gevent.sleep(Test_Function_Sleep_Time)
@@ -184,7 +184,7 @@ def map_target_fun_with_diff_args(*args, **kwargs):
 
         Running_GreenThread_IDs.append(_ident)
         Running_PPIDs.append(_ppid)
-        Running_Current_Threads.append(__get_current_thread())
+        Running_Current_Workers.append(__get_current_thread())
         Running_Finish_Timestamp.append(_time)
 
     gevent.sleep(Test_Function_Sleep_Time)
@@ -226,7 +226,7 @@ async def target_async_fun(*args, **kwargs) -> str:
 
         # Running_GreenThread_IDs.append(_async_task_name)
         Running_PPIDs.append(_ppid)
-        Running_Current_Threads.append(_current_task)
+        Running_Current_Workers.append(_current_task)
         Running_Finish_Timestamp.append(_time)
 
     # await async_sleep(Test_Function_Sleep_Time)
@@ -850,7 +850,7 @@ class TestGreenThread(GeneralRunningTestSpec):
             running_cnt=Running_Count,
             worker_size=Green_Thread_Size,
             running_wokrer_ids=Running_GreenThread_IDs,
-            running_current_workers=Running_Current_Threads,
+            running_current_workers=Running_Current_Workers,
             running_finish_timestamps=Running_Finish_Timestamp
         )
 
@@ -1486,7 +1486,7 @@ class TestGreenThreadPool(PoolRunningTestSpec):
             pool_running_cnt=Pool_Running_Count,
             worker_size=Task_Size,
             running_worker_ids=Running_GreenThread_IDs,
-            running_current_workers=Running_Current_Threads,
+            running_current_workers=Running_Current_Workers,
             running_finish_timestamps=Running_Finish_Timestamp
         )
 
@@ -1497,7 +1497,7 @@ class TestGreenThreadPool(PoolRunningTestSpec):
             pool_running_cnt=Pool_Running_Count,
             worker_size=Task_Size,
             running_worker_ids=Running_GreenThread_IDs,
-            running_current_workers=Running_Current_Threads,
+            running_current_workers=Running_Current_Workers,
             running_finish_timestamps=Running_Finish_Timestamp
         )
 
@@ -1508,7 +1508,7 @@ class TestGreenThreadPool(PoolRunningTestSpec):
             pool_running_cnt=Pool_Running_Count,
             function_args=Test_Function_Args,
             running_worker_ids=Running_GreenThread_IDs,
-            running_current_workers=Running_Current_Threads,
+            running_current_workers=Running_Current_Workers,
             running_finish_timestamps=Running_Finish_Timestamp
         )
 
@@ -1984,7 +1984,7 @@ class TestAsynchronous(GeneralRunningTestSpec):
     def _chk_async_task_record():
         GeneralRunningTestSpec._chk_running_cnt(running_cnt=Running_Count, worker_size=Green_Thread_Size)
 
-        _current_process_list = Running_Current_Threads[:]
+        _current_process_list = Running_Current_Workers[:]
         assert len(_current_process_list) == Green_Thread_Size, "The count of PID (no de-duplicate) should be the same as the count of processes."
         assert len(set(_current_process_list)) == Green_Thread_Size, "The count of PID (de-duplicate) should be the same as the count of processes."
 
