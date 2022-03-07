@@ -271,18 +271,21 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
         self.reset_result()
         __process_running_result = None
 
-        try:
-            __process_running_result = [
-                self._GreenThread_Pool.apply(func=function, args=args, kwds=kwargs)
-                for _ in range(tasks_size)]
-            __exception = None
-            __process_run_successful = True
-        except Exception as e:
-            __exception = e
-            __process_run_successful = False
+        self._GreenThread_List = [
+            self._GreenThread_Pool.apply(func=function, args=args, kwds=kwargs)
+            for _ in range(tasks_size)]
 
-        # Save Running result state and Running result value as dict
-        self._result_saving(successful=__process_run_successful, result=__process_running_result)
+        for _green_thread in self._GreenThread_List:
+            try:
+                __process_running_result = _green_thread
+                __exception = None
+                __process_run_successful = True
+            except Exception as e:
+                __exception = e
+                __process_run_successful = False
+
+            # Save Running result state and Running result value as dict
+            self._result_saving(successful=__process_run_successful, result=__process_running_result, exception=__exception)
 
 
     def async_apply(self,
@@ -305,7 +308,7 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
             __process_run_successful = process.successful()
 
             # Save Running result state and Running result value as dict
-            self._result_saving(successful=__process_run_successful, result=__process_running_result)
+            self._result_saving(successful=__process_run_successful, result=__process_running_result, exception=__exception)
 
 
     def apply_with_iter(self, functions_iter: List[Callable], args_iter: List[Tuple] = None, kwargs_iter: List[Dict] = None) -> None:
@@ -318,19 +321,22 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
         if kwargs_iter is None:
             kwargs_iter = [{} for _ in functions_iter]
 
-        try:
-            __process_running_result = [
-                self._GreenThread_Pool.apply(func=_func, args=_args, kwds=_kwargs)
-                for _func, _args, _kwargs in zip(functions_iter, args_iter, kwargs_iter)
-            ]
-            __exception = None
-            __process_run_successful = True
-        except Exception as e:
-            __exception = e
-            __process_run_successful = False
+        self._GreenThread_List = [
+            self._GreenThread_Pool.apply(func=_func, args=_args, kwds=_kwargs)
+            for _func, _args, _kwargs in zip(functions_iter, args_iter, kwargs_iter)
+        ]
 
-        # Save Running result state and Running result value as dict
-        self._result_saving(successful=__process_run_successful, result=__process_running_result)
+        for _green_thread in self._GreenThread_List:
+            try:
+                __process_running_result = _green_thread
+                __exception = None
+                __process_run_successful = True
+            except Exception as e:
+                __exception = e
+                __process_run_successful = False
+
+            # Save Running result state and Running result value as dict
+            self._result_saving(successful=__process_run_successful, result=__process_running_result, exception=__exception)
 
 
     def async_apply_with_iter(self,
@@ -375,7 +381,7 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
                 _process_run_successful = False
 
             # Save Running result state and Running result value as dict
-            self._result_saving(successful=_process_run_successful, result=_process_running_result)
+            self._result_saving(successful=_process_run_successful, result=_process_running_result, exception=__exception)
 
 
     def map(self, function: Callable, args_iter: IterableType = (), chunksize: int = None) -> None:
@@ -392,7 +398,8 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
             __process_run_successful = False
 
         # Save Running result state and Running result value as dict
-        self._result_saving(successful=__process_run_successful, result=__process_running_result)
+        for __result in (__process_running_result or []):
+            self._result_saving(successful=__process_run_successful, result=__result, exception=__exception)
 
 
     def async_map(self,
@@ -410,7 +417,8 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
         __process_run_successful = __map_result.successful()
 
         # Save Running result state and Running result value as dict
-        self._result_saving(successful=__process_run_successful, result=__process_running_result)
+        for __result in (__process_running_result or []):
+            self._result_saving(successful=__process_run_successful, result=__result, exception=__exception)
 
 
     def map_by_args(self, function: Callable, args_iter: IterableType[IterableType] = (), chunksize: int = None) -> None:
@@ -449,7 +457,8 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
                 __exception = e
 
             # Save Running result state and Running result value as dict
-            self._result_saving(successful=__process_run_successful, result=__results)
+            for __result in (__results or []):
+                self._result_saving(successful=__process_run_successful, result=__result, exception=__exception)
 
 
     def _map_with_args(self, function: Callable, args: Iterable, size: int, chunksize: int) -> None:
@@ -502,7 +511,8 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
                 __exception = e
 
             # Save Running result state and Running result value as dict
-            self._result_saving(successful=__process_run_successful, result=__results)
+            for __result in (__results or []):
+                self._result_saving(successful=__process_run_successful, result=__result, exception=__exception)
 
 
     def _async_map_with_args(self, function: Callable, args: Iterable, size: int, chunksize: int, callback: Callable) -> None:
@@ -537,7 +547,8 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
             __process_run_successful = False
 
         # Save Running result state and Running result value as dict
-        self._result_saving(successful=__process_run_successful, result=__process_running_result)
+        for __result in (__process_running_result or []):
+            self._result_saving(successful=__process_run_successful, result=__result, exception=__exception)
 
 
     def imap_unordered(self, function: Callable, args_iter: IterableType = (), chunksize: int = 1) -> None:
@@ -554,11 +565,12 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
             __process_run_successful = False
 
         # Save Running result state and Running result value as dict
-        self._result_saving(successful=__process_run_successful, result=__process_running_result)
+        for __result in (__process_running_result or []):
+            self._result_saving(successful=__process_run_successful, result=__result, exception=__exception)
 
 
-    def _result_saving(self, successful: bool, result: List) -> None:
-        process_result = {"successful": successful, "result": result}
+    def _result_saving(self, successful: bool, result: List, exception: Exception) -> None:
+        process_result = {"successful": successful, "result": result, "exception": exception}
         # Saving value into list
         self._GreenThread_Running_Result.append(process_result)
 
@@ -582,6 +594,7 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
             _pool_result = _GreenThreadPoolResult()
             _pool_result.is_successful = __result["successful"]
             _pool_result.data = __result["result"]
+            _pool_result.exception = __result["exception"]
             _pool_results.append(_pool_result)
         return _pool_results
 
