@@ -43,7 +43,7 @@ class BaseContext(metaclass=ABCMeta):
 
     @staticmethod
     @abstractmethod
-    def active_workers_count() -> List[Any]:
+    def active_workers_count() -> int:
         pass
 
 
