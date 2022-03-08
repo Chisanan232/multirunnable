@@ -269,13 +269,16 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
 
     def apply(self, tasks_size: int, function: Callable, args: Tuple = (), kwargs: Dict = {}) -> None:
         self.reset_result()
-        __process_running_result = None
 
         self._GreenThread_List = [
             self._GreenThread_Pool.apply(func=function, args=args, kwds=kwargs)
             for _ in range(tasks_size)]
 
         for _green_thread in self._GreenThread_List:
+            __process_running_result = None
+            __process_run_successful = None
+            __exception = None
+
             try:
                 __process_running_result = _green_thread
                 __exception = None
@@ -304,8 +307,18 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
             for _ in range(tasks_size)]
 
         for process in self._GreenThread_List:
-            __process_running_result = process.get()
-            __process_run_successful = process.successful()
+            __process_running_result = None
+            __process_run_successful = None
+            __exception = None
+
+            try:
+                __process_running_result = process.get()
+                __process_run_successful = process.successful()
+                __exception = None
+            except Exception as e:
+                __exception = e
+                __process_running_result = None
+                __process_run_successful = process.successful()
 
             # Save Running result state and Running result value as dict
             self._result_saving(successful=__process_run_successful, result=__process_running_result, exception=__exception)
@@ -327,6 +340,10 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
         ]
 
         for _green_thread in self._GreenThread_List:
+            __process_running_result = None
+            __process_run_successful = None
+            __exception = None
+
             try:
                 __process_running_result = _green_thread
                 __exception = None
@@ -381,7 +398,7 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
                 _process_run_successful = False
 
             # Save Running result state and Running result value as dict
-            self._result_saving(successful=_process_run_successful, result=_process_running_result, exception=__exception)
+            self._result_saving(successful=_process_run_successful, result=_process_running_result, exception=_exception)
 
 
     def map(self, function: Callable, args_iter: IterableType = (), chunksize: int = None) -> None:
@@ -409,12 +426,21 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
                   callback: Callable = None,
                   error_callback: Callable = None) -> None:
         self.reset_result()
+
+        __process_running_result = None
+        __process_run_successful = None
+        __exception = None
+
         __map_result = self._GreenThread_Pool.map_async(
             func=function,
             iterable=args_iter,
             callback=callback)
-        __process_running_result = __map_result.get()
-        __process_run_successful = __map_result.successful()
+        try:
+            __process_running_result = __map_result.get()
+            __process_run_successful = __map_result.successful()
+        except Exception as e:
+            __exception = e
+            __process_running_result = None
 
         # Save Running result state and Running result value as dict
         for __result in (__process_running_result or []):
