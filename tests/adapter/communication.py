@@ -2,13 +2,10 @@ from multirunnable.mode import RunningMode, FeatureMode
 from multirunnable.adapter import Event, Condition
 from multirunnable.adapter.communication import AsyncEvent, AsyncCondition
 
-from .._examples import (
-    map_multi_process, map_multi_threads, map_multi_green_thread, map_async
-)
+from .._examples import MapByStrategy
 from ..framework.lock import EventTestSpec, ConditionTestSpec
 
 from typing import Union
-# import asyncio
 import pytest
 
 
@@ -41,17 +38,17 @@ class TestAdapterEvent(EventTestSpec):
 
     def test_feature_in_parallel(self):
         _event = instantiate_event(_mode=FeatureMode.Parallel, _init=True)
-        EventTestSpec._feature_testing(mode=FeatureMode.Parallel, _lock=_event, running_function=map_multi_process)
+        EventTestSpec._feature_testing(mode=FeatureMode.Parallel, _lock=_event, running_function=MapByStrategy.Parallel)
 
 
     def test_feature_in_concurrent(self):
         _event = instantiate_event(_mode=FeatureMode.Concurrent, _init=True)
-        EventTestSpec._feature_testing(mode=FeatureMode.Concurrent, _lock=_event, running_function=map_multi_threads)
+        EventTestSpec._feature_testing(mode=FeatureMode.Concurrent, _lock=_event, running_function=MapByStrategy.Concurrent)
 
 
     def test_feature_in_green_thread(self):
         _event = instantiate_event(_mode=FeatureMode.GreenThread, _init=True)
-        EventTestSpec._feature_testing(mode=FeatureMode.GreenThread, _lock=_event, running_function=map_multi_green_thread)
+        EventTestSpec._feature_testing(mode=FeatureMode.GreenThread, _lock=_event, running_function=MapByStrategy.CoroutineWithGreenThread)
 
 
     def test_feature_in_asynchronous_tasks(self):
@@ -62,7 +59,7 @@ class TestAdapterEvent(EventTestSpec):
         #
         # _event = instantiate_event(_mode=FeatureMode.Asynchronous, _init=True, event_loop=_event_loop)
         _event = AsyncEvent(mode=FeatureMode.Asynchronous)
-        EventTestSpec._async_feature_testing(_lock=_event, running_function=map_async, factory=_event)
+        EventTestSpec._async_feature_testing(_lock=_event, running_function=MapByStrategy.CoroutineWithAsynchronous, factory=_event)
 
 
 
@@ -80,22 +77,22 @@ class TestAdapterCondition(ConditionTestSpec):
 
     def test_feature_in_parallel(self):
         _condition = instantiate_condition(_mode=FeatureMode.Parallel, _init=True)
-        ConditionTestSpec._feature_testing(mode=FeatureMode.Parallel, _lock=_condition, running_function=map_multi_process)
+        ConditionTestSpec._feature_testing(mode=FeatureMode.Parallel, _lock=_condition, running_function=MapByStrategy.Parallel)
 
 
     def test_feature_by_pykeyword_with_in_parallel(self):
         _condition = instantiate_condition(_mode=FeatureMode.Parallel, _init=True)
-        ConditionTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.Parallel, _lock=_condition, running_function=map_multi_process)
+        ConditionTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.Parallel, _lock=_condition, running_function=MapByStrategy.Parallel)
 
 
     def test_feature_in_concurrent(self):
         _condition = instantiate_condition(_mode=FeatureMode.Concurrent, _init=True)
-        ConditionTestSpec._feature_testing(mode=FeatureMode.Concurrent, _lock=_condition, running_function=map_multi_threads)
+        ConditionTestSpec._feature_testing(mode=FeatureMode.Concurrent, _lock=_condition, running_function=MapByStrategy.Concurrent)
 
 
     def test_feature_by_pykeyword_with_in_concurrent(self):
         _condition = instantiate_condition(_mode=FeatureMode.Concurrent, _init=True)
-        ConditionTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.Concurrent, _lock=_condition, running_function=map_multi_threads)
+        ConditionTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.Concurrent, _lock=_condition, running_function=MapByStrategy.Concurrent)
 
 
     def test_feature_in_asynchronous_tasks(self):
@@ -104,7 +101,7 @@ class TestAdapterCondition(ConditionTestSpec):
         #
         # _condition = instantiate_condition(_mode=FeatureMode.Asynchronous, _init=True, event_loop=_event_loop)
         _condition = AsyncCondition(mode=FeatureMode.Asynchronous)
-        ConditionTestSpec._async_feature_testing(_lock=_condition, running_function=map_async, factory=_condition)
+        ConditionTestSpec._async_feature_testing(_lock=_condition, running_function=MapByStrategy.CoroutineWithAsynchronous, factory=_condition)
 
 
     def test_feature_by_pykeyword_with_in_asynchronous_tasks(self):
@@ -113,6 +110,6 @@ class TestAdapterCondition(ConditionTestSpec):
         #
         # _condition = instantiate_condition(_mode=FeatureMode.Asynchronous, _init=True, event_loop=_event_loop)
         _condition = AsyncCondition(mode=FeatureMode.Asynchronous)
-        ConditionTestSpec._async_feature_testing_by_pykeyword_with(_lock=_condition, running_function=map_async, factory=_condition)
+        ConditionTestSpec._async_feature_testing_by_pykeyword_with(_lock=_condition, running_function=MapByStrategy.CoroutineWithAsynchronous, factory=_condition)
 
 

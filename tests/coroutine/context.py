@@ -1,7 +1,7 @@
 from multirunnable.coroutine.context import green_thread_context, async_task_context
 
 from ..framework.context import _Function, ContextTestSpec
-from .._examples import run_multi_green_thread, run_async
+from .._examples import RunByStrategy
 
 from typing import Type
 import asyncio
@@ -44,11 +44,11 @@ class _GreenThreadFunction(_Function):
 
 
     def get_activate_count(self):
-        return threading.active_count()
+        return gevent.threading.__threading__.active_count()
 
 
     def get_activate_children(self):
-        return threading.enumerate()
+        return gevent.threading.__threading__.enumerate()
 
 
 
@@ -95,23 +95,13 @@ class _AsyncTaskFunction(_Function):
 class TestGreenThreadContext(ContextTestSpec):
 
     @pytest.fixture(scope='class')
-    def testing_func(self) -> _Function:
+    def testing_func(self) -> _GreenThreadFunction:
         return _GreenThreadFunction(py_pkg="gevent")
 
 
     @pytest.fixture(scope='class')
     def running_func(self):
-        return run_multi_green_thread
-
-
-    @pytest.mark.skip(reason="Python package *gevent* doesn't support this feature. MultiRunnable doesn't implement it currently.")
-    def test_activate_workers_count(self, running_func, testing_func):
-        pass
-
-
-    @pytest.mark.skip(reason="Python package *gevent* doesn't support this feature. MultiRunnable doesn't implement it currently.")
-    def test_children_workers(self, running_func, testing_func):
-        pass
+        return RunByStrategy.CoroutineWithGreenThread
 
 
 
@@ -124,5 +114,5 @@ class TestAsynchronousTaskContext(ContextTestSpec):
 
     @pytest.fixture(scope='class')
     def running_func(self):
-        return run_async
+        return RunByStrategy.CoroutineWithAsynchronous
 

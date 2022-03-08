@@ -4,7 +4,7 @@ from multirunnable.parallel.context import context as process_context
 from multirunnable.concurrent.context import context as thread_context
 from multirunnable.coroutine.context import green_thread_context, async_task_context
 
-from .._examples import run_multi_process, run_multi_threads, run_multi_green_thread, run_async
+from .._examples import RunByStrategy
 
 from typing import Type, Union
 import pytest
@@ -140,13 +140,13 @@ class TestAdapterContext:
     @staticmethod
     def _run_test(mode, testing):
         if mode is RunningMode.Parallel:
-            run_multi_process(_function=testing)
+            RunByStrategy.Parallel(_function=testing)
         elif mode is RunningMode.Concurrent:
-            run_multi_threads(_function=testing)
+            RunByStrategy.Concurrent(_function=testing)
         elif mode is RunningMode.GreenThread:
-            run_multi_green_thread(_function=testing)
+            RunByStrategy.CoroutineWithGreenThread(_function=testing)
         elif mode is RunningMode.Asynchronous:
-            run_async(_function=testing)
+            RunByStrategy.CoroutineWithAsynchronous(_function=testing)
         else:
             raise ValueError
 

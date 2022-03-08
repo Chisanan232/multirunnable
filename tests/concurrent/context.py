@@ -1,7 +1,7 @@
 from multirunnable.concurrent.context import context
 
 from ..framework.context import _Function, ContextTestSpec
-from .._examples import run_multi_threads
+from .._examples import RunByStrategy
 
 from typing import Type
 import threading
@@ -59,5 +59,5 @@ class TestParallelContext(ContextTestSpec):
 
     @pytest.fixture(scope='class')
     def running_func(self):
-        return run_multi_threads
+        return RunByStrategy.Concurrent
 

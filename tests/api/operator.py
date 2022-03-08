@@ -10,10 +10,7 @@ from multirunnable.api.operator import (
     EventAsyncOperator, ConditionAsyncOperator)
 
 from ..test_config import Semaphore_Value
-from .._examples import (
-    run_multi_process, run_multi_threads, run_multi_green_thread, run_async,
-    map_multi_process, map_multi_threads, map_multi_green_thread, map_async
-)
+from .._examples import RunByStrategy, MapByStrategy
 from ..framework.lock import LockTestSpec, RLockTestSpec, SemaphoreTestSpec, BoundedSemaphoreTestSpec, EventTestSpec, ConditionTestSpec
 
 import asyncio
@@ -125,42 +122,42 @@ class TestLockAdapterOperator(LockTestSpec):
 
     def test_feature_in_parallel(self, lock_opts: LockAdapterOperator):
         instantiate_lock(FeatureMode.Parallel)
-        LockTestSpec._feature_testing(mode=FeatureMode.Parallel, _lock=lock_opts, running_function=run_multi_process)
+        LockTestSpec._feature_testing(mode=FeatureMode.Parallel, _lock=lock_opts, running_function=RunByStrategy.Parallel)
 
 
     def test_feature_by_pykeyword_with_in_parallel(self, lock_opts: LockAdapterOperator):
         instantiate_lock(FeatureMode.Parallel)
-        LockTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.Parallel, _lock=lock_opts, running_function=run_multi_process)
+        LockTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.Parallel, _lock=lock_opts, running_function=RunByStrategy.Parallel)
 
 
     def test_feature_in_concurrent(self, lock_opts: LockAdapterOperator):
         instantiate_lock(FeatureMode.Concurrent)
-        LockTestSpec._feature_testing(mode=FeatureMode.Concurrent, _lock=lock_opts, running_function=run_multi_threads)
+        LockTestSpec._feature_testing(mode=FeatureMode.Concurrent, _lock=lock_opts, running_function=RunByStrategy.Concurrent)
 
 
     def test_feature_by_pykeyword_with_in_concurrent(self, lock_opts: LockAdapterOperator):
         instantiate_lock(FeatureMode.Concurrent)
-        LockTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.Concurrent, _lock=lock_opts, running_function=run_multi_threads)
+        LockTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.Concurrent, _lock=lock_opts, running_function=RunByStrategy.Concurrent)
 
 
     def test_feature_in_green_thread(self, lock_opts: LockAdapterOperator):
         instantiate_lock(FeatureMode.GreenThread)
-        LockTestSpec._feature_testing(mode=FeatureMode.GreenThread, _lock=lock_opts, running_function=run_multi_green_thread)
+        LockTestSpec._feature_testing(mode=FeatureMode.GreenThread, _lock=lock_opts, running_function=RunByStrategy.CoroutineWithGreenThread)
 
 
     def test_feature_by_pykeyword_with_in_green_thread(self, lock_opts: LockAdapterOperator):
         instantiate_lock(FeatureMode.GreenThread)
-        LockTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.GreenThread, _lock=lock_opts, running_function=run_multi_green_thread)
+        LockTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.GreenThread, _lock=lock_opts, running_function=RunByStrategy.CoroutineWithGreenThread)
 
 
     def test_feature_in_asynchronous_tasks(self):
         lock_opts = LockAsyncOperator()
-        LockTestSpec._async_feature_testing(mode=FeatureMode.Asynchronous, _lock=lock_opts, running_function=run_async, factory=LockFactory())
+        LockTestSpec._async_feature_testing(mode=FeatureMode.Asynchronous, _lock=lock_opts, running_function=RunByStrategy.CoroutineWithAsynchronous, factory=LockFactory())
 
 
     def test_feature_by_pykeyword_with_in_asynchronous_tasks(self):
         lock_opts = LockAsyncOperator()
-        LockTestSpec._async_feature_testing_by_pykeyword_with(mode=FeatureMode.Asynchronous, _lock=lock_opts, running_function=run_async, factory=LockFactory())
+        LockTestSpec._async_feature_testing_by_pykeyword_with(mode=FeatureMode.Asynchronous, _lock=lock_opts, running_function=RunByStrategy.CoroutineWithAsynchronous, factory=LockFactory())
 
 
 
@@ -186,32 +183,32 @@ class TestRLockAdapterOperator(RLockTestSpec):
 
     def test_feature_in_parallel(self, rlock_opts: RLockOperator):
         instantiate_rlock(FeatureMode.Parallel)
-        RLockTestSpec._feature_testing(mode=FeatureMode.Parallel, _lock=rlock_opts, running_function=run_multi_process)
+        RLockTestSpec._feature_testing(mode=FeatureMode.Parallel, _lock=rlock_opts, running_function=RunByStrategy.Parallel)
 
 
     def test_feature_by_pykeyword_with_in_parallel(self, rlock_opts: RLockOperator):
         instantiate_rlock(FeatureMode.Parallel)
-        RLockTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.Parallel, _lock=rlock_opts, running_function=run_multi_process)
+        RLockTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.Parallel, _lock=rlock_opts, running_function=RunByStrategy.Parallel)
 
 
     def test_feature_in_concurrent(self, rlock_opts: RLockOperator):
         instantiate_rlock(FeatureMode.Concurrent)
-        RLockTestSpec._feature_testing(mode=FeatureMode.Concurrent, _lock=rlock_opts, running_function=run_multi_threads)
+        RLockTestSpec._feature_testing(mode=FeatureMode.Concurrent, _lock=rlock_opts, running_function=RunByStrategy.Concurrent)
 
 
     def test_feature_by_pykeyword_with_in_concurrent(self, rlock_opts: RLockOperator):
         instantiate_rlock(FeatureMode.Concurrent)
-        RLockTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.Concurrent, _lock=rlock_opts, running_function=run_multi_threads)
+        RLockTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.Concurrent, _lock=rlock_opts, running_function=RunByStrategy.Concurrent)
 
 
     def test_feature_in_green_thread(self, rlock_opts: RLockOperator):
         instantiate_rlock(FeatureMode.GreenThread)
-        RLockTestSpec._feature_testing(mode=FeatureMode.GreenThread, _lock=rlock_opts, running_function=run_multi_green_thread)
+        RLockTestSpec._feature_testing(mode=FeatureMode.GreenThread, _lock=rlock_opts, running_function=RunByStrategy.CoroutineWithGreenThread)
 
 
     def test_feature_by_pykeyword_with_in_green_thread(self, rlock_opts: RLockOperator):
         instantiate_rlock(FeatureMode.GreenThread)
-        RLockTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.GreenThread, _lock=rlock_opts, running_function=run_multi_green_thread)
+        RLockTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.GreenThread, _lock=rlock_opts, running_function=RunByStrategy.CoroutineWithGreenThread)
 
 
 
@@ -238,23 +235,23 @@ class TestSemaphoreAdapterOperator(SemaphoreTestSpec):
     @pytest.mark.skipif(sys.platform != "win32", reason="On macOS, sem_timedwait is unsupported. Please refer to the multiprocessing documentation.")
     def test_feature_in_parallel(self, semaphore_opts: SemaphoreOperator):
         instantiate_semaphore(FeatureMode.Parallel)
-        SemaphoreTestSpec._feature_testing(mode=FeatureMode.Parallel, _lock=semaphore_opts, running_function=run_multi_process)
+        SemaphoreTestSpec._feature_testing(mode=FeatureMode.Parallel, _lock=semaphore_opts, running_function=RunByStrategy.Parallel)
 
 
     def test_feature_by_pykeyword_with_in_parallel(self, semaphore_opts: SemaphoreOperator):
         instantiate_semaphore(FeatureMode.Parallel)
-        SemaphoreTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.Parallel, _lock=semaphore_opts, running_function=run_multi_process)
+        SemaphoreTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.Parallel, _lock=semaphore_opts, running_function=RunByStrategy.Parallel)
 
 
     @pytest.mark.skip(reason="Still debug for this issue. Mark as XFail because it works finely via Python keyword 'with'.")
     def test_feature_in_concurrent(self, semaphore_opts: SemaphoreOperator):
         instantiate_semaphore(FeatureMode.Concurrent)
-        SemaphoreTestSpec._feature_testing(mode=FeatureMode.Concurrent, _lock=semaphore_opts, running_function=run_multi_threads)
+        SemaphoreTestSpec._feature_testing(mode=FeatureMode.Concurrent, _lock=semaphore_opts, running_function=RunByStrategy.Concurrent)
 
 
     def test_feature_by_pykeyword_with_in_concurrent(self, semaphore_opts: SemaphoreOperator):
         instantiate_semaphore(FeatureMode.Concurrent)
-        SemaphoreTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.Concurrent, _lock=semaphore_opts, running_function=run_multi_threads)
+        SemaphoreTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.Concurrent, _lock=semaphore_opts, running_function=RunByStrategy.Concurrent)
 
 
     @pytest.mark.xfail(reason="Still debug for this issue. Mark as XFail because it works finely via Python keyword 'with'.")
@@ -277,22 +274,22 @@ class TestSemaphoreAdapterOperator(SemaphoreTestSpec):
         # run_multi_green_thread(_function=_target_testing)
         # TestSemaphoreAdapterOperator._chk_done_timestamp(_done_timestamp)
 
-        SemaphoreTestSpec._feature_testing(mode=FeatureMode.GreenThread, _lock=semaphore_opts, running_function=run_multi_green_thread)
+        SemaphoreTestSpec._feature_testing(mode=FeatureMode.GreenThread, _lock=semaphore_opts, running_function=RunByStrategy.CoroutineWithGreenThread)
 
 
     def test_feature_by_pykeyword_with_in_green_thread(self, semaphore_opts: SemaphoreOperator):
         instantiate_semaphore(FeatureMode.GreenThread)
-        SemaphoreTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.GreenThread, _lock=semaphore_opts, running_function=run_multi_green_thread)
+        SemaphoreTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.GreenThread, _lock=semaphore_opts, running_function=RunByStrategy.CoroutineWithGreenThread)
 
 
     def test_feature_in_asynchronous_tasks(self):
         semaphore_opts = SemaphoreAsyncOperator()
-        SemaphoreTestSpec._async_feature_testing(factory=SemaphoreFactory(value=_Semaphore_Value), _lock=semaphore_opts, running_function=run_async)
+        SemaphoreTestSpec._async_feature_testing(factory=SemaphoreFactory(value=_Semaphore_Value), _lock=semaphore_opts, running_function=RunByStrategy.CoroutineWithAsynchronous)
 
 
     def test_feature_by_pykeyword_with_in_asynchronous_tasks(self):
         semaphore_opts = SemaphoreAsyncOperator()
-        SemaphoreTestSpec._async_feature_testing_by_pykeyword_with(factory=SemaphoreFactory(value=_Semaphore_Value), _lock=semaphore_opts, running_function=run_async)
+        SemaphoreTestSpec._async_feature_testing_by_pykeyword_with(factory=SemaphoreFactory(value=_Semaphore_Value), _lock=semaphore_opts, running_function=RunByStrategy.CoroutineWithAsynchronous)
 
 
 
@@ -335,42 +332,42 @@ class TestBoundedSemaphoreAdapterOperator(BoundedSemaphoreTestSpec):
         # run_multi_process(_function=_target_testing)
         # TestSemaphoreAdapterOperator._chk_done_timestamp(_done_timestamp)
 
-        BoundedSemaphoreTestSpec._feature_testing(mode=FeatureMode.Parallel, _lock=bounded_semaphore_opts, running_function=run_multi_process)
+        BoundedSemaphoreTestSpec._feature_testing(mode=FeatureMode.Parallel, _lock=bounded_semaphore_opts, running_function=RunByStrategy.Parallel)
 
 
     def test_feature_by_pykeyword_with_in_parallel(self, bounded_semaphore_opts: BoundedSemaphoreOperator):
         instantiate_bounded_semaphore(FeatureMode.Parallel)
-        BoundedSemaphoreTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.Parallel, _lock=bounded_semaphore_opts, running_function=run_multi_process)
+        BoundedSemaphoreTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.Parallel, _lock=bounded_semaphore_opts, running_function=RunByStrategy.Parallel)
 
 
     def test_feature_in_concurrent(self, bounded_semaphore_opts: BoundedSemaphoreOperator):
         instantiate_bounded_semaphore(FeatureMode.Concurrent)
-        BoundedSemaphoreTestSpec._feature_testing(mode=FeatureMode.Concurrent, _lock=bounded_semaphore_opts, running_function=run_multi_threads)
+        BoundedSemaphoreTestSpec._feature_testing(mode=FeatureMode.Concurrent, _lock=bounded_semaphore_opts, running_function=RunByStrategy.Concurrent)
 
 
     def test_feature_by_pykeyword_with_in_concurrent(self, bounded_semaphore_opts: BoundedSemaphoreOperator):
         instantiate_bounded_semaphore(FeatureMode.Concurrent)
-        BoundedSemaphoreTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.Concurrent, _lock=bounded_semaphore_opts, running_function=run_multi_threads)
+        BoundedSemaphoreTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.Concurrent, _lock=bounded_semaphore_opts, running_function=RunByStrategy.Concurrent)
 
 
     def test_feature_in_green_thread(self, bounded_semaphore_opts: BoundedSemaphoreOperator):
         instantiate_bounded_semaphore(FeatureMode.GreenThread)
-        BoundedSemaphoreTestSpec._feature_testing(mode=FeatureMode.GreenThread, _lock=bounded_semaphore_opts, running_function=run_multi_green_thread)
+        BoundedSemaphoreTestSpec._feature_testing(mode=FeatureMode.GreenThread, _lock=bounded_semaphore_opts, running_function=RunByStrategy.CoroutineWithGreenThread)
 
 
     def test_feature_by_pykeyword_with_in_green_thread(self, bounded_semaphore_opts: BoundedSemaphoreOperator):
         instantiate_bounded_semaphore(FeatureMode.GreenThread)
-        BoundedSemaphoreTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.GreenThread, _lock=bounded_semaphore_opts, running_function=run_multi_green_thread)
+        BoundedSemaphoreTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.GreenThread, _lock=bounded_semaphore_opts, running_function=RunByStrategy.CoroutineWithGreenThread)
 
 
     def test_feature_in_asynchronous_tasks(self):
         bounded_semaphore_opts = BoundedSemaphoreAsyncOperator()
-        BoundedSemaphoreTestSpec._async_feature_testing(_lock=bounded_semaphore_opts, running_function=run_async, factory=BoundedSemaphoreFactory(value=_Semaphore_Value))
+        BoundedSemaphoreTestSpec._async_feature_testing(_lock=bounded_semaphore_opts, running_function=RunByStrategy.CoroutineWithAsynchronous, factory=BoundedSemaphoreFactory(value=_Semaphore_Value))
 
 
     def test_feature_by_pykeyword_with_in_asynchronous_tasks(self):
         bounded_semaphore_opts = BoundedSemaphoreAsyncOperator()
-        BoundedSemaphoreTestSpec._async_feature_testing_by_pykeyword_with(_lock=bounded_semaphore_opts, running_function=run_async, factory=BoundedSemaphoreFactory(value=_Semaphore_Value))
+        BoundedSemaphoreTestSpec._async_feature_testing_by_pykeyword_with(_lock=bounded_semaphore_opts, running_function=RunByStrategy.CoroutineWithAsynchronous, factory=BoundedSemaphoreFactory(value=_Semaphore_Value))
 
 
 
@@ -396,22 +393,22 @@ class TestEventAdapterOperator(EventTestSpec):
 
     def test_feature_in_parallel(self, event_opts: EventOperator):
         instantiate_event(FeatureMode.Parallel)
-        EventTestSpec._feature_testing(mode=FeatureMode.Parallel, _lock=event_opts, running_function=map_multi_process)
+        EventTestSpec._feature_testing(mode=FeatureMode.Parallel, _lock=event_opts, running_function=MapByStrategy.Parallel)
 
 
     def test_feature_in_concurrent(self, event_opts: EventOperator):
         instantiate_event(FeatureMode.Concurrent)
-        EventTestSpec._feature_testing(mode=FeatureMode.Concurrent, _lock=event_opts, running_function=map_multi_threads)
+        EventTestSpec._feature_testing(mode=FeatureMode.Concurrent, _lock=event_opts, running_function=MapByStrategy.Concurrent)
 
 
     def test_feature_in_green_thread(self, event_opts: EventOperator):
         instantiate_event(FeatureMode.GreenThread)
-        EventTestSpec._feature_testing(mode=FeatureMode.GreenThread, _lock=event_opts, running_function=map_multi_green_thread)
+        EventTestSpec._feature_testing(mode=FeatureMode.GreenThread, _lock=event_opts, running_function=MapByStrategy.CoroutineWithGreenThread)
 
 
     def test_feature_in_asynchronous_tasks(self):
         _event_opt = EventAsyncOperator()
-        EventTestSpec._async_feature_testing(_lock=_event_opt, running_function=map_async, factory=EventFactory())
+        EventTestSpec._async_feature_testing(_lock=_event_opt, running_function=MapByStrategy.CoroutineWithAsynchronous, factory=EventFactory())
 
 
 
@@ -437,31 +434,31 @@ class TestConditionAdapterOperator(ConditionTestSpec):
 
     def test_feature_in_parallel(self, condition_opts: ConditionOperator):
         instantiate_condition(FeatureMode.Parallel)
-        ConditionTestSpec._feature_testing(mode=FeatureMode.Parallel, _lock=condition_opts, running_function=map_multi_process)
+        ConditionTestSpec._feature_testing(mode=FeatureMode.Parallel, _lock=condition_opts, running_function=MapByStrategy.Parallel)
 
 
     def test_feature_by_pykeyword_with_in_parallel(self, condition_opts: ConditionOperator):
         instantiate_condition(FeatureMode.Parallel)
-        ConditionTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.Parallel, _lock=condition_opts, running_function=map_multi_process)
+        ConditionTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.Parallel, _lock=condition_opts, running_function=MapByStrategy.Parallel)
 
 
     def test_feature_in_concurrent(self, condition_opts: ConditionOperator):
         instantiate_condition(FeatureMode.Concurrent)
-        ConditionTestSpec._feature_testing(mode=FeatureMode.Concurrent, _lock=condition_opts, running_function=map_multi_threads)
+        ConditionTestSpec._feature_testing(mode=FeatureMode.Concurrent, _lock=condition_opts, running_function=MapByStrategy.Concurrent)
 
 
     def test_feature_by_pykeyword_with_in_concurrent(self, condition_opts: ConditionOperator):
         instantiate_condition(FeatureMode.Concurrent)
-        ConditionTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.Concurrent, _lock=condition_opts, running_function=map_multi_threads)
+        ConditionTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.Concurrent, _lock=condition_opts, running_function=MapByStrategy.Concurrent)
 
 
     def test_feature_in_asynchronous_tasks(self):
         _condition_opt = ConditionAsyncOperator()
-        ConditionTestSpec._async_feature_testing(_lock=_condition_opt, running_function=map_async, factory=ConditionFactory())
+        ConditionTestSpec._async_feature_testing(_lock=_condition_opt, running_function=MapByStrategy.CoroutineWithAsynchronous, factory=ConditionFactory())
 
 
     def test_feature_by_pykeyword_with_in_asynchronous_tasks(self):
         _condition_opt = ConditionAsyncOperator()
-        ConditionTestSpec._async_feature_testing_by_pykeyword_with(_lock=_condition_opt, running_function=map_async, factory=ConditionFactory())
+        ConditionTestSpec._async_feature_testing_by_pykeyword_with(_lock=_condition_opt, running_function=MapByStrategy.CoroutineWithAsynchronous, factory=ConditionFactory())
 
 
