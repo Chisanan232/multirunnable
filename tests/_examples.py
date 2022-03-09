@@ -350,17 +350,6 @@ def target_function(*args, **kwargs) -> str:
         if kwargs:
             assert kwargs == Test_Function_Kwargs, "The argument *kwargs* should be same as the input outside."
 
-        # _pid = os.getpid()
-        # _ppid = os.getppid()
-        # _ident = _get_worker_id()
-        # _current_worker = _get_current_worker()
-        # _time = int(time.time())
-        #
-        # Running_Workers_IDs.append(_ident)
-        # Running_PPIDs.append(_ppid)
-        # Running_Current_Workers.append(str(_current_worker))
-        # Running_Finish_Timestamp.append(_time)
-
         _ident = __record_info_to_flags()
 
     _sleep_time()
@@ -391,17 +380,6 @@ def target_function_for_map(*args, **kwargs) -> str:
         if kwargs:
             assert kwargs is None or kwargs == {}, "The argument *kwargs* should be empty or None value."
 
-        # _pid = os.getpid()
-        # _ppid = os.getppid()
-        # _ident = _get_worker_id()
-        # _current_worker = _get_current_worker()
-        # _time = int(time.time())
-        #
-        # Running_Workers_IDs.append(_ident)
-        # Running_PPIDs.append(_ppid)
-        # Running_Current_Workers.append(str(_current_worker))
-        # Running_Finish_Timestamp.append(_time)
-
         _ident = __record_info_to_flags()
 
     _sleep_time()
@@ -427,17 +405,6 @@ def target_function_for_map_with_diff_args(*args, **kwargs):
             #     assert args == Test_Function_Args, "The argument *args* should be same as the global variable 'Test_Function_Args'."
         if kwargs:
             assert kwargs is None or kwargs == {}, "The argument *kwargs* should be empty or None value."
-
-        # _pid = os.getpid()
-        # _ppid = os.getppid()
-        # _ident = _get_worker_id()
-        # _current_worker = _get_current_worker()
-        # _time = int(time.time())
-        #
-        # Running_Workers_IDs.append(_ident)
-        # Running_PPIDs.append(_ppid)
-        # Running_Current_Workers.append(str(_current_worker))
-        # Running_Finish_Timestamp.append(_time)
 
         _ident = __record_info_to_flags()
 
