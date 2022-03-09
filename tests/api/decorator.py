@@ -1,11 +1,10 @@
 from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 from multirunnable.mode import RunningMode, FeatureMode
-from multirunnable.api.decorator import (
-    RunWith, AsyncRunWith
-)
+from multirunnable.api.decorator import RunWith, AsyncRunWith
 from multirunnable.factory.lock import LockFactory, RLockFactory, SemaphoreFactory, BoundedSemaphoreFactory
 from multirunnable.factory.communication import EventFactory, ConditionFactory
 from multirunnable.factory.strategy import ExecutorStrategyAdapter
+from multirunnable.parallel.strategy import Global_Manager
 from multirunnable.coroutine.strategy import AsynchronousStrategy
 
 from ..test_config import Worker_Size, Worker_Pool_Size, Task_Size, Semaphore_Value
@@ -399,10 +398,9 @@ class TestAsyncRetryMechanism:
 
 class TestFeaturesDecorator:
 
-    @pytest.mark.skip(reason="Not finish yet.")
     def test_lock_decorator_in_parallel(self):
 
-        _done_timestamp = {}
+        _done_timestamp = Global_Manager.dict()
         instantiate_lock(FeatureMode.Parallel)
 
         @RunWith.Lock
@@ -490,10 +488,9 @@ class TestFeaturesDecorator:
         TestFeaturesDecorator._chk_done_timestamp_by_lock(_done_timestamp)
 
 
-    @pytest.mark.skip(reason="Not finish yet.")
     def test_semaphore_decorator_in_parallel(self):
 
-        _done_timestamp = {}
+        _done_timestamp = Global_Manager.dict()
         instantiate_semaphore(FeatureMode.Parallel)
 
         @RunWith.Semaphore
@@ -505,7 +502,7 @@ class TestFeaturesDecorator:
             _done_timestamp[_process_id] = _time
 
         # # # # Run multiple workers and save something info at the right time
-        run_multi_threads(_function=_target_testing)
+        run_multi_process(_function=_target_testing)
         TestFeaturesDecorator._chk_done_timestamp_by_semaphore(_done_timestamp)
 
 
@@ -545,11 +542,10 @@ class TestFeaturesDecorator:
         TestFeaturesDecorator._chk_done_timestamp_by_semaphore(_done_timestamp)
 
 
-    @pytest.mark.skip(reason="Not finish yet.")
     def test_bounded_semaphore_decorator_in_parallel(self):
 
-        _done_timestamp = {}
-        instantiate_bounded_semaphore(FeatureMode.Concurrent)
+        _done_timestamp = Global_Manager.dict()
+        instantiate_bounded_semaphore(FeatureMode.Parallel)
 
         @RunWith.Bounded_Semaphore
         def _target_testing():
