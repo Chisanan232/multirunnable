@@ -1,8 +1,13 @@
-from multirunnable.persistence.file import SavingStrategy
+from multirunnable import set_mode, RunningMode
+from multirunnable.adapter.context import context as adapter_context
+from multirunnable.persistence.file import SavingStrategy, CSVFormatter
 from multirunnable.persistence.file.layer import BaseFao
+from multirunnable.persistence.file.saver import _Done_Flag, _Do_Nothing_Flag
 
 from .._data import Test_Data_List, Test_JSON_Data
 
+from typing import Union
+from collections import namedtuple
 import threading
 import pytest
 import os
@@ -60,35 +65,121 @@ class _TestFaoClientThread(threading.Thread):
 
 
 
-@pytest.fixture(scope="function")
-def example_fao() -> _ExampleTestingFao:
-    return _ExampleTestingFao(strategy=SavingStrategy.ONE_THREAD_ONE_FILE)
-
-
-
 class TestFao:
 
-    @pytest.mark.skip(reason="Not implement testing logic yet.")
-    def test_save_as_json(self, example_fao: _ExampleTestingFao):
-        pass
+    @pytest.mark.parametrize(
+        "saving_strategy",
+        argvalues=[SavingStrategy.ONE_THREAD_ONE_FILE, SavingStrategy.ALL_THREADS_ONE_FILE, SavingStrategy.ONE_THREAD_ONE_FILE_AND_COMPRESS_ALL],
+    )
+    def test_save_as_json(self, saving_strategy: SavingStrategy):
+        set_mode(mode=RunningMode.Concurrent)
+
+        _example_fao = _ExampleTestingFao(strategy=saving_strategy)
+        _file_path = "test.json"
+        # # Run in parent worker.
+        _result = _example_fao.save_as_json(file=_file_path, mode="a+", data=[[Test_JSON_Data]])
+
+        TestFao._checking_process(_strategy=saving_strategy, _result=_result, _file_path=_file_path)
 
 
-    @pytest.mark.skip(reason="Not implement testing logic yet.")
-    def test_save_as_csv(self, example_fao: _ExampleTestingFao):
-        pass
+    @pytest.mark.parametrize(
+        "saving_strategy",
+        argvalues=[SavingStrategy.ONE_THREAD_ONE_FILE, SavingStrategy.ALL_THREADS_ONE_FILE, SavingStrategy.ONE_THREAD_ONE_FILE_AND_COMPRESS_ALL]
+    )
+    def test_save_as_csv(self, saving_strategy: SavingStrategy):
+        set_mode(mode=RunningMode.Concurrent)
+
+        _example_fao = _ExampleTestingFao(strategy=saving_strategy)
+        _file_path = "test.csv"
+        # # Run in parent worker.
+        _result = _example_fao.save_as_csv(file=_file_path, mode="a+", data=Test_Data_List)
+
+        TestFao._checking_process(_strategy=saving_strategy, _result=_result, _file_path=_file_path)
 
 
-    @pytest.mark.skip(reason="Not implement testing logic yet.")
-    def test_save_as_excel(self, example_fao: _ExampleTestingFao):
-        pass
+    @pytest.mark.xfail(reason="It doesn't support process data to streaming with file format '.xlsx'. But it supports '.json' and '.csv'.")
+    @pytest.mark.parametrize(
+        "saving_strategy",
+        argvalues=[SavingStrategy.ONE_THREAD_ONE_FILE, SavingStrategy.ALL_THREADS_ONE_FILE, SavingStrategy.ONE_THREAD_ONE_FILE_AND_COMPRESS_ALL]
+    )
+    def test_save_as_excel(self, saving_strategy: SavingStrategy):
+        set_mode(mode=RunningMode.Concurrent)
+
+        _example_fao = _ExampleTestingFao(strategy=saving_strategy)
+        _file_path = "test.xlsx"
+        # # Run in parent worker.
+        _result = _example_fao.save_as_excel(file=_file_path, mode="a+", data=Test_Data_List)
+
+        TestFao._checking_process(_strategy=saving_strategy, _result=_result, _file_path=_file_path)
 
 
-    @pytest.mark.skip(reason="Not implement testing logic yet.")
-    def test_compress_as_zip(self, example_fao: _ExampleTestingFao):
-        pass
+    @staticmethod
+    def _checking_process(_strategy: SavingStrategy, _result: Union[list, int], _file_path: str):
+        if _strategy is SavingStrategy.ONE_THREAD_ONE_FILE:
+            if TestFao._is_alone() is True:
+                assert _result == _Done_Flag, "If it's children worker or alone by itself, it should save the data as target file format."
+                TestFao._check_file_and_remove_it(_file_path=_file_path)
+            else:
+                assert _result == _Do_Nothing_Flag, "If it's main worker, it should do nothing."
+
+        elif _strategy is SavingStrategy.ALL_THREADS_ONE_FILE:
+            if TestFao._is_alone() is True:
+                # Get the data we pass
+                assert _result == _Done_Flag, "If it's main worker, it should save the data as target file format."
+                TestFao._check_file_and_remove_it(_file_path=_file_path)
+                # assert _result is not None, "If it's children worker or alone by itself, it should return the data."
+            else:
+                assert _result == _Done_Flag, "If it's main worker, it should save the data as target file format."
+                TestFao._check_file_and_remove_it(_file_path=_file_path)
+
+        elif _strategy is SavingStrategy.ONE_THREAD_ONE_FILE_AND_COMPRESS_ALL:
+            if TestFao._is_alone() is True:
+                assert _result is not None, "If it's children worker or alone by itself, it should return the data streaming object."
+                print(f"[DEBUG] _result: {_result}")
+                print(f"[DEBUG] type of _result: {type(_result)}")
+            else:
+                assert _result == _Do_Nothing_Flag, "If it's main worker but call method 'save_as_xxx', it should do nothing."
+
+        else:
+            assert False, "The option value is invalid."
 
 
-    def test_one_thread_one_file_as_csv(self):
+    @staticmethod
+    def _is_alone() -> bool:
+        return adapter_context.active_workers_count() == 1
+
+
+    @pytest.mark.parametrize(
+        "saving_strategy",
+        argvalues=[SavingStrategy.ONE_THREAD_ONE_FILE, SavingStrategy.ALL_THREADS_ONE_FILE, SavingStrategy.ONE_THREAD_ONE_FILE_AND_COMPRESS_ALL]
+    )
+    def test_compress_as_zip(self, saving_strategy: SavingStrategy):
+        set_mode(mode=RunningMode.Concurrent)
+
+        _example_fao = _ExampleTestingFao(strategy=saving_strategy)
+        _csv_file_path = "test.csv"
+        _zip_file_path = "test.zip"
+        try:
+            _result_data = CSVFormatter().stream(data=Test_Data_List)
+            _DataStream = namedtuple("DataStream", ("file_path", "data"))
+            _DataStream.file_path = _csv_file_path
+            _DataStream.data = _result_data
+            _result = _example_fao.compress_as_zip(file=_zip_file_path, mode="a", data=[_DataStream])
+        except ValueError as ve:
+            assert saving_strategy is not SavingStrategy.ONE_THREAD_ONE_FILE_AND_COMPRESS_ALL, "It must be not 'SavingStrategy.ONE_THREAD_ONE_FILE_AND_COMPRESS_ALL'."
+            assert "The compress process only work with strategy 'ONE_THREAD_ONE_FILE_AND_COMPRESS_ALL'" in str(ve), "It should raise an exception about it doesn't support current saving strategy."
+        else:
+            TestFao._check_file_and_remove_it(_file_path=_zip_file_path)
+
+
+    @staticmethod
+    def _check_file_and_remove_it(_file_path: str):
+        _exist_file = os.path.exists(_file_path)
+        assert _exist_file is True, f"It should exist file {_file_path}."
+        os.remove(_file_path)
+
+
+    def test_saving_strategy_one_thread_one_file(self):
         TestFao._init_thread_counter()
 
         tmt = _TestFaoMainThread(strategy=SavingStrategy.ONE_THREAD_ONE_FILE)
@@ -101,7 +192,7 @@ class TestFao:
             os.remove(file_name)
 
 
-    def test_all_threads_one_file_as_csv(self):
+    def test_saving_strategy_all_threads_one_file(self):
         TestFao._init_thread_counter()
 
         tmt = _TestFaoMainThread(strategy=SavingStrategy.ALL_THREADS_ONE_FILE)
@@ -113,7 +204,7 @@ class TestFao:
         os.remove(file_name)
 
 
-    def test_one_thread_one_file_and_compress_to_one_file_as_csv_in_zip(self):
+    def test_saving_strategy_one_thread_one_file_and_compress_to_one_file(self):
         TestFao._init_thread_counter()
 
         tmt = _TestFaoMainThread(strategy=SavingStrategy.ONE_THREAD_ONE_FILE_AND_COMPRESS_ALL)
