@@ -249,7 +249,7 @@ class GeneralRunnableStrategy(RunnableStrategy):
         self.initialization(queue_tasks=queue_tasks, features=features)
         # __workers_list = map(self._generate_worker, args_iter)
         __workers_list = [self._generate_worker(function, args) for args in args_iter]
-        self.activate_workers(list(__workers_list))
+        self.activate_workers(__workers_list)
         self.close(__workers_list)
 
 
