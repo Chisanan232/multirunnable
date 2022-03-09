@@ -1,3 +1,4 @@
+from .. import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 from ..framework.runnable.context import BaseContext
 
 from typing import List, Set
@@ -21,7 +22,7 @@ class green_thread_context(BaseContext):
 
     @staticmethod
     def current_worker_is_parent() -> bool:
-        return gevent.getcurrent() is gevent.threading.main_native_thread()
+        return gevent.threading.__threading__.current_thread() is gevent.threading.__threading__.main_thread()
 
 
     @staticmethod
@@ -32,6 +33,7 @@ class green_thread_context(BaseContext):
     @staticmethod
     def get_current_worker_name() -> str:
         return str(gevent.threading.__threading__.current_thread().name).replace("Thread", "GreenThread")
+        # return str(gevent.getcurrent().name)
 
 
     @staticmethod
@@ -41,12 +43,14 @@ class green_thread_context(BaseContext):
 
     @staticmethod
     def active_workers_count() -> int:
-        raise NotImplemented("Not implement via gevent currently.")
+        # raise NotImplemented("Not implement via gevent currently.")
+        return gevent.threading.__threading__.active_count()
 
 
     @staticmethod
     def children_workers() -> List:
-        raise NotImplemented("Not implement via gevent currently.")
+        # raise NotImplemented("Not implement via gevent currently.")
+        return gevent.threading.__threading__.enumerate()
 
 
 
@@ -54,12 +58,18 @@ class async_task_context(BaseContext):
 
     @staticmethod
     def get_current_worker() -> asyncio.Task:
-        return asyncio.Task.current_task()
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
+            return asyncio.current_task()
+        else:
+            return asyncio.Task.current_task()
 
 
     @staticmethod
     def get_parent_worker() -> asyncio.Task:
-        return asyncio.Task.current_task()
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
+            return asyncio.current_task()
+        else:
+            return asyncio.Task.current_task()
 
 
     @staticmethod
@@ -69,26 +79,37 @@ class async_task_context(BaseContext):
 
     @staticmethod
     def get_current_worker_ident() -> str:
-        return str(id(async_task_context.get_current_worker()))
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
+            return str(id(asyncio.current_task()))
+        else:
+            return str(id(async_task_context.get_current_worker()))
 
 
     @staticmethod
     def get_current_worker_name() -> str:
-        return str(async_task_context.get_current_worker().get_name())
+        return async_task_context.get_current_worker().get_name()
 
 
     @staticmethod
     def current_worker_is_alive() -> bool:
-        return asyncio.Task.current_task().done() is False
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
+            return asyncio.current_task().done() is False
+        else:
+            return asyncio.Task.current_task().done() is False
 
 
     @staticmethod
     def active_workers_count() -> int:
-        return len(asyncio.Task.all_tasks())
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
+            return len(asyncio.all_tasks())
+        else:
+            return len(asyncio.Task.all_tasks())
 
 
     @staticmethod
     def children_workers() -> Set[asyncio.Task]:
-        return asyncio.Task.all_tasks()
-
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
+            return asyncio.all_tasks()
+        else:
+            return asyncio.Task.all_tasks()
 
