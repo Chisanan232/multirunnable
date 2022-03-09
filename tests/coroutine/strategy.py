@@ -1,22 +1,28 @@
-from multirunnable.coroutine.strategy import CoroutineStrategy, GreenThreadStrategy, GreenThreadPoolStrategy, AsynchronousStrategy
+from multirunnable import set_mode, RunningMode
+from multirunnable.coroutine.strategy import GreenThreadStrategy, GreenThreadPoolStrategy, AsynchronousStrategy
 from multirunnable.coroutine.result import CoroutineResult, GreenThreadPoolResult
 from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 
 from ..framework.strategy import GeneralRunningTestSpec, PoolRunningTestSpec
 from ..test_config import (
     Worker_Size, Worker_Pool_Size, Task_Size,
-    Running_Diff_Time,
-    Test_Function_Sleep_Time,
-    Test_Function_Args, Test_Function_Multiple_Args, Test_Function_Kwargs)
+    Test_Function_Args, Test_Function_Multiple_Args, Test_Function_Kwargs, Test_Function_Multiple_Diff_Args
+)
+from .._examples import (
+    # # Import the flags
+    get_running_cnt, get_current_workers, get_running_workers_ids, get_running_done_timestamps,
+    # # Import some common functions
+    reset_running_flags, initial_lock, set_lock, initial_async_event_loop,
+    # # Import some target functions to run for Pool object
+    target_function, target_error_function, target_function_for_map, target_function_for_map_with_diff_args, target_async_function,
+    TargetCls, TargetMapCls, TargetAsyncCls,
+    target_funcs_iter, target_methods_iter, target_classmethods_iter, target_staticmethods_iter,
+    target_func_args_iter, target_funcs_kwargs_iter
+)
 
-from typing import List, Tuple, Dict, Callable
-from gevent.threading import get_ident as get_green_thread_ident, getcurrent as get_current_green_thread, Lock as GeventLock
-from asyncio.locks import Lock as AsyncLock
 import asyncio
 import gevent
 import pytest
-import time
-import os
 import re
 
 
@@ -24,312 +30,18 @@ Green_Thread_Size: int = Worker_Size
 Pool_Size: int = Worker_Pool_Size
 Task_Size: int = Task_Size
 
-Running_Diff_Time: int = Running_Diff_Time
-
-_GreenThread_Lock = GeventLock()
-if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION == 10:
-    _Async_Lock = AsyncLock()
-else:
-    _Async_Lock = AsyncLock(loop=asyncio.get_event_loop())
-
-Running_Parent_PID = None
-Running_Count = 0
-Running_GreenThread_IDs: List = []
-Running_PPIDs: List = []
-Running_Current_Workers: List = []
-Running_Finish_Timestamp: List = []
-
-Pool_Running_Count = 0
-
-
-def reset_running_flag() -> None:
-    global Running_Count
-    Running_Count = 0
-
-
-def reset_pool_running_value() -> None:
-    global Pool_Running_Count
-    Pool_Running_Count = 0
-
-
-def reset_running_timer() -> None:
-    global Running_GreenThread_IDs, Running_PPIDs, Running_Current_Workers, Running_Finish_Timestamp
-    Running_GreenThread_IDs[:] = []
-    Running_PPIDs[:] = []
-    Running_Current_Workers[:] = []
-    Running_Finish_Timestamp[:] = []
-
-
-Test_Function_Sleep_Time = Test_Function_Sleep_Time
-Test_Function_Args: Tuple = Test_Function_Args
-Test_Function_Kwargs: Dict = Test_Function_Kwargs
-Test_Function_Multiple_Args = Test_Function_Multiple_Args
-Test_Function_Multiple_Diff_Args = ((1, 2, 3), (4, 5, 6), (7, "index_8", 9))
-
-
-def target_fun(*args, **kwargs) -> str:
-    global Running_Count
-
-    with _GreenThread_Lock:
-        Running_Count += 1
-
-        if args:
-            assert args == Test_Function_Args, "The argument *args* should be same as the input outside."
-        if kwargs:
-            assert kwargs == Test_Function_Kwargs, "The argument *kwargs* should be same as the input outside."
-
-        _pid = os.getpid()
-        _ppid = os.getppid()
-        _ident = __get_current_thread_ident()
-        _time = int(time.time())
-
-        Running_GreenThread_IDs.append(_ident)
-        Running_PPIDs.append(_ppid)
-        Running_Current_Workers.append(__get_current_thread())
-        Running_Finish_Timestamp.append(_time)
-
-    gevent.sleep(Test_Function_Sleep_Time)
-    return f"result_{_ident}"
-
-
-def pool_target_fun(*args, **kwargs) -> str:
-    global Pool_Running_Count
-
-    with _GreenThread_Lock:
-        Pool_Running_Count += 1
-
-        if args:
-            assert args == Test_Function_Args, "The argument *args* should be same as the input outside."
-        if kwargs:
-            assert kwargs == Test_Function_Kwargs, "The argument *kwargs* should be same as the input outside."
-
-        _pid = os.getpid()
-        _ppid = os.getppid()
-        _ident = __get_current_thread_ident()
-        _time = int(time.time())
-
-        Running_GreenThread_IDs.append(_ident)
-        Running_PPIDs.append(_ppid)
-        Running_Current_Workers.append(__get_current_thread())
-        Running_Finish_Timestamp.append(_time)
-
-    gevent.sleep(Test_Function_Sleep_Time)
-    return f"result_{_ident}"
-
-
-def target_error_fun(*args, **kwargs) -> str:
-    raise Exception("Testing result raising an exception.")
-
-
-def map_target_fun(*args, **kwargs):
-    """
-    Description:
-        Test for 'map', 'starmap' methods.
-    :param args:
-    :param kwargs:
-    :return:
-    """
-    global Pool_Running_Count
-
-    with _GreenThread_Lock:
-        Pool_Running_Count += 1
-
-        if args:
-            assert set(args) <= set(Test_Function_Args), "The argument *args* should be one of element of the input outside."
-            if len(args) > 1:
-                assert args == Test_Function_Args, "The argument *args* should be same as the global variable 'Test_Function_Args'."
-        if kwargs:
-            assert kwargs is None or kwargs == {}, "The argument *kwargs* should be empty or None value."
-
-        _pid = os.getpid()
-        _ppid = os.getppid()
-        _ident = __get_current_thread_ident()
-        # _time = str(datetime.datetime.now())
-        _time = int(time.time())
-
-        Running_GreenThread_IDs.append(_ident)
-        Running_PPIDs.append(_ppid)
-        Running_Current_Workers.append(__get_current_thread())
-        Running_Finish_Timestamp.append(_time)
-
-    gevent.sleep(Test_Function_Sleep_Time)
-    return f"result_{_ident}"
-
-
-def map_target_fun_with_diff_args(*args, **kwargs):
-    """
-    Description:
-        Test for 'map', 'starmap' methods.
-    :param args:
-    :param kwargs:
-    :return:
-    """
-    global Pool_Running_Count
-
-    with _GreenThread_Lock:
-        Pool_Running_Count += 1
-
-        if args:
-            assert {args} <= set(Test_Function_Multiple_Diff_Args), "The argument *args* should be one of element of the input outside."
-            # if len(args) > 1:
-            #     assert args == Test_Function_Args, "The argument *args* should be same as the global variable 'Test_Function_Args'."
-        if kwargs:
-            assert kwargs is None or kwargs == {}, "The argument *kwargs* should be empty or None value."
-
-        _pid = os.getpid()
-        _ppid = os.getppid()
-        _ident = __get_current_thread_ident()
-        # _time = str(datetime.datetime.now())
-        _time = int(time.time())
-
-        Running_GreenThread_IDs.append(_ident)
-        Running_PPIDs.append(_ppid)
-        Running_Current_Workers.append(__get_current_thread())
-        Running_Finish_Timestamp.append(_time)
-
-    gevent.sleep(Test_Function_Sleep_Time)
-    return f"result_{_ident}"
-
-
-def __get_current_thread_ident():
-    # import gevent.threading as gthreading
-    # return gthreading.get_ident()
-    return get_green_thread_ident()
-
-
-def __get_current_thread():
-    # import gevent.threading as gthreading
-    # return str(gthreading.getcurrent())
-    return get_current_green_thread()
-
-
-async def target_async_fun(*args, **kwargs) -> str:
-    global Running_Count
-
-    async with _Async_Lock:
-        Running_Count += 1
-
-        if args:
-            assert args == Test_Function_Args, "The argument *args* should be same as the input outside."
-        if kwargs:
-            assert kwargs == Test_Function_Kwargs, "The argument *kwargs* should be same as the input outside."
-
-        _pid = os.getpid()
-        _ppid = os.getppid()
-        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
-            _current_task = asyncio.current_task(loop=asyncio.get_event_loop())
-        else:
-            _current_task = asyncio.Task.current_task(loop=asyncio.get_event_loop())
-        # _async_task_name = _current_task.get_name()
-        # _time = str(datetime.datetime.now())
-        _time = int(time.time())
-
-        # Running_GreenThread_IDs.append(_async_task_name)
-        Running_PPIDs.append(_ppid)
-        Running_Current_Workers.append(_current_task)
-        Running_Finish_Timestamp.append(_time)
-
-    # await async_sleep(Test_Function_Sleep_Time)
-    await asyncio.sleep(Test_Function_Sleep_Time)
-    return f"result_{id(_current_task)}"
-
-
-class TargetCls:
-
-    def method(self, *args, **kwargs) -> None:
-        target_fun(*args, **kwargs)
-
-
-    @classmethod
-    def classmethod_fun(cls, *args, **kwargs) -> None:
-        target_fun(*args, **kwargs)
-
-
-    @staticmethod
-    def staticmethod_fun(*args, **kwargs) -> None:
-        target_fun(*args, **kwargs)
-
-
-class TargetPoolCls:
-
-    def method(self, *args, **kwargs) -> None:
-        pool_target_fun(*args, **kwargs)
-
-
-    @classmethod
-    def classmethod_fun(cls, *args, **kwargs) -> None:
-        pool_target_fun(*args, **kwargs)
-
-
-    @staticmethod
-    def staticmethod_fun(*args, **kwargs) -> None:
-        pool_target_fun(*args, **kwargs)
-
-
-class TargetPoolMapCls:
-
-    def method(self, *args, **kwargs) -> None:
-        map_target_fun(*args, **kwargs)
-
-
-    @classmethod
-    def classmethod_fun(cls, *args, **kwargs) -> None:
-        map_target_fun(*args, **kwargs)
-
-
-    @staticmethod
-    def staticmethod_fun(*args, **kwargs) -> None:
-        map_target_fun(*args, **kwargs)
-
-
-class TargetAsyncCls:
-
-    async def method(self, *args, **kwargs) -> None:
-        await target_async_fun(*args, **kwargs)
-
-
-    @classmethod
-    async def classmethod_fun(cls, *args, **kwargs) -> None:
-        await target_async_fun(*args, **kwargs)
-
-
-    @staticmethod
-    async def staticmethod_fun(*args, **kwargs) -> None:
-        await target_async_fun(*args, **kwargs)
-
-
-def pool_target_funcs_iter() -> List[Callable]:
-    return [pool_target_fun for _ in range(Task_Size)]
-
-
-def pool_target_methods_iter() -> List[Callable]:
-    _ts = TargetPoolCls()
-    return [_ts.method for _ in range(Task_Size)]
-
-
-def pool_target_classmethods_iter() -> List[Callable]:
-    return [TargetPoolCls.classmethod_fun for _ in range(Task_Size)]
-
-
-def pool_target_staticmethods_iter() -> List[Callable]:
-    return [TargetPoolCls.staticmethod_fun for _ in range(Task_Size)]
-
-
-def pool_target_func_args_iter() -> List[Tuple]:
-    return [Test_Function_Args for _ in range(Task_Size)]
-
-
-def pool_target_funcs_kwargs_iter() -> List[Dict]:
-    return [Test_Function_Kwargs for _ in range(Task_Size)]
-
 
 @pytest.fixture(scope="class")
 def strategy() -> GreenThreadStrategy:
-    return GreenThreadStrategy(executors=Green_Thread_Size)
+    set_mode(mode=RunningMode.GreenThread)
+    _strategy = GreenThreadStrategy(executors=Green_Thread_Size)
+    _strategy.initialization()
+    return _strategy
 
 
 @pytest.fixture(scope="class")
 def pool_strategy() -> GreenThreadPoolStrategy:
+    set_mode(mode=RunningMode.GreenThread)
     _strategy = GreenThreadPoolStrategy(pool_size=Pool_Size)
     _strategy.initialization()
     return _strategy
@@ -337,6 +49,7 @@ def pool_strategy() -> GreenThreadPoolStrategy:
 
 @pytest.fixture(scope="class")
 def async_strategy() -> AsynchronousStrategy:
+    set_mode(mode=RunningMode.Asynchronous)
     return AsynchronousStrategy(executors=Green_Thread_Size)
 
 
@@ -350,7 +63,7 @@ class TestGreenThread(GeneralRunningTestSpec):
         self._start_new_worker(
             strategy=strategy,
             worker_size=Green_Thread_Size,
-            target_fun=target_fun)
+            target_fun=target_function)
 
         TestGreenThread._chk_record()
         strategy.reset_result()
@@ -360,7 +73,7 @@ class TestGreenThread(GeneralRunningTestSpec):
         self._start_new_worker(
             strategy=strategy,
             worker_size=Green_Thread_Size,
-            target_fun=target_fun,
+            target_fun=target_function,
             args=Test_Function_Args)
 
         TestGreenThread._chk_record()
@@ -371,7 +84,7 @@ class TestGreenThread(GeneralRunningTestSpec):
         self._start_new_worker(
             strategy=strategy,
             worker_size=Green_Thread_Size,
-            target_fun=target_fun,
+            target_fun=target_function,
             kwargs=Test_Function_Kwargs)
 
         TestGreenThread._chk_record()
@@ -482,7 +195,7 @@ class TestGreenThread(GeneralRunningTestSpec):
         self._generate_worker(
             strategy=strategy,
             worker_size=Green_Thread_Size,
-            target_fun=target_fun,
+            target_fun=target_function,
             error_msg=_Generate_Worker_Error_Msg)
 
         strategy.reset_result()
@@ -493,7 +206,7 @@ class TestGreenThread(GeneralRunningTestSpec):
         self._generate_worker(
             strategy=strategy,
             worker_size=Green_Thread_Size,
-            target_fun=target_fun,
+            target_fun=target_function,
             args=Test_Function_Args,
             error_msg=_Generate_Worker_Error_Msg)
 
@@ -505,7 +218,7 @@ class TestGreenThread(GeneralRunningTestSpec):
         self._generate_worker(
             strategy=strategy,
             worker_size=Green_Thread_Size,
-            target_fun=target_fun,
+            target_fun=target_function,
             kwargs=Test_Function_Kwargs,
             error_msg=_Generate_Worker_Error_Msg)
 
@@ -637,7 +350,7 @@ class TestGreenThread(GeneralRunningTestSpec):
         self._activate_workers(
             strategy=strategy,
             worker_size=Green_Thread_Size,
-            target_fun=target_fun)
+            target_fun=target_function)
 
         strategy.reset_result()
 
@@ -649,7 +362,7 @@ class TestGreenThread(GeneralRunningTestSpec):
         self._activate_workers(
             strategy=strategy,
             worker_size=Green_Thread_Size,
-            target_fun=target_fun,
+            target_fun=target_function,
             args=Test_Function_Args)
 
         strategy.reset_result()
@@ -662,7 +375,7 @@ class TestGreenThread(GeneralRunningTestSpec):
         self._activate_workers(
             strategy=strategy,
             worker_size=Green_Thread_Size,
-            target_fun=target_fun,
+            target_fun=target_function,
             kwargs=Test_Function_Kwargs)
 
         strategy.reset_result()
@@ -792,7 +505,7 @@ class TestGreenThread(GeneralRunningTestSpec):
         self._activate_workers(
             strategy=strategy,
             worker_size=Green_Thread_Size,
-            target_fun=target_fun,
+            target_fun=target_function,
             args=Test_Function_Args)
 
         _result = strategy.get_result()
@@ -816,7 +529,7 @@ class TestGreenThread(GeneralRunningTestSpec):
         self._activate_workers(
             strategy=strategy,
             worker_size=Green_Thread_Size,
-            target_fun=target_error_fun)
+            target_fun=target_error_function)
 
         _result = strategy.get_result()
         assert _result is not None and _result != [], ""
@@ -837,21 +550,23 @@ class TestGreenThread(GeneralRunningTestSpec):
 
     def _initial(self):
         # Test for parameters with '**kwargs'
-        reset_running_flag()
-        reset_running_timer()
+        # reset_running_flag()
+        # reset_running_timer()
+        reset_running_flags()
+        initial_lock()
 
-        global Running_Parent_PID
-        Running_Parent_PID = os.getpid()
+        # global Running_Parent_PID
+        # Running_Parent_PID = os.getpid()
 
 
     @staticmethod
     def _chk_record():
         GeneralRunningTestSpec._chk_process_record(
-            running_cnt=Running_Count,
+            running_cnt=get_running_cnt(),
             worker_size=Green_Thread_Size,
-            running_wokrer_ids=Running_GreenThread_IDs,
-            running_current_workers=Running_Current_Workers,
-            running_finish_timestamps=Running_Finish_Timestamp
+            running_wokrer_ids=get_running_workers_ids(),
+            running_current_workers=get_current_workers(),
+            running_finish_timestamps=get_running_done_timestamps()
         )
 
 
@@ -859,102 +574,102 @@ class TestGreenThread(GeneralRunningTestSpec):
 class TestGreenThreadPool(PoolRunningTestSpec):
 
     def test_apply_with_function_with_no_arguments(self, pool_strategy: GreenThreadPoolStrategy):
-        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=pool_target_fun)
+        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=target_function)
 
         TestGreenThreadPool._chk_blocking_record()
 
 
     def test_apply_with_function_with_args(self, pool_strategy: GreenThreadPoolStrategy):
-        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=pool_target_fun, args=Test_Function_Args)
+        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=target_function, args=Test_Function_Args)
 
         TestGreenThreadPool._chk_blocking_record()
 
 
     def test_apply_with_function_with_kwargs(self, pool_strategy: GreenThreadPoolStrategy):
-        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=pool_target_fun, kwargs=Test_Function_Kwargs)
+        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=target_function, kwargs=Test_Function_Kwargs)
 
         TestGreenThreadPool._chk_blocking_record()
 
 
     def test_apply_with_bounded_function_with_no_arguments(self, pool_strategy: GreenThreadPoolStrategy):
-        _tc = TargetPoolCls()
+        _tc = TargetCls()
         self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=_tc.method)
 
         TestGreenThreadPool._chk_blocking_record()
 
 
     def test_apply_with_bounded_function_with_args(self, pool_strategy: GreenThreadPoolStrategy):
-        _tc = TargetPoolCls()
+        _tc = TargetCls()
         self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=_tc.method, args=Test_Function_Args)
 
         TestGreenThreadPool._chk_blocking_record()
 
 
     def test_apply_with_bounded_function_with_kwargs(self, pool_strategy: GreenThreadPoolStrategy):
-        _tc = TargetPoolCls()
+        _tc = TargetCls()
         self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=_tc.method, kwargs=Test_Function_Kwargs)
 
         TestGreenThreadPool._chk_blocking_record()
 
 
     def test_apply_with_classmethod_function_with_no_arguments(self, pool_strategy: GreenThreadPoolStrategy):
-        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.classmethod_fun)
+        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetCls.classmethod_fun)
 
         TestGreenThreadPool._chk_blocking_record()
 
 
     def test_apply_with_classmethod_function_with_args(self, pool_strategy: GreenThreadPoolStrategy):
-        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.classmethod_fun, args=Test_Function_Args)
+        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetCls.classmethod_fun, args=Test_Function_Args)
 
         TestGreenThreadPool._chk_blocking_record()
 
 
     def test_apply_with_classmethod_function_with_kwargs(self, pool_strategy: GreenThreadPoolStrategy):
-        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.classmethod_fun, kwargs=Test_Function_Kwargs)
+        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetCls.classmethod_fun, kwargs=Test_Function_Kwargs)
 
         TestGreenThreadPool._chk_blocking_record()
 
 
     def test_apply_with_staticmethod_function_with_no_arguments(self, pool_strategy: GreenThreadPoolStrategy):
-        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.staticmethod_fun)
+        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetCls.staticmethod_fun)
 
         TestGreenThreadPool._chk_blocking_record()
 
 
     def test_apply_with_staticmethod_function_with_args(self, pool_strategy: GreenThreadPoolStrategy):
-        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.staticmethod_fun, args=Test_Function_Args)
+        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetCls.staticmethod_fun, args=Test_Function_Args)
 
         TestGreenThreadPool._chk_blocking_record()
 
 
     def test_apply_with_staticmethod_function_with_kwargs(self, pool_strategy: GreenThreadPoolStrategy):
-        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.staticmethod_fun, kwargs=Test_Function_Kwargs)
+        self._apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetCls.staticmethod_fun, kwargs=Test_Function_Kwargs)
 
         TestGreenThreadPool._chk_blocking_record()
 
 
     def test_async_apply_with_function_with_no_arguments(self, pool_strategy: GreenThreadPoolStrategy):
-        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=pool_target_fun)
+        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=target_function)
 
         TestGreenThreadPool._chk_record()
 
 
     def test_async_apply_with_function_with_args(self, pool_strategy: GreenThreadPoolStrategy):
         # Test for parameters with '*args'
-        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=pool_target_fun, args=Test_Function_Args)
+        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=target_function, args=Test_Function_Args)
 
         TestGreenThreadPool._chk_record()
 
 
     def test_async_apply_with_function_with_kwargs(self, pool_strategy: GreenThreadPoolStrategy):
         # Test for parameters with '**kwargs'
-        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=pool_target_fun, kwargs=Test_Function_Kwargs)
+        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=target_function, kwargs=Test_Function_Kwargs)
 
         TestGreenThreadPool._chk_record()
 
 
     def test_async_apply_with_bounded_function_with_no_arguments(self, pool_strategy: GreenThreadPoolStrategy):
-        _tc = TargetPoolCls()
+        _tc = TargetCls()
         self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=_tc.method)
 
         TestGreenThreadPool._chk_record()
@@ -962,7 +677,7 @@ class TestGreenThreadPool(PoolRunningTestSpec):
 
     def test_async_apply_with_bounded_function_with_args(self, pool_strategy: GreenThreadPoolStrategy):
         # Test for parameters with '*args'
-        _tc = TargetPoolCls()
+        _tc = TargetCls()
         self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=_tc.method, args=Test_Function_Args)
 
         TestGreenThreadPool._chk_record()
@@ -970,54 +685,54 @@ class TestGreenThreadPool(PoolRunningTestSpec):
 
     def test_async_apply_with_bounded_function_with_kwargs(self, pool_strategy: GreenThreadPoolStrategy):
         # Test for parameters with '**kwargs'
-        _tc = TargetPoolCls()
+        _tc = TargetCls()
         self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=_tc.method, kwargs=Test_Function_Kwargs)
 
         TestGreenThreadPool._chk_record()
 
 
     def test_async_apply_with_classmethod_function_with_no_arguments(self, pool_strategy: GreenThreadPoolStrategy):
-        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.classmethod_fun)
+        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetCls.classmethod_fun)
 
         TestGreenThreadPool._chk_record()
 
 
     def test_async_apply_with_classmethod_function_with_args(self, pool_strategy: GreenThreadPoolStrategy):
         # Test for parameters with '*args'
-        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.classmethod_fun, args=Test_Function_Args)
+        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetCls.classmethod_fun, args=Test_Function_Args)
 
         TestGreenThreadPool._chk_record()
 
 
     def test_async_apply_with_classmethod_function_with_kwargs(self, pool_strategy: GreenThreadPoolStrategy):
         # Test for parameters with '**kwargs'
-        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.classmethod_fun, kwargs=Test_Function_Kwargs)
+        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetCls.classmethod_fun, kwargs=Test_Function_Kwargs)
 
         TestGreenThreadPool._chk_record()
 
 
     def test_async_apply_with_staticmethod_function_with_no_arguments(self, pool_strategy: GreenThreadPoolStrategy):
-        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.staticmethod_fun)
+        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetCls.staticmethod_fun)
 
         TestGreenThreadPool._chk_record()
 
 
     def test_async_apply_with_staticmethod_function_with_args(self, pool_strategy: GreenThreadPoolStrategy):
         # Test for parameters with '*args'
-        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.staticmethod_fun, args=Test_Function_Args)
+        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetCls.staticmethod_fun, args=Test_Function_Args)
 
         TestGreenThreadPool._chk_record()
 
 
     def test_async_apply_with_staticmethod_function_with_kwargs(self, pool_strategy: GreenThreadPoolStrategy):
         # Test for parameters with '**kwargs'
-        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetPoolCls.staticmethod_fun, kwargs=Test_Function_Kwargs)
+        self._async_apply(strategy=pool_strategy, tasks_size=Task_Size, target_fun=TargetCls.staticmethod_fun, kwargs=Test_Function_Kwargs)
 
         TestGreenThreadPool._chk_record()
 
 
     def test_apply_with_iter_with_function_with_no_arguments(self, pool_strategy: GreenThreadPoolStrategy):
-        self._apply_with_iter(strategy=pool_strategy, target_funcs_iter=pool_target_funcs_iter())
+        self._apply_with_iter(strategy=pool_strategy, target_funcs_iter=target_funcs_iter())
 
         TestGreenThreadPool._chk_blocking_record()
 
@@ -1025,8 +740,8 @@ class TestGreenThreadPool(PoolRunningTestSpec):
     def test_apply_with_iter_with_function_with_args(self, pool_strategy: GreenThreadPoolStrategy):
         self._apply_with_iter(
             strategy=pool_strategy,
-            target_funcs_iter=pool_target_funcs_iter(),
-            args_iter=pool_target_func_args_iter())
+            target_funcs_iter=target_funcs_iter(),
+            args_iter=target_func_args_iter())
 
         TestGreenThreadPool._chk_blocking_record()
 
@@ -1034,14 +749,14 @@ class TestGreenThreadPool(PoolRunningTestSpec):
     def test_apply_with_iter_with_function_with_kwargs(self, pool_strategy: GreenThreadPoolStrategy):
         self._apply_with_iter(
             strategy=pool_strategy,
-            target_funcs_iter=pool_target_funcs_iter(),
-            kwargs_iter=pool_target_funcs_kwargs_iter())
+            target_funcs_iter=target_funcs_iter(),
+            kwargs_iter=target_funcs_kwargs_iter())
 
         TestGreenThreadPool._chk_blocking_record()
 
 
     def test_apply_with_iter_with_bounded_function_with_no_arguments(self, pool_strategy: GreenThreadPoolStrategy):
-        self._apply_with_iter(strategy=pool_strategy, target_funcs_iter=pool_target_methods_iter())
+        self._apply_with_iter(strategy=pool_strategy, target_funcs_iter=target_methods_iter())
 
         TestGreenThreadPool._chk_blocking_record()
 
@@ -1049,8 +764,8 @@ class TestGreenThreadPool(PoolRunningTestSpec):
     def test_apply_with_iter_with_bounded_function_with_args(self, pool_strategy: GreenThreadPoolStrategy):
         self._apply_with_iter(
             strategy=pool_strategy,
-            target_funcs_iter=pool_target_methods_iter(),
-            args_iter=pool_target_func_args_iter())
+            target_funcs_iter=target_methods_iter(),
+            args_iter=target_func_args_iter())
 
         TestGreenThreadPool._chk_blocking_record()
 
@@ -1058,14 +773,14 @@ class TestGreenThreadPool(PoolRunningTestSpec):
     def test_apply_with_iter_with_bounded_function_with_kwargs(self, pool_strategy: GreenThreadPoolStrategy):
         self._apply_with_iter(
             strategy=pool_strategy,
-            target_funcs_iter=pool_target_methods_iter(),
-            kwargs_iter=pool_target_funcs_kwargs_iter())
+            target_funcs_iter=target_methods_iter(),
+            kwargs_iter=target_funcs_kwargs_iter())
 
         TestGreenThreadPool._chk_blocking_record()
 
 
     def test_apply_with_iter_with_classmethod_function_with_no_arguments(self, pool_strategy: GreenThreadPoolStrategy):
-        self._apply_with_iter(strategy=pool_strategy, target_funcs_iter=pool_target_classmethods_iter())
+        self._apply_with_iter(strategy=pool_strategy, target_funcs_iter=target_classmethods_iter())
 
         TestGreenThreadPool._chk_blocking_record()
 
@@ -1073,8 +788,8 @@ class TestGreenThreadPool(PoolRunningTestSpec):
     def test_apply_with_iter_with_classmethod_function_with_args(self, pool_strategy: GreenThreadPoolStrategy):
         self._apply_with_iter(
             strategy=pool_strategy,
-            target_funcs_iter=pool_target_classmethods_iter(),
-            args_iter=pool_target_func_args_iter())
+            target_funcs_iter=target_classmethods_iter(),
+            args_iter=target_func_args_iter())
 
         TestGreenThreadPool._chk_blocking_record()
 
@@ -1082,14 +797,14 @@ class TestGreenThreadPool(PoolRunningTestSpec):
     def test_apply_with_iter_with_classmethod_function_with_kwargs(self, pool_strategy: GreenThreadPoolStrategy):
         self._apply_with_iter(
             strategy=pool_strategy,
-            target_funcs_iter=pool_target_classmethods_iter(),
-            kwargs_iter=pool_target_funcs_kwargs_iter())
+            target_funcs_iter=target_classmethods_iter(),
+            kwargs_iter=target_funcs_kwargs_iter())
 
         TestGreenThreadPool._chk_blocking_record()
 
 
     def test_apply_with_iter_with_staticmethod_function_with_no_arguments(self, pool_strategy: GreenThreadPoolStrategy):
-        self._apply_with_iter(strategy=pool_strategy, target_funcs_iter=pool_target_staticmethods_iter())
+        self._apply_with_iter(strategy=pool_strategy, target_funcs_iter=target_staticmethods_iter())
 
         TestGreenThreadPool._chk_blocking_record()
 
@@ -1097,8 +812,8 @@ class TestGreenThreadPool(PoolRunningTestSpec):
     def test_apply_with_iter_with_staticmethod_function_with_args(self, pool_strategy: GreenThreadPoolStrategy):
         self._apply_with_iter(
             strategy=pool_strategy,
-            target_funcs_iter=pool_target_staticmethods_iter(),
-            args_iter=pool_target_func_args_iter())
+            target_funcs_iter=target_staticmethods_iter(),
+            args_iter=target_func_args_iter())
 
         TestGreenThreadPool._chk_blocking_record()
 
@@ -1106,14 +821,14 @@ class TestGreenThreadPool(PoolRunningTestSpec):
     def test_apply_with_iter_with_staticmethod_function_with_kwargs(self, pool_strategy: GreenThreadPoolStrategy):
         self._apply_with_iter(
             strategy=pool_strategy,
-            target_funcs_iter=pool_target_staticmethods_iter(),
-            kwargs_iter=pool_target_funcs_kwargs_iter())
+            target_funcs_iter=target_staticmethods_iter(),
+            kwargs_iter=target_funcs_kwargs_iter())
 
         TestGreenThreadPool._chk_blocking_record()
 
 
     def test_async_apply_with_iter_with_function_with_no_arguments(self, pool_strategy: GreenThreadPoolStrategy):
-        self._async_apply_with_iter(strategy=pool_strategy, target_funcs_iter=pool_target_funcs_iter())
+        self._async_apply_with_iter(strategy=pool_strategy, target_funcs_iter=target_funcs_iter())
 
         TestGreenThreadPool._chk_record()
 
@@ -1121,8 +836,8 @@ class TestGreenThreadPool(PoolRunningTestSpec):
     def test_async_apply_with_iter_with_function_with_args(self, pool_strategy: GreenThreadPoolStrategy):
         self._async_apply_with_iter(
             strategy=pool_strategy,
-            target_funcs_iter=pool_target_funcs_iter(),
-            args_iter=pool_target_func_args_iter())
+            target_funcs_iter=target_funcs_iter(),
+            args_iter=target_func_args_iter())
 
         TestGreenThreadPool._chk_record()
 
@@ -1130,14 +845,14 @@ class TestGreenThreadPool(PoolRunningTestSpec):
     def test_async_apply_with_iter_with_function_with_kwargs(self, pool_strategy: GreenThreadPoolStrategy):
         self._async_apply_with_iter(
             strategy=pool_strategy,
-            target_funcs_iter=pool_target_funcs_iter(),
-            kwargs_iter=pool_target_funcs_kwargs_iter())
+            target_funcs_iter=target_funcs_iter(),
+            kwargs_iter=target_funcs_kwargs_iter())
 
         TestGreenThreadPool._chk_record()
 
 
     def test_async_apply_with_iter_with_bounded_function_with_no_arguments(self, pool_strategy: GreenThreadPoolStrategy):
-        self._async_apply_with_iter(strategy=pool_strategy, target_funcs_iter=pool_target_methods_iter())
+        self._async_apply_with_iter(strategy=pool_strategy, target_funcs_iter=target_methods_iter())
 
         TestGreenThreadPool._chk_record()
 
@@ -1145,8 +860,8 @@ class TestGreenThreadPool(PoolRunningTestSpec):
     def test_async_apply_with_iter_with_bounded_function_with_args(self, pool_strategy: GreenThreadPoolStrategy):
         self._async_apply_with_iter(
             strategy=pool_strategy,
-            target_funcs_iter=pool_target_methods_iter(),
-            args_iter=pool_target_func_args_iter())
+            target_funcs_iter=target_methods_iter(),
+            args_iter=target_func_args_iter())
 
         TestGreenThreadPool._chk_record()
 
@@ -1154,14 +869,14 @@ class TestGreenThreadPool(PoolRunningTestSpec):
     def test_async_apply_with_iter_with_bounded_function_with_kwargs(self, pool_strategy: GreenThreadPoolStrategy):
         self._async_apply_with_iter(
             strategy=pool_strategy,
-            target_funcs_iter=pool_target_methods_iter(),
-            kwargs_iter=pool_target_funcs_kwargs_iter())
+            target_funcs_iter=target_methods_iter(),
+            kwargs_iter=target_funcs_kwargs_iter())
 
         TestGreenThreadPool._chk_record()
 
 
     def test_async_apply_with_iter_with_classmethod_function_with_no_arguments(self, pool_strategy: GreenThreadPoolStrategy):
-        self._async_apply_with_iter(strategy=pool_strategy, target_funcs_iter=pool_target_classmethods_iter())
+        self._async_apply_with_iter(strategy=pool_strategy, target_funcs_iter=target_classmethods_iter())
 
         TestGreenThreadPool._chk_record()
 
@@ -1169,8 +884,8 @@ class TestGreenThreadPool(PoolRunningTestSpec):
     def test_async_apply_with_iter_with_classmethod_function_with_args(self, pool_strategy: GreenThreadPoolStrategy):
         self._async_apply_with_iter(
             strategy=pool_strategy,
-            target_funcs_iter=pool_target_classmethods_iter(),
-            args_iter=pool_target_func_args_iter())
+            target_funcs_iter=target_classmethods_iter(),
+            args_iter=target_func_args_iter())
 
         TestGreenThreadPool._chk_record()
 
@@ -1178,14 +893,14 @@ class TestGreenThreadPool(PoolRunningTestSpec):
     def test_async_apply_with_iter_with_classmethod_function_with_kwargs(self, pool_strategy: GreenThreadPoolStrategy):
         self._async_apply_with_iter(
             strategy=pool_strategy,
-            target_funcs_iter=pool_target_classmethods_iter(),
-            kwargs_iter=pool_target_funcs_kwargs_iter())
+            target_funcs_iter=target_classmethods_iter(),
+            kwargs_iter=target_funcs_kwargs_iter())
 
         TestGreenThreadPool._chk_record()
 
 
     def test_async_apply_with_iter_with_staticmethod_function_with_no_arguments(self, pool_strategy: GreenThreadPoolStrategy):
-        self._async_apply_with_iter(strategy=pool_strategy, target_funcs_iter=pool_target_staticmethods_iter())
+        self._async_apply_with_iter(strategy=pool_strategy, target_funcs_iter=target_staticmethods_iter())
 
         TestGreenThreadPool._chk_record()
 
@@ -1193,8 +908,8 @@ class TestGreenThreadPool(PoolRunningTestSpec):
     def test_async_apply_with_iter_with_staticmethod_function_with_args(self, pool_strategy: GreenThreadPoolStrategy):
         self._async_apply_with_iter(
             strategy=pool_strategy,
-            target_funcs_iter=pool_target_staticmethods_iter(),
-            args_iter=pool_target_func_args_iter())
+            target_funcs_iter=target_staticmethods_iter(),
+            args_iter=target_func_args_iter())
 
         TestGreenThreadPool._chk_record()
 
@@ -1202,15 +917,15 @@ class TestGreenThreadPool(PoolRunningTestSpec):
     def test_async_apply_with_iter_with_staticmethod_function_with_kwargs(self, pool_strategy: GreenThreadPoolStrategy):
         self._async_apply_with_iter(
             strategy=pool_strategy,
-            target_funcs_iter=pool_target_staticmethods_iter(),
-            kwargs_iter=pool_target_funcs_kwargs_iter())
+            target_funcs_iter=target_staticmethods_iter(),
+            kwargs_iter=target_funcs_kwargs_iter())
 
         TestGreenThreadPool._chk_record()
 
 
     def test_map_with_function(self, pool_strategy: GreenThreadPoolStrategy):
         # Test for no any parameters
-        self._map(strategy=pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Args)
+        self._map(strategy=pool_strategy, target_fun=target_function_for_map, args_iter=Test_Function_Args)
 
         TestGreenThreadPool._chk_map_record()
 
@@ -1220,7 +935,7 @@ class TestGreenThreadPool(PoolRunningTestSpec):
 
     def test_map_with_bounded_function(self, pool_strategy: GreenThreadPoolStrategy):
         # Test for no any parameters
-        _tc = TargetPoolMapCls()
+        _tc = TargetMapCls()
         self._map(strategy=pool_strategy, target_fun=_tc.method, args_iter=Test_Function_Args)
 
         TestGreenThreadPool._chk_map_record()
@@ -1228,21 +943,21 @@ class TestGreenThreadPool(PoolRunningTestSpec):
 
     def test_map_with_classmethod_function(self, pool_strategy: GreenThreadPoolStrategy):
         # Test for no any parameters
-        self._map(strategy=pool_strategy, target_fun=TargetPoolMapCls.classmethod_fun, args_iter=Test_Function_Args)
+        self._map(strategy=pool_strategy, target_fun=TargetMapCls.classmethod_fun, args_iter=Test_Function_Args)
 
         TestGreenThreadPool._chk_map_record()
 
 
     def test_map_with_staticmethod_function(self, pool_strategy: GreenThreadPoolStrategy):
         # Test for no any parameters
-        self._map(strategy=pool_strategy, target_fun=TargetPoolMapCls.staticmethod_fun, args_iter=Test_Function_Args)
+        self._map(strategy=pool_strategy, target_fun=TargetMapCls.staticmethod_fun, args_iter=Test_Function_Args)
 
         TestGreenThreadPool._chk_map_record()
 
 
     def test_async_map_with_function(self, pool_strategy: GreenThreadPoolStrategy):
         # Test for no any parameters
-        self._async_map(strategy=pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Args)
+        self._async_map(strategy=pool_strategy, target_fun=target_function_for_map, args_iter=Test_Function_Args)
 
         TestGreenThreadPool._chk_map_record()
 
@@ -1252,7 +967,7 @@ class TestGreenThreadPool(PoolRunningTestSpec):
 
     def test_async_map_with_bounded_function(self, pool_strategy: GreenThreadPoolStrategy):
         # Test for no any parameters
-        _tc = TargetPoolMapCls()
+        _tc = TargetMapCls()
         self._async_map(strategy=pool_strategy, target_fun=_tc.method, args_iter=Test_Function_Args)
 
         TestGreenThreadPool._chk_map_record()
@@ -1260,25 +975,25 @@ class TestGreenThreadPool(PoolRunningTestSpec):
 
     def test_async_map_with_classmethod_function(self, pool_strategy: GreenThreadPoolStrategy):
         # Test for no any parameters
-        self._async_map(strategy=pool_strategy, target_fun=TargetPoolMapCls.classmethod_fun, args_iter=Test_Function_Args)
+        self._async_map(strategy=pool_strategy, target_fun=TargetMapCls.classmethod_fun, args_iter=Test_Function_Args)
 
         TestGreenThreadPool._chk_map_record()
 
 
     def test_async_map_with_staticmethod_function(self, pool_strategy: GreenThreadPoolStrategy):
         # Test for no any parameters
-        self._async_map(strategy=pool_strategy, target_fun=TargetPoolMapCls.staticmethod_fun, args_iter=Test_Function_Args)
+        self._async_map(strategy=pool_strategy, target_fun=TargetMapCls.staticmethod_fun, args_iter=Test_Function_Args)
 
         TestGreenThreadPool._chk_map_record()
 
 
     def test_map_by_args_with_function(self, pool_strategy: GreenThreadPoolStrategy):
         # Test for no any parameters
-        self._map_by_args(strategy=pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Multiple_Args)
+        self._map_by_args(strategy=pool_strategy, target_fun=target_function_for_map, args_iter=Test_Function_Multiple_Args)
 
         TestGreenThreadPool._chk_map_record()
 
-        self._map_by_args(strategy=pool_strategy, target_fun=map_target_fun_with_diff_args, args_iter=Test_Function_Multiple_Diff_Args)
+        self._map_by_args(strategy=pool_strategy, target_fun=target_function_for_map_with_diff_args, args_iter=Test_Function_Multiple_Diff_Args)
 
         TestGreenThreadPool._chk_map_record()
 
@@ -1288,7 +1003,7 @@ class TestGreenThreadPool(PoolRunningTestSpec):
 
     def test_map_by_args_with_bounded_function(self, pool_strategy: GreenThreadPoolStrategy):
         # Test for no any parameters
-        _tc = TargetPoolMapCls()
+        _tc = TargetMapCls()
         self._map_by_args(strategy=pool_strategy, target_fun=_tc.method, args_iter=Test_Function_Multiple_Args)
 
         TestGreenThreadPool._chk_map_record()
@@ -1296,32 +1011,32 @@ class TestGreenThreadPool(PoolRunningTestSpec):
 
     def test_map_by_args_with_classmethod_function(self, pool_strategy: GreenThreadPoolStrategy):
         # Test for no any parameters
-        self._map_by_args(strategy=pool_strategy, target_fun=TargetPoolMapCls.classmethod_fun, args_iter=Test_Function_Multiple_Args)
+        self._map_by_args(strategy=pool_strategy, target_fun=TargetMapCls.classmethod_fun, args_iter=Test_Function_Multiple_Args)
 
         TestGreenThreadPool._chk_map_record()
 
 
     def test_map_by_args_with_staticmethod_function(self, pool_strategy: GreenThreadPoolStrategy):
         # Test for no any parameters
-        self._map_by_args(strategy=pool_strategy, target_fun=TargetPoolMapCls.staticmethod_fun, args_iter=Test_Function_Multiple_Args)
+        self._map_by_args(strategy=pool_strategy, target_fun=TargetMapCls.staticmethod_fun, args_iter=Test_Function_Multiple_Args)
 
         TestGreenThreadPool._chk_map_record()
 
 
     def test_async_map_by_args_with_function(self, pool_strategy: GreenThreadPoolStrategy):
         # Test for no any parameters
-        self._async_map_by_args(strategy=pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Multiple_Args)
+        self._async_map_by_args(strategy=pool_strategy, target_fun=target_function_for_map, args_iter=Test_Function_Multiple_Args)
 
         TestGreenThreadPool._chk_map_record()
 
-        self._async_map_by_args(strategy=pool_strategy, target_fun=map_target_fun_with_diff_args, args_iter=Test_Function_Multiple_Diff_Args)
+        self._async_map_by_args(strategy=pool_strategy, target_fun=target_function_for_map_with_diff_args, args_iter=Test_Function_Multiple_Diff_Args)
 
         TestGreenThreadPool._chk_map_record()
 
 
     def test_async_map_by_args_with_bounded_function(self, pool_strategy: GreenThreadPoolStrategy):
         # Test for no any parameters
-        _tc = TargetPoolMapCls()
+        _tc = TargetMapCls()
         self._async_map_by_args(strategy=pool_strategy, target_fun=_tc.method, args_iter=Test_Function_Multiple_Args)
 
         TestGreenThreadPool._chk_map_record()
@@ -1329,70 +1044,70 @@ class TestGreenThreadPool(PoolRunningTestSpec):
 
     def test_async_map_by_args_with_classmethod_function(self, pool_strategy: GreenThreadPoolStrategy):
         # Test for no any parameters
-        self._async_map_by_args(strategy=pool_strategy, target_fun=TargetPoolMapCls.classmethod_fun, args_iter=Test_Function_Multiple_Args)
+        self._async_map_by_args(strategy=pool_strategy, target_fun=TargetMapCls.classmethod_fun, args_iter=Test_Function_Multiple_Args)
 
         TestGreenThreadPool._chk_map_record()
 
 
     def test_async_map_by_args_with_staticmethod_function(self, pool_strategy: GreenThreadPoolStrategy):
         # Test for no any parameters
-        self._async_map_by_args(strategy=pool_strategy, target_fun=TargetPoolMapCls.staticmethod_fun, args_iter=Test_Function_Multiple_Args)
+        self._async_map_by_args(strategy=pool_strategy, target_fun=TargetMapCls.staticmethod_fun, args_iter=Test_Function_Multiple_Args)
 
         TestGreenThreadPool._chk_map_record()
 
 
     def test_imap_with_function(self, pool_strategy: GreenThreadPoolStrategy):
-        self._imap(strategy=pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Args)
+        self._imap(strategy=pool_strategy, target_fun=target_function_for_map, args_iter=Test_Function_Args)
 
         TestGreenThreadPool._chk_map_record()
 
 
     def test_imap_with_bounded_function(self, pool_strategy: GreenThreadPoolStrategy):
-        _tc = TargetPoolMapCls()
+        _tc = TargetMapCls()
         self._imap(strategy=pool_strategy, target_fun=_tc.method, args_iter=Test_Function_Args)
 
         TestGreenThreadPool._chk_map_record()
 
 
     def test_imap_with_classmethod_function(self, pool_strategy: GreenThreadPoolStrategy):
-        self._imap(strategy=pool_strategy, target_fun=TargetPoolMapCls.classmethod_fun, args_iter=Test_Function_Args)
+        self._imap(strategy=pool_strategy, target_fun=TargetMapCls.classmethod_fun, args_iter=Test_Function_Args)
 
         TestGreenThreadPool._chk_map_record()
 
 
     def test_imap_with_staticmethod_function(self, pool_strategy: GreenThreadPoolStrategy):
-        self._imap(strategy=pool_strategy, target_fun=TargetPoolMapCls.staticmethod_fun, args_iter=Test_Function_Args)
+        self._imap(strategy=pool_strategy, target_fun=TargetMapCls.staticmethod_fun, args_iter=Test_Function_Args)
 
         TestGreenThreadPool._chk_map_record()
 
 
     def test_imap_unordered_with_function(self, pool_strategy: GreenThreadPoolStrategy):
-        self._imap_unordered(strategy=pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Args)
+        self._imap_unordered(strategy=pool_strategy, target_fun=target_function_for_map, args_iter=Test_Function_Args)
 
         TestGreenThreadPool._chk_map_record()
 
 
     def test_imap_unordered_with_bounded_function(self, pool_strategy: GreenThreadPoolStrategy):
-        _tc = TargetPoolMapCls()
+        _tc = TargetMapCls()
         self._imap_unordered(strategy=pool_strategy, target_fun=_tc.method, args_iter=Test_Function_Args)
 
         TestGreenThreadPool._chk_map_record()
 
 
     def test_imap_unordered_with_classmethod_function(self, pool_strategy: GreenThreadPoolStrategy):
-        self._imap_unordered(strategy=pool_strategy, target_fun=TargetPoolMapCls.classmethod_fun, args_iter=Test_Function_Args)
+        self._imap_unordered(strategy=pool_strategy, target_fun=TargetMapCls.classmethod_fun, args_iter=Test_Function_Args)
 
         TestGreenThreadPool._chk_map_record()
 
 
     def test_imap_unordered_with_staticmethod_function(self, pool_strategy: GreenThreadPoolStrategy):
-        self._imap_unordered(strategy=pool_strategy, target_fun=TargetPoolMapCls.staticmethod_fun, args_iter=Test_Function_Args)
+        self._imap_unordered(strategy=pool_strategy, target_fun=TargetMapCls.staticmethod_fun, args_iter=Test_Function_Args)
 
         TestGreenThreadPool._chk_map_record()
 
 
     def test_get_success_result_with_async_apply(self, pool_strategy: GreenThreadPoolStrategy):
-        self._async_apply(tasks_size=Task_Size, strategy=pool_strategy, target_fun=pool_target_fun)
+        self._async_apply(tasks_size=Task_Size, strategy=pool_strategy, target_fun=target_function)
 
         _results = pool_strategy.get_result()
         PoolRunningTestSpec._chk_getting_success_result(results=_results)
@@ -1400,49 +1115,49 @@ class TestGreenThreadPool(PoolRunningTestSpec):
 
     @pytest.mark.skip(reason="Still consider about this feature.")
     def test_get_failure_result_with_async_apply(self, pool_strategy: GreenThreadPoolStrategy):
-        self._async_apply(tasks_size=Task_Size, strategy=pool_strategy, target_fun=target_error_fun)
+        self._async_apply(tasks_size=Task_Size, strategy=pool_strategy, target_fun=target_error_function)
 
         _results = pool_strategy.get_result()
         PoolRunningTestSpec._chk_getting_failure_result(results=_results)
 
 
     def test_get_success_result_with_map(self, pool_strategy: GreenThreadPoolStrategy):
-        self._map(strategy=pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Args)
+        self._map(strategy=pool_strategy, target_fun=target_function_for_map, args_iter=Test_Function_Args)
 
         _results = pool_strategy.get_result()
         PoolRunningTestSpec._chk_getting_success_result(results=_results)
 
 
     def test_get_success_result_with_async_map(self, pool_strategy: GreenThreadPoolStrategy):
-        self._async_map(strategy=pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Args)
+        self._async_map(strategy=pool_strategy, target_fun=target_function_for_map, args_iter=Test_Function_Args)
 
         _results = pool_strategy.get_result()
         PoolRunningTestSpec._chk_getting_success_result(results=_results)
 
 
     def test_get_success_result_with_map_by_args(self, pool_strategy: GreenThreadPoolStrategy):
-        self._map_by_args(strategy=pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Multiple_Args)
+        self._map_by_args(strategy=pool_strategy, target_fun=target_function_for_map, args_iter=Test_Function_Multiple_Args)
 
         _results = pool_strategy.get_result()
         PoolRunningTestSpec._chk_getting_success_result(results=_results)
 
 
     def test_get_success_result_with_async_map_by_args(self, pool_strategy: GreenThreadPoolStrategy):
-        self._async_map_by_args(strategy=pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Multiple_Args)
+        self._async_map_by_args(strategy=pool_strategy, target_fun=target_function_for_map, args_iter=Test_Function_Multiple_Args)
 
         _results = pool_strategy.get_result()
         PoolRunningTestSpec._chk_getting_success_result(results=_results)
 
 
     def test_get_success_result_with_imap(self, pool_strategy: GreenThreadPoolStrategy):
-        self._imap(strategy=pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Args)
+        self._imap(strategy=pool_strategy, target_fun=target_function_for_map, args_iter=Test_Function_Args)
 
         _results = pool_strategy.get_result()
         PoolRunningTestSpec._chk_getting_success_result(results=_results)
 
 
     def test_get_success_result_with_imap_unordered(self, pool_strategy: GreenThreadPoolStrategy):
-        self._imap_unordered(strategy=pool_strategy, target_fun=map_target_fun, args_iter=Test_Function_Args)
+        self._imap_unordered(strategy=pool_strategy, target_fun=target_function_for_map, args_iter=Test_Function_Args)
 
         _results = pool_strategy.get_result()
         PoolRunningTestSpec._chk_getting_success_result(results=_results)
@@ -1472,44 +1187,41 @@ class TestGreenThreadPool(PoolRunningTestSpec):
 
 
     def _initial(self):
-        # Test for parameters with '**kwargs'
-        reset_pool_running_value()
-        reset_running_timer()
-
-        global Running_Parent_PID
-        Running_Parent_PID = os.getpid()
+        reset_running_flags()
+        initial_lock()
 
 
     @staticmethod
     def _chk_blocking_record():
         PoolRunningTestSpec._chk_process_record_blocking(
-            pool_running_cnt=Pool_Running_Count,
+            pool_running_cnt=get_running_cnt(),
             worker_size=Task_Size,
-            running_worker_ids=Running_GreenThread_IDs,
-            running_current_workers=Running_Current_Workers,
-            running_finish_timestamps=Running_Finish_Timestamp
+            running_worker_ids=get_running_workers_ids(),
+            running_current_workers=get_current_workers(),
+            running_finish_timestamps=get_running_done_timestamps(),
+            de_duplicate=False
         )
 
 
     @staticmethod
     def _chk_record():
         PoolRunningTestSpec._chk_process_record(
-            pool_running_cnt=Pool_Running_Count,
+            pool_running_cnt=get_running_cnt(),
             worker_size=Task_Size,
-            running_worker_ids=Running_GreenThread_IDs,
-            running_current_workers=Running_Current_Workers,
-            running_finish_timestamps=Running_Finish_Timestamp
+            running_worker_ids=get_running_workers_ids(),
+            running_current_workers=get_current_workers(),
+            running_finish_timestamps=get_running_done_timestamps()
         )
 
 
     @staticmethod
     def _chk_map_record():
         PoolRunningTestSpec._chk_process_record_map(
-            pool_running_cnt=Pool_Running_Count,
+            pool_running_cnt=get_running_cnt(),
             function_args=Test_Function_Args,
-            running_worker_ids=Running_GreenThread_IDs,
-            running_current_workers=Running_Current_Workers,
-            running_finish_timestamps=Running_Finish_Timestamp
+            running_worker_ids=get_running_workers_ids(),
+            running_current_workers=get_current_workers(),
+            running_finish_timestamps=get_running_done_timestamps()
         )
 
 
@@ -1530,10 +1242,10 @@ class TestAsynchronous(GeneralRunningTestSpec):
             self._generate_worker(
                 strategy=async_strategy,
                 worker_size=Green_Thread_Size,
-                target_fun=target_async_fun,
+                target_fun=target_async_function,
                 error_msg=_Async_Generate_Worker_Error_Msg)
 
-        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
             asyncio.run(__chk_type())
         else:
             _event_loop = asyncio.get_event_loop()
@@ -1546,11 +1258,11 @@ class TestAsynchronous(GeneralRunningTestSpec):
             self._generate_worker(
                 strategy=async_strategy,
                 worker_size=Green_Thread_Size,
-                target_fun=target_async_fun,
+                target_fun=target_async_function,
                 args=Test_Function_Args,
                 error_msg=_Async_Generate_Worker_Error_Msg)
 
-        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
             asyncio.run(__chk_type())
         else:
             _event_loop = asyncio.get_event_loop()
@@ -1563,11 +1275,11 @@ class TestAsynchronous(GeneralRunningTestSpec):
             self._generate_worker(
                 strategy=async_strategy,
                 worker_size=Green_Thread_Size,
-                target_fun=target_async_fun,
+                target_fun=target_async_function,
                 kwargs=Test_Function_Kwargs,
                 error_msg=_Async_Generate_Worker_Error_Msg)
 
-        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
             asyncio.run(__chk_type())
         else:
             _event_loop = asyncio.get_event_loop()
@@ -1585,7 +1297,7 @@ class TestAsynchronous(GeneralRunningTestSpec):
                 target_fun=_tc.method,
                 error_msg=_Async_Generate_Worker_Error_Msg)
 
-        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
             asyncio.run(__chk_type())
         else:
             _event_loop = asyncio.get_event_loop()
@@ -1604,7 +1316,7 @@ class TestAsynchronous(GeneralRunningTestSpec):
                 args=Test_Function_Args,
                 error_msg=_Async_Generate_Worker_Error_Msg)
 
-        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
             asyncio.run(__chk_type())
         else:
             _event_loop = asyncio.get_event_loop()
@@ -1623,7 +1335,7 @@ class TestAsynchronous(GeneralRunningTestSpec):
                 kwargs=Test_Function_Kwargs,
                 error_msg=_Async_Generate_Worker_Error_Msg)
 
-        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
             asyncio.run(__chk_type())
         else:
             _event_loop = asyncio.get_event_loop()
@@ -1640,7 +1352,7 @@ class TestAsynchronous(GeneralRunningTestSpec):
                 target_fun=TargetAsyncCls.classmethod_fun,
                 error_msg=_Async_Generate_Worker_Error_Msg)
 
-        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
             asyncio.run(__chk_type())
         else:
             _event_loop = asyncio.get_event_loop()
@@ -1658,7 +1370,7 @@ class TestAsynchronous(GeneralRunningTestSpec):
                 args=Test_Function_Args,
                 error_msg=_Async_Generate_Worker_Error_Msg)
 
-        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
             asyncio.run(__chk_type())
         else:
             _event_loop = asyncio.get_event_loop()
@@ -1676,7 +1388,7 @@ class TestAsynchronous(GeneralRunningTestSpec):
                 kwargs=Test_Function_Kwargs,
                 error_msg=_Async_Generate_Worker_Error_Msg)
 
-        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
             asyncio.run(__chk_type())
         else:
             _event_loop = asyncio.get_event_loop()
@@ -1693,7 +1405,7 @@ class TestAsynchronous(GeneralRunningTestSpec):
                 target_fun=TargetAsyncCls.staticmethod_fun,
                 error_msg=_Async_Generate_Worker_Error_Msg)
 
-        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
             asyncio.run(__chk_type())
         else:
             _event_loop = asyncio.get_event_loop()
@@ -1711,7 +1423,7 @@ class TestAsynchronous(GeneralRunningTestSpec):
                 args=Test_Function_Args,
                 error_msg=_Async_Generate_Worker_Error_Msg)
 
-        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
             asyncio.run(__chk_type())
         else:
             _event_loop = asyncio.get_event_loop()
@@ -1729,7 +1441,7 @@ class TestAsynchronous(GeneralRunningTestSpec):
                 kwargs=Test_Function_Kwargs,
                 error_msg=_Async_Generate_Worker_Error_Msg)
 
-        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
             asyncio.run(__chk_type())
         else:
             _event_loop = asyncio.get_event_loop()
@@ -1745,10 +1457,10 @@ class TestAsynchronous(GeneralRunningTestSpec):
 
         async def __run_process():
             await async_strategy.initialization(queue_tasks=None, features=None)
-            _async_task = [async_strategy.generate_worker(target_async_fun) for _ in range(Green_Thread_Size)]
+            _async_task = [async_strategy.generate_worker(target_async_function) for _ in range(Green_Thread_Size)]
             await async_strategy.activate_workers(_async_task)
 
-        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
             asyncio.run(__run_process())
         else:
             _event_loop = asyncio.get_event_loop()
@@ -1764,10 +1476,10 @@ class TestAsynchronous(GeneralRunningTestSpec):
 
         async def __run_process():
             await async_strategy.initialization(queue_tasks=None, features=None)
-            _async_task = [async_strategy.generate_worker(target_async_fun, *Test_Function_Args) for _ in range(Green_Thread_Size)]
+            _async_task = [async_strategy.generate_worker(target_async_function, *Test_Function_Args) for _ in range(Green_Thread_Size)]
             await async_strategy.activate_workers(_async_task)
 
-        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
             asyncio.run(__run_process())
         else:
             _event_loop = asyncio.get_event_loop()
@@ -1783,10 +1495,10 @@ class TestAsynchronous(GeneralRunningTestSpec):
 
         async def __run_process():
             await async_strategy.initialization(queue_tasks=None, features=None)
-            _async_task = [async_strategy.generate_worker(target_async_fun, **Test_Function_Kwargs) for _ in range(Green_Thread_Size)]
+            _async_task = [async_strategy.generate_worker(target_async_function, **Test_Function_Kwargs) for _ in range(Green_Thread_Size)]
             await async_strategy.activate_workers(_async_task)
 
-        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
             asyncio.run(__run_process())
         else:
             _event_loop = asyncio.get_event_loop()
@@ -1806,7 +1518,7 @@ class TestAsynchronous(GeneralRunningTestSpec):
             _async_task = [async_strategy.generate_worker(_tc.method) for _ in range(Green_Thread_Size)]
             await async_strategy.activate_workers(_async_task)
 
-        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
             asyncio.run(__run_process())
         else:
             _event_loop = asyncio.get_event_loop()
@@ -1826,7 +1538,7 @@ class TestAsynchronous(GeneralRunningTestSpec):
             _async_task = [async_strategy.generate_worker(_tc.method, *Test_Function_Args) for _ in range(Green_Thread_Size)]
             await async_strategy.activate_workers(_async_task)
 
-        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
             asyncio.run(__run_process())
         else:
             _event_loop = asyncio.get_event_loop()
@@ -1846,7 +1558,7 @@ class TestAsynchronous(GeneralRunningTestSpec):
             _async_task = [async_strategy.generate_worker(_tc.method, **Test_Function_Kwargs) for _ in range(Green_Thread_Size)]
             await async_strategy.activate_workers(_async_task)
 
-        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
             asyncio.run(__run_process())
         else:
             _event_loop = asyncio.get_event_loop()
@@ -1865,7 +1577,7 @@ class TestAsynchronous(GeneralRunningTestSpec):
             _async_task = [async_strategy.generate_worker(TargetAsyncCls.classmethod_fun) for _ in range(Green_Thread_Size)]
             await async_strategy.activate_workers(_async_task)
 
-        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
             asyncio.run(__run_process())
         else:
             _event_loop = asyncio.get_event_loop()
@@ -1884,7 +1596,7 @@ class TestAsynchronous(GeneralRunningTestSpec):
             _async_task = [async_strategy.generate_worker(TargetAsyncCls.classmethod_fun, *Test_Function_Args) for _ in range(Green_Thread_Size)]
             await async_strategy.activate_workers(_async_task)
 
-        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
             asyncio.run(__run_process())
         else:
             _event_loop = asyncio.get_event_loop()
@@ -1903,7 +1615,7 @@ class TestAsynchronous(GeneralRunningTestSpec):
             _async_task = [async_strategy.generate_worker(TargetAsyncCls.classmethod_fun, **Test_Function_Kwargs) for _ in range(Green_Thread_Size)]
             await async_strategy.activate_workers(_async_task)
 
-        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
             asyncio.run(__run_process())
         else:
             _event_loop = asyncio.get_event_loop()
@@ -1922,7 +1634,7 @@ class TestAsynchronous(GeneralRunningTestSpec):
             _async_task = [async_strategy.generate_worker(TargetAsyncCls.staticmethod_fun) for _ in range(Green_Thread_Size)]
             await async_strategy.activate_workers(_async_task)
 
-        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
             asyncio.run(__run_process())
         else:
             _event_loop = asyncio.get_event_loop()
@@ -1941,7 +1653,7 @@ class TestAsynchronous(GeneralRunningTestSpec):
             _async_task = [async_strategy.generate_worker(TargetAsyncCls.staticmethod_fun, *Test_Function_Args) for _ in range(Green_Thread_Size)]
             await async_strategy.activate_workers(_async_task)
 
-        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
             asyncio.run(__run_process())
         else:
             _event_loop = asyncio.get_event_loop()
@@ -1960,7 +1672,7 @@ class TestAsynchronous(GeneralRunningTestSpec):
             _async_task = [async_strategy.generate_worker(TargetAsyncCls.staticmethod_fun, **Test_Function_Kwargs) for _ in range(Green_Thread_Size)]
             await async_strategy.activate_workers(_async_task)
 
-        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
             asyncio.run(__run_process())
         else:
             _event_loop = asyncio.get_event_loop()
@@ -1972,23 +1684,20 @@ class TestAsynchronous(GeneralRunningTestSpec):
 
 
     def _initial(self):
-        # Test for parameters with '**kwargs'
-        reset_running_flag()
-        reset_running_timer()
-
-        global Running_Parent_PID
-        Running_Parent_PID = os.getpid()
+        reset_running_flags()
+        initial_async_event_loop()
+        initial_lock()
 
 
     @staticmethod
     def _chk_async_task_record():
-        GeneralRunningTestSpec._chk_running_cnt(running_cnt=Running_Count, worker_size=Green_Thread_Size)
+        GeneralRunningTestSpec._chk_running_cnt(running_cnt=get_running_cnt(), worker_size=Green_Thread_Size)
 
-        _current_process_list = Running_Current_Workers[:]
+        _current_process_list = get_current_workers()[:]
         assert len(_current_process_list) == Green_Thread_Size, "The count of PID (no de-duplicate) should be the same as the count of processes."
         assert len(set(_current_process_list)) == Green_Thread_Size, "The count of PID (de-duplicate) should be the same as the count of processes."
 
-        GeneralRunningTestSpec._chk_done_timestamp(timestamp_list=Running_Finish_Timestamp[:])
+        GeneralRunningTestSpec._chk_done_timestamp(timestamp_list=get_running_done_timestamps()[:])
 
 
     def test_get_async_result(self, async_strategy: AsynchronousStrategy):
@@ -1996,10 +1705,10 @@ class TestAsynchronous(GeneralRunningTestSpec):
 
         async def __run_process():
             await async_strategy.initialization(queue_tasks=None, features=None)
-            _async_task = [async_strategy.generate_worker(target_async_fun, **Test_Function_Kwargs) for _ in range(Green_Thread_Size)]
+            _async_task = [async_strategy.generate_worker(target_async_function, **Test_Function_Kwargs) for _ in range(Green_Thread_Size)]
             await async_strategy.activate_workers(_async_task)
 
-        if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION > 6:
+        if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
             asyncio.run(__run_process())
         else:
             _event_loop = asyncio.get_event_loop()
