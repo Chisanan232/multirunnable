@@ -1,6 +1,6 @@
 from abc import ABC
 from typing import Tuple, Dict, Optional, Union, List, Callable as CallableType, Iterable as IterableType
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 
 from .framework import (
     BaseQueueTask as _BaseQueueTask,
@@ -52,28 +52,35 @@ class Executor(ABC, _BaseExecutor):
             features=features)
 
 
-    # def async_run(self,
-    #               function: CallableType,
-    #               args_iter: IterableType = [],
-    #               queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
-    #               features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
-    #     pass
-
-
     def map(self,
             function: CallableType,
             args_iter: IterableType = [],
             queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
             features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
+
+        # Check the arguments format. Its formatter should be like ((arg1, ), (arg2, ), ...)
+        # It should change to like that if the formatter is (arg1, arg2, ...)
+        assert isinstance(args_iter, Iterable) is True, "The option *args_iter* must to be an iterable object."
+
+        _valid_args_iter = None
+        _args_is_iter_chksum = map(lambda a: isinstance(a, Tuple) or isinstance(a, Dict) is True, args_iter)
+        if False in list(_args_is_iter_chksum):
+            _args_iter = []
+            for _args in args_iter:
+                if isinstance(_args, Tuple) or isinstance(_args, Dict):
+                    _args_iter.append(_args)
+                else:
+                    _new_args = (_args,)
+                    _args_iter.append(_new_args)
+            _valid_args_iter = _args_iter
+        else:
+            _valid_args_iter = args_iter
+
         General_Runnable_Strategy.map(
             function=function,
-            args_iter=args_iter,
+            args_iter=_valid_args_iter,
             queue_tasks=queue_tasks,
             features=features)
-
-
-    # def async_map(self) -> None:
-    #     pass
 
 
     def map_with_function(self,
