@@ -23,11 +23,7 @@ jobs:
         os: [ubuntu-18.04,ubuntu-latest]
         exclude:
           - os: ubuntu-18.04
-            python-version: 3.6
-          - os: ubuntu-18.04
             python-version: 3.9
-          - os: ubuntu-18.04
-            python-version: '3.10'
           - os: ubuntu-latest
             python-version: 3.8
           - os: ubuntu-latest
@@ -129,6 +125,12 @@ jobs:
           pip install pytest-rerunfailures
           pip install mysql-connector-python
           pip install -r dev-requirements.txt
+
+      - name: Change the setting of option *open files* of resource limit
+        run: |
+          ulimit -a
+          ulimit -n 512
+          ulimit -a
 
       - name: Run tests with pytest
         run: pytest
