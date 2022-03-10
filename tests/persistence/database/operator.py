@@ -113,21 +113,6 @@ class TestPersistenceDatabaseOperatorWithSingleConnection:
         assert _row_count == _Data_Row_Number, f"The data rows count should be {_Data_Row_Number}. But we got {_row_count}."
 
 
-    def test_next(self, opts_with_single_conn_strategy: MySQLOperator):
-        opts_with_single_conn_strategy.execute(_Test_SQL)
-
-        _all_daterow = []
-        while True:
-            try:
-                _datarow = opts_with_single_conn_strategy.next()
-                _all_daterow.append(_datarow)
-            except Exception as e:
-                print(f"The exception message is {traceback.format_exc()}")
-                break
-
-        assert len(_all_daterow) == _Data_Row_Number, "The size of data rows should be the same."
-
-
     def test_execute(self, opts_with_single_conn_strategy: MySQLOperator):
         try:
             opts_with_single_conn_strategy.execute(_Test_SQL)

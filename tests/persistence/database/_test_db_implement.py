@@ -133,10 +133,6 @@ class MySQLOperator(DatabaseOperator):
         return self._cursor.rowcount
 
 
-    def next(self) -> MySQLCursor:
-        return self._cursor.next()
-
-
     def execute(self, operator: Any, params: Tuple = None, multi: bool = False) -> MySQLCursor:
         return self._cursor.execute(operation=operator, params=params, multi=multi)
 
