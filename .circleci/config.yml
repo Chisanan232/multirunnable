@@ -86,6 +86,12 @@ commands:
   run_pytest:
     steps:
       - run:
+         name: Change the setting of option *open files* of resource limit
+         command: |
+             ulimit -a
+             ulimit -n 512
+             ulimit -a
+      - run:
          name: Run PyTest command to test
          command: |
              pytest
