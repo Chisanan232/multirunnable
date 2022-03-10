@@ -184,7 +184,8 @@ class TestDaoWithSingleConnection:
         try:
             db_opt_single.execute(_Test_SQL)
         except Exception as e:
-            assert "Lost connection to MySQL server at '127.0.0.1:3306', system error: 9 Bad file descriptor" in str(e), "It should raise an exception about it lose connection."
+            assert "Lost connection to MySQL server at '127.0.0.1:3306', system error: 9 Bad file descriptor" in str(e) or "mysql.connector.errors.ProgrammingError: 2055: Cursor is not connected" in str(e), \
+                "It should raise an exception about it lose connection."
 
 
 
