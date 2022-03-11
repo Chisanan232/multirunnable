@@ -342,26 +342,6 @@ class TestPersistenceDatabaseOperatorWithConnectionPool:
         argvalues=Under_Test_RunningModes,
         indirect=True
     )
-    def test_next(self, opts_with_conn_pool_strategy: MySQLOperator):
-        opts_with_conn_pool_strategy.execute(_Test_SQL)
-
-        _all_daterow = []
-        while True:
-            try:
-                _datarow = opts_with_conn_pool_strategy.next()
-                _all_daterow.append(_datarow)
-            except Exception as e:
-                print(f"The exception message is {traceback.format_exc()}")
-                break
-
-        assert len(_all_daterow) == _Data_Row_Number, "The size of data rows should be the same."
-
-
-    @pytest.mark.parametrize(
-        argnames="opts_with_conn_pool_strategy",
-        argvalues=Under_Test_RunningModes,
-        indirect=True
-    )
     def test_execute(self, opts_with_conn_pool_strategy: MySQLOperator):
         try:
             opts_with_conn_pool_strategy.execute(_Test_SQL)
