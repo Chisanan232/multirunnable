@@ -1,5 +1,5 @@
 from multirunnable.mode import FeatureMode
-from multirunnable.factory.lock import LockFactory, RLockFactory, SemaphoreFactory, BoundedSemaphoreFactory
+from multirunnable.factory.lock import LockFactory, SemaphoreFactory, BoundedSemaphoreFactory
 from multirunnable.factory.communication import EventFactory, ConditionFactory
 from multirunnable.api.operator import (
     LockAdapterOperator, RLockOperator,
@@ -12,8 +12,12 @@ from multirunnable.api.operator import (
 from ..test_config import Semaphore_Value
 from .._examples import RunByStrategy, MapByStrategy
 from ..framework.lock import LockTestSpec, RLockTestSpec, SemaphoreTestSpec, BoundedSemaphoreTestSpec, EventTestSpec, ConditionTestSpec
+from .._examples_with_synchronization import (
+    instantiate_lock, instantiate_rlock,
+    instantiate_semaphore, instantiate_bounded_semaphore,
+    instantiate_event, instantiate_condition
+)
 
-import asyncio
 import pytest
 import sys
 
@@ -21,51 +25,6 @@ import sys
 _Semaphore_Value = Semaphore_Value
 
 _Sleep_Time: int = 1
-
-
-def instantiate_lock(_mode, **kwargs):
-    _lock = LockFactory()
-    return _initial(_lock, _mode, **kwargs)
-
-
-def instantiate_rlock(_mode, **kwargs):
-    _rlock = RLockFactory()
-    return _initial(_rlock, _mode, **kwargs)
-
-
-def instantiate_semaphore(_mode, **kwargs):
-    _semaphore = SemaphoreFactory(value=_Semaphore_Value)
-    return _initial(_semaphore, _mode, **kwargs)
-
-
-def instantiate_bounded_semaphore(_mode, **kwargs):
-    _bounded_semaphore = BoundedSemaphoreFactory(value=_Semaphore_Value)
-    return _initial(_bounded_semaphore, _mode, **kwargs)
-
-
-def instantiate_event(_mode, **kwargs):
-    _event = EventFactory()
-    return _initial(_event, _mode, **kwargs)
-
-
-def instantiate_condition(_mode, **kwargs):
-    _condition = ConditionFactory()
-    return _initial(_condition, _mode, **kwargs)
-
-
-def _initial(_feature_factory, _mode, **kwargs):
-    """
-    Description:
-        Instantiate a new instance via Factory and annotate it as a global object.
-    :param _feature_factory:
-    :param _mode:
-    :param kwargs:
-    :return:
-    """
-    _feature_factory.feature_mode = _mode
-    _feature_instn = _feature_factory.get_instance(**kwargs)
-    _feature_factory.globalize_instance(_feature_instn)
-    return _feature_instn
 
 
 @pytest.fixture(scope="function")

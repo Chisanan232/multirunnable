@@ -1,21 +1,25 @@
 from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
-from multirunnable.mode import RunningMode, FeatureMode
+from multirunnable.mode import FeatureMode
 from multirunnable.api.decorator import RunWith, AsyncRunWith
-from multirunnable.factory.lock import LockFactory, RLockFactory, SemaphoreFactory, BoundedSemaphoreFactory
-from multirunnable.factory.communication import EventFactory, ConditionFactory
-from multirunnable.factory.strategy import ExecutorStrategyAdapter
-from multirunnable.parallel.strategy import Global_Manager
+from multirunnable.factory.lock import LockFactory, SemaphoreFactory, BoundedSemaphoreFactory
+from multirunnable.parallel.share import Global_Manager
 from multirunnable.coroutine.strategy import AsynchronousStrategy
 
+from ..framework.lock import LockTestSpec, SemaphoreTestSpec
 from ..test_config import Worker_Size, Worker_Pool_Size, Task_Size, Semaphore_Value
 from ._retry_sample import (
     _Retry_Time, _Default_Retry_Time, _Test_Return_Value, _Test_Exception,
-    init_flag, get_process_flag, get_running_function_flag,
+    init_flag, get_process_flag,
     target_function_with_default, target_function_raising_exception_with_default,
     target_function, target_function_raising_exception,
     async_target_function_with_default, async_target_function_raising_exception_with_default,
     async_target_function, async_target_function_raising_exception,
     TargetBoundedFunction, TargetBoundedAsyncFunction
+)
+from .._examples import RunByStrategy
+from .._examples_with_synchronization import (
+    instantiate_lock, instantiate_rlock,
+    instantiate_semaphore, instantiate_bounded_semaphore
 )
 
 from gevent.threading import get_ident as get_gevent_ident
@@ -38,86 +42,6 @@ _Random_Start_Time: int = 60
 _Random_End_Time: int = 80
 
 _Default_Value: int = 1
-
-
-def instantiate_lock(_mode, **kwargs):
-    _lock = LockFactory()
-    return _initial(_lock, _mode, **kwargs)
-
-
-def instantiate_rlock(_mode, **kwargs):
-    _rlock = RLockFactory()
-    return _initial(_rlock, _mode, **kwargs)
-
-
-def instantiate_semaphore(_mode, **kwargs):
-    _semaphore = SemaphoreFactory(value=_Semaphore_Value)
-    return _initial(_semaphore, _mode, **kwargs)
-
-
-def instantiate_bounded_semaphore(_mode, **kwargs):
-    _bounded_semaphore = BoundedSemaphoreFactory(value=_Semaphore_Value)
-    return _initial(_bounded_semaphore, _mode, **kwargs)
-
-
-def instantiate_event(_mode, **kwargs):
-    _event = EventFactory()
-    return _initial(_event, _mode, **kwargs)
-
-
-def instantiate_condition(_mode, **kwargs):
-    _condition = ConditionFactory()
-    return _initial(_condition, _mode, **kwargs)
-
-
-def _initial(_feature_factory, _mode, **kwargs):
-    _feature_factory.feature_mode = _mode
-    _feature_instn = _feature_factory.get_instance(**kwargs)
-    _feature_factory.globalize_instance(_feature_instn)
-    return _feature_instn
-
-
-def run_multi_process(_function):
-    _strategy_adapter = ExecutorStrategyAdapter(mode=RunningMode.Parallel, executors=_Worker_Size)
-    _strategy = _strategy_adapter.get_simple()
-
-    _run_with_multiple_workers(_strategy, _function)
-
-
-def run_multi_threads(_function):
-    _strategy_adapter = ExecutorStrategyAdapter(mode=RunningMode.Concurrent, executors=_Worker_Size)
-    _strategy = _strategy_adapter.get_simple()
-
-    _run_with_multiple_workers(_strategy, _function)
-
-
-def run_multi_green_thread(_function):
-    _strategy_adapter = ExecutorStrategyAdapter(mode=RunningMode.GreenThread, executors=_Worker_Size)
-    _strategy = _strategy_adapter.get_simple()
-
-    _run_with_multiple_workers(_strategy, _function)
-
-
-def run_async(_function, _feature):
-    _strategy_adapter = ExecutorStrategyAdapter(mode=RunningMode.Asynchronous, executors=_Worker_Size)
-    _strategy = _strategy_adapter.get_simple()
-
-    async def __process():
-        await _strategy.initialization(queue_tasks=None, features=_feature)
-        _ps = [_strategy.generate_worker(_function) for _ in range(Worker_Size)]
-        await _strategy.activate_workers(_ps)
-
-    if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
-        asyncio.run(__process(), debug=True)
-    else:
-        _event_loop = asyncio.get_event_loop()
-        _event_loop.run_until_complete(__process())
-
-
-def _run_with_multiple_workers(_strategy, _function):
-    _ps = [_strategy.generate_worker(_function) for _ in range(Worker_Size)]
-    _strategy.activate_workers(_ps)
-    _strategy.close(_ps)
 
 
 @pytest.fixture(scope="class")
@@ -412,7 +336,7 @@ class TestFeaturesDecorator:
             _done_timestamp[_process_id] = _time
 
         # # # # Run multiple workers and save something info at the right time
-        run_multi_process(_function=_target_testing)
+        RunByStrategy.Parallel(_function=_target_testing)
         TestFeaturesDecorator._chk_done_timestamp_by_lock(_done_timestamp)
 
 
@@ -430,7 +354,7 @@ class TestFeaturesDecorator:
             _done_timestamp[_thread_id] = _time
 
         # # # # Run multiple workers and save something info at the right time
-        run_multi_threads(_function=_target_testing)
+        RunByStrategy.Concurrent(_function=_target_testing)
         TestFeaturesDecorator._chk_done_timestamp_by_lock(_done_timestamp)
 
 
@@ -448,7 +372,7 @@ class TestFeaturesDecorator:
             _done_timestamp[_thread_id] = _time
 
         # # # # Run multiple workers and save something info at the right time
-        run_multi_green_thread(_function=_target_testing)
+        RunByStrategy.CoroutineWithGreenThread(_function=_target_testing)
         TestFeaturesDecorator._chk_done_timestamp_by_lock(_done_timestamp)
 
 
@@ -466,7 +390,7 @@ class TestFeaturesDecorator:
             _done_timestamp[_thread_id] = _time
 
         # # # # Run multiple workers and save something info at the right time
-        run_multi_threads(_function=_target_testing)
+        RunByStrategy.Concurrent(_function=_target_testing)
         TestFeaturesDecorator._chk_done_timestamp_by_lock(_done_timestamp)
 
 
@@ -484,7 +408,7 @@ class TestFeaturesDecorator:
             _done_timestamp[_thread_id] = _time
 
         # # # # Run multiple workers and save something info at the right time
-        run_multi_green_thread(_function=_target_testing)
+        RunByStrategy.CoroutineWithGreenThread(_function=_target_testing)
         TestFeaturesDecorator._chk_done_timestamp_by_lock(_done_timestamp)
 
 
@@ -502,7 +426,7 @@ class TestFeaturesDecorator:
             _done_timestamp[_process_id] = _time
 
         # # # # Run multiple workers and save something info at the right time
-        run_multi_process(_function=_target_testing)
+        RunByStrategy.Parallel(_function=_target_testing)
         TestFeaturesDecorator._chk_done_timestamp_by_semaphore(_done_timestamp)
 
 
@@ -520,7 +444,7 @@ class TestFeaturesDecorator:
             _done_timestamp[_thread_id] = _time
 
         # # # # Run multiple workers and save something info at the right time
-        run_multi_threads(_function=_target_testing)
+        RunByStrategy.Concurrent(_function=_target_testing)
         TestFeaturesDecorator._chk_done_timestamp_by_semaphore(_done_timestamp)
 
 
@@ -538,7 +462,7 @@ class TestFeaturesDecorator:
             _done_timestamp[_thread_id] = _time
 
         # # # # Run multiple workers and save something info at the right time
-        run_multi_green_thread(_function=_target_testing)
+        RunByStrategy.CoroutineWithGreenThread(_function=_target_testing)
         TestFeaturesDecorator._chk_done_timestamp_by_semaphore(_done_timestamp)
 
 
@@ -561,7 +485,7 @@ class TestFeaturesDecorator:
                 assert True, "Testing code successfully."
 
         # # # # Run multiple workers and save something info at the right time
-        run_multi_process(_function=_target_testing)
+        RunByStrategy.Parallel(_function=_target_testing)
         TestFeaturesDecorator._chk_done_timestamp_by_semaphore(_done_timestamp)
 
 
@@ -584,7 +508,7 @@ class TestFeaturesDecorator:
                 assert True, "Testing code successfully."
 
         # # # # Run multiple workers and save something info at the right time
-        run_multi_threads(_function=_target_testing)
+        RunByStrategy.Concurrent(_function=_target_testing)
         TestFeaturesDecorator._chk_done_timestamp_by_semaphore(_done_timestamp)
 
 
@@ -607,44 +531,18 @@ class TestFeaturesDecorator:
                 assert True, "Testing code successfully."
 
         # # # # Run multiple workers and save something info at the right time
-        run_multi_green_thread(_function=_target_testing)
+        RunByStrategy.CoroutineWithGreenThread(_function=_target_testing)
         TestFeaturesDecorator._chk_done_timestamp_by_semaphore(_done_timestamp)
 
 
     @staticmethod
     def _chk_done_timestamp_by_lock(_done_timestamp: dict):
-        assert len(_done_timestamp.keys()) == _Worker_Size, f"The amount of thread ID keys (no de-duplicate) should be equal to worker size '{_Worker_Size}'."
-        assert len(set(_done_timestamp.keys())) == _Worker_Size, f"The amount of thread ID keys (de-duplicate) should be equal to worker size '{_Worker_Size}'."
-        _previous_v = None
-        for _v in sorted(_done_timestamp.values()):
-            if _previous_v is None:
-                _previous_v = _v
-            if _previous_v != _v:
-                assert int(abs(float(_v) - float(_previous_v))) == _Sleep_Time, \
-                    f"The different time betweeen them should be {_Sleep_Time} second(s). One is {_v} and another one is {_previous_v}. All of them are {_done_timestamp}"
-                _previous_v = _v
+        LockTestSpec._chk_done_timestamp(_done_timestamp=_done_timestamp)
 
 
     @staticmethod
     def _chk_done_timestamp_by_semaphore(_done_timestamp: dict):
-        assert len(_done_timestamp.keys()) == _Worker_Size, f"The amount of thread ID keys (no de-duplicate) should be equal to worker size '{_Worker_Size}'."
-        assert len(set(_done_timestamp.keys())) == _Worker_Size, f"The amount of thread ID keys (de-duplicate) should be equal to worker size '{_Worker_Size}'."
-        assert len(_done_timestamp.values()) == _Worker_Size, f"The amount of done-timestamp (no de-duplicate) should be equal to worker size '{_Worker_Size}'."
-        _int_unix_time_timestamps = [int(_v) for _v in _done_timestamp.values()]
-        if _Worker_Size % 2 == 0:
-            assert len(set(_int_unix_time_timestamps)) == int(_Worker_Size / _Semaphore_Value), \
-                f"The amount of done-timestamp (de-duplicate) should be equal to (worker size: {_Worker_Size} / semaphore value: {_Semaphore_Value}) '{int(_Worker_Size / _Semaphore_Value)}'."
-        else:
-            assert len(set(_int_unix_time_timestamps)) == int(_Worker_Size / _Semaphore_Value) + 1, \
-                f"The amount of done-timestamp (de-duplicate) should be equal to (worker size: {_Worker_Size} / semaphore value: {_Semaphore_Value}) '{int(_Worker_Size / _Semaphore_Value)}'."
-        _previous_v = None
-        for _v in sorted(_int_unix_time_timestamps):
-            if _previous_v is None:
-                _previous_v = _v
-            if _previous_v != _v:
-                assert int(abs(float(_v) - float(_previous_v))) == _Sleep_Time, \
-                    f"The different time betweeen them should be {_Sleep_Time} second(s). One is {_v} and another one is {_previous_v}. All of them are {_done_timestamp}"
-                _previous_v = _v
+        SemaphoreTestSpec._chk_done_timestamp(_done_timestamp=_done_timestamp)
 
 
 
@@ -670,7 +568,7 @@ class TestAsyncFeaturesDecorator:
             _done_timestamp[_current_task_id] = _time
 
         # # # # Run multiple workers and save something info at the right time
-        run_async(_function=_target_testing, _feature=LockFactory())
+        RunByStrategy.CoroutineWithAsynchronous(_function=_target_testing, _feature=LockFactory())
         TestAsyncFeaturesDecorator._chk_done_timestamp_by_lock(_done_timestamp)
 
 
@@ -694,7 +592,7 @@ class TestAsyncFeaturesDecorator:
             _done_timestamp[_current_task_id] = _time
 
         # # # # Run multiple workers and save something info at the right time
-        run_async(_function=_target_testing, _feature=SemaphoreFactory(value=_Semaphore_Value))
+        RunByStrategy.CoroutineWithAsynchronous(_function=_target_testing, _feature=SemaphoreFactory(value=_Semaphore_Value))
         TestAsyncFeaturesDecorator._chk_done_timestamp_by_semaphore(_done_timestamp)
 
 
@@ -723,42 +621,16 @@ class TestAsyncFeaturesDecorator:
                 assert True, "Testing code successfully."
 
         # # # # Run multiple workers and save something info at the right time
-        run_async(_function=_target_testing, _feature=BoundedSemaphoreFactory(value=_Semaphore_Value))
+        RunByStrategy.CoroutineWithAsynchronous(_function=_target_testing, _feature=BoundedSemaphoreFactory(value=_Semaphore_Value))
         TestAsyncFeaturesDecorator._chk_done_timestamp_by_semaphore(_done_timestamp)
 
 
     @staticmethod
     def _chk_done_timestamp_by_lock(_done_timestamp: dict):
-        assert len(_done_timestamp.keys()) == _Worker_Size, f"The amount of thread ID keys (no de-duplicate) should be equal to worker size '{_Worker_Size}'."
-        assert len(set(_done_timestamp.keys())) == _Worker_Size, f"The amount of thread ID keys (de-duplicate) should be equal to worker size '{_Worker_Size}'."
-        _previous_v = None
-        for _v in sorted(_done_timestamp.values()):
-            if _previous_v is None:
-                _previous_v = _v
-            if _previous_v != _v:
-                assert int(abs(float(_v) - float(_previous_v))) == _Sleep_Time, \
-                    f"The different time betweeen them should be {_Sleep_Time} second(s). One is {_v} and another one is {_previous_v}. All of them are {_done_timestamp}"
-                _previous_v = _v
+        LockTestSpec._chk_done_timestamp(_done_timestamp=_done_timestamp)
 
 
     @staticmethod
     def _chk_done_timestamp_by_semaphore(_done_timestamp: dict):
-        assert len(_done_timestamp.keys()) == _Worker_Size, f"The amount of thread ID keys (no de-duplicate) should be equal to worker size '{_Worker_Size}'."
-        assert len(set(_done_timestamp.keys())) == _Worker_Size, f"The amount of thread ID keys (de-duplicate) should be equal to worker size '{_Worker_Size}'."
-        assert len(_done_timestamp.values()) == _Worker_Size, f"The amount of done-timestamp (no de-duplicate) should be equal to worker size '{_Worker_Size}'."
-        _int_unix_time_timestamps = [int(_v) for _v in _done_timestamp.values()]
-        if _Worker_Size % 2 == 0:
-            assert len(set(_int_unix_time_timestamps)) == int(_Worker_Size / _Semaphore_Value), \
-                f"The amount of done-timestamp (de-duplicate) should be equal to (worker size: {_Worker_Size} / semaphore value: {_Semaphore_Value}) '{int(_Worker_Size / _Semaphore_Value)}'."
-        else:
-            assert len(set(_int_unix_time_timestamps)) == int(_Worker_Size / _Semaphore_Value) + 1, \
-                f"The amount of done-timestamp (de-duplicate) should be equal to (worker size: {_Worker_Size} / semaphore value: {_Semaphore_Value}) '{int(_Worker_Size / _Semaphore_Value)}'."
-        _previous_v = None
-        for _v in sorted(_int_unix_time_timestamps):
-            if _previous_v is None:
-                _previous_v = _v
-            if _previous_v != _v:
-                assert int(abs(float(_v) - float(_previous_v))) == _Sleep_Time, \
-                    f"The different time betweeen them should be {_Sleep_Time} second(s). One is {_v} and another one is {_previous_v}. All of them are {_done_timestamp}"
-                _previous_v = _v
+        SemaphoreTestSpec._chk_done_timestamp(_done_timestamp=_done_timestamp)
 
