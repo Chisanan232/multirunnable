@@ -1,8 +1,6 @@
 from multirunnable.api.manage import Globalize
 from multirunnable.exceptions import GlobalizeObjectError
 
-import pytest
-
 
 
 class TestGlobalize:
