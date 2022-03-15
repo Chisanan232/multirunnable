@@ -188,15 +188,11 @@ class LockTestSpec(FeatureTestSpec, ABC):
             await asyncio.sleep(_Sleep_Time)
             _worker_id = FeatureTestSpec._get_worker_id(mode)
             _time = float(time.time())
-            print(f"[DEBUG] _worker_id: {_worker_id}")
-            print(f"[DEBUG] _time: {_time}")
             _done_timestamp[_worker_id] = _time
-            print(f"[DEBUG] _done_timestamp: {_done_timestamp}")
             _lock.release()
 
         # # # # Run multiple workers and save something info at the right time
         running_function(_function=_target_testing, event_loop=event_loop, _feature=factory)
-        print(f"[DEBUG] before checking _done_timestamp: {_done_timestamp}")
         LockTestSpec._chk_done_timestamp(_done_timestamp)
 
 
@@ -211,8 +207,6 @@ class LockTestSpec(FeatureTestSpec, ABC):
                     await asyncio.sleep(_Sleep_Time)
                     _worker_id = FeatureTestSpec._get_worker_id(mode)
                     _time = float(time.time())
-                    print(f"[DEBUG] _worker_id: {_worker_id}")
-                    print(f"[DEBUG] _time: {_time}")
                     _done_timestamp[_worker_id] = _time
             except Exception as e:
                 assert False, f"Occur something unexpected issue. Please check it. Exception: {e}"
@@ -365,8 +359,6 @@ class SemaphoreTestSpec(FeatureTestSpec, ABC):
                     _worker_id = FeatureTestSpec._get_worker_id(mode)
                     FeatureTestSpec._sleep(mode)
                     _time = float(time.time())
-                    print(f"[DEBUG] _worker_id: {_worker_id}")
-                    print(f"[DEBUG] _time: {_time}")
                     _done_timestamp[_worker_id] = _time
             except Exception as e:
                 assert False, f"Occur something unexpected issue. Please check it. Exception: {e}"
@@ -397,7 +389,6 @@ class SemaphoreTestSpec(FeatureTestSpec, ABC):
 
         # # # # Run multiple workers and save something info at the right time
         running_function(_function=_target_testing, _feature=factory)
-        print(f"[DEBUG] _done_timestamp: {_done_timestamp}")
         SemaphoreTestSpec._chk_done_timestamp(_done_timestamp)
 
 
@@ -424,7 +415,6 @@ class SemaphoreTestSpec(FeatureTestSpec, ABC):
 
         # # # # Run multiple workers and save something info at the right time
         running_function(_function=_target_testing, _feature=factory)
-        print(f"[DEBUG] _done_timestamp: {_done_timestamp}")
         SemaphoreTestSpec._chk_done_timestamp(_done_timestamp)
 
 
@@ -534,7 +524,6 @@ class BoundedSemaphoreTestSpec(FeatureTestSpec, ABC):
 
         # # # # Run multiple workers and save something info at the right time
         running_function(_function=_target_testing, _feature=factory)
-        print(f"[DEBUG] _done_timestamp: {_done_timestamp}")
         BoundedSemaphoreTestSpec._chk_done_timestamp(_done_timestamp)
 
 
@@ -561,7 +550,6 @@ class BoundedSemaphoreTestSpec(FeatureTestSpec, ABC):
 
         # # # # Run multiple workers and save something info at the right time
         running_function(_function=_target_testing, _feature=factory)
-        print(f"[DEBUG] _done_timestamp: {_done_timestamp}")
         BoundedSemaphoreTestSpec._chk_done_timestamp(_done_timestamp)
 
 
