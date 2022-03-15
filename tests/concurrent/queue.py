@@ -7,7 +7,6 @@ if PYTHON_MAJOR_VERSION == 3 and PYTHON_MINOR_VERSION == 6:
     from queue import Queue, LifoQueue, PriorityQueue
 else:
     from queue import Queue, SimpleQueue, LifoQueue, PriorityQueue
-import pytest
 
 
 _Semaphore_Value = Semaphore_Value

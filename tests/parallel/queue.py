@@ -3,7 +3,6 @@
 from ..test_config import Semaphore_Value
 
 from multiprocessing.queues import Queue, SimpleQueue, JoinableQueue
-import pytest
 
 
 _Semaphore_Value = Semaphore_Value
