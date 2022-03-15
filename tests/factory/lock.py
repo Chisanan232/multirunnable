@@ -1,3 +1,5 @@
+import traceback
+
 from multirunnable.mode import FeatureMode
 from multirunnable.factory.lock import LockFactory, RLockFactory, SemaphoreFactory, BoundedSemaphoreFactory
 
@@ -59,8 +61,8 @@ class TestLockFactory:
         assert mr_lock.feature_mode is None, "The default value of FeatureMode of Lock instance should be None."
         try:
             mr_lock.feature_mode = _testing_mode
-        except Exception as e:
-            assert False, "It should set the FeatureMode into Lock instance without any issue."
+        except Exception:
+            assert False, f"It should set the FeatureMode into Lock instance without any issue.\n Error: {traceback.format_exc()}"
         else:
             _feature_mode = mr_lock.feature_mode
             assert _feature_mode is _testing_mode, f"The mode we got from Lock instance should be the same as we set '{_testing_mode}'."
@@ -157,8 +159,8 @@ class TestRLockFactory:
         assert mr_rlock.feature_mode is None, "The default value of FeatureMode of RLock instance should be None."
         try:
             mr_rlock.feature_mode = _testing_mode
-        except Exception as e:
-            assert False, "It should set the FeatureMode into RLock instance without any issue."
+        except Exception:
+            assert False, f"It should set the FeatureMode into RLock instance without any issue.\n Error: {traceback.format_exc()}"
         else:
             _feature_mode = mr_rlock.feature_mode
             assert _feature_mode is _testing_mode, f"The mode we got from RLock instance should be the same as we set '{_testing_mode}'."
@@ -255,8 +257,8 @@ class TestSemaphoreFactory:
         assert mr_semaphore.feature_mode is None, "The default value of FeatureMode of Semaphore instance should be None."
         try:
             mr_semaphore.feature_mode = _testing_mode
-        except Exception as e:
-            assert False, "It should set the FeatureMode into Semaphore instance without any issue."
+        except Exception:
+            assert False, f"It should set the FeatureMode into Semaphore instance without any issue.\n Error: {traceback.format_exc()}"
         else:
             _feature_mode = mr_semaphore.feature_mode
             assert _feature_mode is _testing_mode, f"The mode we got from Semaphore instance should be the same as we set '{_testing_mode}'."
@@ -353,8 +355,8 @@ class TestBoundedSemaphoreFactory:
         assert mr_bounded_semaphore.feature_mode is None, "The default value of FeatureMode of BoundedSemaphore instance should be None."
         try:
             mr_bounded_semaphore.feature_mode = _testing_mode
-        except Exception as e:
-            assert False, "It should set the FeatureMode into BoundedSemaphore instance without any issue."
+        except Exception:
+            assert False, f"It should set the FeatureMode into BoundedSemaphore instance without any issue.\n Error: {traceback.format_exc()}"
         else:
             _feature_mode = mr_bounded_semaphore.feature_mode
             assert _feature_mode is _testing_mode, f"The mode we got from BoundedSemaphore instance should be the same as we set '{_testing_mode}'."
