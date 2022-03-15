@@ -9,7 +9,6 @@ import multirunnable as mr
 import pytest
 import time
 import sys
-import os
 
 
 Process_Size: int = Worker_Size
