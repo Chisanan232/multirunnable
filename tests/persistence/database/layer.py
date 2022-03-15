@@ -100,7 +100,7 @@ class TestDaoWithSingleConnection:
     def test_commit(self, db_opt_single: TargetSingleDao):
         try:
             db_opt_single.commit()
-        except Exception as e:
+        except Exception:
             assert False, f"It should work finely without any issue. \nThe exception message is {traceback.format_exc()}"
         else:
             assert True, "It works finely."
@@ -109,7 +109,7 @@ class TestDaoWithSingleConnection:
     def test_execute(self, db_opt_single: TargetSingleDao):
         try:
             db_opt_single.execute(_Test_SQL)
-        except Exception as e:
+        except Exception:
             assert False, f"It should work finely without any issue. \nThe exception message is {traceback.format_exc()}"
         else:
             assert True, "It work finely!"
@@ -121,7 +121,7 @@ class TestDaoWithSingleConnection:
     def test_execute_many(self, db_opt_single: TargetSingleDao):
         try:
             db_opt_single.execute_many(_Test_SQL)
-        except Exception as e:
+        except Exception:
             assert False, f"It should work finely without any issue. \nThe exception message is {traceback.format_exc()}"
         else:
             assert True, "It work finely!"
@@ -271,7 +271,7 @@ class TestDaoWithConnectionPool:
     def test_commit(self, db_opt_pool: TargetSingleDao):
         try:
             db_opt_pool.commit()
-        except Exception as e:
+        except Exception:
             assert False, f"It should work finely without any issue. \nThe exception message is {traceback.format_exc()}"
         else:
             assert True, "It works finely."
@@ -285,8 +285,8 @@ class TestDaoWithConnectionPool:
     def test_execute(self, db_opt_pool: TargetPoolDao):
         try:
             db_opt_pool.execute(_Test_SQL)
-        except Exception as e:
-            assert False, ""
+        except Exception:
+            assert False, f"It should work finely.\n Error: {traceback.format_exc()}"
         else:
             assert True, ""
 
@@ -299,8 +299,8 @@ class TestDaoWithConnectionPool:
     def test_execute_many(self, db_opt_pool: TargetPoolDao):
         try:
             db_opt_pool.execute_many(_Test_SQL)
-        except Exception as e:
-            assert False, ""
+        except Exception:
+            assert False, f"It should work finely.\n Error: {traceback.format_exc()}"
         else:
             assert True, ""
 
