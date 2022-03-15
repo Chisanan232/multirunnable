@@ -1,4 +1,4 @@
-from .strategy import BaseDatabaseConnection as _BaseDataBaseConnection, BaseSingleConnection, BaseConnectionPool
+from .strategy import BaseDatabaseConnection as _BaseDataBaseConnection, BaseConnectionPool
 
 from abc import ABC, abstractmethod
 from typing import Tuple, Dict, TypeVar, Generic, Any
