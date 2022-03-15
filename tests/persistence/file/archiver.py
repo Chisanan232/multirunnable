@@ -1,5 +1,4 @@
 from multirunnable.persistence.file.archivers import ZIPArchiver
-from multirunnable.persistence.file.saver import FileSaver
 from multirunnable.persistence.file.files import CSVFormatter
 
 from .._data import Test_Data_List

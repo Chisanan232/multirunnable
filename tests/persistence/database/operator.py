@@ -116,7 +116,7 @@ class TestPersistenceDatabaseOperatorWithSingleConnection:
     def test_execute(self, opts_with_single_conn_strategy: MySQLOperator):
         try:
             opts_with_single_conn_strategy.execute(_Test_SQL)
-        except Exception as e:
+        except Exception:
             assert False, f"It should work finely without any issue. \nThe exception message is {traceback.format_exc()}"
         else:
             assert True, "It work finely!"
@@ -129,7 +129,7 @@ class TestPersistenceDatabaseOperatorWithSingleConnection:
         try:
             opts_with_single_conn_strategy.execute_many(INSERT_TEST_DATA_SQL_WITH_OPTION, TEST_DATA_ROWS)
             opts_with_single_conn_strategy.commit()
-        except Exception as e:
+        except Exception:
             assert False, f"It should work finely without any issue. \nThe exception message is {traceback.format_exc()}"
         else:
             assert True, "It work finely!"
@@ -197,7 +197,7 @@ class TestPersistenceDatabaseOperatorWithSingleConnection:
     def test_close_cursor(self, opts_with_single_conn_strategy: MySQLOperator):
         try:
             opts_with_single_conn_strategy.close_cursor()
-        except Exception as e:
+        except Exception:
             assert False, f"It should work finely without any issue. \nThe exception message is {traceback.format_exc()}"
         else:
             assert True, "It work finely."
@@ -216,7 +216,7 @@ class TestPersistenceDatabaseOperatorWithSingleConnection:
         _db_connection = getattr(opts_with_single_conn_strategy, "_db_connection")
         try:
             opts_with_single_conn_strategy.close_connection()
-        except Exception as e:
+        except Exception:
             assert False, f"It should work finely without any issue. \nThe exception message is {traceback.format_exc()}"
         else:
             assert True, "It work finely."
@@ -292,7 +292,7 @@ class TestPersistenceDatabaseOperatorWithConnectionPool:
         _db_connection = getattr(opts_with_conn_pool_strategy, "_db_connection")
         try:
             opts_with_conn_pool_strategy.commit(conn=_db_connection)
-        except Exception as e:
+        except Exception:
             assert False, f"It should work finely without any issue. \nThe exception message is {traceback.format_exc()}"
         else:
             assert True, "It works finely."
@@ -308,7 +308,7 @@ class TestPersistenceDatabaseOperatorWithConnectionPool:
             opts_with_conn_pool_strategy.commit()
         except ValueError as ve:
             assert "Option *conn* cannot be None object if connection strategy is BaseConnectionPool type" in str(ve), "It should raise an exception about option *conn* cannot be None type."
-        except Exception as e:
+        except Exception:
             assert False, f"It should work finely without any issue. \nThe exception message is {traceback.format_exc()}"
         else:
             assert True, "It still could work finely even it works with option *conn* as a None type."
@@ -345,7 +345,7 @@ class TestPersistenceDatabaseOperatorWithConnectionPool:
     def test_execute(self, opts_with_conn_pool_strategy: MySQLOperator):
         try:
             opts_with_conn_pool_strategy.execute(_Test_SQL)
-        except Exception as e:
+        except Exception:
             assert False, f"It should work finely without any issue. \nThe exception message is {traceback.format_exc()}"
         else:
             assert True, "It work finely!"
@@ -363,7 +363,7 @@ class TestPersistenceDatabaseOperatorWithConnectionPool:
         try:
             opts_with_conn_pool_strategy.execute_many(INSERT_TEST_DATA_SQL_WITH_OPTION, TEST_DATA_ROWS)
             opts_with_conn_pool_strategy.commit()
-        except Exception as e:
+        except Exception:
             assert False, f"It should work finely without any issue. \nThe exception message is {traceback.format_exc()}"
         else:
             assert True, "It work finely!"
@@ -475,7 +475,7 @@ class TestPersistenceDatabaseOperatorWithConnectionPool:
         _db_connection = getattr(opts_with_conn_pool_strategy, "_db_connection")
         try:
             opts_with_conn_pool_strategy.close_connection(conn=_db_connection)
-        except Exception as e:
+        except Exception:
             assert False, f"It should work finely without any issue. \nThe exception message is {traceback.format_exc()}"
         else:
             assert True, "It work finely."
@@ -496,7 +496,7 @@ class TestPersistenceDatabaseOperatorWithConnectionPool:
             opts_with_conn_pool_strategy.close_connection()
         except ValueError as ve:
             assert "Option *conn* cannot be None object if connection strategy is BaseConnectionPool type" in str(ve), "It should raise an exception about option *conn* cannot be None type."
-        except Exception as e:
+        except Exception:
             assert False, f"It should work finely without any issue. \nThe exception message is {traceback.format_exc()}"
         else:
             assert True, "It still could work finely even it works with option *conn* as a None type."

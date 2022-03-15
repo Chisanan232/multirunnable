@@ -3,8 +3,9 @@ from multirunnable.persistence.file.files import File, CSVFormatter, XLSXFormatt
 from .._data import Test_Data_List, Test_Error_Data_List, Test_JSON_Data
 
 from pathlib import Path
-from typing import List, Dict
-from openpyxl import Workbook, load_workbook
+from typing import List
+from openpyxl import load_workbook
+import traceback
 import pytest
 import json
 import csv
@@ -69,7 +70,7 @@ class TestFiles:
         _test_file_path = Test_CSV_File_Path
         try:
             TestFiles._save_process(_file_format=csv_formatter, _file_path=_test_file_path, _data=Test_Error_Data_List)
-        except ValueError as ve:
+        except ValueError:
             assert True, "It work finely."
         else:
             assert False, "It should raise ValueError if the data which we save as target file format is invalid."
@@ -137,8 +138,8 @@ class TestFiles:
             _file_format.close()
         except ValueError as e:
             raise e
-        except Exception as e:
-            assert False, "It should work finely without any issue."
+        except Exception:
+            assert False, f"It should work finely without any issue.\n The error is: {traceback.format_exc()}"
         else:
             assert True, "It work finely!"
 
