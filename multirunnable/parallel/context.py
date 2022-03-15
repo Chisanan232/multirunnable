@@ -24,7 +24,7 @@ class context(BaseContext):
         if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 7):
             return parent_process()
         else:
-            raise NotImplemented("It doesn't support to get parent process via APIs of multiprocessing less than Python 3.8.")
+            raise NotImplementedError("It doesn't support to get parent process via APIs of multiprocessing less than Python 3.8.")
 
 
     @staticmethod
