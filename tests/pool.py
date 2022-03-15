@@ -15,6 +15,7 @@ from ._examples import (
     target_function, target_function_for_map, target_funcs_iter
 )
 
+import traceback
 import pytest
 
 
@@ -380,8 +381,8 @@ class TestSimplePool:
             simple_pool.initial()
             simple_pool.async_apply(tasks_size=Task_Size, function=lambda a: a+a, args=(1,))
             simple_pool.terminal()
-        except Exception as e:
-            assert False, "It should work finely without any issue. Please check it."
+        except Exception:
+            assert False, f"It should work finely without any issue. Please check it.\n Error: {traceback.format_exc()}"
         else:
             assert True, "It work finely without any issue."
 
@@ -396,8 +397,8 @@ class TestSimplePool:
             simple_pool.initial()
             simple_pool.async_apply(tasks_size=Task_Size, function=lambda a: a+a, args=(1,))
             simple_pool.close()
-        except Exception as e:
-            assert False, "It should work finely without any issue. Please check it."
+        except Exception:
+            assert False, f"It should work finely without any issue. Please check it.\n Error: {traceback.format_exc()}"
         else:
             assert True, "It work finely without any issue."
 
@@ -663,8 +664,8 @@ class TestAdapterPool:
             adapter_pool.initial()
             adapter_pool.async_apply(tasks_size=Task_Size, function=lambda a: a+a, args=(1,))
             adapter_pool.terminal()
-        except Exception as e:
-            assert False, "It should work finely without any issue. Please check it."
+        except Exception:
+            assert False, f"It should work finely without any issue. Please check it.\n Error: {traceback.format_exc()}"
         else:
             assert True, "It work finely without any issue."
 
@@ -674,8 +675,8 @@ class TestAdapterPool:
             adapter_pool.initial()
             adapter_pool.async_apply(tasks_size=Task_Size, function=lambda a: a+a, args=(1,))
             adapter_pool.close()
-        except Exception as e:
-            assert False, "It should work finely without any issue. Please check it."
+        except Exception:
+            assert False, f"It should work finely without any issue. Please check it.\n Error: {traceback.format_exc()}"
         else:
             assert True, "It work finely without any issue."
 
