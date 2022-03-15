@@ -164,7 +164,7 @@ class TestFao:
             _DataStream = namedtuple("DataStream", ("file_path", "data"))
             _DataStream.file_path = _csv_file_path
             _DataStream.data = _result_data
-            _result = _example_fao.compress_as_zip(file=_zip_file_path, mode="a", data=[_DataStream])
+            _example_fao.compress_as_zip(file=_zip_file_path, mode="a", data=[_DataStream])
         except ValueError as ve:
             assert saving_strategy is not SavingStrategy.ONE_THREAD_ONE_FILE_AND_COMPRESS_ALL, "It must be not 'SavingStrategy.ONE_THREAD_ONE_FILE_AND_COMPRESS_ALL'."
             assert "The compress process only work with strategy 'ONE_THREAD_ONE_FILE_AND_COMPRESS_ALL'" in str(ve), "It should raise an exception about it doesn't support current saving strategy."
