@@ -1,5 +1,3 @@
-import pytest
-
 from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 from multirunnable.mode import FeatureMode
 from multirunnable.adapter import Lock, RLock, Semaphore, BoundedSemaphore
@@ -13,6 +11,7 @@ from gevent import sleep as gevent_sleep
 import multiprocessing
 import threading
 import asyncio
+import pytest
 import random
 import time
 
@@ -67,7 +66,7 @@ class FeatureTestSpec(metaclass=ABCMeta):
 
 
     @staticmethod
-    def _get_collection_dict(mode) -> dict:
+    def _get_collection_dict(mode: FeatureMode) -> dict:
         if mode is FeatureMode.Parallel:
             return _Process_Manager.dict()
         else:
@@ -75,7 +74,7 @@ class FeatureTestSpec(metaclass=ABCMeta):
 
 
     @staticmethod
-    def _get_collection_list(mode) -> list:
+    def _get_collection_list(mode: FeatureMode) -> list:
         if mode is FeatureMode.Parallel:
             return _Process_Manager.list()
         else:
@@ -83,7 +82,7 @@ class FeatureTestSpec(metaclass=ABCMeta):
 
 
     @staticmethod
-    def _get_worker_id(mode) -> str:
+    def _get_worker_id(mode: FeatureMode) -> str:
         if mode is FeatureMode.Parallel:
             return str(multiprocessing.current_process().pid)
         elif mode is FeatureMode.Concurrent:
@@ -102,7 +101,7 @@ class FeatureTestSpec(metaclass=ABCMeta):
 
 
     @staticmethod
-    def _sleep(mode) -> None:
+    def _sleep(mode: FeatureMode) -> None:
         if mode is FeatureMode.Parallel or mode is FeatureMode.Concurrent:
             time.sleep(_Sleep_Time)
         elif mode is FeatureMode.GreenThread:
@@ -137,7 +136,7 @@ class LockTestSpec(FeatureTestSpec, ABC):
 
 
     @staticmethod
-    def _feature_testing(mode, _lock, running_function):
+    def _feature_testing(mode: FeatureMode, _lock, running_function):
 
         _done_timestamp = FeatureTestSpec._get_collection_dict(mode)
 
@@ -156,7 +155,7 @@ class LockTestSpec(FeatureTestSpec, ABC):
 
 
     @staticmethod
-    def _feature_testing_by_pykeyword_with(mode, _lock, running_function):
+    def _feature_testing_by_pykeyword_with(mode: FeatureMode, _lock, running_function):
 
         _done_timestamp = FeatureTestSpec._get_collection_dict(mode)
 
@@ -179,7 +178,7 @@ class LockTestSpec(FeatureTestSpec, ABC):
 
 
     @staticmethod
-    def _async_feature_testing(mode, _lock, running_function, event_loop=None, factory=None):
+    def _async_feature_testing(mode: FeatureMode, _lock, running_function, event_loop=None, factory=None):
         _done_timestamp = FeatureTestSpec._get_collection_dict(mode)
 
         async def _target_testing():
@@ -197,7 +196,7 @@ class LockTestSpec(FeatureTestSpec, ABC):
 
 
     @staticmethod
-    def _async_feature_testing_by_pykeyword_with(mode, _lock, running_function, factory=None):
+    def _async_feature_testing_by_pykeyword_with(mode: FeatureMode, _lock, running_function, factory=None):
         _done_timestamp = FeatureTestSpec._get_collection_dict(mode)
 
         async def _target_testing():
@@ -246,7 +245,7 @@ class RLockTestSpec(FeatureTestSpec, ABC):
 
 
     @staticmethod
-    def _feature_testing(mode, _lock, running_function):
+    def _feature_testing(mode: FeatureMode, _lock, running_function):
 
         _done_timestamp = FeatureTestSpec._get_collection_dict(mode)
 
@@ -267,7 +266,7 @@ class RLockTestSpec(FeatureTestSpec, ABC):
 
 
     @staticmethod
-    def _feature_testing_by_pykeyword_with(mode, _lock, running_function):
+    def _feature_testing_by_pykeyword_with(mode: FeatureMode, _lock, running_function):
 
         _done_timestamp = FeatureTestSpec._get_collection_dict(mode)
 
@@ -329,7 +328,7 @@ class SemaphoreTestSpec(FeatureTestSpec, ABC):
 
 
     @staticmethod
-    def _feature_testing(mode, _lock, running_function):
+    def _feature_testing(mode: FeatureMode, _lock, running_function):
 
         _done_timestamp = FeatureTestSpec._get_collection_dict(mode)
 
@@ -348,7 +347,7 @@ class SemaphoreTestSpec(FeatureTestSpec, ABC):
 
 
     @staticmethod
-    def _feature_testing_by_pykeyword_with(mode, _lock, running_function):
+    def _feature_testing_by_pykeyword_with(mode: FeatureMode, _lock, running_function):
 
         _done_timestamp = FeatureTestSpec._get_collection_dict(mode)
 
@@ -464,7 +463,7 @@ class BoundedSemaphoreTestSpec(FeatureTestSpec, ABC):
 
 
     @staticmethod
-    def _feature_testing(mode, _lock, running_function):
+    def _feature_testing(mode: FeatureMode, _lock, running_function):
 
         _done_timestamp = FeatureTestSpec._get_collection_dict(mode)
 
@@ -483,7 +482,7 @@ class BoundedSemaphoreTestSpec(FeatureTestSpec, ABC):
 
 
     @staticmethod
-    def _feature_testing_by_pykeyword_with(mode, _lock, running_function):
+    def _feature_testing_by_pykeyword_with(mode: FeatureMode, _lock, running_function):
 
         _done_timestamp = FeatureTestSpec._get_collection_dict(mode)
 
@@ -599,7 +598,7 @@ class EventTestSpec(FeatureTestSpec, ABC):
 
 
     @staticmethod
-    def _feature_testing(mode, _lock, running_function):
+    def _feature_testing(mode: FeatureMode, _lock, running_function):
 
         _thread_ids = FeatureTestSpec._get_collection_dict(mode)
         _thread_flag = FeatureTestSpec._get_collection_dict(mode)
@@ -700,7 +699,7 @@ class ConditionTestSpec(FeatureTestSpec, ABC):
 
 
     @staticmethod
-    def _feature_testing(mode, _lock, running_function):
+    def _feature_testing(mode: FeatureMode, _lock, running_function):
         _thread_ids = FeatureTestSpec._get_collection_dict(mode)
         _thread_flag = FeatureTestSpec._get_collection_dict(mode)
 
@@ -738,7 +737,7 @@ class ConditionTestSpec(FeatureTestSpec, ABC):
 
 
     @staticmethod
-    def _feature_testing_by_pykeyword_with(mode, _lock, running_function):
+    def _feature_testing_by_pykeyword_with(mode: FeatureMode, _lock, running_function):
         _thread_ids = FeatureTestSpec._get_collection_dict(mode)
         _thread_flag = FeatureTestSpec._get_collection_dict(mode)
 
