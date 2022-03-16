@@ -1,9 +1,9 @@
 from multirunnable.persistence.database.strategy import get_connection_pool, BaseDatabaseConnection, BaseSingleConnection, BaseConnectionPool
 from multirunnable.persistence.database.operator import DatabaseOperator
-from multirunnable.parallel.share import sharing_in_processes
+# from multirunnable.parallel.share import sharing_in_processes
 
 from multiprocessing.managers import NamespaceProxy
-from typing import Any, Tuple, Dict, Union, cast
+from typing import Any, Tuple, Dict, Union
 from mysql.connector.connection import MySQLConnection
 from mysql.connector.pooling import MySQLConnectionPool, PooledMySQLConnection
 from mysql.connector.errors import PoolError
