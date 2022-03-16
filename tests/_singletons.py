@@ -4,7 +4,6 @@ from multirunnable._singletons import (
     SingletonMeta, NamedSingletonMeta, NamedSingletonABCMeta)     # Implement via meta class
 
 from abc import abstractmethod
-import pytest
 
 
 
