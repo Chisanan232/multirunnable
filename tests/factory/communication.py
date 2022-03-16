@@ -1,6 +1,7 @@
 from multirunnable.mode import FeatureMode
 from multirunnable.factory.communication import EventFactory, ConditionFactory
 
+import traceback
 import pytest
 import re
 
@@ -44,8 +45,8 @@ class TestAdapterEvent:
         assert mr_event.feature_mode is None, "The default value of FeatureMode of Event instance should be None."
         try:
             mr_event.feature_mode = _testing_mode
-        except Exception as e:
-            assert False, "It should set the FeatureMode into Event instance without any issue."
+        except Exception:
+            assert False, f"It should set the FeatureMode into Event instance without any issue.\n Error: {traceback.format_exc()}"
         else:
             _feature_mode = mr_event.feature_mode
             assert _feature_mode is _testing_mode, f"The mode we got from Event instance should be the same as we set '{_testing_mode}'."
@@ -142,8 +143,8 @@ class TestAdapterCondition:
         assert mr_condition.feature_mode is None, "The default value of FeatureMode of Condition instance should be None."
         try:
             mr_condition.feature_mode = _testing_mode
-        except Exception as e:
-            assert False, "It should set the FeatureMode into Condition instance without any issue."
+        except Exception:
+            assert False, f"It should set the FeatureMode into Event instance without any issue.\n Error: {traceback.format_exc()}"
         else:
             _feature_mode = mr_condition.feature_mode
             assert _feature_mode is _testing_mode, f"The mode we got from Condition instance should be the same as we set '{_testing_mode}'."
