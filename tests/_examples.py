@@ -1,4 +1,4 @@
-from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION, get_current_mode
+from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION, set_mode, get_current_mode
 from multirunnable.mode import RunningMode
 from multirunnable.adapter.context import context as _adapter_context
 from multirunnable.factory import ExecutorStrategyAdapter, LockFactory, RLockFactory
@@ -231,6 +231,8 @@ class RunByStrategy:
 
     @staticmethod
     def Parallel(_function):
+        set_mode(mode=RunningMode.Parallel)
+
         _strategy_adapter = ExecutorStrategyAdapter(mode=RunningMode.Parallel, executors=_Worker_Size)
         _strategy = _strategy_adapter.get_simple()
 
@@ -239,6 +241,8 @@ class RunByStrategy:
 
     @staticmethod
     def Concurrent(_function):
+        set_mode(mode=RunningMode.Concurrent)
+
         _strategy_adapter = ExecutorStrategyAdapter(mode=RunningMode.Concurrent, executors=_Worker_Size)
         _strategy = _strategy_adapter.get_simple()
 
@@ -247,6 +251,8 @@ class RunByStrategy:
 
     @staticmethod
     def CoroutineWithGreenThread(_function):
+        set_mode(mode=RunningMode.GreenThread)
+
         _strategy_adapter = ExecutorStrategyAdapter(mode=RunningMode.GreenThread, executors=_Worker_Size)
         _strategy = _strategy_adapter.get_simple()
 
@@ -255,6 +261,7 @@ class RunByStrategy:
 
     @staticmethod
     def CoroutineWithAsynchronous(_function, event_loop=None, _feature=None):
+        set_mode(mode=RunningMode.Asynchronous)
 
         _strategy_adapter = ExecutorStrategyAdapter(mode=RunningMode.Asynchronous, executors=_Worker_Size)
         _strategy = _strategy_adapter.get_simple()
@@ -283,6 +290,8 @@ class MapByStrategy:
 
     @staticmethod
     def Parallel(_functions: List):
+        set_mode(mode=RunningMode.Parallel)
+
         _strategy_adapter = ExecutorStrategyAdapter(mode=RunningMode.Parallel, executors=_Worker_Size)
         _strategy = _strategy_adapter.get_simple()
 
@@ -291,6 +300,8 @@ class MapByStrategy:
 
     @staticmethod
     def Concurrent(_functions: List):
+        set_mode(mode=RunningMode.Concurrent)
+
         _strategy_adapter = ExecutorStrategyAdapter(mode=RunningMode.Concurrent, executors=_Worker_Size)
         _strategy = _strategy_adapter.get_simple()
 
@@ -299,6 +310,8 @@ class MapByStrategy:
 
     @staticmethod
     def CoroutineWithGreenThread(_functions: List):
+        set_mode(mode=RunningMode.GreenThread)
+
         _strategy_adapter = ExecutorStrategyAdapter(mode=RunningMode.GreenThread, executors=_Worker_Size)
         _strategy = _strategy_adapter.get_simple()
 
@@ -307,6 +320,8 @@ class MapByStrategy:
 
     @staticmethod
     def CoroutineWithAsynchronous(_functions: List, _feature=None):
+        set_mode(mode=RunningMode.Asynchronous)
+
         _strategy_adapter = ExecutorStrategyAdapter(mode=RunningMode.Asynchronous, executors=_Worker_Size)
         _strategy = _strategy_adapter.get_simple()
         _strategy.map_with_function(functions=_functions, features=_feature)
