@@ -1,15 +1,15 @@
-from multirunnable.mode import FeatureMode
+from multirunnable.mode import RunningMode, FeatureMode
 from multirunnable.factory.lock import LockFactory, SemaphoreFactory, BoundedSemaphoreFactory
 from multirunnable.factory.communication import EventFactory, ConditionFactory
 from multirunnable.api.operator import (
-    LockAdapterOperator, RLockOperator,
+    LockOperator, RLockOperator,
     SemaphoreOperator, BoundedSemaphoreOperator,
     EventOperator, ConditionOperator,
     LockAsyncOperator,
     SemaphoreAsyncOperator, BoundedSemaphoreAsyncOperator,
     EventAsyncOperator, ConditionAsyncOperator)
 
-from ..test_config import Semaphore_Value
+from ..test_config import Under_Test_RunningModes, Semaphore_Value
 from .._examples import RunByStrategy, MapByStrategy
 from ..framework.lock import LockTestSpec, RLockTestSpec, SemaphoreTestSpec, BoundedSemaphoreTestSpec, EventTestSpec, ConditionTestSpec
 from .._examples_with_synchronization import (
@@ -29,7 +29,7 @@ _Sleep_Time: int = 1
 
 @pytest.fixture(scope="function")
 def lock_opts():
-    return LockAdapterOperator()
+    return LockOperator()
 
 
 @pytest.fixture(scope="function")
@@ -60,15 +60,15 @@ def condition_opts():
 
 class TestLockAdapterOperator(LockTestSpec):
 
-    @pytest.mark.parametrize("mode", [FeatureMode.Parallel, FeatureMode.Concurrent, FeatureMode.GreenThread])
-    def test_get_feature_instance(self, mode, lock_opts: LockAdapterOperator):
+    @pytest.mark.parametrize("mode", Under_Test_RunningModes)
+    def test_get_feature_instance(self, mode, lock_opts: LockOperator):
         _lock = instantiate_lock(mode)
         _feature_instn = lock_opts._get_feature_instance()
         assert _feature_instn is _lock, "The feature property should be the 'Lock' instance we set."
 
 
-    @pytest.mark.parametrize("mode", [FeatureMode.Parallel, FeatureMode.Concurrent, FeatureMode.GreenThread])
-    def test_feature_instance_property(self, mode, lock_opts: LockAdapterOperator):
+    @pytest.mark.parametrize("mode", Under_Test_RunningModes)
+    def test_feature_instance_property(self, mode, lock_opts: LockOperator):
         _lock = instantiate_lock(mode)
 
         try:
@@ -79,33 +79,33 @@ class TestLockAdapterOperator(LockTestSpec):
             assert _feature_instn is _lock, "The feature property should be the 'Lock' instance we set."
 
 
-    def test_feature_in_parallel(self, lock_opts: LockAdapterOperator):
-        instantiate_lock(FeatureMode.Parallel)
+    def test_feature_in_parallel(self, lock_opts: LockOperator):
+        instantiate_lock(RunningMode.Parallel)
         LockTestSpec._feature_testing(mode=FeatureMode.Parallel, _lock=lock_opts, running_function=RunByStrategy.Parallel)
 
 
-    def test_feature_by_pykeyword_with_in_parallel(self, lock_opts: LockAdapterOperator):
-        instantiate_lock(FeatureMode.Parallel)
+    def test_feature_by_pykeyword_with_in_parallel(self, lock_opts: LockOperator):
+        instantiate_lock(RunningMode.Parallel)
         LockTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.Parallel, _lock=lock_opts, running_function=RunByStrategy.Parallel)
 
 
-    def test_feature_in_concurrent(self, lock_opts: LockAdapterOperator):
-        instantiate_lock(FeatureMode.Concurrent)
+    def test_feature_in_concurrent(self, lock_opts: LockOperator):
+        instantiate_lock(RunningMode.Concurrent)
         LockTestSpec._feature_testing(mode=FeatureMode.Concurrent, _lock=lock_opts, running_function=RunByStrategy.Concurrent)
 
 
-    def test_feature_by_pykeyword_with_in_concurrent(self, lock_opts: LockAdapterOperator):
-        instantiate_lock(FeatureMode.Concurrent)
+    def test_feature_by_pykeyword_with_in_concurrent(self, lock_opts: LockOperator):
+        instantiate_lock(RunningMode.Concurrent)
         LockTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.Concurrent, _lock=lock_opts, running_function=RunByStrategy.Concurrent)
 
 
-    def test_feature_in_green_thread(self, lock_opts: LockAdapterOperator):
-        instantiate_lock(FeatureMode.GreenThread)
+    def test_feature_in_green_thread(self, lock_opts: LockOperator):
+        instantiate_lock(RunningMode.GreenThread)
         LockTestSpec._feature_testing(mode=FeatureMode.GreenThread, _lock=lock_opts, running_function=RunByStrategy.CoroutineWithGreenThread)
 
 
-    def test_feature_by_pykeyword_with_in_green_thread(self, lock_opts: LockAdapterOperator):
-        instantiate_lock(FeatureMode.GreenThread)
+    def test_feature_by_pykeyword_with_in_green_thread(self, lock_opts: LockOperator):
+        instantiate_lock(RunningMode.GreenThread)
         LockTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.GreenThread, _lock=lock_opts, running_function=RunByStrategy.CoroutineWithGreenThread)
 
 
@@ -122,14 +122,14 @@ class TestLockAdapterOperator(LockTestSpec):
 
 class TestRLockAdapterOperator(RLockTestSpec):
 
-    @pytest.mark.parametrize("mode", [FeatureMode.Parallel, FeatureMode.Concurrent, FeatureMode.GreenThread])
+    @pytest.mark.parametrize("mode", Under_Test_RunningModes)
     def test_get_feature_instance(self, mode, rlock_opts: RLockOperator):
         _rlock = instantiate_rlock(mode)
         _feature_instn = rlock_opts._get_feature_instance()
         assert _feature_instn is _rlock, "The feature property should be the 'RLock' instance we set."
 
 
-    @pytest.mark.parametrize("mode", [FeatureMode.Parallel, FeatureMode.Concurrent, FeatureMode.GreenThread])
+    @pytest.mark.parametrize("mode", Under_Test_RunningModes)
     def test_feature_instance_property(self, mode, rlock_opts: RLockOperator):
         _rlock = instantiate_rlock(mode)
         try:
@@ -141,46 +141,46 @@ class TestRLockAdapterOperator(RLockTestSpec):
 
 
     def test_feature_in_parallel(self, rlock_opts: RLockOperator):
-        instantiate_rlock(FeatureMode.Parallel)
+        instantiate_rlock(RunningMode.Parallel)
         RLockTestSpec._feature_testing(mode=FeatureMode.Parallel, _lock=rlock_opts, running_function=RunByStrategy.Parallel)
 
 
     def test_feature_by_pykeyword_with_in_parallel(self, rlock_opts: RLockOperator):
-        instantiate_rlock(FeatureMode.Parallel)
+        instantiate_rlock(RunningMode.Parallel)
         RLockTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.Parallel, _lock=rlock_opts, running_function=RunByStrategy.Parallel)
 
 
     def test_feature_in_concurrent(self, rlock_opts: RLockOperator):
-        instantiate_rlock(FeatureMode.Concurrent)
+        instantiate_rlock(RunningMode.Concurrent)
         RLockTestSpec._feature_testing(mode=FeatureMode.Concurrent, _lock=rlock_opts, running_function=RunByStrategy.Concurrent)
 
 
     def test_feature_by_pykeyword_with_in_concurrent(self, rlock_opts: RLockOperator):
-        instantiate_rlock(FeatureMode.Concurrent)
+        instantiate_rlock(RunningMode.Concurrent)
         RLockTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.Concurrent, _lock=rlock_opts, running_function=RunByStrategy.Concurrent)
 
 
     def test_feature_in_green_thread(self, rlock_opts: RLockOperator):
-        instantiate_rlock(FeatureMode.GreenThread)
+        instantiate_rlock(RunningMode.GreenThread)
         RLockTestSpec._feature_testing(mode=FeatureMode.GreenThread, _lock=rlock_opts, running_function=RunByStrategy.CoroutineWithGreenThread)
 
 
     def test_feature_by_pykeyword_with_in_green_thread(self, rlock_opts: RLockOperator):
-        instantiate_rlock(FeatureMode.GreenThread)
+        instantiate_rlock(RunningMode.GreenThread)
         RLockTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.GreenThread, _lock=rlock_opts, running_function=RunByStrategy.CoroutineWithGreenThread)
 
 
 
 class TestSemaphoreAdapterOperator(SemaphoreTestSpec):
 
-    @pytest.mark.parametrize("mode", [FeatureMode.Parallel, FeatureMode.Concurrent, FeatureMode.GreenThread])
+    @pytest.mark.parametrize("mode", Under_Test_RunningModes)
     def test_get_feature_instance(self, mode, semaphore_opts: SemaphoreOperator):
         _semaphore = instantiate_semaphore(mode)
         _feature_instn = semaphore_opts._get_feature_instance()
         assert _feature_instn is _semaphore, "The feature property should be the 'Semaphore' instance we set."
 
 
-    @pytest.mark.parametrize("mode", [FeatureMode.Parallel, FeatureMode.Concurrent, FeatureMode.GreenThread])
+    @pytest.mark.parametrize("mode", Under_Test_RunningModes)
     def test_feature_instance_property(self, mode, semaphore_opts: SemaphoreOperator):
         _semaphore = instantiate_semaphore(mode)
         try:
@@ -193,23 +193,23 @@ class TestSemaphoreAdapterOperator(SemaphoreTestSpec):
 
     @pytest.mark.skipif(sys.platform != "win32", reason="On macOS, sem_timedwait is unsupported. Please refer to the multiprocessing documentation.")
     def test_feature_in_parallel(self, semaphore_opts: SemaphoreOperator):
-        instantiate_semaphore(FeatureMode.Parallel)
+        instantiate_semaphore(RunningMode.Parallel)
         SemaphoreTestSpec._feature_testing(mode=FeatureMode.Parallel, _lock=semaphore_opts, running_function=RunByStrategy.Parallel)
 
 
     def test_feature_by_pykeyword_with_in_parallel(self, semaphore_opts: SemaphoreOperator):
-        instantiate_semaphore(FeatureMode.Parallel)
+        instantiate_semaphore(RunningMode.Parallel)
         SemaphoreTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.Parallel, _lock=semaphore_opts, running_function=RunByStrategy.Parallel)
 
 
     @pytest.mark.skip(reason="Still debug for this issue. Mark as XFail because it works finely via Python keyword 'with'.")
     def test_feature_in_concurrent(self, semaphore_opts: SemaphoreOperator):
-        instantiate_semaphore(FeatureMode.Concurrent)
+        instantiate_semaphore(RunningMode.Concurrent)
         SemaphoreTestSpec._feature_testing(mode=FeatureMode.Concurrent, _lock=semaphore_opts, running_function=RunByStrategy.Concurrent)
 
 
     def test_feature_by_pykeyword_with_in_concurrent(self, semaphore_opts: SemaphoreOperator):
-        instantiate_semaphore(FeatureMode.Concurrent)
+        instantiate_semaphore(RunningMode.Concurrent)
         SemaphoreTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.Concurrent, _lock=semaphore_opts, running_function=RunByStrategy.Concurrent)
 
 
@@ -217,7 +217,7 @@ class TestSemaphoreAdapterOperator(SemaphoreTestSpec):
     def test_feature_in_green_thread(self, semaphore_opts: SemaphoreOperator):
 
         # _done_timestamp = {}
-        instantiate_semaphore(FeatureMode.GreenThread)
+        instantiate_semaphore(RunningMode.GreenThread)
 
         # def _target_testing():
         #     _smp_opts = SemaphoreOperator()
@@ -237,7 +237,7 @@ class TestSemaphoreAdapterOperator(SemaphoreTestSpec):
 
 
     def test_feature_by_pykeyword_with_in_green_thread(self, semaphore_opts: SemaphoreOperator):
-        instantiate_semaphore(FeatureMode.GreenThread)
+        instantiate_semaphore(RunningMode.GreenThread)
         SemaphoreTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.GreenThread, _lock=semaphore_opts, running_function=RunByStrategy.CoroutineWithGreenThread)
 
 
@@ -254,14 +254,14 @@ class TestSemaphoreAdapterOperator(SemaphoreTestSpec):
 
 class TestBoundedSemaphoreAdapterOperator(BoundedSemaphoreTestSpec):
 
-    @pytest.mark.parametrize("mode", [FeatureMode.Parallel, FeatureMode.Concurrent, FeatureMode.GreenThread])
+    @pytest.mark.parametrize("mode", Under_Test_RunningModes)
     def test_get_feature_instance(self, mode, bounded_semaphore_opts: BoundedSemaphoreOperator):
         _bounded_semaphore = instantiate_bounded_semaphore(mode)
         _feature_instn = bounded_semaphore_opts._get_feature_instance()
         assert _feature_instn is _bounded_semaphore, "The feature property should be the 'BoundedSemaphore' instance we set."
 
 
-    @pytest.mark.parametrize("mode", [FeatureMode.Parallel, FeatureMode.Concurrent, FeatureMode.GreenThread])
+    @pytest.mark.parametrize("mode", Under_Test_RunningModes)
     def test_feature_instance_property(self, mode, bounded_semaphore_opts: BoundedSemaphoreOperator):
         _bounded_semaphore = instantiate_bounded_semaphore(mode)
         try:
@@ -276,7 +276,7 @@ class TestBoundedSemaphoreAdapterOperator(BoundedSemaphoreTestSpec):
     def test_feature_in_parallel(self, bounded_semaphore_opts: BoundedSemaphoreOperator):
 
         # _done_timestamp = _Process_Manager.dict()
-        instantiate_bounded_semaphore(FeatureMode.Parallel)
+        instantiate_bounded_semaphore(RunningMode.Parallel)
 
         # def _target_testing():
         #     # Save a timestamp into list
@@ -295,27 +295,27 @@ class TestBoundedSemaphoreAdapterOperator(BoundedSemaphoreTestSpec):
 
 
     def test_feature_by_pykeyword_with_in_parallel(self, bounded_semaphore_opts: BoundedSemaphoreOperator):
-        instantiate_bounded_semaphore(FeatureMode.Parallel)
+        instantiate_bounded_semaphore(RunningMode.Parallel)
         BoundedSemaphoreTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.Parallel, _lock=bounded_semaphore_opts, running_function=RunByStrategy.Parallel)
 
 
     def test_feature_in_concurrent(self, bounded_semaphore_opts: BoundedSemaphoreOperator):
-        instantiate_bounded_semaphore(FeatureMode.Concurrent)
+        instantiate_bounded_semaphore(RunningMode.Concurrent)
         BoundedSemaphoreTestSpec._feature_testing(mode=FeatureMode.Concurrent, _lock=bounded_semaphore_opts, running_function=RunByStrategy.Concurrent)
 
 
     def test_feature_by_pykeyword_with_in_concurrent(self, bounded_semaphore_opts: BoundedSemaphoreOperator):
-        instantiate_bounded_semaphore(FeatureMode.Concurrent)
+        instantiate_bounded_semaphore(RunningMode.Concurrent)
         BoundedSemaphoreTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.Concurrent, _lock=bounded_semaphore_opts, running_function=RunByStrategy.Concurrent)
 
 
     def test_feature_in_green_thread(self, bounded_semaphore_opts: BoundedSemaphoreOperator):
-        instantiate_bounded_semaphore(FeatureMode.GreenThread)
+        instantiate_bounded_semaphore(RunningMode.GreenThread)
         BoundedSemaphoreTestSpec._feature_testing(mode=FeatureMode.GreenThread, _lock=bounded_semaphore_opts, running_function=RunByStrategy.CoroutineWithGreenThread)
 
 
     def test_feature_by_pykeyword_with_in_green_thread(self, bounded_semaphore_opts: BoundedSemaphoreOperator):
-        instantiate_bounded_semaphore(FeatureMode.GreenThread)
+        instantiate_bounded_semaphore(RunningMode.GreenThread)
         BoundedSemaphoreTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.GreenThread, _lock=bounded_semaphore_opts, running_function=RunByStrategy.CoroutineWithGreenThread)
 
 
@@ -332,14 +332,14 @@ class TestBoundedSemaphoreAdapterOperator(BoundedSemaphoreTestSpec):
 
 class TestEventAdapterOperator(EventTestSpec):
 
-    @pytest.mark.parametrize("mode", [FeatureMode.Parallel, FeatureMode.Concurrent, FeatureMode.GreenThread])
+    @pytest.mark.parametrize("mode", Under_Test_RunningModes)
     def test_get_feature_instance(self, mode, event_opts: EventOperator):
         _event = instantiate_event(mode)
         _feature_instn = event_opts._get_feature_instance()
         assert _feature_instn is _event, "The feature property should be the 'Event' instance we set."
 
 
-    @pytest.mark.parametrize("mode", [FeatureMode.Parallel, FeatureMode.Concurrent, FeatureMode.GreenThread])
+    @pytest.mark.parametrize("mode", Under_Test_RunningModes)
     def test_feature_instance_property(self, mode, event_opts: EventOperator):
         _event = instantiate_event(mode)
         try:
@@ -351,17 +351,17 @@ class TestEventAdapterOperator(EventTestSpec):
 
 
     def test_feature_in_parallel(self, event_opts: EventOperator):
-        instantiate_event(FeatureMode.Parallel)
+        instantiate_event(RunningMode.Parallel)
         EventTestSpec._feature_testing(mode=FeatureMode.Parallel, _lock=event_opts, running_function=MapByStrategy.Parallel)
 
 
     def test_feature_in_concurrent(self, event_opts: EventOperator):
-        instantiate_event(FeatureMode.Concurrent)
+        instantiate_event(RunningMode.Concurrent)
         EventTestSpec._feature_testing(mode=FeatureMode.Concurrent, _lock=event_opts, running_function=MapByStrategy.Concurrent)
 
 
     def test_feature_in_green_thread(self, event_opts: EventOperator):
-        instantiate_event(FeatureMode.GreenThread)
+        instantiate_event(RunningMode.GreenThread)
         EventTestSpec._feature_testing(mode=FeatureMode.GreenThread, _lock=event_opts, running_function=MapByStrategy.CoroutineWithGreenThread)
 
 
@@ -373,14 +373,14 @@ class TestEventAdapterOperator(EventTestSpec):
 
 class TestConditionAdapterOperator(ConditionTestSpec):
 
-    @pytest.mark.parametrize("mode", [FeatureMode.Parallel, FeatureMode.Concurrent])
+    @pytest.mark.parametrize("mode", [RunningMode.Parallel, RunningMode.Concurrent])
     def test_get_feature_instance(self, mode, condition_opts: ConditionOperator):
         _condition = instantiate_condition(mode)
         _feature_instn = condition_opts._get_feature_instance()
         assert _feature_instn is _condition, "The feature property should be the 'Condition' instance we set."
 
 
-    @pytest.mark.parametrize("mode", [FeatureMode.Parallel, FeatureMode.Concurrent])
+    @pytest.mark.parametrize("mode", [RunningMode.Parallel, RunningMode.Concurrent])
     def test_feature_instance_property(self, mode, condition_opts: ConditionOperator):
         _condition = instantiate_condition(mode)
         try:
@@ -392,22 +392,22 @@ class TestConditionAdapterOperator(ConditionTestSpec):
 
 
     def test_feature_in_parallel(self, condition_opts: ConditionOperator):
-        instantiate_condition(FeatureMode.Parallel)
+        instantiate_condition(RunningMode.Parallel)
         ConditionTestSpec._feature_testing(mode=FeatureMode.Parallel, _lock=condition_opts, running_function=MapByStrategy.Parallel)
 
 
     def test_feature_by_pykeyword_with_in_parallel(self, condition_opts: ConditionOperator):
-        instantiate_condition(FeatureMode.Parallel)
+        instantiate_condition(RunningMode.Parallel)
         ConditionTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.Parallel, _lock=condition_opts, running_function=MapByStrategy.Parallel)
 
 
     def test_feature_in_concurrent(self, condition_opts: ConditionOperator):
-        instantiate_condition(FeatureMode.Concurrent)
+        instantiate_condition(RunningMode.Concurrent)
         ConditionTestSpec._feature_testing(mode=FeatureMode.Concurrent, _lock=condition_opts, running_function=MapByStrategy.Concurrent)
 
 
     def test_feature_by_pykeyword_with_in_concurrent(self, condition_opts: ConditionOperator):
-        instantiate_condition(FeatureMode.Concurrent)
+        instantiate_condition(RunningMode.Concurrent)
         ConditionTestSpec._feature_testing_by_pykeyword_with(mode=FeatureMode.Concurrent, _lock=condition_opts, running_function=MapByStrategy.Concurrent)
 
 

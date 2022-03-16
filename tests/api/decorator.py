@@ -1,5 +1,5 @@
 from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
-from multirunnable.mode import FeatureMode
+from multirunnable.mode import RunningMode
 from multirunnable.api.decorator import RunWith, AsyncRunWith
 from multirunnable.factory.lock import LockFactory, SemaphoreFactory, BoundedSemaphoreFactory
 from multirunnable.parallel.share import Global_Manager
@@ -325,7 +325,7 @@ class TestFeaturesDecorator:
     def test_lock_decorator_in_parallel(self):
 
         _done_timestamp = Global_Manager.dict()
-        instantiate_lock(FeatureMode.Parallel)
+        instantiate_lock(RunningMode.Parallel)
 
         @RunWith.Lock
         def _target_testing():
@@ -343,7 +343,7 @@ class TestFeaturesDecorator:
     def test_lock_decorator_in_concurrent(self):
 
         _done_timestamp = {}
-        instantiate_lock(FeatureMode.Concurrent)
+        instantiate_lock(RunningMode.Concurrent)
 
         @RunWith.Lock
         def _target_testing():
@@ -361,7 +361,7 @@ class TestFeaturesDecorator:
     def test_lock_decorator_in_green_thread(self):
 
         _done_timestamp = {}
-        instantiate_lock(FeatureMode.GreenThread)
+        instantiate_lock(RunningMode.GreenThread)
 
         @RunWith.Lock
         def _target_testing():
@@ -379,7 +379,7 @@ class TestFeaturesDecorator:
     def test_rlock_decorator_in_concurrent(self):
 
         _done_timestamp = {}
-        instantiate_rlock(FeatureMode.Concurrent)
+        instantiate_rlock(RunningMode.Concurrent)
 
         @RunWith.RLock
         def _target_testing():
@@ -397,7 +397,7 @@ class TestFeaturesDecorator:
     def test_rlock_decorator_in_green_thread(self):
 
         _done_timestamp = {}
-        instantiate_rlock(FeatureMode.GreenThread)
+        instantiate_rlock(RunningMode.GreenThread)
 
         @RunWith.RLock
         def _target_testing():
@@ -415,7 +415,7 @@ class TestFeaturesDecorator:
     def test_semaphore_decorator_in_parallel(self):
 
         _done_timestamp = Global_Manager.dict()
-        instantiate_semaphore(FeatureMode.Parallel)
+        instantiate_semaphore(RunningMode.Parallel)
 
         @RunWith.Semaphore
         def _target_testing():
@@ -433,7 +433,7 @@ class TestFeaturesDecorator:
     def test_semaphore_decorator_in_concurrent(self):
 
         _done_timestamp = {}
-        instantiate_semaphore(FeatureMode.Concurrent)
+        instantiate_semaphore(RunningMode.Concurrent)
 
         @RunWith.Semaphore
         def _target_testing():
@@ -451,7 +451,7 @@ class TestFeaturesDecorator:
     def test_semaphore_decorator_in_green_thread(self):
 
         _done_timestamp = {}
-        instantiate_semaphore(FeatureMode.GreenThread)
+        instantiate_semaphore(RunningMode.GreenThread)
 
         @RunWith.Semaphore
         def _target_testing():
@@ -469,7 +469,7 @@ class TestFeaturesDecorator:
     def test_bounded_semaphore_decorator_in_parallel(self):
 
         _done_timestamp = Global_Manager.dict()
-        instantiate_bounded_semaphore(FeatureMode.Parallel)
+        instantiate_bounded_semaphore(RunningMode.Parallel)
 
         @RunWith.Bounded_Semaphore
         def _target_testing():
@@ -492,7 +492,7 @@ class TestFeaturesDecorator:
     def test_bounded_semaphore_decorator_in_concurrent(self):
 
         _done_timestamp = {}
-        instantiate_bounded_semaphore(FeatureMode.Concurrent)
+        instantiate_bounded_semaphore(RunningMode.Concurrent)
 
         @RunWith.Bounded_Semaphore
         def _target_testing():
@@ -515,7 +515,7 @@ class TestFeaturesDecorator:
     def test_bounded_semaphore_decorator_in_green_thread(self):
 
         _done_timestamp = {}
-        instantiate_bounded_semaphore(FeatureMode.GreenThread)
+        instantiate_bounded_semaphore(RunningMode.GreenThread)
 
         @RunWith.Bounded_Semaphore
         def _target_testing():
@@ -553,7 +553,7 @@ class TestAsyncFeaturesDecorator:
         asyncio.set_event_loop(loop=_event_loop)
 
         _done_timestamp = {}
-        instantiate_lock(FeatureMode.Asynchronous, event_loop=_event_loop)
+        instantiate_lock(RunningMode.Asynchronous, event_loop=_event_loop)
 
         @AsyncRunWith.Lock
         async def _target_testing():
@@ -577,7 +577,7 @@ class TestAsyncFeaturesDecorator:
         asyncio.set_event_loop(loop=_event_loop)
 
         _done_timestamp = {}
-        instantiate_semaphore(FeatureMode.Asynchronous, event_loop=_event_loop)
+        instantiate_semaphore(RunningMode.Asynchronous, event_loop=_event_loop)
 
         @AsyncRunWith.Semaphore
         async def _target_testing():
@@ -601,7 +601,7 @@ class TestAsyncFeaturesDecorator:
         asyncio.set_event_loop(loop=_event_loop)
 
         _done_timestamp = {}
-        instantiate_bounded_semaphore(FeatureMode.Asynchronous, event_loop=_event_loop)
+        instantiate_bounded_semaphore(RunningMode.Asynchronous, event_loop=_event_loop)
 
         @AsyncRunWith.Bounded_Semaphore
         async def _target_testing():
