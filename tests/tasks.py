@@ -4,8 +4,8 @@ A unittest for pyocean.task module
 
 from multirunnable.tasks import QueueTask
 from multirunnable.parallel import Queue as Process_Queue
-from multirunnable.concurrent import Thread_Queue
-from multirunnable.coroutine import Greenlet_Queue, Async_Queue
+# from multirunnable.concurrent import Thread_Queue
+# from multirunnable.coroutine import Greenlet_Queue, Async_Queue
 
 from abc import ABCMeta, abstractmethod
 import random
