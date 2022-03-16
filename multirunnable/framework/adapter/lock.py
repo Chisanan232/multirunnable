@@ -156,12 +156,12 @@ class BaseLockAdapter(BaseFeatureAdapter):
 
 
     @abstractmethod
-    def acquire(self, *args, **kwargs) -> None:
+    def acquire(self, **kwargs) -> None:
         pass
 
 
     @abstractmethod
-    def release(self, *args, **kwargs) -> None:
+    def release(self, **kwargs) -> None:
         pass
 
 
@@ -230,12 +230,12 @@ class BaseAsyncLockAdapter(BaseFeatureAdapter):
 
 
     @abstractmethod
-    async def acquire(self, *args, **kwargs) -> None:
+    async def acquire(self, **kwargs) -> None:
         pass
 
 
     @abstractmethod
-    def release(self, *args, **kwargs) -> None:
+    def release(self, **kwargs) -> None:
         pass
 
 
@@ -261,7 +261,7 @@ class BaseAsyncCommunicationAdapter(BaseFeatureAdapter):
 
 
     @abstractmethod
-    async def wait(self, *args, **kwargs) -> None:
+    async def wait(self, **kwargs) -> None:
         pass
 
 
