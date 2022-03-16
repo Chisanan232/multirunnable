@@ -1,3 +1,5 @@
+import traceback
+
 from multirunnable import set_mode, get_current_mode, RunningMode
 from multirunnable.persistence.database.strategy import get_connection_pool, database_connection_pools, Globalize
 from multirunnable.exceptions import GlobalizeObjectError
@@ -148,8 +150,8 @@ class TestPersistenceDatabaseOneConnection:
 
         try:
             single_connection_strategy.close_connection()
-        except Exception as e:
-            assert False, "It should close the database connection and cursor instances normally."
+        except Exception:
+            assert False, f"It should close the database connection and cursor instances normally.\n Error: {traceback.format_exc()}"
         else:
             assert True, "It closes the database connection and cursor instances normally."
 
