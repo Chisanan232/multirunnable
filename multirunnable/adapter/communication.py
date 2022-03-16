@@ -3,6 +3,7 @@ __all__ = ["Event", "Condition"]
 from ..framework.adapter import BaseCommunicationAdapter, BaseLockAdapter, BaseAsyncLockAdapter, BaseAsyncCommunicationAdapter
 from ..factory import EventFactory, ConditionFactory
 from ..api import (
+    RLockOperator,
     EventOperator, ConditionOperator,
     EventAsyncOperator, ConditionAsyncOperator
 )
@@ -47,10 +48,9 @@ class Condition(BaseLockAdapter, BaseCommunicationAdapter):
 
 
     def acquire(self, blocking: bool = True, timeout: int = None) -> None:
-        __kwargs = {}
-        __kwargs.get("blocking", blocking)
-        __kwargs.get("timeout", timeout)
-        self._feature_operator.acquire(**__kwargs)
+        _timeout = RLockOperator.converse_timeout_val(timeout=timeout)
+        _args = (blocking, _timeout)
+        self._feature_operator.acquire(*_args)
 
 
     def release(self) -> None:

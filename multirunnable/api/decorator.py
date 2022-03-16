@@ -6,7 +6,7 @@ from functools import wraps
 
 from multirunnable.framework.runnable.result import MRResult as _MRResult
 from multirunnable.api.operator import (
-    LockAdapterOperator as _LockOperator,
+    LockOperator as _LockOperator,
     RLockOperator as _RLockOperator,
     SemaphoreOperator as _SemaphoreOperator,
     BoundedSemaphoreOperator as _BoundedSemaphoreOperator,

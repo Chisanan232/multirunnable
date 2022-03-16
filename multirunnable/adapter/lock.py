@@ -38,11 +38,10 @@ class RLock(BaseLockAdapter):
         return RLockOperator()
 
 
-    def acquire(self, blocking: bool = True, timeout: int = -1) -> None:
-        __kwargs = {}
-        __kwargs.get("blocking", blocking)
-        __kwargs.get("timeout", timeout)
-        self._feature_operator.acquire(**__kwargs)
+    def acquire(self, blocking: bool = True, timeout: int = None) -> None:
+        _timeout = RLockOperator.converse_timeout_val(timeout=timeout)
+        _kwargs = {"blocking": blocking, "timeout": _timeout}
+        self._feature_operator.acquire(**_kwargs)
 
 
     def release(self) -> None:
@@ -66,10 +65,8 @@ class Semaphore(BaseLockAdapter):
 
 
     def acquire(self, blocking: bool = True, timeout: int = None) -> None:
-        __kwargs = {}
-        __kwargs.get("blocking", blocking)
-        __kwargs.get("timeout", timeout)
-        return self._feature_operator.acquire(**__kwargs)
+        _kwargs = {"blocking": blocking, "timeout": timeout}
+        return self._feature_operator.acquire(**_kwargs)
 
 
     def release(self, n: int = 1) -> None:
@@ -94,7 +91,7 @@ class BoundedSemaphore(Semaphore):
 
 class AsyncLock(BaseAsyncLockAdapter):
 
-    def _instantiate_factory(self) -> LockAsyncOperator:
+    def _instantiate_factory(self) -> LockFactory:
         return LockFactory()
 
 
@@ -118,11 +115,11 @@ class AsyncSemaphore(BaseAsyncLockAdapter):
         super().__init__(**kwargs)
 
 
-    def _instantiate_factory(self) -> LockAsyncOperator:
+    def _instantiate_factory(self) -> SemaphoreFactory:
         return SemaphoreFactory(value=self._value)
 
 
-    def _instantiate_operator(self) -> LockAsyncOperator:
+    def _instantiate_operator(self) -> SemaphoreAsyncOperator:
         return SemaphoreAsyncOperator()
 
 
@@ -137,11 +134,11 @@ class AsyncSemaphore(BaseAsyncLockAdapter):
 
 class AsyncBoundedSemaphore(AsyncSemaphore):
 
-    def _instantiate_factory(self) -> LockAsyncOperator:
+    def _instantiate_factory(self) -> BoundedSemaphoreFactory:
         return BoundedSemaphoreFactory(value=self._value)
 
 
-    def _instantiate_operator(self) -> LockAsyncOperator:
+    def _instantiate_operator(self) -> BoundedSemaphoreAsyncOperator:
         return BoundedSemaphoreAsyncOperator()
 
 

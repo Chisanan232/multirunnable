@@ -1,3 +1,5 @@
+from multirunnable._config import get_current_mode
+from multirunnable.mode import RunningMode
 from multirunnable.framework.api.operator import (
     AdapterOperator as _AdapterOperator,
     BaseLockAdapterOperator as _BaseLockAdapterOperator,
@@ -18,7 +20,7 @@ from typing import Dict, Optional
 
 
 
-class LockAdapterOperator(_BaseLockAdapterOperator):
+class LockOperator(_BaseLockAdapterOperator):
 
     def _get_feature_instance(self) -> _MRLock:
         from .manage import Running_Lock
@@ -41,21 +43,25 @@ class RLockOperator(_BaseLockAdapterOperator):
         return Running_RLock
 
 
-    def acquire(self, blocking: bool = True, timeout: int = -1) -> None:
+    def acquire(self, blocking: bool = True, timeout: int = None) -> None:
         # # # # From document, Parallel, Concurrent and Gevent all has both 2 parameters 'blocking' and 'timeout'.
-        # # # # Parallel - multiprocessing doesn't have parameter 'blocking' and type is bool
-        # # # # Concurrent - threading has parameter 'blocking' and type is bool
-        # # # # Coroutine - gevent (greenlet framework) has parameter 'blocking' and type is int
         # # # # Async - asyncio doesn't have any parameter
-        __kwargs = {}
-        __kwargs.get("blocking", blocking)
-        __kwargs.get("timeout", timeout)
-        self._feature_instance.acquire(**__kwargs)
+        _timeout = RLockOperator.converse_timeout_val(timeout=timeout)
+        _args = (blocking, _timeout)
+        self._feature_instance.acquire(*_args)
 
     # __enter__ = acquire
 
     def release(self) -> None:
         self._feature_instance.release()
+
+
+    @staticmethod
+    def converse_timeout_val(timeout: int) -> int:
+        _rmode = get_current_mode(force=True)
+        if _rmode is RunningMode.Concurrent and timeout is None:
+            timeout = -1
+        return timeout
 
 
 
@@ -79,10 +85,8 @@ class SemaphoreOperator(_BaseLockAdapterOperator):
         :return:
         """
 
-        __kwargs = {}
-        __kwargs.get("blocking", blocking)
-        __kwargs.get("timeout", timeout)
-        return self._feature_instance.acquire(**__kwargs)
+        _kwargs = {"blocking": blocking, "timeout": timeout}
+        return self._feature_instance.acquire(**_kwargs)
 
     # __enter__ = acquire
 
@@ -166,10 +170,10 @@ class ConditionOperator(_BaseLockAdapterOperator):
 
 
     def acquire(self, blocking: bool = True, timeout: int = None) -> None:
-        __kwargs = {}
-        __kwargs.get("blocking", blocking)
-        __kwargs.get("timeout", timeout)
-        self._feature_instance.acquire(**__kwargs)
+        # _kwargs = {"blocking": blocking, "timeout": timeout}
+        _timeout = RLockOperator.converse_timeout_val(timeout=timeout)
+        _args = (blocking, _timeout)
+        self._feature_instance.acquire(*_args)
 
 
     def release(self) -> None:
