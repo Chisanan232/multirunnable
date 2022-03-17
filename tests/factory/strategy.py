@@ -6,8 +6,6 @@ from multirunnable.coroutine.strategy import GreenThreadStrategy, GreenThreadPoo
 
 from ..test_config import Worker_Size, Worker_Pool_Size, Task_Size
 
-import pytest
-
 
 _Worker_Size = Worker_Size
 _Worker_Pool_Size = Worker_Pool_Size
