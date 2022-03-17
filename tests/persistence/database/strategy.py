@@ -1,6 +1,6 @@
 import traceback
 
-from multirunnable import set_mode, get_current_mode, RunningMode
+from multirunnable import set_mode, RunningMode
 from multirunnable.persistence.database.strategy import get_connection_pool, database_connection_pools, Globalize
 from multirunnable.exceptions import GlobalizeObjectError
 
@@ -104,7 +104,7 @@ class TestPersistenceDatabaseOneConnection:
         _new_cursor = _new_connection.cursor()
 
         _data = _select_data(_cursor=_new_cursor)
-        assert _data == [], f"It should get an empty dataset right now."
+        assert _data == [], "It should get an empty dataset right now."
         TestPersistenceDatabaseOneConnection._insert_data(cursor=_new_cursor, commit=True, connection_strategy=single_connection_strategy)
         TestPersistenceDatabaseOneConnection._close_instance(_strategy=single_connection_strategy, _cursor=_new_cursor)
 
@@ -113,7 +113,7 @@ class TestPersistenceDatabaseOneConnection:
         _latest_cursor = _latest_connection.cursor()
 
         _data = _select_data(_cursor=_latest_cursor)
-        assert _data != [] and len(_data) == 1, f"It should get an empty dataset right now."
+        assert _data != [] and len(_data) == 1, "It should get an empty dataset right now."
         TestPersistenceDatabaseOneConnection._delete_data(cursor=_latest_cursor, connection_strategy=single_connection_strategy)
         TestPersistenceDatabaseOneConnection._close_instance(_strategy=single_connection_strategy, _cursor=_latest_cursor)
 
@@ -334,7 +334,7 @@ class TestPersistenceDatabaseConnectionPool:
         _new_cursor = _new_connection.cursor()
 
         _data = _select_data(_cursor=_new_cursor)
-        assert _data == [], f"It should get an empty dataset right now."
+        assert _data == [], "It should get an empty dataset right now."
         TestPersistenceDatabaseConnectionPool._insert_data(conn=_new_connection, cursor=_new_cursor, commit=True, connection_strategy=connection_pool_strategy)
         TestPersistenceDatabaseConnectionPool._close_instance(_strategy=connection_pool_strategy, _conn=_new_connection, _cursor=_new_cursor)
 
@@ -343,7 +343,7 @@ class TestPersistenceDatabaseConnectionPool:
         _latest_cursor = _latest_connection.cursor()
 
         _data = _select_data(_cursor=_latest_cursor)
-        assert _data != [] and len(_data) == 1, f"It should get an empty dataset right now."
+        assert _data != [] and len(_data) == 1, "It should get an empty dataset right now."
         TestPersistenceDatabaseConnectionPool._delete_data(conn=_latest_connection, cursor=_latest_cursor, connection_strategy=connection_pool_strategy)
         TestPersistenceDatabaseConnectionPool._close_instance(_strategy=connection_pool_strategy, _conn=_latest_connection, _cursor=_latest_cursor)
 
@@ -387,7 +387,7 @@ class TestPersistenceDatabaseConnectionPool:
         try:
             _cursor = _conn.cursor()
         except AttributeError as ae:
-            assert "'NoneType' object has no attribute 'cursor'" in str(ae), f""
+            assert "'NoneType' object has no attribute 'cursor'" in str(ae), ""
 
 
 
