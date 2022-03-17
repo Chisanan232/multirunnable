@@ -1,7 +1,7 @@
 # MultiRunnable
 
 [![Supported Versions](https://img.shields.io/pypi/pyversions/multirunnable.svg?logo=python&logoColor=FBE072)](https://pypi.org/project/multirunnable)
-[![Release](https://img.shields.io/github/release/Chisanan232/multirunnable.svg?label=Release&sort=semver)](https://github.com/Chisanan232/multirunnable/releases)
+[![Release](https://img.shields.io/github/release/Chisanan232/multirunnable.svg?label=Release)](https://github.com/Chisanan232/multirunnable/releases)
 [![PyPI version](https://badge.fury.io/py/MultiRunnable.svg)](https://badge.fury.io/py/MultiRunnable)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/6733a68742a64b3dbcfa57b1309de4ce)](https://www.codacy.com/gh/Chisanan232/multirunnable/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Chisanan232/multirunnable&amp;utm_campaign=Badge_Grade)
