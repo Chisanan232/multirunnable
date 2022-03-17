@@ -12,7 +12,7 @@ def set_mode(mode: _RunningMode) -> None:
 
 def get_current_mode(force: bool = False) -> _RunningMode:
     if RUNNING_MODE is None:
-        logging.warning(f"Current 'RUNNING_MODE' is None.")
+        logging.warning("Current 'RUNNING_MODE' is None.")
         if force is True:
             raise ValueError("Current 'RUNNING_MODE' is None.")
     return RUNNING_MODE
