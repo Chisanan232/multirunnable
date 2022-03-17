@@ -69,7 +69,7 @@ class FileSaver(BaseSaver):
             self.__Has_Data = False
             return _Done_Flag
         elif self._is_main_worker():
-            logging.warning(f"This's main worker (thread, process, etc) so that it doesn't do anything here.")
+            logging.warning("This's main worker (thread, process, etc) so that it doesn't do anything here.")
             self.__Has_Data = False
             return _Do_Nothing_Flag
         elif self._is_children_worker():
@@ -114,7 +114,7 @@ class FileSaver(BaseSaver):
         elif self._is_main_worker():
             # This's super worker and its responsibility is compressing all files
             # This process should not handle and run here. It's Archiver's responsibility.
-            logging.warning(f"This's main worker (thread, process, etc) so that it doesn't do anything here.")
+            logging.warning("This's main worker (thread, process, etc) so that it doesn't do anything here.")
             self.__Has_Data = False
             return _Do_Nothing_Flag
         elif self._is_children_worker():
