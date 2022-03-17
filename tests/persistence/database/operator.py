@@ -94,7 +94,7 @@ class TestPersistenceDatabaseOperatorWithSingleConnection:
     def test_commit(self, opts_with_single_conn_strategy: MySQLOperator):
         try:
             opts_with_single_conn_strategy.commit()
-        except Exception as e:
+        except Exception:
             assert False, f"It should work finely without any issue. \nThe exception message is {traceback.format_exc()}"
         else:
             assert True, "It works finely."
@@ -451,7 +451,7 @@ class TestPersistenceDatabaseOperatorWithConnectionPool:
     def test_close_cursor(self, opts_with_conn_pool_strategy: MySQLOperator):
         try:
             opts_with_conn_pool_strategy.close_cursor()
-        except Exception as e:
+        except Exception:
             assert False, f"It should work finely without any issue. \nThe exception message is {traceback.format_exc()}"
         else:
             assert True, "It work finely."
