@@ -117,7 +117,7 @@ class _BaseRetry:
     @classmethod
     def _call_retry_instance(cls, frame: List[inspect.FrameInfo], index: int):
         _retry_func_name = cls.__search_target_function_by_frame(frame=frame, index=index)
-        assert _retry_func_name, f"It should already have the function which target to retry in keys."
+        assert _retry_func_name, "It should already have the function which target to retry in keys."
         _cls = cls._Retry_Object[_retry_func_name]
         return _cls
 
@@ -363,7 +363,7 @@ class _RetryBoundedFunction(_BaseRetry):
 
     def run_target_function(self, current_cls, instance, *args, **kwargs):
         _target_func = getattr(current_cls, "_Target_Function")
-        assert _target_func is not None, f"It's impossible that the target function is None object."
+        assert _target_func is not None, "It's impossible that the target function is None object."
         return _target_func(instance, *args, **kwargs)
 
 
@@ -642,7 +642,7 @@ class _AsyncRetryBoundedFunction(_BaseAsyncRetry):
 
     async def run_target_function(self, current_cls, instance, *args, **kwargs):
         _target_func = getattr(current_cls, "_Target_Function")
-        assert _target_func is not None, f"It's impossible that the target function is None object."
+        assert _target_func is not None, "It's impossible that the target function is None object."
         return await _target_func(instance, *args, **kwargs)
 
 
