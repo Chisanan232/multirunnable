@@ -59,7 +59,7 @@ def process_target_function_implement() -> str:
         Running_Process_Finish_Timestamp.append(_time)
 
     time.sleep(Test_Function_Sleep_Time)
-    return f"test_result"
+    return "test_result"
 
 
 def thread_target_function_implement() -> str:
@@ -71,7 +71,7 @@ def thread_target_function_implement() -> str:
         Running_Thread_Finish_Timestamp.append(_time)
 
     Sleep_Function(Test_Function_Sleep_Time)
-    return f"test_result"
+    return "test_result"
 
 
 @mr.multi_processes(processes=Process_Size)
@@ -117,9 +117,9 @@ class TestPackageInit:
         _py_major_ver = _python_version.major
         _py_minor_ver = _python_version.minor
 
-        assert mr.PYTHON_MAJOR_VERSION == int(_py_major_ver), f""
-        assert mr.PYTHON_MINOR_VERSION == int(_py_minor_ver), f""
-        assert mr.PYTHON_VERSION == f"{_py_major_ver}.{_py_minor_ver}", f""
+        assert mr.PYTHON_MAJOR_VERSION == int(_py_major_ver), ""
+        assert mr.PYTHON_MINOR_VERSION == int(_py_minor_ver), ""
+        assert mr.PYTHON_VERSION == f"{_py_major_ver}.{_py_minor_ver}", ""
 
 
     def test_run_parallel_with_decorator(self):
