@@ -746,7 +746,6 @@ class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
         if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) <= (3, 6):
             _event_loop = asyncio.get_event_loop()
             _event_loop.close()
-        pass
 
 
     @dispatch(Iterable)
