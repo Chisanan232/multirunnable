@@ -100,10 +100,10 @@ class ProcessStrategy(ParallelStrategy, _GeneralRunnableStrategy):
         super().__init__(executors=executors)
 
 
-    def initialization(self,
-                       queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+    def initialization(self, queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
                        features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
                        *args, **kwargs) -> None:
+
         super(ProcessStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
 
         # Initial sub-class of 'multiprocessing.managers.BaseManager'
@@ -218,10 +218,10 @@ class ProcessPoolStrategy(ParallelStrategy, _PoolRunnableStrategy, _Resultable):
         super().__init__(pool_size=pool_size)
 
 
-    def initialization(self,
-                       queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+    def initialization(self, queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
                        features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
                        *args, **kwargs) -> None:
+
         super(ProcessPoolStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
 
         # Activate multiprocessing.managers.BaseManager server
@@ -254,13 +254,9 @@ class ProcessPoolStrategy(ParallelStrategy, _PoolRunnableStrategy, _Resultable):
             self._result_saving(successful=__process_run_successful, result=__process_running_result, exception=__exception)
 
 
-    def async_apply(self,
-                    tasks_size: int,
-                    function: Callable,
-                    args: Tuple = (),
-                    kwargs: Dict = {},
-                    callback: Callable = None,
-                    error_callback: Callable = None) -> None:
+    def async_apply(self, tasks_size: int, function: Callable, args: Tuple = (),
+                    kwargs: Dict = {}, callback: Callable = None, error_callback: Callable = None) -> None:
+
         self.reset_result()
         self._Processors_List = [
             self._Processors_Pool.apply_async(func=function,
@@ -314,12 +310,10 @@ class ProcessPoolStrategy(ParallelStrategy, _PoolRunnableStrategy, _Resultable):
             self._result_saving(successful=__process_run_successful, result=__process_running_result, exception=__exception)
 
 
-    def async_apply_with_iter(self,
-                              functions_iter: List[Callable],
-                              args_iter: List[Tuple] = None,
-                              kwargs_iter: List[Dict] = None,
-                              callback_iter: List[Callable] = None,
+    def async_apply_with_iter(self, functions_iter: List[Callable], args_iter: List[Tuple] = None,
+                              kwargs_iter: List[Dict] = None, callback_iter: List[Callable] = None,
                               error_callback_iter: List[Callable] = None) -> None:
+
         self.reset_result()
 
         if args_iter is None:
@@ -377,12 +371,9 @@ class ProcessPoolStrategy(ParallelStrategy, _PoolRunnableStrategy, _Resultable):
             self._result_saving(successful=_process_run_successful, result=__result, exception=_exception)
 
 
-    def async_map(self,
-                  function: Callable,
-                  args_iter: IterableType = (),
-                  chunksize: int = None,
-                  callback: Callable = None,
-                  error_callback: Callable = None) -> None:
+    def async_map(self, function: Callable, args_iter: IterableType = (), chunksize: int = None,
+                  callback: Callable = None, error_callback: Callable = None) -> None:
+
         self.reset_result()
 
         _process_running_result = None
@@ -425,12 +416,9 @@ class ProcessPoolStrategy(ParallelStrategy, _PoolRunnableStrategy, _Resultable):
             self._result_saving(successful=_process_run_successful, result=__result, exception=_exception)
 
 
-    def async_map_by_args(self,
-                          function: Callable,
-                          args_iter: IterableType[IterableType] = (),
-                          chunksize: int = None,
-                          callback: Callable = None,
-                          error_callback: Callable = None) -> None:
+    def async_map_by_args(self, function: Callable, args_iter: IterableType[IterableType] = (),
+                          chunksize: int = None, callback: Callable = None, error_callback: Callable = None) -> None:
+
         self.reset_result()
         _map_result = self._Processors_Pool.starmap_async(
             func=function,

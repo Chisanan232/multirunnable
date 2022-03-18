@@ -62,13 +62,8 @@ class BasePool(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def async_apply(self,
-                    tasks_size: int,
-                    function: Callable,
-                    args: Tuple = (),
-                    kwargs: Dict = {},
-                    callback: Callable = None,
-                    error_callback: Callable = None) -> None:
+    def async_apply(self, tasks_size: int, function: Callable, args: Tuple = (),
+                    kwargs: Dict = {}, callback: Callable = None, error_callback: Callable = None) -> None:
         """
         Description:
             The adapter of multiprocessing.pool.apply_async.
@@ -97,11 +92,8 @@ class BasePool(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def async_apply_with_iter(self,
-                              functions_iter: List[Callable],
-                              args_iter: List[Tuple] = None,
-                              kwargs_iter: List[Dict] = None,
-                              callback_iter: List[Callable] = None,
+    def async_apply_with_iter(self, functions_iter: List[Callable], args_iter: List[Tuple] = None,
+                              kwargs_iter: List[Dict] = None, callback_iter: List[Callable] = None,
                               error_callback_iter: List[Callable] = None) -> None:
         """
         Description:
@@ -130,12 +122,8 @@ class BasePool(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def async_map(self,
-                  function: Callable,
-                  args_iter: Iterable = (),
-                  chunksize: int = None,
-                  callback: Callable = None,
-                  error_callback: Callable = None) -> None:
+    def async_map(self, function: Callable, args_iter: Iterable = (), chunksize: int = None,
+                  callback: Callable = None, error_callback: Callable = None) -> None:
         """
         Description:
             The adapter of multiprocessing.pool.map_async.
@@ -163,12 +151,8 @@ class BasePool(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def async_map_by_args(self,
-                          function: Callable,
-                          args_iter: Iterable[Iterable] = (),
-                          chunksize: int = None,
-                          callback: Callable = None,
-                          error_callback: Callable = None) -> None:
+    def async_map_by_args(self, function: Callable, args_iter: Iterable[Iterable] = (),
+                          chunksize: int = None, callback: Callable = None, error_callback: Callable = None) -> None:
         """
         Description:
             The adapter of multiprocessing.pool.starmap_async.

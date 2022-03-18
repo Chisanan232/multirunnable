@@ -40,11 +40,10 @@ class Executor(ABC, _BaseExecutor):
         return _worker
 
 
-    def run(self,
-            function: CallableType,
-            args: Optional[Union[Tuple, Dict]] = None,
+    def run(self, function: CallableType, args: Optional[Union[Tuple, Dict]] = None,
             queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
             features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
+
         General_Runnable_Strategy.run(
             function=function,
             args=args,
@@ -52,9 +51,7 @@ class Executor(ABC, _BaseExecutor):
             features=features)
 
 
-    def map(self,
-            function: CallableType,
-            args_iter: IterableType = [],
+    def map(self, function: CallableType, args_iter: IterableType = [],
             queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
             features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
 
@@ -83,11 +80,10 @@ class Executor(ABC, _BaseExecutor):
             features=features)
 
 
-    def map_with_function(self,
-                          functions: IterableType[Callable],
-                          args_iter: IterableType = [],
+    def map_with_function(self, functions: IterableType[Callable], args_iter: IterableType = [],
                           queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
                           features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
+
         General_Runnable_Strategy.map_with_function(
             functions=functions,
             args_iter=args_iter,

@@ -135,8 +135,7 @@ class GreenThreadStrategy(BaseGreenThreadStrategy, _GeneralRunnableStrategy):
 
     _Strategy_Feature_Mode: _FeatureMode = _FeatureMode.GreenThread
 
-    def initialization(self,
-                       queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+    def initialization(self, queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
                        features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
                        *args, **kwargs) -> None:
         super(GreenThreadStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
@@ -256,10 +255,10 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
         super().__init__(pool_size=pool_size)
 
 
-    def initialization(self,
-                       queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+    def initialization(self, queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
                        features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
                        *args, **kwargs) -> None:
+
         super(GreenThreadPoolStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
 
         # Initialize and build the Processes Pool.
@@ -291,13 +290,9 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
             self._result_saving(successful=__process_run_successful, result=__process_running_result, exception=__exception)
 
 
-    def async_apply(self,
-                    tasks_size: int,
-                    function: Callable,
-                    args: Tuple = (),
-                    kwargs: Dict = {},
-                    callback: Callable = None,
-                    error_callback: Callable = None) -> None:
+    def async_apply(self, tasks_size: int, function: Callable, args: Tuple = (),
+                    kwargs: Dict = {}, callback: Callable = None, error_callback: Callable = None) -> None:
+
         self.reset_result()
         self._GreenThread_List = [
             self._GreenThread_Pool.apply_async(func=function,
@@ -356,12 +351,10 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
             self._result_saving(successful=__process_run_successful, result=__process_running_result, exception=__exception)
 
 
-    def async_apply_with_iter(self,
-                              functions_iter: List[Callable],
-                              args_iter: List[Tuple] = None,
-                              kwargs_iter: List[Dict] = None,
-                              callback_iter: List[Callable] = None,
+    def async_apply_with_iter(self, functions_iter: List[Callable], args_iter: List[Tuple] = None,
+                              kwargs_iter: List[Dict] = None, callback_iter: List[Callable] = None,
                               error_callback_iter: List[Callable] = None) -> None:
+
         self.reset_result()
 
         if args_iter is None:
@@ -419,12 +412,9 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
             self._result_saving(successful=__process_run_successful, result=__result, exception=__exception)
 
 
-    def async_map(self,
-                  function: Callable,
-                  args_iter: IterableType = (),
-                  chunksize: int = None,
-                  callback: Callable = None,
-                  error_callback: Callable = None) -> None:
+    def async_map(self, function: Callable, args_iter: IterableType = (), chunksize: int = None,
+                  callback: Callable = None, error_callback: Callable = None) -> None:
+
         self.reset_result()
 
         __process_running_result = None
@@ -505,12 +495,9 @@ class GreenThreadPoolStrategy(BaseGreenThreadStrategy, _PoolRunnableStrategy, _R
         self.map(function=partial_function, args_iter=_last_args, chunksize=chunksize)
 
 
-    def async_map_by_args(self,
-                          function: Callable,
-                          args_iter: IterableType[IterableType] = (),
-                          chunksize: int = None,
-                          callback: Callable = None,
-                          error_callback: Callable = None) -> None:
+    def async_map_by_args(self, function: Callable, args_iter: IterableType[IterableType] = (),
+                          chunksize: int = None, callback: Callable = None, error_callback: Callable = None) -> None:
+
         self.reset_result()
         args_iter_set = set(args_iter)
         if len(args_iter_set) == 1:
@@ -661,9 +648,7 @@ class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
         AsynchronousStrategy._run_async_task(__start_new_async_tasks)
 
 
-    def run(self,
-            function: Callable,
-            args: Optional[Union[Tuple, Dict]] = None,
+    def run(self, function: Callable, args: Optional[Union[Tuple, Dict]] = None,
             queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
             features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
 
@@ -677,9 +662,7 @@ class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
         AsynchronousStrategy._run_async_task(__run_process)
 
 
-    def map(self,
-            function: Callable,
-            args_iter: IterableType = [],
+    def map(self, function: Callable, args_iter: IterableType = [],
             queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
             features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
 
@@ -693,9 +676,7 @@ class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
         AsynchronousStrategy._run_async_task(__map_process)
 
 
-    def map_with_function(self,
-                          functions: IterableType[Callable],
-                          args_iter: IterableType = [],
+    def map_with_function(self, functions: IterableType[Callable], args_iter: IterableType = [],
                           queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
                           features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
 
@@ -713,10 +694,10 @@ class AsynchronousStrategy(BaseAsyncStrategy, _Resultable):
         AsynchronousStrategy._run_async_task(__map_with_function_process)
 
 
-    async def initialization(self,
-                             queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+    async def initialization(self, queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
                              features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
                              *args, **kwargs) -> None:
+
         if kwargs.get("event_loop") is None:
             if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 6):
                 _running_event_loop = asyncio.get_running_loop()

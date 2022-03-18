@@ -42,10 +42,10 @@ class Pool(ABC, _BasePool):
         self.close()
 
 
-    def initial(self,
-                queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+    def initial(self, queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
                 features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
                 *args, **kwargs):
+
         Pool_Runnable_Strategy.initialization(
             queue_tasks=queue_tasks, features=features, *args, **kwargs)
 
@@ -54,13 +54,9 @@ class Pool(ABC, _BasePool):
         Pool_Runnable_Strategy.apply(tasks_size=tasks_size, function=function, args=args, kwargs=kwargs)
 
 
-    def async_apply(self,
-                    tasks_size: int,
-                    function: Callable,
-                    args: Tuple = (),
-                    kwargs: Dict = {},
-                    callback: Callable = None,
-                    error_callback: Callable = None) -> None:
+    def async_apply(self, tasks_size: int, function: Callable, args: Tuple = (),
+                    kwargs: Dict = {}, callback: Callable = None, error_callback: Callable = None) -> None:
+
         Pool_Runnable_Strategy.async_apply(
             tasks_size=tasks_size,
             function=function,
@@ -74,12 +70,10 @@ class Pool(ABC, _BasePool):
         Pool_Runnable_Strategy.apply_with_iter(functions_iter=functions_iter, args_iter=args_iter, kwargs_iter=kwargs_iter)
 
 
-    def async_apply_with_iter(self,
-                              functions_iter: List[Callable],
-                              args_iter: List[Tuple] = None,
-                              kwargs_iter: List[Dict] = None,
-                              callback_iter: List[Callable] = None,
+    def async_apply_with_iter(self, functions_iter: List[Callable], args_iter: List[Tuple] = None,
+                              kwargs_iter: List[Dict] = None, callback_iter: List[Callable] = None,
                               error_callback_iter: List[Callable] = None) -> None:
+
         Pool_Runnable_Strategy.async_apply_with_iter(
             functions_iter=functions_iter,
             args_iter=args_iter,
@@ -92,12 +86,9 @@ class Pool(ABC, _BasePool):
         Pool_Runnable_Strategy.map(function=function, args_iter=args_iter, chunksize=chunksize)
 
 
-    def async_map(self,
-                  function: Callable,
-                  args_iter: Iterable = (),
-                  chunksize: int = None,
-                  callback: Callable = None,
-                  error_callback: Callable = None) -> None:
+    def async_map(self, function: Callable, args_iter: Iterable = (), chunksize: int = None,
+                  callback: Callable = None, error_callback: Callable = None) -> None:
+
         Pool_Runnable_Strategy.async_map(
             function=function,
             args_iter=args_iter,
@@ -110,12 +101,9 @@ class Pool(ABC, _BasePool):
         Pool_Runnable_Strategy.map_by_args(function=function, args_iter=args_iter, chunksize=chunksize)
 
 
-    def async_map_by_args(self,
-                          function: Callable,
-                          args_iter: Iterable[Iterable] = (),
-                          chunksize: int = None,
-                          callback: Callable = None,
-                          error_callback: Callable = None) -> None:
+    def async_map_by_args(self, function: Callable, args_iter: Iterable[Iterable] = (), chunksize: int = None,
+                          callback: Callable = None, error_callback: Callable = None) -> None:
+
         Pool_Runnable_Strategy.async_map_by_args(
             function=function,
             args_iter=args_iter,

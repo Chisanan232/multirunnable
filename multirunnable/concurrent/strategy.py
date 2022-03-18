@@ -89,8 +89,7 @@ class ThreadStrategy(ConcurrentStrategy, _GeneralRunnableStrategy):
     _Strategy_Feature_Mode: _FeatureMode = _FeatureMode.Concurrent
     __Thread_List: List[Thread] = None
 
-    def initialization(self,
-                       queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+    def initialization(self, queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
                        features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
                        *args, **kwargs) -> None:
         super(ThreadStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
@@ -185,8 +184,7 @@ class ThreadPoolStrategy(ConcurrentStrategy, _PoolRunnableStrategy, _Resultable)
         super().__init__(pool_size=pool_size)
 
 
-    def initialization(self,
-                       queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+    def initialization(self, queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
                        features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
                        *args, **kwargs) -> None:
         super(ThreadPoolStrategy, self).initialization(queue_tasks=queue_tasks, features=features, *args, **kwargs)
@@ -218,13 +216,9 @@ class ThreadPoolStrategy(ConcurrentStrategy, _PoolRunnableStrategy, _Resultable)
             self._result_saving(successful=__process_run_successful, result=__process_running_result, exception=__exception)
 
 
-    def async_apply(self,
-                    tasks_size: int,
-                    function: Callable,
-                    args: Tuple = (),
-                    kwargs: Dict = {},
-                    callback: Callable = None,
-                    error_callback: Callable = None) -> None:
+    def async_apply(self, tasks_size: int, function: Callable, args: Tuple = (),
+                    kwargs: Dict = {}, callback: Callable = None, error_callback: Callable = None) -> None:
+
         self.reset_result()
         self._Thread_List = [
             self._Thread_Pool.apply_async(func=function,
@@ -278,12 +272,10 @@ class ThreadPoolStrategy(ConcurrentStrategy, _PoolRunnableStrategy, _Resultable)
             self._result_saving(successful=__process_run_successful, result=__process_running_result, exception=__exception)
 
 
-    def async_apply_with_iter(self,
-                              functions_iter: List[Callable],
-                              args_iter: List[Tuple] = None,
-                              kwargs_iter: List[Dict] = None,
-                              callback_iter: List[Callable] = None,
+    def async_apply_with_iter(self, functions_iter: List[Callable], args_iter: List[Tuple] = None,
+                              kwargs_iter: List[Dict] = None, callback_iter: List[Callable] = None,
                               error_callback_iter: List[Callable] = None) -> None:
+
         self.reset_result()
 
         if args_iter is None:
@@ -341,12 +333,9 @@ class ThreadPoolStrategy(ConcurrentStrategy, _PoolRunnableStrategy, _Resultable)
             self._result_saving(successful=__process_run_successful, result=__result, exception=None)
 
 
-    def async_map(self,
-                  function: Callable,
-                  args_iter: IterableType = (),
-                  chunksize: int = None,
-                  callback: Callable = None,
-                  error_callback: Callable = None) -> None:
+    def async_map(self, function: Callable, args_iter: IterableType = (), chunksize: int = None,
+                  callback: Callable = None, error_callback: Callable = None) -> None:
+
         self.reset_result()
         __map_result = self._Thread_Pool.map_async(
             func=function,
@@ -380,12 +369,9 @@ class ThreadPoolStrategy(ConcurrentStrategy, _PoolRunnableStrategy, _Resultable)
             self._result_saving(successful=__process_run_successful, result=__result, exception=None)
 
 
-    def async_map_by_args(self,
-                          function: Callable,
-                          args_iter: IterableType[IterableType] = (),
-                          chunksize: int = None,
-                          callback: Callable = None,
-                          error_callback: Callable = None) -> None:
+    def async_map_by_args(self, function: Callable, args_iter: IterableType[IterableType] = (),
+                          chunksize: int = None, callback: Callable = None, error_callback: Callable = None) -> None:
+
         self.reset_result()
         __map_result = self._Thread_Pool.starmap_async(
             func=function,

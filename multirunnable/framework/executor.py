@@ -43,18 +43,14 @@ class BaseExecutor(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def run(self,
-            function: CallableType,
-            args: Optional[Union[Tuple, Dict]] = None,
+    def run(self, function: CallableType, args: Optional[Union[Tuple, Dict]] = None,
             queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
             features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
         pass
 
 
     @abstractmethod
-    def map(self,
-            function: CallableType,
-            args_iter: IterableType = [],
+    def map(self, function: CallableType, args_iter: IterableType = [],
             queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
             features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
         """
@@ -73,9 +69,7 @@ class BaseExecutor(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def map_with_function(self,
-                          functions: IterableType[Callable],
-                          args_iter: IterableType = [],
+    def map_with_function(self, functions: IterableType[Callable], args_iter: IterableType = [],
                           queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
                           features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
         """

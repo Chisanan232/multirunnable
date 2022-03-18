@@ -50,9 +50,7 @@ class BaseRunnableStrategy(metaclass=ABCMeta):
         return __instance_brief
 
 
-    def initialization(
-            self,
-            queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+    def initialization(self, queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
             features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
             *args, **kwargs) -> None:
         """
@@ -160,8 +158,7 @@ class RunnableStrategy(BaseRunnableStrategy, ABC):
         self.__Initialization = RunnableInitialization(mode=self._Strategy_Feature_Mode)
 
 
-    def initialization(self,
-                       queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+    def initialization(self, queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
                        features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
                        *args, **kwargs) -> None:
         """
@@ -212,9 +209,7 @@ class GeneralRunnableStrategy(RunnableStrategy):
         return self._executors_num
 
 
-    def run(self,
-            function: Callable,
-            args: Optional[Union[Tuple, Dict]] = None,
+    def run(self, function: Callable, args: Optional[Union[Tuple, Dict]] = None,
             queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
             features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
         """
@@ -232,9 +227,7 @@ class GeneralRunnableStrategy(RunnableStrategy):
         self.close(__workers_list)
 
 
-    def map(self,
-            function: Callable,
-            args_iter: Iterable = [],
+    def map(self, function: Callable, args_iter: Iterable = [],
             queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
             features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
         """
@@ -253,9 +246,7 @@ class GeneralRunnableStrategy(RunnableStrategy):
         self.close(__workers_list)
 
 
-    def map_with_function(self,
-                          functions: Iterable[Callable],
-                          args_iter: Iterable = [],
+    def map_with_function(self, functions: Iterable[Callable], args_iter: Iterable = [],
                           queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
                           features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None) -> None:
         """
@@ -383,13 +374,8 @@ class PoolRunnableStrategy(RunnableStrategy):
 
 
     @abstractmethod
-    def async_apply(self,
-                    tasks_size: int,
-                    function: Callable,
-                    args: Tuple = (),
-                    kwargs: Dict = {},
-                    callback: Callable = None,
-                    error_callback: Callable = None) -> None:
+    def async_apply(self, tasks_size: int, function: Callable, args: Tuple = (),
+                    kwargs: Dict = {}, callback: Callable = None, error_callback: Callable = None) -> None:
         """
         Description:
             Refer to multiprocessing.pool.apply_async.
@@ -404,11 +390,8 @@ class PoolRunnableStrategy(RunnableStrategy):
 
 
     @abstractmethod
-    def async_apply_with_iter(self,
-                              functions_iter: List[Callable],
-                              args_iter: List[Tuple] = (),
-                              kwargs_iter: List[Dict] = {},
-                              callback_iter: List[Callable] = None,
+    def async_apply_with_iter(self, functions_iter: List[Callable], args_iter: List[Tuple] = (),
+                              kwargs_iter: List[Dict] = {}, callback_iter: List[Callable] = None,
                               error_callback_iter: List[Callable] = None) -> None:
         pass
 
@@ -424,12 +407,8 @@ class PoolRunnableStrategy(RunnableStrategy):
 
 
     @abstractmethod
-    def async_map(self,
-                  function: Callable,
-                  args_iter: Iterable = (),
-                  chunksize: int = None,
-                  callback: Callable = None,
-                  error_callback: Callable = None) -> None:
+    def async_map(self, function: Callable, args_iter: Iterable = (), chunksize: int = None,
+                  callback: Callable = None, error_callback: Callable = None) -> None:
         """
         Description:
             Refer to multiprocessing.pool.map_async.
@@ -449,12 +428,8 @@ class PoolRunnableStrategy(RunnableStrategy):
 
 
     @abstractmethod
-    def async_map_by_args(self,
-                          function: Callable,
-                          args_iter: Iterable[Iterable] = (),
-                          chunksize: int = None,
-                          callback: Callable = None,
-                          error_callback: Callable = None) -> None:
+    def async_map_by_args(self, function: Callable, args_iter: Iterable[Iterable] = (),
+                          chunksize: int = None, callback: Callable = None, error_callback: Callable = None) -> None:
         """
         Description:
             Refer to multiprocessing.pool.starmap_async.
@@ -506,8 +481,7 @@ class PoolRunnableStrategy(RunnableStrategy):
 
 class AsyncRunnableStrategy(GeneralRunnableStrategy, ABC):
 
-    async def initialization(self,
-                             queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
+    async def initialization(self, queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None,
                              features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None,
                              *args, **kwargs) -> None:
         """
