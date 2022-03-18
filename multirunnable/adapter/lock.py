@@ -108,7 +108,16 @@ class AsyncLock(BaseAsyncLockAdapter):
 
 
 
-class AsyncSemaphore(Semaphore):
+class AsyncSemaphore(BaseAsyncLockAdapter):
+
+    def __init__(self, value: int = 1, **kwargs):
+        self._value = value
+        super().__init__(**kwargs)
+
+
+    def _instantiate_factory(self) -> SemaphoreFactory:
+        return SemaphoreFactory(value=self._value)
+
 
     def _instantiate_operator(self) -> SemaphoreAsyncOperator:
         return SemaphoreAsyncOperator()
