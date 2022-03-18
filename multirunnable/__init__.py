@@ -1,3 +1,14 @@
+#    This is a Python package which integrates APIs of parallel (multiprocessing),
+#    concurrent (threading) and coroutine (gevent, asyncio).
+#
+#     __  ___      ____  _ ____                          __    __   
+#    /  |/  /_  __/ / /_(_) __ \__  ______  ____  ____ _/ /_  / /__ 
+#   / /|_/ / / / / / __/ / /_/ / / / / __ \/ __ \/ __ `/ __ \/ / _ \
+#  / /  / / /_/ / / /_/ / _, _/ /_/ / / / / / / / /_/ / /_/ / /  __/
+# /_/  /_/\__,_/_/\__/_/_/ |_|\__,_/_/ /_/_/ /_/\__,_/_.___/_/\___/ 
+#
+
+
 """
 Set the customized Python package to Python Interpreter Environment Variable Path  so that we could import it if we need.
 """
