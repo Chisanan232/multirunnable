@@ -193,7 +193,7 @@ class RunnableStrategy(BaseRunnableStrategy, ABC):
 
 
 class GeneralRunnableStrategy(RunnableStrategy):
-    
+
     def __init__(self, executors: int):
         super(GeneralRunnableStrategy, self).__init__()
         self._executors_num = executors

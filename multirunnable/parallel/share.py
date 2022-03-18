@@ -7,7 +7,7 @@ from typing import Dict, Any
 Note:
     It raises exception about "TypeError: AutoProxy() got an unexpected 
     keyword argument 'manager_owned'" when it has nested manager scenario. 
-    
+
     It's a bug of Python native package --- multiprocessing. Please refer to the URL below: 
     * Stackoverflow discussion: https://stackoverflow.com/questions/46779860/multiprocessing-managers-and-custom-classes
     * Python Bug record: https://bugs.python.org/issue30256
