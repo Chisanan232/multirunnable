@@ -1,20 +1,49 @@
 import setuptools
+import os
+
+
+here = os.path.abspath(os.path.dirname(__file__))
+
+packages = ["multirunnable"]
+
+requires = [
+    "gevent",
+    "multipledispatch==0.6.0",
+    "openpyxl==2.6.1"
+]
+
+test_requires = [
+    "pytest>=7.0.0",
+    "pytest-cov>=3.0.0",
+    "pytest-html>=3.1.1",
+    "pytest-rerunfailures>=10.2",
+    "codecov>=2.1.12",
+    "coveralls>=3.3.1"
+]
+
+
+about = {}
+with open(os.path.join(here, "multirunnable", "__pkg_info__.py"), "r", encoding="utf-8") as f:
+    exec(f.read(), about)
 
 
 with open("README.md", "r") as fh:
     readme = fh.read()
 
+
 setuptools.setup(
-    name="MultiRunnable",
-    version="0.17.0a1.dev2",
-    author="Liu, Bryant",
-    author_email="chi10211201@cycu.org.tw",
-    url="https://multirunnable.readthedocs.io",
-    license="Apache License 2.0",
-    description="A Python framework integrates running multiple tasks simultaneously with different strategy.",
+    name=about["__title__"],
+    version=about["__version__"],
+    author=about["__author__"],
+    author_email=about["__author_email__"],
+    url=about["__url__"],
+    license=about["__license__"],
+    description=about["__description__"],
     long_description=readme,
     long_description_content_type="text/markdown",
-    packages=setuptools.find_packages("multirunnable"),
+    packages=packages,
+    package_dir={"multirunnable": "multirunnable"},
+    py_modules=packages,
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
@@ -30,9 +59,10 @@ setuptools.setup(
     ],
     keyword="multirunnable parallel concurrent coroutine",
     python_requires='>=3.6',
-    install_requires=[
-        "gevent",
-        "multipledispatch==0.6.0",
-        "openpyxl==2.6.1"
-    ]
+    install_requires=requires,
+    tests_require=test_requires,
+    project_urls={
+        "Documentation": "https://multirunnable.readthedocs.io",
+        "Source": "https://github.com/Chisanan232/multirunnable",
+    },
 )
