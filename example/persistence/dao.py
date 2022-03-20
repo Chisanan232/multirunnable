@@ -1,4 +1,5 @@
 from multirunnable.api import RunWith, AsyncRunWith, QueueOperator
+from multirunnable.persistence.database.strategy import BaseDatabaseConnection
 from multirunnable.persistence.database.operator import DatabaseOperator
 from multirunnable.persistence.database.layer import BaseDao
 
