@@ -11,4 +11,4 @@ __version__ = "0.17.0a1"
 __author__ = "Liu, Bryant"
 __author_email__ = "chi10211201@cycu.org.tw"
 __license__ = "Apache License 2.0"
-__copyright__ = 'Copyright 2022 Kenneth Reitz'
+__copyright__ = "Copyright 2022 Bryant Liu"
