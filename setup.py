@@ -8,8 +8,8 @@ packages = ["multirunnable"]
 
 requires = [
     "gevent",
-    "multipledispatch==0.6.0",
-    "openpyxl==2.6.1"
+    "multipledispatch>=0.6.0",
+    "openpyxl>=2.6.1"
 ]
 
 test_requires = [
