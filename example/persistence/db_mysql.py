@@ -36,30 +36,23 @@ class MySQLOperatorProxy(NamespaceProxy):
 # @sharing_in_processes()
 class MySQLSingleConnection(BaseSingleConnection):
 
-    @property
-    def connection(self) -> MySQLConnection:
-        """
-        Note:
-            For resolving this issue, we should do something to avoid this issue.
-            However, it has exception about "TypeError: can't pickle _mysql_connector.MySQL objects" for database package.
-        :return:
-        """
-        return self._database_connection
-
-
-    def connect_database(self, **kwargs) -> MySQLConnection:
+    def _connect_database(self, **kwargs) -> MySQLConnection:
         # return mysql.connector.connect(**self._Database_Config)
         _connection = mysql.connector.connect(**kwargs)
         return _connection
 
 
+    def _is_connected(self) -> bool:
+        return self.current_connection.is_connected()
+
+
     def commit(self) -> None:
-        self.connection.commit()
+        self.current_connection.commit()
 
 
-    def close(self) -> None:
-        if self.connection is not None and self.connection.is_connected():
-            self.connection.close()
+    def _close_connection(self) -> None:
+        if self.current_connection is not None and self.current_connection.is_connected():
+            self.current_connection.close()
             logging.info(f"MySQL connection is closed. - PID: {os.getpid()}")
         else:
             logging.info("Connection has been disconnect or be killed before.")
@@ -74,7 +67,7 @@ class MySQLDriverConnectionPool(BaseConnectionPool):
         return connection_pool
 
 
-    def get_one_connection(self, pool_name: str = "", **kwargs) -> PooledMySQLConnection:
+    def _get_one_connection(self, pool_name: str = "", **kwargs) -> PooledMySQLConnection:
         while True:
             try:
                 # return self.database_connection_pool.get_connection()
@@ -89,17 +82,17 @@ class MySQLDriverConnectionPool(BaseConnectionPool):
                 raise ConnectionError(f"Cannot get the one connection instance from connection pool because it doesn't exist the connection pool with the name '{pool_name}'.")
 
 
-    def commit(self) -> None:
-        self.connection.commit()
+    def _is_connected(self, conn: PooledMySQLConnection) -> bool:
+        return conn.is_connected()
 
 
-    def close_pool(self, pool_name: str) -> None:
-        get_connection_pool(pool_name=pool_name).close()
+    def _commit(self, conn: PooledMySQLConnection) -> None:
+        conn.commit()
 
 
-    def close(self) -> None:
-        if self.connection is not None and self.connection.is_connected():
-            self.connection.close()
+    def _close_connection(self, conn: PooledMySQLConnection) -> None:
+        if conn is not None:
+            conn.close()
             logging.info(f"MySQL connection is closed. - PID: {os.getpid()}")
         else:
             logging.info("Connection has been disconnect or be killed before.")
@@ -139,19 +132,15 @@ class MySQLOperator(DatabaseOperator):
         return self._cursor.executemany(operation=operator, seq_params=seq_params)
 
 
-    def fetch(self) -> MySQLCursor:
-        return self._cursor.fetch()
-
-
-    def fetch_one(self) -> MySQLCursor:
+    def fetch_one(self) -> list:
         return self._cursor.fetchone()
 
 
-    def fetch_many(self, size: int = None) -> MySQLCursor:
+    def fetch_many(self, size: int = None) -> list:
         return self._cursor.fetchmany(size=size)
 
 
-    def fetch_all(self) -> MySQLCursor:
+    def fetch_all(self) -> list:
         return self._cursor.fetchall()
 
 
