@@ -25,7 +25,7 @@ author = 'Bryant Liu'
 # The full version, including alpha/beta/rc tags
 from multirunnable import __github_tag_version__, __version__
 
-version = __github_tag_version__()
+version = __github_tag_version__
 release = __version__
 
 
