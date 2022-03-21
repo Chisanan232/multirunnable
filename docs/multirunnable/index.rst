@@ -6,7 +6,7 @@
 Welcome to MultiRunnable's documentation!
 =========================================
 
-|python-versions| |release-version| |pypi-version| |license|
+|python-versions| |release-version| |pypi-version| |license| |codacy-level|
 
 :Date: |today|
 
@@ -17,8 +17,6 @@ Building Status
 +------------+---------------------------------+----------------------+
 |     OS     |          Building Status        |    Coverage Status   |
 +============+=================================+======================+
-|    Linux   |    |travis-ci build-status|     |    (Deprecated CI)   |
-+------------+---------------------------------+----------------------+
 |    Linux   |     |circle-ci build-status|    |                      |
 +------------+---------------------------------+   |codecov-coverage| |
 |    Linux   |  |github-actions build-status|  |                      |
@@ -30,8 +28,9 @@ Building Status
 Overview
 ----------
 
-A Python framework integrates running multiple tasks simultaneously with different strategy.
-It target to help developers build parallelism feature easily and clearly. You just only focus
+A Python library integrates the APIs of 3 strategies (Parallel, Concurrent, Coroutine) and
+4 libraries (multiprocessing, threading, gevent, asyncio) to help developers build parallelism humanly.
+It targets to help developers build parallelism feature easily and clearly. You just only focus
 on the business logic implementations or others.
 
 Let's demonstrate an example to show how easy and clear it is!
@@ -85,7 +84,7 @@ Let's demonstrate an example to show how easy and clear it is!
     :target: https://pypi.org/project/multirunnable
 
 
-.. |release-version| image:: https://img.shields.io/github/release/Chisanan232/multirunnable.svg?label=Release&sort=semver
+.. |release-version| image:: https://img.shields.io/github/release/Chisanan232/multirunnable.svg?label=Release
     :alt: Package release version in GitHub
     :target: https://github.com/Chisanan232/multirunnable/releases
 
@@ -100,9 +99,9 @@ Let's demonstrate an example to show how easy and clear it is!
     :target: https://opensource.org/licenses/Apache-2.0
 
 
-.. |travis-ci build-status| image:: https://app.travis-ci.com/Chisanan232/multirunnable.svg?branch=master
-    :alt: Travis-CI building status
-    :target: https://app.travis-ci.com/Chisanan232/multirunnable
+.. |codacy-level| image:: https://app.codacy.com/project/badge/Grade/6733a68742a64b3dbcfa57b1309de4ce
+    :alt: Code Quality by Codacy
+    :target: https://www.codacy.com/gh/Chisanan232/multirunnable/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Chisanan232/multirunnable&amp;utm_campaign=Badge_Grade
 
 
 .. |circle-ci build-status| image:: https://circleci.com/gh/Chisanan232/multirunnable.svg?style=svg
