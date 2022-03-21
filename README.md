@@ -13,14 +13,14 @@
 | Linux |[![multirunnable testing](https://github.com/Chisanan232/multirunnable/actions/workflows/ci.yml/badge.svg)](https://github.com/Chisanan232/multirunnable/actions/workflows/ci.yml)|[![codecov](https://codecov.io/gh/Chisanan232/multirunnable/branch/master/graph/badge.svg?token=E2AGK1ZIDH)](https://codecov.io/gh/Chisanan232/multirunnable)|
 | Windows |[![Build status](https://ci.appveyor.com/api/projects/status/v0nq38jtof6vcm23?svg=true)](https://ci.appveyor.com/project/Chisanan232/multirunnable)|[![Coverage Status](https://coveralls.io/repos/github/Chisanan232/multirunnable/badge.svg?branch=master)](https://coveralls.io/github/Chisanan232/multirunnable?branch=master)|
 
-A Python framework integrates how to build parallelism with different running strategy.
+A Python library integrates the APIs of 3 strategies (Parallel, Concurrent, Coroutine) and 4 libraries (multiprocessing, threading, gevent, asyncio) to help developers build parallelism humanly.
 
 [Overview](#overview) | [Quickly Start](#quickly-start) | [Syntactic Sugar](#syntactic-sugar) | [Resource](#resource) | [Code Example](https://github.com/Chisanan232/multirunnable/tree/master/example)
 <hr>
 
 ## Overview
 
-Package '_multirunnable_' is a framework which could easily build a parallelism with different running strategy by mode option. 
+Package '_multirunnable_' is a library which could easily build a parallelism with different running strategy by mode option. 
 Currently, it has 4 options could use: Parallel, Concurrent, GreenThread and Asynchronous.
 
 Here's an example which implements parallelism as concurrent with _multirunnable_:
