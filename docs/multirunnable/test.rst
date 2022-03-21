@@ -188,7 +188,7 @@ Currently, *MultiRunnable* uses **Circle-CI**, **GitHub Actions** and **AppVeyor
     :target: https://pypi.org/project/multirunnable
 
 
-.. |release-version| image:: https://img.shields.io/github/release/Chisanan232/multirunnable.svg?label=Release&sort=semver
+.. |release-version| image:: https://img.shields.io/github/release/Chisanan232/multirunnable.svg?label=Release
     :alt: travis-ci build status
     :target: https://github.com/Chisanan232/multirunnable/releases
 
