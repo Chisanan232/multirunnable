@@ -5,7 +5,7 @@ from multirunnable.persistence.database.strategy import get_connection_pool, dat
 from multirunnable.exceptions import GlobalizeObjectError
 
 from ...test_config import (
-    Under_Test_RunningModes, Test_Pool_Name, Test_Pool_Size,Database_Config, Database_Pool_Config,
+    Under_Test_RunningModes, Test_Pool_Name, Test_Pool_Size, database_host, Database_Config, Database_Pool_Config,
     SELECT_TEST_DATA_SQL, INSERT_TEST_DATA_SQL, DELETE_TEST_DATA_SQL
 )
 from ._test_db_implement import MySQLSingleConnection, MySQLDriverConnectionPool, ErrorConfigConnectionPool
@@ -85,7 +85,7 @@ class TestPersistenceDatabaseOneConnection:
         else:
             assert False, "It should raise something exceptions because the IP is invalid."
 
-        single_connection_strategy.update_database_config(key="host", value="127.0.0.1")
+        single_connection_strategy.update_database_config(key="host", value=database_host)
         _connection = single_connection_strategy.reconnect()
         assert _connection is not None, "It should return a database connection instance."
 
@@ -291,7 +291,7 @@ class TestPersistenceDatabaseConnectionPool:
         else:
             assert False, "It should raise something exceptions because the IP is invalid."
 
-        connection_pool_strategy.update_database_config(key="host", value="127.0.0.1")
+        connection_pool_strategy.update_database_config(key="host", value=database_host)
         connection_pool_strategy.update_database_config(key="pool_name", value="test_pool")
         _connection = connection_pool_strategy.reconnect()
         assert _connection is not None, "It should return a database connection instance."
