@@ -8,13 +8,13 @@ Under_Test_RunningModes = [RunningMode.Parallel, RunningMode.Concurrent, Running
 Under_Test_RunningModes_Without_Greenlet = [RunningMode.Parallel, RunningMode.Concurrent]
 
 # # # # Base APIs setting
-Worker_Size: int = 7
-Worker_Pool_Size: int = 7
-Task_Size: int = 3
+Worker_Size: int = (os.getenv("WORKER_SIZE") or 7)
+Worker_Pool_Size: int = (os.getenv("WORKER_POOL_SIZE") or 7)
+Task_Size: int = (os.getenv("TASK_SIZE") or 3)
 
-Running_Diff_Time: int = 2
+Running_Diff_Time: int = (os.getenv("RUNNING_DIFFERENT_TIME") or 2)
 
-Test_Function_Sleep_Time = 3
+Test_Function_Sleep_Time = (os.getenv("FUNCTION_SLEEP_TIME") or 3)
 Test_Function_Args: Tuple = (1, 2, "test_value")
 Test_Function_Kwargs: Dict = {"param_1": 1, "param_2": 2, "test_param": "test_value"}
 Test_Function_Multiple_Args = (Test_Function_Args, Test_Function_Args, Test_Function_Args)
@@ -22,13 +22,12 @@ Test_Function_Multiple_Diff_Args = ((1, 2, 3), (4, 5, 6), (7, "index_8", 9))
 
 
 # # # # Lock APIs setting
-Semaphore_Value = 2
+Semaphore_Value = (os.getenv("SEMAPHORE_VALUE") or 2)
 
 
 # # # # Persistence - Database setting
-Test_Pool_Name = "testing_pool"
-Test_Pool_Size = 2
-Test_Pool_Size_ZERO = 0
+Test_Pool_Name = (os.getenv("DB_POOL_NAME") or "testing_pool")
+Test_Pool_Size = (os.getenv("CONNECTION_POOL_SIZE") or 2)
 
 database_host = (os.getenv("DB_HOST") or "127.0.0.1")
 database_port = (os.getenv("DB_PORT") or 3306)
