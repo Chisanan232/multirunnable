@@ -8,14 +8,20 @@ WORKDIR ./
 
 COPY . .
 
-# Install Python dependencies which it runs pytest it needs
-RUN pip install -U pip && \
+RUN \
+      # Install Python dependencies which it runs pytest it needs
+      pip install -U pip && \
       pip install -U pytest &&\
       pip install -U pytest-cov &&\
       pip install pytest-rerunfailures &&\
       pip install codecov &&\
       pip install mysql-connector-python &&\
-      pip install -r dev-requirements.txt
+      pip install -r dev-requirements.txt && \
+
+      # Install some internet tool for debug if it needs
+      apt-get update && \
+      apt-get install -y iputils-ping && \
+      apt-get install -y net-tools && \
+      apt-get install --no-install-recommends --assume-yes netcat
 
 CMD ["pytest"]
-
