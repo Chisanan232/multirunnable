@@ -133,8 +133,6 @@ class TestFao:
         elif _strategy is SavingStrategy.ONE_THREAD_ONE_FILE_AND_COMPRESS_ALL:
             if TestFao._is_alone() is True:
                 assert _result is not None, "If it's children worker or alone by itself, it should return the data streaming object."
-                print(f"[DEBUG] _result: {_result}")
-                print(f"[DEBUG] type of _result: {type(_result)}")
             else:
                 assert _result == _Do_Nothing_Flag, "If it's main worker but call method 'save_as_xxx', it should do nothing."
 
