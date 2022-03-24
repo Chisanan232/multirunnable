@@ -125,9 +125,7 @@ class TestFao:
         elif _strategy is SavingStrategy.ALL_THREADS_ONE_FILE:
             if TestFao._is_alone() is True:
                 # Get the data we pass
-                assert _result == _Done_Flag, "If it's main worker, it should save the data as target file format."
-                TestFao._check_file_and_remove_it(_file_path=_file_path)
-                # assert _result is not None, "If it's children worker or alone by itself, it should return the data."
+                assert _result is not None, "If it's main worker, it should get the object which saving data."
             else:
                 assert _result == _Done_Flag, "If it's main worker, it should save the data as target file format."
                 TestFao._check_file_and_remove_it(_file_path=_file_path)
