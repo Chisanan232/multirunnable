@@ -62,7 +62,7 @@ class _ExampleTestingFile(File):
 
 class _TestProcess(multiprocessing.Process):
 
-    def __init__(self, fs):
+    def __init__(self, fs: FileSaver):
         super().__init__()
         self.fs = fs
 
