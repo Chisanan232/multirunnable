@@ -52,6 +52,7 @@ class FileSaver(BaseSaver):
     def save(self, file: str, mode: str, data: List[list], encoding: str = "UTF-8"):
         if self.__Mediator is None:
             self._saving_process(file=file, mode=mode, encoding=encoding, data=data)
+            return _Done_Flag
         else:
             if self.__Mediator.super_worker_running is True:
                 if self.__Mediator.child_worker_running:
@@ -63,77 +64,70 @@ class FileSaver(BaseSaver):
 
 
     def _one_worker_one_file_process(self, file: str, mode: str, encoding: str, data: List) -> int:
-        if self._is_alone() and self._has_run_children_before() is False:
-            # It must to be 'One Thread One File' strategy.
-            self._saving_process(file=file, mode=mode, encoding=encoding, data=data)
-            self.__Has_Data = False
-            return _Done_Flag
-        elif self._is_main_worker():
-            logging.warning("This's main worker (thread, process, etc) so that it doesn't do anything here.")
-            self.__Has_Data = False
-            return _Do_Nothing_Flag
-        elif self._is_children_worker():
+        if self._is_children_worker():
             global _Run_Children_History_Flag
             _Run_Children_History_Flag["history"] = True
             # It must to be 'One Thread One File' strategy.
             self._saving_process(file=file, mode=mode, encoding=encoding, data=data)
             self.__Has_Data = False
             return _Done_Flag
+        elif self._is_main_worker():
+            if self._has_run_children_before():
+                logging.warning("This's main worker (thread, process, etc) so that it doesn't do anything here.")
+                self.__Has_Data = False
+                return _Do_Nothing_Flag
+            else:
+                self._saving_process(file=file, mode=mode, encoding=encoding, data=data)
+                self.__Has_Data = False
+                return _Done_Flag
         else:
             raise RuntimeError
 
 
     def _all_workers_one_file_process(self, file: str, mode: str, encoding: str, data: List) -> Union[int, list]:
         # 'ALL_THREADS_ONE_FILE' strategy.
-        if self._is_alone() and self._has_run_children_before() is False:
-            self._saving_process(file=file, mode=mode, encoding=encoding, data=data)
-            self.__Has_Data = False
-            return _Done_Flag
-        elif self._is_main_worker():
-            # This's super worker and its responsibility is saving data as file
-            self._saving_process(file=file, mode=mode, encoding=encoding, data=data)
-            self.__Has_Data = False
-            return _Done_Flag
-        elif self._is_children_worker():
+        if self._is_children_worker():
             global _Run_Children_History_Flag
             _Run_Children_History_Flag["history"] = True
             # This's child worker and its responsibility is compressing all files
             self.__Has_Data = True
             return data
+        elif self._is_main_worker():
+            # This's super worker and its responsibility is saving data as file
+            self._saving_process(file=file, mode=mode, encoding=encoding, data=data)
+            self.__Has_Data = False
+            return _Done_Flag
         else:
             raise RuntimeError
 
 
     def _one_worker_one_file_and_compress_all_process(self, file: str, data: List):
         # 'ONE_THREAD_ONE_FILE_AND_COMPRESS_ALL' strategy.
-        if self._is_alone() and self._has_run_children_before() is False:
-            # This's child worker and its responsibility is generating data stream with one specific file format
-            data_stream = self._saving_stream(file=file, data=data)
-            self.__Has_Data = True
-            return data_stream
-        elif self._is_main_worker():
-            # This's super worker and its responsibility is compressing all files
-            # This process should not handle and run here. It's Archiver's responsibility.
-            logging.warning("This's main worker (thread, process, etc) so that it doesn't do anything here.")
-            self.__Has_Data = False
-            return _Do_Nothing_Flag
-        elif self._is_children_worker():
+        if self._is_children_worker():
             global _Run_Children_History_Flag
             _Run_Children_History_Flag["history"] = True
             # This's child worker and its responsibility is generating data stream with one specific file format
             data_stream = self._saving_stream(file=file, data=data)
             self.__Has_Data = True
             return data_stream
+        elif self._is_main_worker():
+            if self._has_run_children_before():
+                # This's super worker and its responsibility is compressing all files
+                # This process should not handle and run here. It's Archiver's responsibility.
+                logging.warning("This's main worker (thread, process, etc) so that it doesn't do anything here.")
+                self.__Has_Data = False
+                return _Do_Nothing_Flag
+            else:
+                # This's child worker and its responsibility is generating data stream with one specific file format
+                data_stream = self._saving_stream(file=file, data=data)
+                self.__Has_Data = True
+                return data_stream
         else:
             raise RuntimeError
 
 
     def has_data(self) -> bool:
         return self.__Has_Data
-
-
-    def _is_alone(self) -> bool:
-        return self.__Mediator.activate_count == 1
 
 
     def _has_run_children_before(self) -> bool:
