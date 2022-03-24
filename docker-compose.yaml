@@ -1,0 +1,71 @@
+version: "3.8"
+
+services:
+
+  pytest_linux:
+    container_name: pytest_py3_linux
+    environment:
+      - DB_HOST=192.168.23.100
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=password
+      - DB_DATABASE=tw_stock
+    build:
+      context: .
+      dockerfile: Dockerfile_pytest
+    networks:
+      pytest_network:
+        ipv4_address: 192.168.23.2
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 64M
+        reservations:
+          cpus: '0.125'
+          memory: 32M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 2
+
+  mysql_db:
+    container_name: mysql_pytest_db
+    image: mysql:8.0.23
+    restart: always
+    environment:
+      - MYSQL_ROOT_HOST=127.0.0.1
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_PASSWORD=password
+      - MYSQL_DATABASE=tw_stock
+    volumes:
+      - ./test_mysql/my.cnf:/etc/mysql/my.cnf
+      - ./test_mysql/mysql:/var/lib/mysql
+    networks:
+      pytest_network:
+        ipv4_address: 192.168.23.100
+    ports:
+      - "1653:3306"
+      - "16530:33060"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 64M
+        reservations:
+          cpus: '0.125'
+          memory: 32M
+      restart_policy:
+        condition: on-failure
+        delay: 3s
+        max_attempts: 3
+
+
+networks:
+  pytest_network:
+    driver: ipvlan
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.23.0/24
+
