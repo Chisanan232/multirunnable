@@ -1,4 +1,4 @@
-name: multirunnable testing
+name: multirunnable testing by 'release'
 
 on:
   push:
