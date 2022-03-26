@@ -1,12 +1,12 @@
-name: multirunnable testing
+name: multirunnable CI/CD by 'master'
 
 on:
   push:
     branches:
       - master
-  pull_request:
-    branches:
-      - master
+#  pull_request:
+#    branches:
+#      - master
 
 
 jobs:

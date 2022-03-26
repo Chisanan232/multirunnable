@@ -1,12 +1,12 @@
-name: multirunnable testing
+name: multirunnable testing by 'develop'
 
 on:
   push:
     branches:
-      - "*"
+      - develop
   pull_request:
     branches:
-      - "*"
+      - develop
 
 
 jobs:
