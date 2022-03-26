@@ -3,10 +3,12 @@ name: multirunnable testing by 'release'
 on:
   push:
     branches:
+      - "releases"
       - "releases-**"
       - "releases/**"
   pull_request:
     branches:
+      - "releases"
       - "releases-**"
       - "releases/**"
 
