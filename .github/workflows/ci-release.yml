@@ -1,16 +1,16 @@
-name: multirunnable testing by 'release'
+name: Testing by 'release'
 
 on:
   push:
     branches:
-      - "releases"
-      - "releases-**"
-      - "releases/**"
+      - "release"
+      - "release-**"
+      - "release/**"
   pull_request:
     branches:
-      - "releases"
-      - "releases-**"
-      - "releases/**"
+      - "release"
+      - "release-**"
+      - "release/**"
 
 
 jobs:
