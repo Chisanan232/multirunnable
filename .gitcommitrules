@@ -1,0 +1,74 @@
+++++++++++++++++++++++ Git Commit Rules: ++++++++++++++++++++++
+
+Description:
+Unify all the commit message to rule and clear it. It could help developers to clean
+and write the summary of release version from ALL the commit logs. Any commit with
+invalid message format should not be merged or fetched, etc.
+
+
+Format:
+[commit topic] (commit scope) <commit message>
+
+
+Commit Topic:
+* New Feature
+The new features which be added currently.
+
+* Breaking Change
+Modify codes which probably lead to it couldn't run with old version code finely.
+
+* Performance
+Improve any performance in anywhere of this package. It may be just a for loop, a
+searching mechanism or something else.
+
+* Bug Fix
+Fix any issues in this package. But it's also probably testing codes.
+
+* Refactor
+Refactoring code. Sometimes, the others may lead to do it. For example, you need to
+fix some issues or modify something to let it's clear so that you would adjust the
+software architecture. About that scenario, you should mark as 'Performance + Refactor'
+or 'Performance + Bug Fix'.
+
+* Style
+Modify anything which does NOT effect to any features or codes. For example, below are
+the things of 'Style':
+    - Remove or add place, indentation, etc.
+    - Remove or add newline.
+    - The way to comment out code.
+
+* Test
+Modify any the codes which is testing code for this package. In this package, it's
+the directory './tests'.
+
+* Docs
+Modify anything which is related with documentation of this package. In this package,
+it's the directory './docs'.
+
+
+Commit Scope:
+* code
+Path is './multirunnable'.
+
+* test
+Path is './tests'.
+
+* example
+Path is './example'.
+
+* study
+Path is './study'.
+
+* docs
+Path is './docs'.
+
+* config
+Other paths which is not in above, all is config type file.
+
+
+Commit Message:
+The description of your commit. Remember, it's BRIEF or SUMMARY, not DETAIL. Just for the point.
+
+
+++++++++++++++++++++++ Author & Copyright: ++++++++++++++++++++++
+                                Copyright 2022 Bryant Liu
