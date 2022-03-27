@@ -111,7 +111,15 @@ jobs:
                 INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
                     VALUES ('0108-01-09 00:00:00' , 51255446 ,11006827093 ,212.0000 ,216.5000 , 211.0000 ,215.5000 ,+4.50 , 14098);"
 
-      - name: Install Python ${{ matrix.python-version }} in  ${{ matrix.os }}
+      - name: Cache Python Runtime environment and dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('*requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Setup Python ${{ matrix.python-version }} in  ${{ matrix.os }}
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
@@ -156,6 +164,12 @@ jobs:
         with:
           name: coverage
           path: .coverage-*
+
+      - name: Install Python tool 'coverage'
+        run: |
+          python -m pip install --upgrade pip
+          pip install -U pip
+          pip install coverage
 
       - name: Combine all code coverage result files
         run: coverage combine
