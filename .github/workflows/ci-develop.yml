@@ -50,9 +50,9 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=3
-        volumes:
-          - ./test_mysql/my.cnf:/etc/mysql/my.cnf
-          - ./test_mysql/mysql:/var/lib/mysql
+#        volumes:
+#          - $(pwd)/test_mysql/my.cnf:/etc/mysql/my.cnf
+#          - $(pwd)/test_mysql/mysql:/var/lib/mysql
 
     steps:
       - name: Checkout
