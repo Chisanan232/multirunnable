@@ -34,24 +34,34 @@ jobs:
           - os: ubuntu-latest
             python-version: 3.8
 
-#    services:
-#      mysql:
-#        image: mysql:8.0.27
-#        env:
-#          MYSQL_ROOT_PASSWORD: password
-#          MYSQL_ALLOW_EMPTY_PASSWORD: true
-#        ports:
-#          - 33306:3306
-#        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+    services:
+      test-mysql:
+        image: mysql:8.0.27
+        env:
+          MYSQL_ROOT_HOST: 127.0.0.1
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_PASSWORD: password
+          MYSQL_DATABASE: tw_stock
+        ports:
+          - 3306:3306
+          - 33060:33060
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+        volumes:
+          - test_mysql/my.cnf:/etc/mysql/my.cnf
+          - test_mysql/mysql:/var/lib/mysql
 
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Set up MySQL database
-        run: |
-          sudo /etc/init.d/mysql start
-#          mysql -e 'CREATE DATABASE ${{ env.DB_DATABASE }};' -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
+#      - name: Set up MySQL database
+#        run: |
+#          sudo /etc/init.d/mysql start
+##          mysql -e 'CREATE DATABASE ${{ env.DB_DATABASE }};' -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
 
 #      - name: Install MySQL driver connection tool
 #        run: |
@@ -295,7 +305,7 @@ jobs:
         with:
           name: multirunnable-codecov
           token: ${{ secrets.CODECOV_TOKEN }}   # The token of project MultiRunnable in codecov
-          file: coverage.xml
+          file: .coverage
           env_vars: OS,PYTHON
           fail_ci_if_error: true   # optional (default = false)
           verbose: true    # optional (default = false)
