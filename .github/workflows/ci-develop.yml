@@ -38,10 +38,10 @@ jobs:
       mysql:
         image: mariadb:10.3
         env:
-          MYSQL_ROOT_HOST: 0.0.0.0
+#          MYSQL_ROOT_HOST: 0.0.0.0
           MYSQL_ROOT_PASSWORD: root
-          MYSQL_PASSWORD: root
-          MYSQL_DATABASE: tw_stock
+#          MYSQL_PASSWORD: root
+#          MYSQL_DATABASE: tw_stock
         ports:
           - 3306:3306
           - 33060:33060
