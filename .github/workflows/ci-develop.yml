@@ -36,9 +36,9 @@ jobs:
 
     services:
       mysql:
-        image: mysql:8.0
+        image: mariadb:10.3
         env:
-          MYSQL_ROOT_HOST: 127.0.0.1
+          MYSQL_ROOT_HOST: 0.0.0.0
           MYSQL_ROOT_PASSWORD: root
           MYSQL_PASSWORD: root
           MYSQL_DATABASE: tw_stock
