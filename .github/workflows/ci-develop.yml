@@ -11,7 +11,7 @@ on:
 
 jobs:
 
-  test:
+  unit-test:
     env:
       DB_HOST: 127.0.0.1
       DB_PORT: 3306
@@ -145,25 +145,133 @@ jobs:
         run: pytest
 
       - name: Rename the code coverage result file
-        run: mv ./.coverage ./.coverage-${{ matrix.os }}-${{ matrix.python-version }}
+        run: mv ./.coverage ./.coverage.${{ matrix.os }}-${{ matrix.python-version }}
 
       - name: Upload code coverage result file
         uses: actions/upload-artifact@v3
         with:
           name: coverage
-          path: .coverage-${{ matrix.os }}-${{ matrix.python-version }}
+          path: .coverage.${{ matrix.os }}-${{ matrix.python-version }}
           if-no-files-found: error
 
 
+  integration-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7,3.8,3.9,'3.10']
+        os: [ubuntu-18.04,ubuntu-latest]
+        exclude:
+          - os: ubuntu-18.04
+            python-version: 3.7
+          - os: ubuntu-18.04
+            python-version: 3.9
+          - os: ubuntu-latest
+            python-version: 3.6
+          - os: ubuntu-latest
+            python-version: 3.8
+
+      - name: Cache Python Runtime environment and dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('*requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Setup Python ${{ matrix.python-version }} in  ${{ matrix.os }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Python ${{ matrix.python-version }} dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -U pip
+          pip install codecov
+          pip install -U pytest
+          pip install -U pytest-cov
+          pip install pytest-rerunfailures
+          pip install mysql-connector-python
+          pip install -r dev-requirements.txt
+
+#      - name: Run tests with pytest
+#        run: pytest
+#
+#      - name: Rename the code coverage result file
+#        run: mv ./.coverage ./.coverage.integration.${{ matrix.os }}-${{ matrix.python-version }}
+#
+#      - name: Upload code coverage result file
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: coverage
+#          path: .coverage.integration.${{ matrix.os }}-${{ matrix.python-version }}
+#          if-no-files-found: error
+
+
+  database-compatibility-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7,3.8,3.9,'3.10']
+        os: [ubuntu-18.04,ubuntu-latest]
+        exclude:
+          - os: ubuntu-18.04
+            python-version: 3.7
+          - os: ubuntu-18.04
+            python-version: 3.9
+          - os: ubuntu-latest
+            python-version: 3.6
+          - os: ubuntu-latest
+            python-version: 3.8
+
+      - name: Cache Python Runtime environment and dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('*requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Setup Python ${{ matrix.python-version }} in  ${{ matrix.os }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Python ${{ matrix.python-version }} dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -U pip
+          pip install codecov
+          pip install -U pytest
+          pip install -U pytest-cov
+          pip install pytest-rerunfailures
+          pip install mysql-connector-python
+          pip install -r dev-requirements.txt
+
+#      - name: Run tests with pytest
+#        run: pytest
+#
+#      - name: Rename the code coverage result file
+#        run: mv ./.coverage ./.coverage.database-compatibility.${{ matrix.os }}-${{ matrix.python-version }}
+#
+#      - name: Upload code coverage result file
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: coverage
+#          path: .coverage.database-compatibility.${{ matrix.os }}-${{ matrix.python-version }}
+#          if-no-files-found: error
+
+
   codecov_finish:
-    needs: test
+    needs: [unit-test, integration-test, database-compatibility-test]
     runs-on: ubuntu-latest
     steps:
       - name: Download code coverage result file
         uses: actions/download-artifact@v3
         with:
           name: coverage
-          path: .coverage-*
+          path: .coverage.*
 
       - name: Install Python tool 'coverage'
         run: |
@@ -172,7 +280,7 @@ jobs:
           pip install coverage
 
       - name: Combine all code coverage result files
-        run: coverage combine
+        run: coverage combine .coverage.*
 
       - name: Upload testing coverage of project code to Codecov
         uses: codecov/codecov-action@v2
