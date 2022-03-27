@@ -136,3 +136,37 @@ jobs:
       - name: Run tests with pytest
         run: pytest
 
+      - name: Rename the code coverage result file
+        run: mv ./.coverage ./.coverage-${{ matrix.os }}-${{ matrix.python-version }}
+
+      - name: Upload code coverage result file
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage
+          path: .coverage-${{ matrix.os }}-${{ matrix.python-version }}
+          if-no-files-found: error
+
+
+  codecov_finish:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download code coverage result file
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage
+          path: .coverage-*
+
+      - name: Combine all code coverage result files
+        run: coverage combine
+
+      - name: Upload testing coverage of project code to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          name: multirunnable-codecov
+          token: ${{ secrets.CODECOV_TOKEN }}   # The token of project MultiRunnable in codecov
+          file: coverage.xml
+          env_vars: OS,PYTHON
+          fail_ci_if_error: true   # optional (default = false)
+          verbose: true    # optional (default = false)
+
