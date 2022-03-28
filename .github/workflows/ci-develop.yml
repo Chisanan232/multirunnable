@@ -19,6 +19,20 @@ jobs:
       DB_PASSWORD: root
       DB_DATABASE: tw_stock
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+          - 33060:33060
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -33,27 +47,6 @@ jobs:
             python-version: 3.6
           - os: ubuntu-latest
             python-version: 3.8
-
-    services:
-      mysql:
-        image: mysql:8.0
-#        image: mariadb:10.3
-        env:
-#          MYSQL_ROOT_HOST: 0.0.0.0
-          MYSQL_ROOT_PASSWORD: root
-#          MYSQL_PASSWORD: root
-#          MYSQL_DATABASE: tw_stock
-        ports:
-          - 3306:3306
-          - 33060:33060
-        options: >-
-          --health-cmd="mysqladmin ping"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-#        volumes:
-#          - $(pwd)/test_mysql/my.cnf:/etc/mysql/my.cnf
-#          - $(pwd)/test_mysql/mysql:/var/lib/mysql
 
     steps:
       - name: Checkout
@@ -230,16 +223,12 @@ jobs:
     strategy:
       matrix:
         python-version: [3.6, 3.7,3.8,3.9,'3.10']
-        os: [ubuntu-18.04,ubuntu-latest]
-        exclude:
-          - os: ubuntu-18.04
-            python-version: 3.7
-          - os: ubuntu-18.04
-            python-version: 3.9
-          - os: ubuntu-latest
-            python-version: 3.6
-          - os: ubuntu-latest
-            python-version: 3.8
+        os: [ubuntu-latest]
+#        exclude:
+#          - os: ubuntu-latest
+#            python-version: 3.6
+#          - os: ubuntu-latest
+#            python-version: 3.8
 
     steps:
       - name: Checkout
@@ -302,13 +291,6 @@ jobs:
       - name: Combine all code coverage result files
         run: coverage combine .coverage.*
 
-      - name: Upload testing coverage of project code to Codecov
-        uses: codecov/codecov-action@v2
-        with:
-          name: multirunnable-codecov
-          token: ${{ secrets.CODECOV_TOKEN }}   # The token of project MultiRunnable in codecov
-          file: .coverage
-          env_vars: OS,PYTHON
-          fail_ci_if_error: true   # optional (default = false)
-          verbose: true    # optional (default = false)
+      - name: Display testing coverage of project code
+        run: coverage report -m
 
