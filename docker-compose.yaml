@@ -39,8 +39,8 @@ services:
       - MYSQL_PASSWORD=password
       - MYSQL_DATABASE=tw_stock
     volumes:
-      - ./test_mysql/my.cnf:/etc/mysql/my.cnf
-      - ./test_mysql/mysql:/var/lib/mysql
+      - ./tests/database/test_mysql/my.cnf:/etc/mysql/my.cnf
+      - ./tests/database/test_mysql/mysql:/var/lib/mysql
     networks:
       pytest_network:
         ipv4_address: 192.168.23.100

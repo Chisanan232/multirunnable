@@ -1,4 +1,4 @@
-name: multirunnable testing by 'develop'
+name: Testing by 'develop'
 
 on:
   push:
@@ -11,13 +11,27 @@ on:
 
 jobs:
 
-  test:
+  unit-test:
     env:
       DB_HOST: 127.0.0.1
       DB_PORT: 3306
       DB_USER: root
       DB_PASSWORD: root
       DB_DATABASE: tw_stock
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+          - 33060:33060
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
 
     runs-on: ${{ matrix.os }}
     strategy:
@@ -34,24 +48,14 @@ jobs:
           - os: ubuntu-latest
             python-version: 3.8
 
-#    services:
-#      mysql:
-#        image: mysql:8.0.27
-#        env:
-#          MYSQL_ROOT_PASSWORD: password
-#          MYSQL_ALLOW_EMPTY_PASSWORD: true
-#        ports:
-#          - 33306:3306
-#        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Set up MySQL database
-        run: |
-          sudo /etc/init.d/mysql start
-#          mysql -e 'CREATE DATABASE ${{ env.DB_DATABASE }};' -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
+#      - name: Set up MySQL database
+#        run: |
+#          sudo /etc/init.d/mysql start
+##          mysql -e 'CREATE DATABASE ${{ env.DB_DATABASE }};' -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
 
 #      - name: Install MySQL driver connection tool
 #        run: |
@@ -67,6 +71,7 @@ jobs:
               sleep 10
             done
             echo Failed waiting for MySQL && exit 1
+        continue-on-error: true
 
       - name: Test MySQL connection
         run: mysql -h ${{ env.DB_HOST }} -u ${{ env.DB_USER }} -p${{ env.DB_PASSWORD }} --execute="show databases;"
@@ -111,7 +116,15 @@ jobs:
                 INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
                     VALUES ('0108-01-09 00:00:00' , 51255446 ,11006827093 ,212.0000 ,216.5000 , 211.0000 ,215.5000 ,+4.50 , 14098);"
 
-      - name: Install Python ${{ matrix.python-version }} in  ${{ matrix.os }}
+      - name: Cache Python Runtime environment and dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('*requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Setup Python ${{ matrix.python-version }} in  ${{ matrix.os }}
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
@@ -135,4 +148,149 @@ jobs:
 
       - name: Run tests with pytest
         run: pytest
+
+      - name: Rename the code coverage result file
+        run: mv ./.coverage ./.coverage.${{ matrix.os }}-${{ matrix.python-version }}
+
+      - name: Upload code coverage result file
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage
+          path: .coverage.${{ matrix.os }}-${{ matrix.python-version }}
+          if-no-files-found: error
+
+
+  integration-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7,3.8,3.9,'3.10']
+        os: [ubuntu-18.04,ubuntu-latest]
+        exclude:
+          - os: ubuntu-18.04
+            python-version: 3.7
+          - os: ubuntu-18.04
+            python-version: 3.9
+          - os: ubuntu-latest
+            python-version: 3.6
+          - os: ubuntu-latest
+            python-version: 3.8
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Cache Python Runtime environment and dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('*requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Setup Python ${{ matrix.python-version }} in  ${{ matrix.os }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Python ${{ matrix.python-version }} dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -U pip
+          pip install codecov
+          pip install -U pytest
+          pip install -U pytest-cov
+          pip install pytest-rerunfailures
+          pip install mysql-connector-python
+          pip install -r dev-requirements.txt
+
+#      - name: Run tests with pytest
+#        run: pytest
+#
+#      - name: Rename the code coverage result file
+#        run: mv ./.coverage ./.coverage.integration.${{ matrix.os }}-${{ matrix.python-version }}
+#
+#      - name: Upload code coverage result file
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: coverage
+#          path: .coverage.integration.${{ matrix.os }}-${{ matrix.python-version }}
+#          if-no-files-found: error
+
+
+  database-compatibility-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7,3.8,3.9,'3.10']
+        os: [ubuntu-latest]
+#        exclude:
+#          - os: ubuntu-latest
+#            python-version: 3.6
+#          - os: ubuntu-latest
+#            python-version: 3.8
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Cache Python Runtime environment and dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('*requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Setup Python ${{ matrix.python-version }} in  ${{ matrix.os }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Python ${{ matrix.python-version }} dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -U pip
+          pip install codecov
+          pip install -U pytest
+          pip install -U pytest-cov
+          pip install pytest-rerunfailures
+          pip install mysql-connector-python
+          pip install -r dev-requirements.txt
+
+#      - name: Run tests with pytest
+#        run: pytest
+#
+#      - name: Rename the code coverage result file
+#        run: mv ./.coverage ./.coverage.database-compatibility.${{ matrix.os }}-${{ matrix.python-version }}
+#
+#      - name: Upload code coverage result file
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: coverage
+#          path: .coverage.database-compatibility.${{ matrix.os }}-${{ matrix.python-version }}
+#          if-no-files-found: error
+
+
+  codecov_finish:
+    needs: [unit-test, integration-test, database-compatibility-test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download code coverage result file
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage
+          path: .coverage.*
+
+      - name: Install Python tool 'coverage'
+        run: |
+          python -m pip install --upgrade pip
+          pip install -U pip
+          pip install coverage
+
+      - name: Combine all code coverage result files
+        run: coverage combine .coverage.*
+
+      - name: Display testing coverage of project code
+        run: coverage report -m
 

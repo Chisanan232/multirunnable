@@ -70,7 +70,10 @@ class _Function(metaclass=ABCMeta):
         _worker_str = _Function._get_worker_name(pkg=self._py_pkg)
         _current_process_name = self.get_current_worker_name()
         _mr_current_process_name = self.worker_context.get_current_worker_name()
+        print(f"[DEBUG in func_to_get_current_worker_name] _current_process_name: {_current_process_name}")
+        print(f"[DEBUG in func_to_get_current_worker_name] _mr_current_process_name: {_mr_current_process_name}")
         assert _current_process_name is _mr_current_process_name, f"The name of current {_worker_str} we got should be same as the name of {_worker_str} it returns via Python package '{self._py_pkg}'."
+        assert False
 
 
     @abstractmethod
