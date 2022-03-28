@@ -1,10 +1,10 @@
 [run]
-source=
-    ./multirunnable
+parallel = True
+source=./multirunnable
 
 omit =
 #    */__init__.py
-    ./_version.py
+    ./__pkg_info__.py
     ./_utils.py
 
 
@@ -12,6 +12,7 @@ omit =
 # Regexes for lines to exclude from consideration
 exclude_lines =
     # Don't complain about missing debug-only code:
+    def __str__
     def __repr__
     if self\.debug
 

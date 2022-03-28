@@ -1,2 +1,3 @@
 codecov:
   token: $CODECOV_TOKEN
+  allow_coverage_offsets: true
