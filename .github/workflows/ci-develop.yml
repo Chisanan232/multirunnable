@@ -292,5 +292,5 @@ jobs:
         run: coverage combine .coverage.*
 
       - name: Display testing coverage of project code
-        run: coverage report -m
+        run: coverage report
 
