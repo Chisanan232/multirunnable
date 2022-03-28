@@ -7,6 +7,11 @@ from multirunnable.coroutine.strategy import AsynchronousStrategy
 
 from ..framework.lock import LockTestSpec, SemaphoreTestSpec
 from ..test_config import Worker_Size, Worker_Pool_Size, Task_Size, Semaphore_Value
+from .._examples import RunByStrategy
+from .._examples_with_synchronization import (
+    instantiate_lock, instantiate_rlock,
+    instantiate_semaphore, instantiate_bounded_semaphore
+)
 from ._retry_sample import (
     _Retry_Time, _Default_Retry_Time, _Test_Return_Value, _Test_Exception,
     init_flag, get_process_flag,
@@ -15,11 +20,6 @@ from ._retry_sample import (
     async_target_function_with_default, async_target_function_raising_exception_with_default,
     async_target_function, async_target_function_raising_exception,
     TargetBoundedFunction, TargetBoundedAsyncFunction
-)
-from .._examples import RunByStrategy
-from .._examples_with_synchronization import (
-    instantiate_lock, instantiate_rlock,
-    instantiate_semaphore, instantiate_bounded_semaphore
 )
 
 from gevent.threading import get_ident as get_gevent_ident
