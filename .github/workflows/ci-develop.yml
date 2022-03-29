@@ -29,7 +29,7 @@ jobs:
       - id: set-matrix
         run: |
           sudo apt-get install jq
-          echo "::set-output name=matrix::$(bash scripts/get-unit-test-core-persistence.sh)"
+          echo "::set-output name=matrix::$(bash scripts/get-unit-test-persistence-paths.sh)"
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
@@ -51,13 +51,13 @@ jobs:
           - os: ubuntu-latest
             python-version: 3.8
           - os: macos-10.15
-            python-version: 3.7
-          - os: macos-10.15
-            python-version: 3.9
-          - os: macos-latest
             python-version: 3.6
+          - os: macos-10.15
+            python-version: 3.8    # Pickle Issue
           - os: macos-latest
-            python-version: 3.8
+            python-version: 3.7
+          - os: macos-latest
+            python-version: 3.9
         test-path: ${{fromJson(needs.prep-testbed-core.outputs.matrix)}}
 
     steps:
