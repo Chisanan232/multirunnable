@@ -108,7 +108,7 @@ jobs:
 
 
   unit-test-persistence:
-    needs: unit-test-persistence
+    needs: prep-testbed-persistence
     env:
       DB_HOST: 127.0.0.1
       DB_PORT: 3306
