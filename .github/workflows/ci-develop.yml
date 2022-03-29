@@ -10,8 +10,105 @@ on:
 
 
 jobs:
+  prep-testbed-core:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - id: set-matrix
+        run: |
+          sudo apt-get install jq
+          echo "::set-output name=matrix::$(bash scripts/get-unit-test-core-paths.sh)"
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
 
-  unit-test:
+
+  prep-testbed-persistence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - id: set-matrix
+        run: |
+          sudo apt-get install jq
+          echo "::set-output name=matrix::$(bash scripts/get-unit-test-core-persistence.sh)"
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+
+
+  unit-test-core:
+    needs: prep-testbed-core
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7,3.8,3.9,'3.10']
+        os: [ubuntu-18.04,ubuntu-latest, macos-10.15, macos-latest]
+        exclude:
+          - os: ubuntu-18.04
+            python-version: 3.7
+          - os: ubuntu-18.04
+            python-version: 3.9
+          - os: ubuntu-latest
+            python-version: 3.6
+          - os: ubuntu-latest
+            python-version: 3.8
+          - os: macos-10.15
+            python-version: 3.7
+          - os: macos-10.15
+            python-version: 3.9
+          - os: macos-latest
+            python-version: 3.6
+          - os: macos-latest
+            python-version: 3.8
+        test-path: ${{fromJson(needs.prep-testbed-core.outputs.matrix)}}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Cache Python Runtime environment and dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('*requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Setup Python ${{ matrix.python-version }} in  ${{ matrix.os }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Python ${{ matrix.python-version }} dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -U pip
+          pip install codecov
+          pip install -U pytest
+          pip install -U pytest-cov
+          pip install pytest-rerunfailures
+          pip install -r dev-requirements.txt
+
+      - name: Change the setting of option *open files* of resource limit
+        run: |
+          ulimit -a
+          ulimit -n 512
+          ulimit -a
+
+      - name: Run tests with pytest
+        run: pytest ${{ matrix.test-path }}
+
+      - name: Rename the code coverage result file
+        run: mv ./.coverage ./.coverage.unit-test-core.${{ matrix.os }}-${{ matrix.python-version }}
+
+      - name: Upload code coverage result file
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage
+          path: .coverage.unit-test-core.${{ matrix.os }}-${{ matrix.python-version }}
+          if-no-files-found: error
+
+
+  unit-test-persistence:
+    needs: unit-test-persistence
     env:
       DB_HOST: 127.0.0.1
       DB_PORT: 3306
@@ -47,6 +144,7 @@ jobs:
             python-version: 3.6
           - os: ubuntu-latest
             python-version: 3.8
+        test-path: ${{fromJson(needs.prep-testbed-persistence.outputs.matrix)}}
 
     steps:
       - name: Checkout
@@ -140,24 +238,44 @@ jobs:
           pip install mysql-connector-python
           pip install -r dev-requirements.txt
 
-      - name: Change the setting of option *open files* of resource limit
-        run: |
-          ulimit -a
-          ulimit -n 512
-          ulimit -a
-
       - name: Run tests with pytest
-        run: pytest
+        run: pytest ${{ matrix.test-path }}
 
       - name: Rename the code coverage result file
-        run: mv ./.coverage ./.coverage.${{ matrix.os }}-${{ matrix.python-version }}
+        run: mv ./.coverage ./.coverage.unit-test-persistence.${{ matrix.os }}-${{ matrix.python-version }}
 
       - name: Upload code coverage result file
         uses: actions/upload-artifact@v3
         with:
           name: coverage
-          path: .coverage.${{ matrix.os }}-${{ matrix.python-version }}
+          path: .coverage.unit-test-persistence.${{ matrix.os }}-${{ matrix.python-version }}
           if-no-files-found: error
+
+
+  unit-test-codecov:
+    needs: [unit-test-core, unit-test-persistence]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Download code coverage result file
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage
+          path: .coverage.*
+
+      - name: Install Python tool 'coverage'
+        run: |
+          python -m pip install --upgrade pip
+          pip install -U pip
+          pip install coverage
+
+      - name: Combine all code coverage result files
+        run: coverage combine .coverage.*
+
+      - name: Display testing coverage of project code
+        run: coverage report -m
 
 
   integration-test:
@@ -272,10 +390,13 @@ jobs:
 #          if-no-files-found: error
 
 
-  codecov_finish:
-    needs: [unit-test, integration-test, database-compatibility-test]
+  total_codecov_finish:
+    needs: [unit-test-codecov, integration-test, database-compatibility-test]
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
       - name: Download code coverage result file
         uses: actions/download-artifact@v3
         with:
