@@ -1,17 +1,18 @@
 # MultiRunnable
 
 [![Supported Versions](https://img.shields.io/pypi/pyversions/multirunnable.svg?logo=python&logoColor=FBE072)](https://pypi.org/project/multirunnable)
-[![Release](https://img.shields.io/github/release/Chisanan232/multirunnable.svg?label=Release)](https://github.com/Chisanan232/multirunnable/releases)
-[![PyPI version](https://badge.fury.io/py/MultiRunnable.svg)](https://badge.fury.io/py/MultiRunnable)
+[![Release](https://img.shields.io/github/release/Chisanan232/multirunnable.svg?label=Release&amp;logo=github)](https://github.com/Chisanan232/multirunnable/releases)
+[![PyPI version](https://img.shields.io/pypi/v/MultiRunnable?color=%23099cec&amp;label=PyPI&amp;logo=pypi&amp;logoColor=white)](https://pypi.org/project/MultiRunnable/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/6733a68742a64b3dbcfa57b1309de4ce)](https://www.codacy.com/gh/Chisanan232/multirunnable/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Chisanan232/multirunnable&amp;utm_campaign=Badge_Grade)
 [![Documentation Status](https://readthedocs.org/projects/multirunnable/badge/?version=latest)](https://multirunnable.readthedocs.io/en/latest/?badge=latest)
 
 | OS | Building Status | Coverage Status |
 |------------|------------|--------|
+| Linux / MacOS |[![MultiRunnable CI/CD](https://github.com/Chisanan232/multirunnable/actions/workflows/ci-cd-master.yml/badge.svg)](https://github.com/Chisanan232/multirunnable/actions/workflows/ci-cd-master.yml)|[![codecov](https://codecov.io/gh/Chisanan232/multirunnable/branch/master/graph/badge.svg?token=E2AGK1ZIDH)](https://codecov.io/gh/Chisanan232/multirunnable)|
 | Linux |[![CircleCI](https://circleci.com/gh/Chisanan232/multirunnable.svg?style=svg)](https://app.circleci.com/pipelines/github/Chisanan232/multirunnable)|[![codecov](https://codecov.io/gh/Chisanan232/multirunnable/branch/master/graph/badge.svg?token=E2AGK1ZIDH)](https://codecov.io/gh/Chisanan232/multirunnable)|
-| Linux |[![multirunnable testing](https://github.com/Chisanan232/multirunnable/actions/workflows/ci.yml/badge.svg)](https://github.com/Chisanan232/multirunnable/actions/workflows/ci.yml)|[![codecov](https://codecov.io/gh/Chisanan232/multirunnable/branch/master/graph/badge.svg?token=E2AGK1ZIDH)](https://codecov.io/gh/Chisanan232/multirunnable)|
-| Windows |[![Build status](https://ci.appveyor.com/api/projects/status/v0nq38jtof6vcm23?svg=true)](https://ci.appveyor.com/project/Chisanan232/multirunnable)|[![Coverage Status](https://coveralls.io/repos/github/Chisanan232/multirunnable/badge.svg?branch=master)](https://coveralls.io/github/Chisanan232/multirunnable?branch=master)|
+
+[comment]: <> (| Windows |[![Build status]&#40;https://ci.appveyor.com/api/projects/status/v0nq38jtof6vcm23?svg=true&#41;]&#40;https://ci.appveyor.com/project/Chisanan232/multirunnable&#41;|[![Coverage Status]&#40;https://coveralls.io/repos/github/Chisanan232/multirunnable/badge.svg?branch=master&#41;]&#40;https://coveralls.io/github/Chisanan232/multirunnable?branch=master&#41;|)
 
 A Python library integrates the APIs of 3 strategies (Parallel, Concurrent, Coroutine) and 4 libraries (multiprocessing, threading, gevent, asyncio) to help developers build parallelism humanly.
 
