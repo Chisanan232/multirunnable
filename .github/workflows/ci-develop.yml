@@ -95,6 +95,7 @@ jobs:
 
       - name: Run tests with pytest
         run: pytest ${{ matrix.test-path }}
+        continue-on-error: true
 
       - name: Rename the code coverage result file
         run: mv ./.coverage ./.coverage.unit-test-core.${{ matrix.os }}-${{ matrix.python-version }}
@@ -169,7 +170,6 @@ jobs:
               sleep 10
             done
             echo Failed waiting for MySQL && exit 1
-        continue-on-error: true
 
       - name: Test MySQL connection
         run: mysql -h ${{ env.DB_HOST }} -u ${{ env.DB_USER }} -p${{ env.DB_PASSWORD }} --execute="show databases;"
@@ -240,6 +240,7 @@ jobs:
 
       - name: Run tests with pytest
         run: pytest ${{ matrix.test-path }}
+        continue-on-error: true
 
       - name: Rename the code coverage result file
         run: mv ./.coverage ./.coverage.unit-test-persistence.${{ matrix.os }}-${{ matrix.python-version }}
