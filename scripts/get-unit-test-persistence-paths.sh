@@ -39,7 +39,7 @@ else
     getalltests $persistence_database_path
     getalltests $persistence_file_path
 
-    dest=( "${persistence_database_tests[@]}" "${persistence_file_tests[@]}" )
+    dest=( "${persistence_database_tests[@]} ${persistence_file_tests[@]}" )
 
     printf '%s\n' "${dest[@]}" | jq -R . | jq -cs .
 

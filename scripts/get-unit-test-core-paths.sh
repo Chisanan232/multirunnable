@@ -72,7 +72,7 @@ else
     getalltests $api_path
     getalltests $adapter_path
 
-    dest=( "${array1[@]}" "${init_tests[@]}" "${parallel_tests[@]}" "${concurrent_tests[@]}" "${coroutine_tests[@]}" "${factory_tests[@]}" "${apis_tests[@]}" "${adapter_tests[@]}" )
+    dest=( "${array1[@]} ${init_tests[@]} ${parallel_tests[@]} ${concurrent_tests[@]} ${coroutine_tests[@]} ${factory_tests[@]} ${apis_tests[@]} ${adapter_tests[@]}" )
 
     printf '%s\n' "${dest[@]}" | jq -R . | jq -cs .
 
