@@ -57,7 +57,7 @@ jobs:
           - os: macos-latest
             python-version: 3.7
           - os: macos-latest
-            python-version: 3.9
+            python-version: 3.8    # Pickle Issue
         test-path: ${{fromJson(needs.prep-testbed-core.outputs.matrix)}}
 
     steps:
@@ -279,7 +279,20 @@ jobs:
         run: coverage report -m
 
 
+  prep-testbed-integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - id: set-matrix
+        run: |
+          sudo apt-get install jq
+          echo "::set-output name=matrix::$(bash scripts/get-integration-test-paths.sh)"
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+
+
   integration-test:
+    needs: prep-testbed-integration
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -294,6 +307,7 @@ jobs:
             python-version: 3.6
           - os: ubuntu-latest
             python-version: 3.8
+        test-path: ${{fromJson(needs.prep-testbed-integration.outputs.matrix)}}
 
     steps:
       - name: Checkout
@@ -323,21 +337,35 @@ jobs:
           pip install mysql-connector-python
           pip install -r dev-requirements.txt
 
-#      - name: Run tests with pytest
-#        run: pytest
-#
-#      - name: Rename the code coverage result file
-#        run: mv ./.coverage ./.coverage.integration.${{ matrix.os }}-${{ matrix.python-version }}
-#
-#      - name: Upload code coverage result file
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: coverage
-#          path: .coverage.integration.${{ matrix.os }}-${{ matrix.python-version }}
-#          if-no-files-found: error
+      - name: Run tests with pytest
+        run: pytest ${{ matrix.test-path }}
+        continue-on-error: true
+
+      - name: Rename the code coverage result file
+        run: mv ./.coverage ./.coverage.integration.${{ matrix.os }}-${{ matrix.python-version }}
+
+      - name: Upload code coverage result file
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage
+          path: .coverage.integration.${{ matrix.os }}-${{ matrix.python-version }}
+          if-no-files-found: error
+
+
+  prep-testbed-database-compatibility:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - id: set-matrix
+        run: |
+          sudo apt-get install jq
+          echo "::set-output name=matrix::$(bash scripts/get-compatibility-test-paths.sh)"
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
 
 
   database-compatibility-test:
+    needs: prep-testbed-database-compatibility
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -348,6 +376,7 @@ jobs:
 #            python-version: 3.6
 #          - os: ubuntu-latest
 #            python-version: 3.8
+        test-path: ${{fromJson(needs.prep-testbed-database-compatibility.outputs.matrix)}}
 
     steps:
       - name: Checkout
@@ -377,18 +406,19 @@ jobs:
           pip install mysql-connector-python
           pip install -r dev-requirements.txt
 
-#      - name: Run tests with pytest
-#        run: pytest
-#
-#      - name: Rename the code coverage result file
-#        run: mv ./.coverage ./.coverage.database-compatibility.${{ matrix.os }}-${{ matrix.python-version }}
-#
-#      - name: Upload code coverage result file
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: coverage
-#          path: .coverage.database-compatibility.${{ matrix.os }}-${{ matrix.python-version }}
-#          if-no-files-found: error
+      - name: Run tests with pytest
+        run: pytest ${{ matrix.test-path }}
+        continue-on-error: true
+
+      - name: Rename the code coverage result file
+        run: mv ./.coverage ./.coverage.database-compatibility.${{ matrix.os }}-${{ matrix.python-version }}
+
+      - name: Upload code coverage result file
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage
+          path: .coverage.database-compatibility.${{ matrix.os }}-${{ matrix.python-version }}
+          if-no-files-found: error
 
 
   total_codecov_finish:
