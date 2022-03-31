@@ -1,11 +1,11 @@
-from .task import BaseQueueTask as _BaseQueueTask
-from .factory import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory, BaseList as _BaseList
-from multirunnable.framework.runnable.result import MRResult as _MRResult
-from ..types import MRTasks as _MRTasks
-
-from abc import ABCMeta, abstractmethod
-from typing import List, Tuple, Dict, Optional, Union, Callable as CallableType, Iterable as IterableType
 from collections.abc import Callable
+from typing import List, Tuple, Dict, Optional, Union, Callable as CallableType, Iterable as IterableType
+from abc import ABCMeta, abstractmethod
+
+from .runnable.result import MRResult as _MRResult
+from .factory import BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory, BaseList as _BaseList
+from .task import BaseQueueTask as _BaseQueueTask
+from ..types import MRTasks as _MRTasks
 
 
 

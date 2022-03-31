@@ -1,5 +1,6 @@
-from multirunnable.mode import RunningMode as _RunningMode
 import logging
+
+from .mode import RunningMode as _RunningMode
 
 # # Current Running Mode
 RUNNING_MODE: _RunningMode = None

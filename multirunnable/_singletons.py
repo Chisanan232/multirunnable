@@ -1,6 +1,6 @@
-from abc import ABCMeta
-from typing import Dict, TypeVar, Generic, Any
 from inspect import isclass as inspect_isclass
+from typing import Dict, TypeVar, Generic, Any
+from abc import ABCMeta
 
 
 T = TypeVar("T")

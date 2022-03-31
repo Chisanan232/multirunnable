@@ -1,5 +1,5 @@
-from .. import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 from ..framework.runnable.context import BaseContext
+from .. import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 
 from multiprocessing.process import BaseProcess
 if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) > (3, 7):

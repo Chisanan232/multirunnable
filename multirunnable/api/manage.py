@@ -1,5 +1,8 @@
-from multirunnable.framework.factory.base import BaseGlobalizeAPI as _BaseGlobalizeAPI
-from multirunnable.types import (
+from typing import Dict, Optional
+
+from ..framework.factory.base import BaseGlobalizeAPI as _BaseGlobalizeAPI
+from ..exceptions import GlobalizeObjectError as _GlobalizeObjectError
+from ..types import (
     MRQueue as _MRQueue,
     MRLock as _MRLock,
     MRRLock as _MRRLock,
@@ -7,9 +10,6 @@ from multirunnable.types import (
     MRBoundedSemaphore as _MRBoundedSemaphore,
     MREvent as _MREvent,
     MRCondition as _MRCondition)
-from multirunnable.exceptions import GlobalizeObjectError as _GlobalizeObjectError
-
-from typing import Dict, Optional
 
 
 Running_Queue: Optional[Dict[str, _MRQueue]] = {}

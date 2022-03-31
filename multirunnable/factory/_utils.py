@@ -1,13 +1,13 @@
-from multirunnable.framework.runnable import (
+from typing import Dict, Tuple, Type, Union
+
+from ..framework.runnable import (
     BaseContext,
     PosixThreadLock,
     PosixThreadCommunication,
     BaseQueue
 )
-from multirunnable.mode import ContextMode, FeatureMode
-from multirunnable._import_utils import ImportMultiRunnable
-
-from typing import Dict, Tuple, Type, Union
+from .._import_utils import ImportMultiRunnable
+from ..mode import ContextMode, FeatureMode
 
 
 

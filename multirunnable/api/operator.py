@@ -1,11 +1,14 @@
-from multirunnable._config import get_current_mode
-from multirunnable.mode import RunningMode
-from multirunnable.framework.api.operator import (
+from typing import Dict, Optional
+
+from ..framework.api.operator import (
     AdapterOperator as _AdapterOperator,
     BaseLockAdapterOperator as _BaseLockAdapterOperator,
     AsyncAdapterOperator as _AsyncAdapterOperator,
     BaseAsyncLockAdapterOperator as _BaseAsyncLockOperator)
-from multirunnable.types import (
+from ..api.exceptions import QueueNotExistWithName as _QueueNotExistWithName
+from ..exceptions import GlobalObjectIsNoneError as _GlobalObjectIsNoneError
+from .._config import get_current_mode
+from ..types import (
     MRLock as _MRLock,
     MRRLock as _MRRLock,
     MRSemaphore as _MRSemaphore,
@@ -13,10 +16,7 @@ from multirunnable.types import (
     MREvent as _MREvent,
     MRCondition as _MRCondition,
     MRQueue as _MRQueue)
-from multirunnable.exceptions import GlobalObjectIsNoneError as _GlobalObjectIsNoneError
-from multirunnable.api.exceptions import QueueNotExistWithName as _QueueNotExistWithName
-
-from typing import Dict, Optional
+from ..mode import RunningMode
 
 
 

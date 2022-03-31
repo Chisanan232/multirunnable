@@ -1,12 +1,15 @@
-from multirunnable.framework.runnable.synchronization import (
+from threading import (
+    Lock as _Thread_Lock,
+    RLock as _Thread_RLock,
+    Semaphore as _Thread_Semaphore,
+    BoundedSemaphore as _Thread_BoundedSemaphore,
+    Event as _Thread_Event,
+    Condition as _Thread_Condition)
+from typing import Union
+
+from ..framework.runnable.synchronization import (
     PosixThreadLock as _PosixThreadLock,
     PosixThreadCommunication as _PosixThreadCommunication)
-
-from threading import (
-    Lock as _Thread_Lock, RLock as _Thread_RLock,
-    Semaphore as _Thread_Semaphore, BoundedSemaphore as _Thread_BoundedSemaphore,
-    Event as _Thread_Event, Condition as _Thread_Condition)
-from typing import Union
 
 
 

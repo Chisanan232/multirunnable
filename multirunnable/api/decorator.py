@@ -1,11 +1,11 @@
-from abc import ABCMeta, abstractmethod
-from types import MethodType, FunctionType
-from typing import List, Callable, Type, Any, Union, Optional
-from inspect import isclass as inspect_isclass
 from functools import wraps
+from inspect import isclass as inspect_isclass
+from typing import List, Callable, Type, Any, Union, Optional
+from types import MethodType, FunctionType
+from abc import ABCMeta, abstractmethod
 
-from multirunnable.framework.runnable.result import MRResult as _MRResult
-from multirunnable.api.operator import (
+from ..framework.runnable.result import MRResult as _MRResult
+from ..api.operator import (
     LockOperator as _LockOperator,
     RLockOperator as _RLockOperator,
     SemaphoreOperator as _SemaphoreOperator,

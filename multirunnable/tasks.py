@@ -1,11 +1,11 @@
-from multirunnable.framework.task import BaseQueueTask as _BaseQueueTask
-from multirunnable.framework.runnable import BaseQueueType as _BaseQueueType
-from multirunnable.framework.factory import BaseList as _BaseList
-from multirunnable.types import MRQueue as _MRQueue
-from multirunnable.factory.queue import QueueAdapter as _QueueAdapter
-from multirunnable.factory.collection import QueueTaskList as _QueueTaskList
-
 from typing import Iterable
+
+from .framework.runnable import BaseQueueType as _BaseQueueType
+from .framework.factory import BaseList as _BaseList
+from .framework.task import BaseQueueTask as _BaseQueueTask
+from .factory.collection import QueueTaskList as _QueueTaskList
+from .factory.queue import QueueAdapter as _QueueAdapter
+from .types import MRQueue as _MRQueue
 
 
 

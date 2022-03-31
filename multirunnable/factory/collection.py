@@ -1,9 +1,9 @@
-from multirunnable.framework.task import BaseQueueTask as _BaseQueueTask
-from multirunnable.framework.factory import (
+from typing import List
+
+from ..framework.factory import (
     BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory,
     BaseList as _BaseList, BaseIterator as _BaseIterator)
-
-from typing import List
+from ..framework.task import BaseQueueTask as _BaseQueueTask
 
 
 
