@@ -1,6 +1,8 @@
-from multirunnable.mode import RunningMode, FeatureMode
-from multirunnable.factory.lock import LockFactory, SemaphoreFactory, BoundedSemaphoreFactory
+import pytest
+import sys
+
 from multirunnable.factory.communication import EventFactory, ConditionFactory
+from multirunnable.factory.lock import LockFactory, SemaphoreFactory, BoundedSemaphoreFactory
 from multirunnable.api.operator import (
     LockOperator, RLockOperator,
     SemaphoreOperator, BoundedSemaphoreOperator,
@@ -8,18 +10,16 @@ from multirunnable.api.operator import (
     LockAsyncOperator,
     SemaphoreAsyncOperator, BoundedSemaphoreAsyncOperator,
     EventAsyncOperator, ConditionAsyncOperator)
+from multirunnable.mode import RunningMode, FeatureMode
 
-from ..test_config import Under_Test_RunningModes, Semaphore_Value
-from .._examples import RunByStrategy, MapByStrategy
-from ..framework.lock import LockTestSpec, RLockTestSpec, SemaphoreTestSpec, BoundedSemaphoreTestSpec, EventTestSpec, ConditionTestSpec
-from .._examples_with_synchronization import (
+from ...test_config import Under_Test_RunningModes, Semaphore_Value
+from ..._examples_with_synchronization import (
     instantiate_lock, instantiate_rlock,
     instantiate_semaphore, instantiate_bounded_semaphore,
     instantiate_event, instantiate_condition
 )
-
-import pytest
-import sys
+from ..._examples import RunByStrategy, MapByStrategy
+from ..framework.lock import LockTestSpec, RLockTestSpec, SemaphoreTestSpec, BoundedSemaphoreTestSpec, EventTestSpec, ConditionTestSpec
 
 
 _Semaphore_Value = Semaphore_Value

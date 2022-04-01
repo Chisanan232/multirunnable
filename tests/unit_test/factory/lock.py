@@ -1,12 +1,11 @@
 import traceback
-
-from multirunnable.mode import FeatureMode
-from multirunnable.factory.lock import LockFactory, RLockFactory, SemaphoreFactory, BoundedSemaphoreFactory
-
-from ..test_config import Semaphore_Value
-
 import pytest
 import re
+
+from multirunnable.factory.lock import LockFactory, RLockFactory, SemaphoreFactory, BoundedSemaphoreFactory
+from multirunnable.mode import FeatureMode
+
+from ...test_config import Semaphore_Value
 
 
 _Semaphore_Value = Semaphore_Value

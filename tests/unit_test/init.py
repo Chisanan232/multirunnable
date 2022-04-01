@@ -1,14 +1,14 @@
 """ Test for the module '__init__' of package MultiRunnable """
 
-from .framework.strategy import GeneralRunningTestSpec
-from .test_config import Worker_Size, Running_Diff_Time, Test_Function_Sleep_Time
-
 from typing import List, Callable
 import multiprocessing as mp
 import multirunnable as mr
 import pytest
 import time
 import sys
+
+from ..test_config import Worker_Size, Running_Diff_Time, Test_Function_Sleep_Time
+from .framework.strategy import GeneralRunningTestSpec
 
 
 Process_Size: int = Worker_Size
@@ -149,7 +149,6 @@ class TestPackageInit:
         reset_thread_running_timer()
 
         from gevent.threading import Lock
-        import gevent
         global _Thread_Lock, Sleep_Function
         _Thread_Lock = Lock()
         # Sleep_Function = gevent.sleep
@@ -201,7 +200,6 @@ class TestPackageInit:
         reset_thread_running_timer()
 
         from gevent.threading import Lock
-        import gevent
         global _Thread_Lock, Sleep_Function
         _Thread_Lock = Lock()
         # Sleep_Function = gevent.sleep

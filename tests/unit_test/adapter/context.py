@@ -1,13 +1,13 @@
-from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION, set_mode, RunningMode
-from multirunnable.adapter.context import context as adapter_context
-from multirunnable.parallel.context import context as process_context
-from multirunnable.concurrent.context import context as thread_context
-from multirunnable.coroutine.context import green_thread_context, async_task_context
-
-from .._examples import RunByStrategy
-
 from typing import Type, Union
 import pytest
+
+from multirunnable.concurrent.context import context as thread_context
+from multirunnable.coroutine.context import green_thread_context, async_task_context
+from multirunnable.parallel.context import context as process_context
+from multirunnable.adapter.context import context as adapter_context
+from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION, set_mode, RunningMode
+
+from ..._examples import RunByStrategy
 
 
 

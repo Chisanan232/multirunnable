@@ -1,25 +1,24 @@
-from multirunnable import set_mode, RunningMode
+import multiprocessing as mp
+import pytest
+import os
+
 from multirunnable.parallel.strategy import ProcessStrategy, ProcessPoolStrategy
 from multirunnable.parallel.result import ParallelResult
+from multirunnable import set_mode, RunningMode
 
-from ..framework.strategy import GeneralRunningTestSpec, PoolRunningTestSpec
-from ..test_config import (
+from ...test_config import (
     Worker_Size, Worker_Pool_Size, Task_Size,
     Test_Function_Args, Test_Function_Multiple_Args, Test_Function_Kwargs)
-from .._examples import (
+from ..._examples import (
     # # Import the flags
     get_running_cnt, get_running_ppids, get_current_workers, get_running_workers_ids, get_running_done_timestamps,
     # # Import some common functions
-    reset_running_flags, initial_lock, set_lock,
-    # # Import some target functions to run for Pool object
+    reset_running_flags, initial_lock,  # # Import some target functions to run for Pool object
     target_function, target_error_function, target_function_for_map, TargetCls, TargetMapCls,
     target_funcs_iter, target_methods_iter, target_classmethods_iter, target_staticmethods_iter,
     target_func_args_iter, target_funcs_kwargs_iter
 )
-
-import multiprocessing as mp
-import pytest
-import os
+from ..framework.strategy import GeneralRunningTestSpec, PoolRunningTestSpec
 
 
 Process_Size: int = Worker_Size
