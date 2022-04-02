@@ -1,7 +1,7 @@
-from .strategy import BaseDatabaseConnection as _BaseDataBaseConnection, BaseConnectionPool
-
-from abc import ABC, abstractmethod
 from typing import Tuple, Dict, TypeVar, Generic, Any
+from abc import ABC, abstractmethod
+
+from .strategy import BaseDatabaseConnection as _BaseDataBaseConnection, BaseConnectionPool
 
 
 T = TypeVar("T")
@@ -18,7 +18,9 @@ class BaseDatabaseOperator:
         if self._db_connection is None:
             self._conn_strategy.initial(**self._db_conn_config)
             if isinstance(self._conn_strategy, BaseConnectionPool) is True:
-                self._pool_name = self._db_conn_config.get("pool_name", "")
+                self._pool_name = self._db_conn_config.get("pool_name", None)
+                if self._pool_name is None:
+                    raise ValueError("Pool name could not be empty value.")
                 self._db_connection = self._conn_strategy.get_one_connection(pool_name=self._pool_name)
             else:
                 self._db_connection = self._conn_strategy.get_one_connection()
@@ -33,7 +35,7 @@ class BaseDatabaseOperator:
     def _connection(self) -> Generic[T]:
         if self._db_connection is None:
             if isinstance(self._conn_strategy, BaseConnectionPool):
-                self._db_connection = self._conn_strategy.get_one_connection(pool_name=self._db_conn_config.get("pool_name", ""))
+                self._db_connection = self._conn_strategy.get_one_connection(pool_name=self._db_conn_config.get("pool_name", None))
             else:
                 self._db_connection = self._conn_strategy.get_one_connection()
             assert self._db_connection is not None, "The database connection should not be None object."
