@@ -283,10 +283,11 @@ class RunByStrategy:
         _ps = [_strategy.generate_worker(_function) for _ in range(_Worker_Size)]
         _strategy.activate_workers(_ps)
         _strategy.close(_ps)
-        _result = _strategy.get_result()
-        for _r in _result:
-            print(f"[DEBUG] _r.data: {_r.data}")
-            print(f"[DEBUG] _r.exception: {_r.exception}")
+        # # For debug
+        # _result = _strategy.get_result()
+        # for _r in _result:
+        #     print(f"[DEBUG] _r.data: {_r.data}")
+        #     print(f"[DEBUG] _r.exception: {_r.exception}")
 
 
 
