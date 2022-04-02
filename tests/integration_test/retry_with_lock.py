@@ -5,14 +5,14 @@ from multirunnable import RunningMode
 
 from ..test_config import Under_Test_RunningModes, Worker_Size, Semaphore_Value, Running_Diff_Time, Test_Function_Sleep_Time
 from .._examples import (
-    RunByStrategy, reset_running_flags, get_running_cnt, get_running_workers_ids, get_running_done_timestamps
+    RunByStrategy, reset_running_flags, get_running_workers_ids, get_running_done_timestamps
 )
 from .._examples_with_synchronization import (
     instantiate_lock, instantiate_rlock,
     instantiate_semaphore, instantiate_bounded_semaphore
 )
 from ._retry_with_lock_examples import (
-    retry_success_with_lock, retry_success_with_rlock, retry_success_with_smp, retry_success_with_bsmp,
+    target_function_with_lock, target_function_with_rlock, target_function_with_smp, target_function_with_bsmp,
     RetrySuccessMethods
 )
 
@@ -29,7 +29,7 @@ class TestRetryWithLock:
         reset_running_flags()
 
         instantiate_lock(_mode=mode)
-        TestRetryWithLock._run_test(mode=mode, function=retry_success_with_lock)
+        TestRetryWithLock._run_test(mode=mode, function=target_function_with_lock)
         TestRetryWithLock._chk_results(synchronize=True)
 
 
@@ -38,7 +38,7 @@ class TestRetryWithLock:
         reset_running_flags()
 
         instantiate_rlock(_mode=mode)
-        TestRetryWithLock._run_test(mode=mode, function=retry_success_with_rlock)
+        TestRetryWithLock._run_test(mode=mode, function=target_function_with_rlock)
         TestRetryWithLock._chk_results(synchronize=True)
 
 
@@ -47,7 +47,7 @@ class TestRetryWithLock:
         reset_running_flags()
 
         instantiate_semaphore(_mode=mode)
-        TestRetryWithLock._run_test(mode=mode, function=retry_success_with_smp)
+        TestRetryWithLock._run_test(mode=mode, function=target_function_with_smp)
         TestRetryWithLock._chk_results(synchronize=False)
 
 
@@ -56,7 +56,7 @@ class TestRetryWithLock:
         reset_running_flags()
 
         instantiate_bounded_semaphore(_mode=mode)
-        TestRetryWithLock._run_test(mode=mode, function=retry_success_with_bsmp)
+        TestRetryWithLock._run_test(mode=mode, function=target_function_with_bsmp)
         TestRetryWithLock._chk_results(synchronize=False)
 
 

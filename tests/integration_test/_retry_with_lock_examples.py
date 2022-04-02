@@ -5,8 +5,24 @@ from .._examples import (
 )
 
 
-@RunWith.Lock
+def target_function_with_lock() -> None:
+    retry_success_with_lock()
+
+
+def target_function_with_rlock() -> None:
+    retry_success_with_rlock()
+
+
+def target_function_with_smp() -> None:
+    retry_success_with_smp()
+
+
+def target_function_with_bsmp() -> None:
+    retry_success_with_bsmp()
+
+
 @retry.function
+@RunWith.Lock
 def retry_success_with_lock() -> None:
     _record_info_to_flags()
     _sleep_time()
