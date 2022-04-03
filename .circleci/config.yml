@@ -86,7 +86,7 @@ commands:
          name: Install MySQL database
          shell: powershell.exe
          command: |
-            choco install -y mysql
+            choco install -y mysql --params "/dataLocation:./tests/database/test_mysql/mysql"
 
 
   install_mysql_cli:
@@ -234,9 +234,9 @@ commands:
          name: Get the test cases (file paths)
          shell: powershell.exe
          command: |
-             Get-ChildItem -Force
-             Get-ChildItem -Force ./workspace/
+             type ./workspace/unit-test-core-cases
              ./workspace/unit-test-core-cases > $env:Unit_Test_Core
+             echo $env:Unit_Test_Core
 #             Set-Variable -Name $env:APPDATA -Value D:\
 
       - run:
