@@ -236,9 +236,9 @@ commands:
          shell: powershell.exe
          command: |
              ./workspace/unit-test-core-cases > $env:Unit_Test_Core
+             echo $env:Unit_Test_Core
 #             echo $env:Unit_Test_Core_Data
 #             ConvertFrom-Json $env:Unit_Test_Core_Data > $env:Unit_Test_Core
-             echo $env:Unit_Test_Core
 #             Set-Variable -Name $env:APPDATA -Value D:\
 
       - run:
