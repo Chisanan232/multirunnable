@@ -242,7 +242,7 @@ commands:
          name: Get the test cases (file paths)
          shell: powershell.exe
          command: |
-             /tmp/workspace/unit-test-core-cases > $env:Unit_Test_Core
+             /workspace/unit-test-core-cases > $env:Unit_Test_Core
 #             Set-Variable -Name $env:APPDATA -Value D:\
 
       - run:
@@ -265,13 +265,13 @@ commands:
   run_pytest_unit_test_persistence:
     steps:
       - attach_workspace:
-           at: /tmp/workspace
+           at: /tmp/workspace/unit-test-persistence-cases
 
       - run:
          name: Get the test cases (file paths)
          shell: powershell.exe
          command: |
-             /tmp/workspace/unit-test-persistence-cases > $env:Unit_Test_Persistence
+             /workspace/unit-test-persistence-cases > $env:Unit_Test_Persistence
 #             Set-Variable -Name $env:APPDATA -Value D:\
 
       - run:
