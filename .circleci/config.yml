@@ -384,7 +384,7 @@ executors:
 
   windows:
     machine:
-      image: win/default # executor type
+      image: win/default    # executor type
 #      image: windows-default    # Windows machine image
 #      - image: winamd64/python:3.10    # Windows machine image
 #        auth:
@@ -540,42 +540,42 @@ jobs:
       - prepare_unit_test_persistence
 
   unit-test-core-python36:
-    executor: windows
+    executor: win/default # executor type
     steps:
       - install_pkg_manager_chocolatey
       - install_python_36
       - run_unit_test_core
 
   unit-test-core-python37:
-    executor: windows
+    executor: win/default # executor type
     steps:
       - install_pkg_manager_chocolatey
       - install_python_37
       - run_unit_test_core
 
   unit-test-core-python38:
-    executor: windows
+    executor: win/default # executor type
     steps:
       - install_pkg_manager_chocolatey
       - install_python_38
       - run_unit_test_core
 
   unit-test-core-python39:
-    executor: windows
+    executor: win/default # executor type
     steps:
       - install_pkg_manager_chocolatey
       - install_python_39
       - run_unit_test_core
 
   unit-test-core-python310:
-    executor: windows
+    executor: win/default # executor type
     steps:
       - install_pkg_manager_chocolatey
       - install_python_310
       - run_unit_test_core
 
   unit-test-persistence-python36:
-    executor: windows
+    executor: win/default # executor type
     steps:
       - install_pkg_manager_chocolatey
       - install_python_36
@@ -590,7 +590,7 @@ jobs:
       DB_PASSWORD: 'password'
 
   unit-test-persistence-python37:
-    executor: windows
+    executor: win/default # executor type
     steps:
       - install_pkg_manager_chocolatey
       - install_python_37
@@ -605,7 +605,7 @@ jobs:
       DB_PASSWORD: 'password'
 
   unit-test-persistence-python38:
-    executor: windows
+    executor: win/default # executor type
     steps:
       - install_pkg_manager_chocolatey
       - install_python_38
@@ -620,7 +620,7 @@ jobs:
       DB_PASSWORD: 'password'
 
   unit-test-persistence-python39:
-    executor: windows
+    executor: win/default # executor type
     steps:
       - install_pkg_manager_chocolatey
       - install_python_39
@@ -635,7 +635,7 @@ jobs:
       DB_PASSWORD: 'password'
 
   unit-test-persistence-python310:
-    executor: windows
+    executor: win/default # executor type
     steps:
       - install_pkg_manager_chocolatey
       - install_python_310
