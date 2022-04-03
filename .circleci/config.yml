@@ -658,7 +658,7 @@ workflows:
            requires:
              - pre-testbed-unit-test-persistence
 
-      - unit-test-coveralls-done
+      - unit-test-coveralls-done:
            requires:
              - unit-test-core-python36
              - unit-test-core-python37
@@ -671,7 +671,7 @@ workflows:
              - unit-test-persistence-python39
              - unit-test-persistence-python310
 
-      - all-coveralls-done
+      - all-coveralls-done:
            requires:
              - unit-test-coveralls-done
 
