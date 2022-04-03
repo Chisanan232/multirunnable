@@ -299,8 +299,8 @@ commands:
 #         command: |
 #             coveralls    # submit coverage to coveralls
          command: |
-#             codecov -t $CODECOV_TOKEN    # submit coverage to codecov
              python -m coveralls
+#             codecov -t $CODECOV_TOKEN    # submit coverage to codecov
 
 
   install_pkg_manager_chocolatey:
