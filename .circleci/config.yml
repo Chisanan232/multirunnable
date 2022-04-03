@@ -80,6 +80,24 @@ commands:
             pip -V
 
 
+  install_mysql:
+    steps:
+      - run:
+         name: Install MySQL database
+         shell: powershell.exe
+         command: |
+            choco install -y mysql
+
+
+  activate_mysql_server:
+    steps:
+      - run:
+         name: Activate MySQL database server
+         shell: powershell.exe
+         command: |
+            net start mysql
+
+
   install_mysql_cli:
     steps:
       - run:
@@ -311,6 +329,8 @@ commands:
 
   perpare_testing_database:
     steps:
+      - install_mysql
+      - activate_mysql_server
       - install_mysql_cli
       - test_databade_connection
       - prepare_testing_data
@@ -363,26 +383,25 @@ executors:
 #           DB_PORT: 3306
 
   windows:
-    docker:
-#      - image: windows-default    # Windows machine image
-      - image: mcr.microsoft.com/windows/nanoserver:ltsc2022
+    machine:
+      - image: windows-default    # Windows machine image
         environment:
           DATABASE_DRIVER: 'mysql'
 #          MYSQL_ROOT_HOST: 127.0.0.1
-#          MYSQL_PASSWORD: 'password'
+          MYSQL_ROOT_PASSWORD: 'password'
 #          MYSQL_DATABASE: 'tw_stock'
           DB_HOST: 127.0.0.1
           DB_PORT: 3306
           DB_USER: 'root'
           DB_PASSWORD: 'password'
 
-      - image: circleci/mysql:8.0.23
-#        auth:
-#          username: chisanan232
-#          password: $DOCKERHUB_PASSWORD
-        environment:
-          MYSQL_ROOT_PASSWORD: password
-          MYSQL_ALLOW_EMPTY_PASSWORD: true
+#      - image: circleci/mysql:8.0.23
+##        auth:
+##          username: chisanan232
+##          password: $DOCKERHUB_PASSWORD
+#        environment:
+#          MYSQL_ROOT_PASSWORD: password
+#          MYSQL_ALLOW_EMPTY_PASSWORD: true
 
 #  docker-py36:
 #    docker:
