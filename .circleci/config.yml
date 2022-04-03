@@ -89,22 +89,14 @@ commands:
             choco install -y mysql
 
 
-  activate_mysql_server:
-    steps:
-      - run:
-         name: Activate MySQL database server
-         shell: powershell.exe
-         command: |
-            net start mysql
-
-
   install_mysql_cli:
     steps:
       - run:
          name: Install MySQL command lines tool
          shell: powershell.exe
          command: |
-            choco install mysql-cli
+            choco install -y netcat
+            choco install -y mysql-cli
 
 
   test_databade_connection:
@@ -236,7 +228,7 @@ commands:
   run_pytest_unit_test_core:
     steps:
       - attach_workspace:
-           at: /tmp/workspace/unit-test-core-cases
+           at: /workspace/unit-test-core-cases
 
       - run:
          name: Get the test cases (file paths)
@@ -265,7 +257,7 @@ commands:
   run_pytest_unit_test_persistence:
     steps:
       - attach_workspace:
-           at: /tmp/workspace/unit-test-persistence-cases
+           at: /workspace/unit-test-persistence-cases
 
       - run:
          name: Get the test cases (file paths)
