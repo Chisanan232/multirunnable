@@ -375,7 +375,7 @@ executors:
           DB_USER: 'root'
           DB_PASSWORD: 'password'
 
-    docker:
+#    docker:
       - image: circleci/mysql:8.0.23
         auth:
           username: chisanan232
