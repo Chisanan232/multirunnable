@@ -241,12 +241,12 @@ commands:
   run_pytest_unit_test_core:
     steps:
       - attach_workspace:
-           at: /tmp/workspace
+           at: /workspace
       - run:
          name: Get the test cases (file paths)
          shell: powershell.exe
          command: |
-             /tmp/workspace/unit-test-core-cases > $env:Unit_Test_Core
+             /workspace/unit-test-core-cases > $env:Unit_Test_Core
 #             Set-Variable -Name $env:APPDATA -Value D:\
 
       - run:
@@ -259,7 +259,7 @@ commands:
          shell: powershell.exe
          command: |
              python -V > $Python_Version
-             Move-Item -Path .coverage -Destination .coverage.unit-test-core.windows.$Python_Version
+             Move-Item -Path .coverage -Destination workspace/.coverage.unit-test-core.windows.$Python_Version
       - persist_to_workspace:
          root: workspace
          paths:
@@ -269,12 +269,12 @@ commands:
   run_pytest_unit_test_persistence:
     steps:
       - attach_workspace:
-           at: /tmp/workspace
+           at: /workspace
       - run:
          name: Get the test cases (file paths)
          shell: powershell.exe
          command: |
-             /tmp/workspace/unit-test-persistence-cases > $env:Unit_Test_Persistence
+             /workspace/unit-test-persistence-cases > $env:Unit_Test_Persistence
 #             Set-Variable -Name $env:APPDATA -Value D:\
 
       - run:
@@ -287,7 +287,7 @@ commands:
          shell: powershell.exe
          command: |
              python -V > $Python_Version
-             Move-Item -Path .coverage -Destination .coverage.unit-test-persistence.windows.$Python_Version
+             Move-Item -Path .coverage -Destination workspace/.coverage.unit-test-persistence.windows.$Python_Version
       - persist_to_workspace:
          root: workspace
          paths:
@@ -297,7 +297,7 @@ commands:
   report_testing_coverage:
     steps:
       - attach_workspace:
-           at: /tmp/workspace
+           at: /workspace
       - run:
          name:  Combine all coverage results
          command: |
@@ -330,7 +330,7 @@ commands:
   perpare_testing_database:
     steps:
       - install_mysql
-      - activate_mysql_server
+#      - activate_mysql_server
       - install_mysql_cli
       - test_databade_connection
       - prepare_testing_data
