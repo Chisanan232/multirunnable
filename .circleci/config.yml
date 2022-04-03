@@ -635,7 +635,7 @@ workflows:
       - unit-test-core-python38:
            requires:
              - pre-testbed-unit-test-core
-      - unit-test-core-python38:
+      - unit-test-core-python39:
            requires:
              - pre-testbed-unit-test-core
       - unit-test-core-python310:
@@ -651,7 +651,7 @@ workflows:
       - unit-test-persistence-python38:
            requires:
              - pre-testbed-unit-test-persistence
-      - unit-test-persistence-python38:
+      - unit-test-persistence-python39:
            requires:
              - pre-testbed-unit-test-persistence
       - unit-test-persistence-python310:
