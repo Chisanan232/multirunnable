@@ -164,14 +164,14 @@ jobs:
 #            sudo apt-get install -y default-mysql-client
 
       - name: Waiting for MySQL to be ready
-        run: |
-            for i in `seq 1 10`;
-            do
-              nc -z 127.0.0.1 3306 && echo Success && exit 0
-              echo -n .
-              sleep 10
-            done
-            echo Failed waiting for MySQL && exit 1
+        run: bash scripts/wait_database_ready.sh
+#            for i in `seq 1 10`;
+#            do
+#              nc -z 127.0.0.1 3306 && echo Success && exit 0
+#              echo -n .
+#              sleep 10
+#            done
+#            echo Failed waiting for MySQL && exit 1
 
       - name: Test MySQL connection
 #        run: mysql -h ${{ env.DB_HOST }} -u ${{ env.DB_USER }} -p${{ env.DB_PASSWORD }} --execute="show databases;"
