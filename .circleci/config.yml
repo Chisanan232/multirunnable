@@ -86,8 +86,8 @@ commands:
          name: Install MySQL database
          shell: powershell.exe
          command: |
-            choco install -y mysql
-#            choco install -y mysql --params "/dataLocation:./tests/database/test_mysql/mysql"
+            choco install -y mysql --params "/dataLocation:./tests/database/test_mysql/mysql"
+#            choco install -y mysql
 
 
   install_mysql_cli:
@@ -185,7 +185,7 @@ commands:
          command: |
             choco install jq
             mkdir -p workspace
-            bash scripts/get-unit-test-core-paths.sh > workspace/unit-test-core-cases
+            bash scripts/get-unit-test-core-paths.sh windows > workspace/unit-test-core-cases
 
       - persist_to_workspace:
          root: workspace
@@ -201,7 +201,7 @@ commands:
          command: |
             choco install jq
             mkdir -p workspace
-            bash scripts/get-unit-test-persistence-paths.sh > workspace/unit-test-persistence-cases
+            bash scripts/get-unit-test-persistence-paths.sh windows > workspace/unit-test-persistence-cases
 
       - persist_to_workspace:
          root: workspace
@@ -235,9 +235,9 @@ commands:
          name: Get the test cases (file paths)
          shell: powershell.exe
          command: |
-             ./workspace/unit-test-core-cases > $env:Unit_Test_Core_Data
-             echo $env:Unit_Test_Core_Data
-             ConvertFrom-Json $env:Unit_Test_Core_Data > $env:Unit_Test_Core
+             ./workspace/unit-test-core-cases > $env:Unit_Test_Core
+#             echo $env:Unit_Test_Core_Data
+#             ConvertFrom-Json $env:Unit_Test_Core_Data > $env:Unit_Test_Core
              echo $env:Unit_Test_Core
 #             Set-Variable -Name $env:APPDATA -Value D:\
 
@@ -265,10 +265,9 @@ commands:
 
       - run:
          name: Get the test cases (file paths)
-#         shell: powershell.exe
+         shell: powershell.exe
          command: |
-             ./workspace/unit-test-persistence-cases > $env:Unit_Test_Persistence_Data
-             ConvertFrom-Json $env:Unit_Test_Persistence_Data > $env:Unit_Test_Persistence
+             ./workspace/unit-test-persistence-cases > $env:Unit_Test_Persistence
 #             Set-Variable -Name $env:APPDATA -Value D:\
 
       - run:
@@ -582,7 +581,7 @@ jobs:
       DB_HOST: 127.0.0.1
       DB_PORT: 3306
       DB_USER: 'root'
-      DB_PASSWORD: 'password'
+      DB_PASSWORD: 'root'
 
   unit-test-persistence-python37:
     executor: win/default # executor type
@@ -598,7 +597,7 @@ jobs:
       DB_HOST: 127.0.0.1
       DB_PORT: 3306
       DB_USER: 'root'
-      DB_PASSWORD: 'password'
+      DB_PASSWORD: 'root'
 
   unit-test-persistence-python38:
     executor: win/default # executor type
@@ -614,7 +613,7 @@ jobs:
       DB_HOST: 127.0.0.1
       DB_PORT: 3306
       DB_USER: 'root'
-      DB_PASSWORD: 'password'
+      DB_PASSWORD: 'root'
 
   unit-test-persistence-python39:
     executor: win/default # executor type
@@ -630,7 +629,7 @@ jobs:
       DB_HOST: 127.0.0.1
       DB_PORT: 3306
       DB_USER: 'root'
-      DB_PASSWORD: 'password'
+      DB_PASSWORD: 'root'
 
   unit-test-persistence-python310:
     executor: win/default # executor type
@@ -646,7 +645,7 @@ jobs:
       DB_HOST: 127.0.0.1
       DB_PORT: 3306
       DB_USER: 'root'
-      DB_PASSWORD: 'password'
+      DB_PASSWORD: 'root'
 
   unit-test-coveralls-done:
     executor: windows
