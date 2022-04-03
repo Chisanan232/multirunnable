@@ -364,7 +364,7 @@ executors:
 
   windows:
     machine:
-      - image: win/default    # Windows machine image
+      - image: windows-default    # Windows machine image
         environment:
           DATABASE_DRIVER: 'mysql'
 #          MYSQL_ROOT_HOST: 127.0.0.1
