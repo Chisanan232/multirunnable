@@ -384,7 +384,8 @@ executors:
 
   windows:
     machine:
-      image: windows-default    # Windows machine image
+      image: win/default # executor type
+#      image: windows-default    # Windows machine image
 #      - image: winamd64/python:3.10    # Windows machine image
 #        auth:
 #          username: chisanan232
@@ -529,12 +530,12 @@ jobs:
 #      - prepare_testing_data
 
   pre-testbed-unit-test-core:
-    executor: windows
+    executor: win/default # executor type
     steps:
       - prepare_unit_test_core
 
   pre-testbed-unit-test-persistence:
-    executor: windows
+    executor: win/default # executor type
     steps:
       - prepare_unit_test_persistence
 
