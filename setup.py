@@ -44,6 +44,7 @@ setuptools.setup(
     packages=packages,
     package_dir={"multirunnable": "multirunnable"},
     py_modules=packages,
+    zip_safe=False,
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
