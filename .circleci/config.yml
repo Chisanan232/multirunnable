@@ -383,23 +383,27 @@ executors:
 #           DB_PORT: 3306
 
   windows:
-    machine:
-      image: windows-default    # Windows machine image
-      environment:
-        DATABASE_DRIVER: 'mysql'
-        MYSQL_ROOT_PASSWORD: 'password'
-        DB_HOST: 127.0.0.1
-        DB_PORT: 3306
-        DB_USER: 'root'
-        DB_PASSWORD: 'password'
+    docker:
+#      image: windows-default    # Windows machine image
+      - image: winamd64/python:3.10    # Windows machine image
+        auth:
+          username: chisanan232
+          password: $DOCKERHUB_PASSWORD
+        environment:
+          DATABASE_DRIVER: 'mysql'
+#          MYSQL_ROOT_PASSWORD: 'password'
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_USER: 'root'
+          DB_PASSWORD: 'password'
 
-#      - image: circleci/mysql:8.0.23
-##        auth:
-##          username: chisanan232
-##          password: $DOCKERHUB_PASSWORD
-#        environment:
-#          MYSQL_ROOT_PASSWORD: password
-#          MYSQL_ALLOW_EMPTY_PASSWORD: true
+      - image: circleci/mysql:8.0.23
+        auth:
+          username: chisanan232
+          password: $DOCKERHUB_PASSWORD
+        environment:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_ALLOW_EMPTY_PASSWORD: true
 
 #  docker-py36:
 #    docker:
