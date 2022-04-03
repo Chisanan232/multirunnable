@@ -1,7 +1,7 @@
 version: 2.1
 
-orbs:
-  win: circleci/windows@4.1.1    # The Windows orb give you everything you need to start using the Windows executor.
+#orbs:
+#  win: circleci/windows@4.1.1    # The Windows orb give you everything you need to start using the Windows executor.
 
 commands:
 
@@ -115,15 +115,14 @@ commands:
       - run:
          name: Create database
          shell: powershell.exe
-         command: |
+         command: bash scripts/database-execution.sh create_database
 #            mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD --execute="CREATE DATABASE tw_stock;"
 #            mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD $DB_DATABASE < ./tests/testing-database/test_sql/$DATABASE_DRIVER/create_database.sql
-            bash scripts/database-execution.sh create_database
 
       - run:
          name: Create table for saving testing data
          shell: powershell.exe
-         command: |
+         command: bash scripts/database-execution.sh create_table
 #            mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD --execute="
 #                CREATE TABLE IF NOT EXISTS tw_stock.stock_data_2330 (
 #                                                               stock_date DATETIME NOT NULL,
@@ -137,12 +136,11 @@ commands:
 #                                                               turnover_volume DECIMAL(12,4) NOT NULL,
 #                                                               PRIMARY KEY(stock_date)) DEFAULT CHARSET=utf8;"
 #            mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD $DB_DATABASE < ./tests/testing-database/test_sql/$DATABASE_DRIVER/create_table.sql
-            bash scripts/database-execution.sh create_table
 
       - run:
          name: Insert testing data
          shell: powershell.exe
-         command: |
+         command: bash scripts/database-execution.sh insert_test_data_rows
 #            mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD --execute="
 #                INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
 #                    VALUES ('0108-01-02 00:00:00' , 32900482 , 7276419230 ,226.5000 ,226.5000 , 219.0000, 219.5000 ,-6.00 , 12329);"
@@ -162,7 +160,6 @@ commands:
 #                INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
 #                    VALUES ('0108-01-09 00:00:00' , 51255446 ,11006827093 ,212.0000 ,216.5000 , 211.0000 ,215.5000 ,+4.50 , 14098);"
 #            mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD $DB_DATABASE < ./tests/testing-database/test_sql/$DATABASE_DRIVER/insert_test_data_rows.sql
-            bash scripts/database-execution.sh insert_test_data_rows
 
 #  isntall_databade_driver_tool:
 #    steps:
@@ -366,8 +363,8 @@ executors:
 #           DB_PORT: 3306
 
   windows:
-    machine:
-      - image: windows-default    # Windows machine image
+    docker:
+      - image: circleci/windows@4.1.1    # Windows machine image
         environment:
           DATABASE_DRIVER: 'mysql'
 #          MYSQL_ROOT_HOST: 127.0.0.1
@@ -378,7 +375,6 @@ executors:
           DB_USER: 'root'
           DB_PASSWORD: 'password'
 
-    docker:
       - image: circleci/mysql:8.0.23
         auth:
           username: chisanan232
