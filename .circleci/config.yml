@@ -236,7 +236,7 @@ commands:
   run_pytest_unit_test_core:
     steps:
       - attach_workspace:
-           at: /tmp/workspace
+           at: /tmp/workspace/unit-test-core-cases
 
       - run:
          name: Get the test cases (file paths)
@@ -357,7 +357,7 @@ commands:
 
   run_unit_test_persistence:
     steps:
-      - checkout    # this pulls code down from GitHub
+#      - checkout    # this pulls code down from GitHub
       - install_python_dependecies
       - run_pytest_unit_test_persistence
       - report_testing_coverage
@@ -574,6 +574,7 @@ jobs:
   unit-test-persistence-python36:
     executor: win/default # executor type
     steps:
+      - checkout    # this pulls code down from GitHub
       - install_pkg_manager_chocolatey
       - install_python_36
       - perpare_testing_database
@@ -589,6 +590,7 @@ jobs:
   unit-test-persistence-python37:
     executor: win/default # executor type
     steps:
+      - checkout    # this pulls code down from GitHub
       - install_pkg_manager_chocolatey
       - install_python_37
       - perpare_testing_database
@@ -604,6 +606,7 @@ jobs:
   unit-test-persistence-python38:
     executor: win/default # executor type
     steps:
+      - checkout    # this pulls code down from GitHub
       - install_pkg_manager_chocolatey
       - install_python_38
       - perpare_testing_database
@@ -619,6 +622,7 @@ jobs:
   unit-test-persistence-python39:
     executor: win/default # executor type
     steps:
+      - checkout    # this pulls code down from GitHub
       - install_pkg_manager_chocolatey
       - install_python_39
       - perpare_testing_database
@@ -634,6 +638,7 @@ jobs:
   unit-test-persistence-python310:
     executor: win/default # executor type
     steps:
+      - checkout    # this pulls code down from GitHub
       - install_pkg_manager_chocolatey
       - install_python_310
       - perpare_testing_database
