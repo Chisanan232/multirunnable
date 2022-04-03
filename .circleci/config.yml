@@ -110,7 +110,7 @@ commands:
       - run:
          name: Test MySQL connection
          shell: powershell.exe
-         command: mysql -u $DB_USER -h $DB_HOST -p$DB_PASSWORD --execute="show databases;"
+         command: bash scripts/database-execution.sh show_databases
 
 
   prepare_testing_data:
@@ -235,8 +235,8 @@ commands:
          shell: powershell.exe
          command: |
              Get-ChildItem -Force
-             Get-ChildItem -Force /workspace/
-             /workspace/unit-test-core-cases > $env:Unit_Test_Core
+             Get-ChildItem -Force ./workspace/
+             ./workspace/unit-test-core-cases > $env:Unit_Test_Core
 #             Set-Variable -Name $env:APPDATA -Value D:\
 
       - run:
@@ -265,7 +265,7 @@ commands:
          name: Get the test cases (file paths)
 #         shell: powershell.exe
          command: |
-             /workspace/unit-test-persistence-cases > $env:Unit_Test_Persistence
+             ./workspace/unit-test-persistence-cases > $env:Unit_Test_Persistence
 #             Set-Variable -Name $env:APPDATA -Value D:\
 
       - run:
