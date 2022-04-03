@@ -363,8 +363,9 @@ executors:
 #           DB_PORT: 3306
 
   windows:
-    machine:
-      - image: windows-default    # Windows machine image
+    docker:
+#      - image: windows-default    # Windows machine image
+      - image: mcr.microsoft.com/windows/nanoserver:ltsc2022
         environment:
           DATABASE_DRIVER: 'mysql'
 #          MYSQL_ROOT_HOST: 127.0.0.1
@@ -375,11 +376,10 @@ executors:
           DB_USER: 'root'
           DB_PASSWORD: 'password'
 
-#    docker:
       - image: circleci/mysql:8.0.23
-        auth:
-          username: chisanan232
-          password: $DOCKERHUB_PASSWORD
+#        auth:
+#          username: chisanan232
+#          password: $DOCKERHUB_PASSWORD
         environment:
           MYSQL_ROOT_PASSWORD: password
           MYSQL_ALLOW_EMPTY_PASSWORD: true
