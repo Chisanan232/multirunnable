@@ -18,7 +18,7 @@ jobs:
       - id: set-matrix
         run: |
           sudo apt-get install jq
-          echo "::set-output name=matrix::$(bash scripts/get-unit-test-core-paths.sh)"
+          echo "::set-output name=matrix::$(bash scripts/get-unit-test-core-paths.sh unix)"
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
@@ -30,7 +30,7 @@ jobs:
       - id: set-matrix
         run: |
           sudo apt-get install jq
-          echo "::set-output name=matrix::$(bash scripts/get-unit-test-persistence-paths.sh)"
+          echo "::set-output name=matrix::$(bash scripts/get-unit-test-persistence-paths.sh unix)"
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
@@ -296,7 +296,7 @@ jobs:
       - id: set-matrix
         run: |
           sudo apt-get install jq
-          echo "::set-output name=matrix::$(bash scripts/get-integration-test-paths.sh)"
+          echo "::set-output name=matrix::$(bash scripts/get-integration-test-paths.sh unix)"
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
@@ -403,7 +403,7 @@ jobs:
 #      - id: set-matrix
 #        run: |
 #          sudo apt-get install jq
-#          echo "::set-output name=matrix::$(bash scripts/get-compatibility-test-paths.sh)"
+#          echo "::set-output name=matrix::$(bash scripts/get-compatibility-test-paths.sh unix)"
 #    outputs:
 #      matrix: ${{ steps.set-matrix.outputs.matrix }}
 #
