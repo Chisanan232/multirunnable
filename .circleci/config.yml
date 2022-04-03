@@ -307,23 +307,27 @@ commands:
 
 
   install_pkg_manager_chocolatey:
+    steps:
       - get_execution_policy
       - install_chocolatey
 
 
   perpare_testing_database:
+    steps:
       - install_mysql_cli
       - test_databade_connection
       - prepare_testing_data
 
 
   prepare_unit_test_core:
+    steps:
       - checkout    # this pulls code down from GitHub
       - install_pkg_manager_chocolatey
       - get_unit_test_core_cases
 
 
   prepare_unit_test_persistence:
+    steps:
       - checkout    # this pulls code down from GitHub
       - install_pkg_manager_chocolatey
       - get_unit_test_persistence_cases
