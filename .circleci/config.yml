@@ -385,13 +385,13 @@ executors:
   windows:
     machine:
       image: windows-default    # Windows machine image
-        environment:
-          DATABASE_DRIVER: 'mysql'
-          MYSQL_ROOT_PASSWORD: 'password'
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          DB_USER: 'root'
-          DB_PASSWORD: 'password'
+      environment:
+        DATABASE_DRIVER: 'mysql'
+        MYSQL_ROOT_PASSWORD: 'password'
+        DB_HOST: 127.0.0.1
+        DB_PORT: 3306
+        DB_USER: 'root'
+        DB_PASSWORD: 'password'
 
 #      - image: circleci/mysql:8.0.23
 ##        auth:
