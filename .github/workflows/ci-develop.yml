@@ -175,12 +175,12 @@ jobs:
 
       - name: Test MySQL connection
 #        run: mysql -h ${{ env.DB_HOST }} -u ${{ env.DB_USER }} -p${{ env.DB_PASSWORD }} --execute="show databases;"
-        run: mysql -h ${{ env.DB_HOST }} -u ${{ env.DB_USER }} -p${{ env.DB_PASSWORD }} < ./tests/testing-database/test_sql/${{ env.DATABASE_DRIVER }}/show_database.sql
+        run: mysql -h ${{ env.DB_HOST }} -u ${{ env.DB_USER }} -p${{ env.DB_PASSWORD }} ${{ env.DB_DATABASE }} < ./tests/testing-database/test_sql/${{ env.DATABASE_DRIVER }}/show_database.sql
 
       - name: Create database
         run: |
 #            mysql -h ${{ env.DB_HOST }} -u ${{ env.DB_USER }} -p${{ env.DB_PASSWORD }} --execute="CREATE DATABASE tw_stock;"
-            mysql -h ${{ env.DB_HOST }} -u ${{ env.DB_USER }} -p${{ env.DB_PASSWORD }} < ./tests/testing-database/test_sql/${{ env.DATABASE_DRIVER }}/create_database.sql
+            mysql -h ${{ env.DB_HOST }} -u ${{ env.DB_USER }} -p${{ env.DB_PASSWORD }} ${{ env.DB_DATABASE }} < ./tests/testing-database/test_sql/${{ env.DATABASE_DRIVER }}/create_database.sql
 
       - name: Create table for saving testing data
         run: |
@@ -196,7 +196,7 @@ jobs:
 #                                                               gross_spread DECIMAL(8,4) NOT NULL,
 #                                                               turnover_volume DECIMAL(12,4) NOT NULL,
 #                                                               PRIMARY KEY(stock_date)) DEFAULT CHARSET=utf8;"
-            mysql -h ${{ env.DB_HOST }} -u ${{ env.DB_USER }} -p${{ env.DB_PASSWORD }} < ./tests/testing-database/test_sql/${{ env.DATABASE_DRIVER }}/create_table.sql
+            mysql -h ${{ env.DB_HOST }} -u ${{ env.DB_USER }} -p${{ env.DB_PASSWORD }} ${{ env.DB_DATABASE }} < ./tests/testing-database/test_sql/${{ env.DATABASE_DRIVER }}/create_table.sql
 
       - name: Insert testing data
         run: |
@@ -218,7 +218,7 @@ jobs:
 #            mysql -h ${{ env.DB_HOST }} -u ${{ env.DB_USER }} -p${{ env.DB_PASSWORD }} --execute="
 #                INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
 #                    VALUES ('0108-01-09 00:00:00' , 51255446 ,11006827093 ,212.0000 ,216.5000 , 211.0000 ,215.5000 ,+4.50 , 14098);"
-            mysql -h ${{ env.DB_HOST }} -u ${{ env.DB_USER }} -p${{ env.DB_PASSWORD }} < ./tests/testing-database/test_sql/${{ env.DATABASE_DRIVER }}/insert_test_data_rows.sql
+            mysql -h ${{ env.DB_HOST }} -u ${{ env.DB_USER }} -p${{ env.DB_PASSWORD }} ${{ env.DB_DATABASE }} < ./tests/testing-database/test_sql/${{ env.DATABASE_DRIVER }}/insert_test_data_rows.sql
 
       - name: Cache Python Runtime environment and dependencies
         uses: actions/cache@v3
