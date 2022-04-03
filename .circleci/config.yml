@@ -384,12 +384,10 @@ executors:
 
   windows:
     machine:
-      - image: windows-default    # Windows machine image
+      image: windows-default    # Windows machine image
         environment:
           DATABASE_DRIVER: 'mysql'
-#          MYSQL_ROOT_HOST: 127.0.0.1
           MYSQL_ROOT_PASSWORD: 'password'
-#          MYSQL_DATABASE: 'tw_stock'
           DB_HOST: 127.0.0.1
           DB_PORT: 3306
           DB_USER: 'root'
