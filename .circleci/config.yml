@@ -113,14 +113,7 @@ commands:
       # Our primary container isn't MYSQL so run a sleep command until it's ready.
           name: Waiting for MySQL to be ready
           shell: powershell.exe
-          command: |
-            for i in `seq 1 10`;
-            do
-              nc -z $DB_HOST $DB_PORT && echo Success && exit 0
-              echo -n .
-              sleep 5
-            done
-            echo Failed waiting for MySQL && exit 1
+          command: bash scripts/wait_database_ready.sh
 
       - run:
          name: Test MySQL connection
@@ -200,6 +193,7 @@ commands:
             choco install jq
             mkdir -p workspace
             bash scripts/get-unit-test-core-paths.sh > workspace/unit-test-core-cases
+
       - persist_to_workspace:
          root: workspace
          paths:
@@ -215,6 +209,7 @@ commands:
             choco install jq
             mkdir -p workspace
             bash scripts/get-unit-test-persistence-paths.sh > workspace/unit-test-persistence-cases
+
       - persist_to_workspace:
          root: workspace
          paths:
@@ -241,12 +236,13 @@ commands:
   run_pytest_unit_test_core:
     steps:
       - attach_workspace:
-           at: /workspace
+           at: /tmp/workspace
+
       - run:
          name: Get the test cases (file paths)
          shell: powershell.exe
          command: |
-             /workspace/unit-test-core-cases > $env:Unit_Test_Core
+             /tmp/workspace/unit-test-core-cases > $env:Unit_Test_Core
 #             Set-Variable -Name $env:APPDATA -Value D:\
 
       - run:
@@ -269,12 +265,13 @@ commands:
   run_pytest_unit_test_persistence:
     steps:
       - attach_workspace:
-           at: /workspace
+           at: /tmp/workspace
+
       - run:
          name: Get the test cases (file paths)
          shell: powershell.exe
          command: |
-             /workspace/unit-test-persistence-cases > $env:Unit_Test_Persistence
+             /tmp/workspace/unit-test-persistence-cases > $env:Unit_Test_Persistence
 #             Set-Variable -Name $env:APPDATA -Value D:\
 
       - run:
