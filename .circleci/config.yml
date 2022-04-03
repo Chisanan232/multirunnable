@@ -89,6 +89,11 @@ commands:
             choco install -y mysql --params "/dataLocation:./tests/database/test_mysql/mysql"
 #            choco install -y mysql
 
+      - run:
+         name: Start MySQL database service
+         shell: powershell.exe
+         command: net start mysql
+
 
   install_mysql_cli:
     steps:
@@ -120,50 +125,16 @@ commands:
          name: Create database
          shell: powershell.exe
          command: bash scripts/database-execution.sh create_database
-#            mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD --execute="CREATE DATABASE tw_stock;"
-#            mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD $DB_DATABASE < ./tests/testing-database/test_sql/$DATABASE_DRIVER/create_database.sql
 
       - run:
          name: Create table for saving testing data
          shell: powershell.exe
          command: bash scripts/database-execution.sh create_table
-#            mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD --execute="
-#                CREATE TABLE IF NOT EXISTS tw_stock.stock_data_2330 (
-#                                                               stock_date DATETIME NOT NULL,
-#                                                               trade_volume DECIMAL(12,4) NOT NULL,
-#                                                               turnover_price DECIMAL(16,4) NOT NULL,
-#                                                               opening_price DECIMAL(8,4) NOT NULL,
-#                                                               highest_price DECIMAL(8,4) NOT NULL,
-#                                                               lowest_price DECIMAL(8,4) NOT NULL,
-#                                                               closing_price DECIMAL(8,4) NOT NULL,
-#                                                               gross_spread DECIMAL(8,4) NOT NULL,
-#                                                               turnover_volume DECIMAL(12,4) NOT NULL,
-#                                                               PRIMARY KEY(stock_date)) DEFAULT CHARSET=utf8;"
-#            mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD $DB_DATABASE < ./tests/testing-database/test_sql/$DATABASE_DRIVER/create_table.sql
 
       - run:
          name: Insert testing data
          shell: powershell.exe
          command: bash scripts/database-execution.sh insert_test_data_rows
-#            mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD --execute="
-#                INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
-#                    VALUES ('0108-01-02 00:00:00' , 32900482 , 7276419230 ,226.5000 ,226.5000 , 219.0000, 219.5000 ,-6.00 , 12329);"
-#            mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD --execute="
-#                INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
-#                    VALUES ('0108-01-03 00:00:00' , 34615620 , 7459051790 ,214.0000 ,218.0000 , 214.0000 ,215.5000 ,-4.00 , 14549);"
-#            mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD --execute="
-#                INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
-#                    VALUES ('0108-01-04 00:00:00' , 67043521 ,13987136785 ,211.5000 ,211.5000 , 206.5000 ,208.0000 ,-7.50 , 28786);"
-#            mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD --execute="
-#                INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
-#                    VALUES ('0108-01-07 00:00:00' , 35695176 , 7591116569 ,212.0000 ,214.0000 , 211.0000 ,213.0000 ,+5.00 , 11224);"
-#            mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD --execute="
-#                INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
-#                    VALUES ('0108-01-08 00:00:00' , 23794481 , 5019703557 ,212.0000 ,212.5000 , 210.0000 ,211.0000 ,-2.00 , 9377);"
-#            mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD --execute="
-#                INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
-#                    VALUES ('0108-01-09 00:00:00' , 51255446 ,11006827093 ,212.0000 ,216.5000 , 211.0000 ,215.5000 ,+4.50 , 14098);"
-#            mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD $DB_DATABASE < ./tests/testing-database/test_sql/$DATABASE_DRIVER/insert_test_data_rows.sql
 
 #  isntall_databade_driver_tool:
 #    steps:
@@ -252,6 +223,7 @@ commands:
          command: |
              python -V > $Python_Version
              Move-Item -Path .coverage -Destination workspace/.coverage.unit-test-core.windows.$Python_Version
+
       - persist_to_workspace:
          root: workspace
          paths:
@@ -281,6 +253,7 @@ commands:
          command: |
              python -V > $Python_Version
              Move-Item -Path .coverage -Destination workspace/.coverage.unit-test-persistence.windows.$Python_Version
+
       - persist_to_workspace:
          root: workspace
          paths:
@@ -323,7 +296,6 @@ commands:
   perpare_testing_database:
     steps:
       - install_mysql
-#      - activate_mysql_server
       - install_mysql_cli
       - test_databade_connection
       - prepare_testing_data
@@ -359,168 +331,7 @@ commands:
       - report_testing_coverage
 
 
-executors:
-#  docker-mysql:
-#    docker:
-#      - image: circleci/mysql:8.0.23
-##          auth:
-##            username: chisanan232
-##            password: $DOCKERHUB_PASSWORD
-#      - environment:
-#           MYSQL_ROOT_HOST: 127.0.0.1
-#           MYSQL_ROOT_PASSWORD: password
-#           MYSQL_DATABASE: tw_stock
-#           MYSQL_USER: user
-#           MYSQL_PASSWORD: passw23mr
-#           DB_HOST: 127.0.0.1
-#           DB_PORT: 3306
-
-  windows:
-    machine:
-      image: win/default    # executor type
-#      image: windows-default    # Windows machine image
-#      - image: winamd64/python:3.10    # Windows machine image
-#        auth:
-#          username: chisanan232
-#          password: $DOCKERHUB_PASSWORD
-#        environment:
-#          DATABASE_DRIVER: 'mysql'
-##          MYSQL_ROOT_PASSWORD: 'password'
-#          DB_HOST: 127.0.0.1
-#          DB_PORT: 3306
-#          DB_USER: 'root'
-#          DB_PASSWORD: 'password'
-
-#      - image: circleci/mysql:8.0.23
-#        auth:
-#          username: chisanan232
-#          password: $DOCKERHUB_PASSWORD
-#        environment:
-#          MYSQL_ROOT_PASSWORD: password
-#          MYSQL_ALLOW_EMPTY_PASSWORD: true
-
-#  docker-py36:
-#    docker:
-#      - image: circleci/python:3.6
-#        auth:
-#          username: chisanan232
-#          password: $DOCKERHUB_PASSWORD
-#        environment:
-#          MYSQL_PASSWORD: 'password'
-#          MYSQL_DATABASE: 'tw_stock'
-#          MYSQL_ROOT_HOST: 127.0.0.1
-#          DB_HOST: 127.0.0.1
-#          DB_PORT: 3306
-#          DB_USER: 'root'
-#          DB_PASSWORD: 'password'
-#
-#      - image: circleci/mysql:8.0.23
-#        auth:
-#          username: chisanan232
-#          password: $DOCKERHUB_PASSWORD
-#        environment:
-#          MYSQL_ROOT_PASSWORD: password
-#          MYSQL_ALLOW_EMPTY_PASSWORD: true
-#
-#  docker-py37:
-#    docker:
-#      - image: circleci/python:3.7
-#        auth:
-#          username: chisanan232
-#          password: $DOCKERHUB_PASSWORD
-#        environment:
-#          MYSQL_PASSWORD: 'password'
-#          MYSQL_DATABASE: 'tw_stock'
-#          MYSQL_ROOT_HOST: 127.0.0.1
-#          DB_HOST: 127.0.0.1
-#          DB_PORT: 3306
-#          DB_USER: 'root'
-#          DB_PASSWORD: 'password'
-#
-#      - image: circleci/mysql:8.0.23
-#        auth:
-#          username: chisanan232
-#          password: $DOCKERHUB_PASSWORD
-#        environment:
-#          MYSQL_ROOT_PASSWORD: password
-#          MYSQL_ALLOW_EMPTY_PASSWORD: true
-#
-#  docker-py38:
-#    docker:
-#      - image: circleci/python:3.8
-#        auth:
-#          username: chisanan232
-#          password: $DOCKERHUB_PASSWORD
-#        environment:
-#          MYSQL_PASSWORD: 'password'
-#          MYSQL_DATABASE: 'tw_stock'
-#          MYSQL_ROOT_HOST: 127.0.0.1
-#          DB_HOST: 127.0.0.1
-#          DB_PORT: 3306
-#          DB_USER: 'root'
-#          DB_PASSWORD: 'password'
-#
-#      - image: circleci/mysql:8.0.23
-#        auth:
-#          username: chisanan232
-#          password: $DOCKERHUB_PASSWORD
-#        environment:
-#          MYSQL_ROOT_PASSWORD: password
-#          MYSQL_ALLOW_EMPTY_PASSWORD: true
-#
-#  docker-py39:
-#    docker:
-#      - image: circleci/python:3.9
-#        auth:
-#          username: chisanan232
-#          password: $DOCKERHUB_PASSWORD
-#        environment:
-#          MYSQL_PASSWORD: 'password'
-#          MYSQL_DATABASE: 'tw_stock'
-#          MYSQL_ROOT_HOST: 127.0.0.1
-#          DB_HOST: 127.0.0.1
-#          DB_PORT: 3306
-#          DB_USER: 'root'
-#          DB_PASSWORD: 'password'
-#
-#      - image: circleci/mysql:8.0.23
-#        auth:
-#          username: chisanan232
-#          password: $DOCKERHUB_PASSWORD
-#        environment:
-#          MYSQL_ROOT_PASSWORD: password
-#          MYSQL_ALLOW_EMPTY_PASSWORD: true
-#
-#  docker-py310:
-#    docker:
-#      - image: circleci/python:3.10
-#        auth:
-#          username: chisanan232
-#          password: $DOCKERHUB_PASSWORD
-#        environment:
-#          MYSQL_PASSWORD: 'password'
-#          MYSQL_DATABASE: 'tw_stock'
-#          MYSQL_ROOT_HOST: 127.0.0.1
-#          DB_HOST: 127.0.0.1
-#          DB_PORT: 3306
-#          DB_USER: 'root'
-#          DB_PASSWORD: 'password'
-#
-#      - image: circleci/mysql:8.0.23
-#        auth:
-#          username: chisanan232
-#          password: $DOCKERHUB_PASSWORD
-#        environment:
-#          MYSQL_ROOT_PASSWORD: password
-#          MYSQL_ALLOW_EMPTY_PASSWORD: true
-
-
 jobs:
-  # This is job about database which saving the testing data for ensure the features work finely without any issue.
-#  build-testing-database:
-#    executor: docker-mysql
-#    steps:
-#      - prepare_testing_data
 
   pre-testbed-unit-test-core:
     executor: win/default # executor type
@@ -648,7 +459,7 @@ jobs:
       DB_PASSWORD: 'root'
 
   unit-test-coveralls-done:
-    executor: windows
+    executor: win/default # executor type
     steps:
       - checkout    # this pulls code down from GitHub
       - install_pkg_manager_chocolatey
@@ -656,7 +467,7 @@ jobs:
       - report_testing_coverage
 
   all-coveralls-done:
-    executor: windows
+    executor: win/default # executor type
     steps:
       - checkout    # this pulls code down from GitHub
       - install_pkg_manager_chocolatey
@@ -669,16 +480,6 @@ workflows:
   version: 2.1
   build_and_test:    # this is the name of our workflow
     jobs:    # and here we list the jobs we are going to run.
-      # General work flow
-#      - build-testing-database
-#      - test-linux-python36
-#      - test-linux-python37
-#      - test-linux-python38
-#      - test-linux-python39
-#      - test-linux-python310
-
-      # Sequence work flow
-#      - build-testing-database
       - pre-testbed-unit-test-core
       - pre-testbed-unit-test-persistence
 
