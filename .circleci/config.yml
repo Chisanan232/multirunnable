@@ -1,7 +1,7 @@
 version: 2.1
 
-#orbs:
-#  win: circleci/windows@4.1.1    # The Windows orb give you everything you need to start using the Windows executor.
+orbs:
+  win: circleci/windows@4.1.1    # The Windows orb give you everything you need to start using the Windows executor.
 
 commands:
 
@@ -363,8 +363,8 @@ executors:
 #           DB_PORT: 3306
 
   windows:
-    docker:
-      - image: circleci/windows@4.1.1    # Windows machine image
+    machine:
+      - image: win/default    # Windows machine image
         environment:
           DATABASE_DRIVER: 'mysql'
 #          MYSQL_ROOT_HOST: 127.0.0.1
@@ -375,6 +375,7 @@ executors:
           DB_USER: 'root'
           DB_PASSWORD: 'password'
 
+    docker:
       - image: circleci/mysql:8.0.23
         auth:
           username: chisanan232
