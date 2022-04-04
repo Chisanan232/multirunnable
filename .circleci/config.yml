@@ -226,22 +226,24 @@ commands:
       - attach_workspace:
            at: /workspace
 
-      - run:
-         name: Get the test cases (file paths)
-         shell: powershell.exe
-         command: |
-             ./workspace/unit-test-core-cases > $env:Unit_Test_Core
-#             $env:Unit_Test_Core
-#             echo $env:Unit_Test_Core_Data
-#             ConvertFrom-Json $env:Unit_Test_Core_Data > $env:Unit_Test_Core
-#             Set-Variable -Name $env:APPDATA -Value D:\
+#      - run:
+#         name: Get the test cases (file paths)
+#         shell: powershell.exe
+#         command: |
+#             ./workspace/unit-test-core-cases > $env:Unit_Test_Core
+##             $env:Unit_Test_Core
+##             echo $env:Unit_Test_Core_Data
+##             ConvertFrom-Json $env:Unit_Test_Core_Data > $env:Unit_Test_Core
+##             Set-Variable -Name $env:APPDATA -Value D:\
 
       - run:
          name: Run PyTest command to test
          shell: powershell.exe
          command: |
-             echo $env:Unit_Test_Core
-             pytest $env:Unit_Test_Core
+             bash scripts/windows/run_pytest_with_test_cases.sh ./workspace/unit-test-core-cases
+#             echo $env:Unit_Test_Core
+#             ls
+#             pytest $env:Unit_Test_Core
 
       - run:
          name: Upload the coverage result to Circle-CI workspace
