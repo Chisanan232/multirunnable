@@ -80,14 +80,42 @@ commands:
             pip -V
 
 
-  install_mysql:
+  install_docker:
     steps:
       - run:
-         name: Install MySQL database
+         name: Install Docker
          shell: powershell.exe
          command: |
-            choco install -y mysql --params "/port:3306 /dataLocation:./tests/database/test_mysql/mysql"
-#            choco install -y mysql
+            choco install -y docker
+            choco install -y docker-machine
+            choco install virtualbox
+
+
+  initial_mysql:
+    steps:
+      - run:
+         name: Initial MySQL database and start service via Docker
+         shell: powershell.exe
+         command: |
+            docker pull mysql:8.0
+            docker run --name test_mysql \
+              --restart always \
+              --network=bridge \
+              -p 3306:3306 \
+              --env="MYSQL_ROOT_PASSWORD=password" \
+              -v "$(pwd)"/tests/testing-database/test_mysql/my.cnf:/etc/mysql/my.cnf \
+              -v "$(pwd)"/tests/testing-database/test_mysql/mysql:/var/lib/mysql \
+              -d mysql:8.0
+
+
+#  install_mysql:
+#    steps:
+#      - run:
+#         name: Install MySQL database and start database service
+#         shell: powershell.exe
+#         command: |
+#            choco install -y mysql --params "/port:3306 /dataLocation:./tests/database/test_mysql/mysql"
+##            choco install -y mysql
 
 #      - run:
 #         name: Start MySQL database service
@@ -184,9 +212,12 @@ commands:
     steps:
       - run:
          name: Check Python Version
+         shell: powershell.exe
          command: python --version
+
       - run:
          name: Upgrade and install Python dependencies
+         shell: powershell.exe
          command: |
              pip install -U pip
              pip install -U pytest
@@ -215,8 +246,10 @@ commands:
 
       - run:
          name: Run PyTest command to test
+         shell: powershell.exe
          command: |
-             pytest $Unit_Test_Core
+             echo $env:Unit_Test_Core
+             pytest $env:Unit_Test_Core
 
       - run:
          name: Upload the coverage result to Circle-CI workspace
@@ -227,6 +260,7 @@ commands:
 
       - persist_to_workspace:
          root: workspace
+         shell: powershell.exe
          paths:
            - .coverage.unit-test-core.windows.*
 
@@ -245,6 +279,7 @@ commands:
 
       - run:
          name: Run PyTest command to test
+         shell: powershell.exe
          command: |
              pytest $Unit_Test_Persistence
 
@@ -267,11 +302,13 @@ commands:
            at: /workspace
       - run:
          name:  Combine all coverage results
+         shell: powershell.exe
          command: |
              coverage combine .coverage.unit-test*
 
       - run:
          name:  Report testing coverage of project code
+         shell: powershell.exe
          command: |
              coverage report -m
 
@@ -281,6 +318,7 @@ commands:
       - report_testing_coverage
       - run:
          name: Submit calculation result of testing coverage of project code to coveralls
+         shell: powershell.exe
 #         command: |
 #             coveralls    # submit coverage to coveralls
          command: |
@@ -296,7 +334,9 @@ commands:
 
   perpare_testing_database:
     steps:
-      - install_mysql
+#      - install_mysql
+      - install_docker
+      - initial_mysql
       - install_mysql_cli
       - test_databade_connection
       - prepare_testing_data
