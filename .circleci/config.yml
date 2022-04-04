@@ -98,14 +98,7 @@ commands:
          shell: powershell.exe
          command: |
             docker pull mysql:8.0
-            docker run --name test_mysql \
-              --restart always \
-              --network=bridge \
-              -p 3306:3306 \
-              --env="MYSQL_ROOT_PASSWORD=password" \
-              -v "$(pwd)"/tests/testing-database/test_mysql/my.cnf:/etc/mysql/my.cnf \
-              -v "$(pwd)"/tests/testing-database/test_mysql/mysql:/var/lib/mysql \
-              -d mysql:8.0
+            docker run --name test_mysql --restart always --network=bridge -p 3306:3306 --env="MYSQL_ROOT_PASSWORD=password" -v "$(pwd)"/tests/testing-database/test_mysql/my.cnf:/etc/mysql/my.cnf -v "$(pwd)"/tests/testing-database/test_mysql/mysql:/var/lib/mysql -d mysql:8.0
 
 
 #  install_mysql:
@@ -239,7 +232,7 @@ commands:
          command: |
              Get-Content ./workspace/unit-test-core-cases
              ./workspace/unit-test-core-cases > $env:Unit_Test_Core
-             echo $env:Unit_Test_Core
+             $env:Unit_Test_Core
 #             echo $env:Unit_Test_Core_Data
 #             ConvertFrom-Json $env:Unit_Test_Core_Data > $env:Unit_Test_Core
 #             Set-Variable -Name $env:APPDATA -Value D:\
@@ -248,8 +241,8 @@ commands:
          name: Run PyTest command to test
          shell: powershell.exe
          command: |
-             echo $env:Unit_Test_Core
-             pytest $env:Unit_Test_Core
+             $env:Unit_Test_Core
+             pytest & "$env:Unit_Test_Core"
 
       - run:
          name: Upload the coverage result to Circle-CI workspace
@@ -281,7 +274,7 @@ commands:
          name: Run PyTest command to test
          shell: powershell.exe
          command: |
-             pytest $Unit_Test_Persistence
+             pytest & "$Unit_Test_Persistence"
 
       - run:
          name: Upload the coverage result to Circle-CI workspace
