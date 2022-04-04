@@ -240,6 +240,9 @@ commands:
          name: Run PyTest command to test
          shell: powershell.exe
          command: |
+             Get-ChildItem -Force
+             Get-ChildItem -Force ./tests
+             Get-ChildItem -Force ./tests/unit_test
              bash scripts/windows/run_pytest_with_test_cases.sh ./workspace/unit-test-core-cases
 #             echo $env:Unit_Test_Core
 #             ls
