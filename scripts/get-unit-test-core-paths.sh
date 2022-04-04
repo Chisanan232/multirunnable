@@ -69,7 +69,7 @@ dest=( "${array1[@]} ${init_tests[@]} ${parallel_tests[@]} ${concurrent_tests[@]
 
 if echo $runtime_os | grep -q "windows";
 then
-    printf '%s\n' "${dest[@]}" | jq -R .
+    printf "${dest[@]}" | jq -R .
 elif echo $runtime_os | grep -q "unix";
 then
     printf '%s\n' "${dest[@]}" | jq -R . | jq -cs .
