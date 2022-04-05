@@ -380,3 +380,64 @@ jobs:
           fail_ci_if_error: true   # optional (default = false)
           verbose: true    # optional (default = false)
 
+
+  build_package:
+    needs: codecov_finish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -U pip
+          pip install -U setuptools
+          pip install wheel
+
+      - name: Compile and package the code as Python package formatter
+        run: python3 setup.py sdist bdist_wheel
+
+      - name: Upload Python package files
+        uses: actions/upload-artifact@v3
+        with:
+          name: MultiRunnable-Python-Package
+          path: ./dist/MultiRunnable-0.17.0*
+          if-no-files-found: error
+
+
+  final_check:
+    env:
+      MultiRunnableVersion: 0.17.0a2
+
+    needs: build_package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Python package files
+        uses: actions/download-artifact@v3
+        with:
+          name: MultiRunnable-Python-Package
+          path: ./dist/MultiRunnable-0.17.0*
+          if-no-files-found: error
+
+      - name: Install MultiRunnable with .whl file via 'pip'
+        run: |
+          python -m pip install --upgrade pip
+          pip install -U pip
+          pip install dist/MultiRunnable-$MultiRunnableVersion*.whl
+
+      - name: Show the Python package information
+        run: pip show multirunnable
+
+      - name: Test to run script with package 'multirunnable' in command lines
+        run: |
+          import multirunnable as mr
+          import time
+          Workers_Number = 5
+          executor = mr.SimpleExecutor(mode=mr.RunningMode.Concurrent, executors=Workers_Number)
+          executor.run(function=lambda a: print(f"param: {a}, time: {time.time()}"), args={"index": f"test_arg"})
+        shell: python
+
+      - name: Test to run script with package 'multirunnable' with Python file
+        run: python3 scripts/mr_script.py
+

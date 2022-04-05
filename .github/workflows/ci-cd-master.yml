@@ -405,7 +405,7 @@ jobs:
 #        run: codecov -f ./codecov.token    # submit coverage to codecov
 
 
-  build_package_and_push_to_pypi:
+  build_package:
     needs: codecov_finish
     runs-on: ubuntu-latest
     steps:
@@ -418,36 +418,42 @@ jobs:
           pip install -U pip
           pip install -U setuptools
           pip install wheel
-          pip install twine
 
       - name: Compile and package the code as Python package formatter
         run: python3 setup.py sdist bdist_wheel
 
-      - name: Push Python package to PyPI
-        run: python3 -m twine upload ./dist/MultiRunnable-0.17.0*
-        env:
-          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-#          TWINE_REPOSITORY: multirunnable
+      - name: Upload Python package files
+        uses: actions/upload-artifact@v3
+        with:
+          name: MultiRunnable-Python-Package
+          path: ./dist/MultiRunnable-0.17.0*
+          if-no-files-found: error
 
 
   final_check:
     env:
       MultiRunnableVersion: 0.17.0a2
 
-    needs: build_package_and_push_to_pypi
+    needs: build_package
     runs-on: ubuntu-latest
     steps:
-      - name: Install MultiRunnable via 'pip'
+      - name: Download Python package files
+        uses: actions/download-artifact@v3
+        with:
+          name: MultiRunnable-Python-Package
+          path: ./dist/MultiRunnable-0.17.0*
+          if-no-files-found: error
+
+      - name: Install MultiRunnable with .whl file via 'pip'
         run: |
           python -m pip install --upgrade pip
           pip install -U pip
-          pip install multirunnable==$MultiRunnableVersion
+          pip install dist/MultiRunnable-$MultiRunnableVersion*.whl
 
       - name: Show the Python package information
         run: pip show multirunnable
 
-      - name: Show the Python package information
+      - name: Test to run script with package 'multirunnable' in command lines
         run: |
           import multirunnable as mr
           import time
@@ -455,3 +461,40 @@ jobs:
           executor = mr.SimpleExecutor(mode=mr.RunningMode.Concurrent, executors=Workers_Number)
           executor.run(function=lambda a: print(f"param: {a}, time: {time.time()}"), args={"index": f"test_arg"})
         shell: python
+
+      - name: Test to run script with package 'multirunnable' with Python file
+        run: python3 scripts/mr_script.py
+
+
+  push_to_pypi:
+    needs: final_check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Python package files
+        uses: actions/download-artifact@v3
+        with:
+          name: MultiRunnable-Python-Package
+          path: ./dist/MultiRunnable-0.17.0*
+          if-no-files-found: error
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -U pip
+          pip install -U setuptools
+          pip install wheel
+          pip install twine
+
+      - name: Upload code coverage result file
+        uses: actions/upload-artifact@v3
+        with:
+          name: MultiRunnable-Python-Package
+          path: ./dist/MultiRunnable-0.17.0*
+          if-no-files-found: error
+
+      - name: Push Python package to PyPI
+        run: python3 -m twine upload ./dist/MultiRunnable-0.17.0*
+        env:
+          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+#          TWINE_REPOSITORY: multirunnable
