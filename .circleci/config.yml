@@ -97,7 +97,7 @@ commands:
          name: Initial MySQL database and start service via Docker
          shell: powershell.exe
          command: |
-            docker pull mysql:8.0
+            docker pull --platform linux mysql:8.0
             docker run --name test_mysql --restart always -p 3306:3306 --env="MYSQL_ROOT_PASSWORD=password" -v "$pwd"/tests/testing-database/test_mysql/my.cnf:/etc/mysql/my.cnf -v "$pwd"/tests/testing-database/test_mysql/mysql:/var/lib/mysql -d mysql:8.0
 
 
@@ -240,12 +240,8 @@ commands:
          name: Run PyTest command to test
          shell: powershell.exe
          command: |
-             Get-ChildItem -Force
-             Get-ChildItem -Force ./tests
-             Get-ChildItem -Force ./tests/unit_test
              bash scripts/windows/run_pytest_with_test_cases.sh ./workspace/unit-test-core-cases
 #             echo $env:Unit_Test_Core
-#             ls
 #             pytest $env:Unit_Test_Core
 
       - run:
@@ -267,18 +263,19 @@ commands:
       - attach_workspace:
            at: /workspace
 
-      - run:
-         name: Get the test cases (file paths)
-         shell: powershell.exe
-         command: |
-             ./workspace/unit-test-persistence-cases > $env:Unit_Test_Persistence
-#             Set-Variable -Name $env:APPDATA -Value D:\
+#      - run:
+#         name: Get the test cases (file paths)
+#         shell: powershell.exe
+#         command: |
+#             ./workspace/unit-test-persistence-cases > $env:Unit_Test_Persistence
+##             Set-Variable -Name $env:APPDATA -Value D:\
 
       - run:
          name: Run PyTest command to test
          shell: powershell.exe
          command: |
-             pytest $Unit_Test_Persistence
+             bash scripts/windows/run_pytest_with_test_cases.sh ./workspace/unit-test-persistence-cases
+#             pytest $Unit_Test_Persistence
 
       - run:
          name: Upload the coverage result to Circle-CI workspace
