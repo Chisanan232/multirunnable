@@ -41,7 +41,7 @@ setuptools.setup(
     description=about["__description__"],
     long_description=readme,
     long_description_content_type="text/markdown",
-    packages=packages,
+    packages=setuptools.find_packages(exclude=("tests", "study", "example")),
     package_dir={"multirunnable": "multirunnable"},
     py_modules=packages,
     zip_safe=False,
