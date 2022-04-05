@@ -41,6 +41,10 @@ the things of 'Style':
 Modify any the codes which is testing code for this package. In this package, it's
 the directory './tests'.
 
+* Debug
+Modify any the codes or configuration which for debugging. However, it CAN NOT be used
+in some scope like 'code' or 'test'.
+
 * Docs
 Modify anything which is related with documentation of this package. In this package,
 it's the directory './docs'.
@@ -52,6 +56,9 @@ Path is './multirunnable'.
 
 * test
 Path is './tests'.
+
+* script
+Path is './scripts'.
 
 * example
 Path is './example'.
