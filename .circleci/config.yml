@@ -103,7 +103,7 @@ commands:
             (Get-Content C:\\Users\\circleci\\.docker\\config.json).replace('false', 'true') | Set-Content C:\\Users\\circleci\\.docker\\config.json
             restart-service *docker*
             docker version
-            docker pull --platform linux mysql:8.0
+            docker pull mysql:8.0
             docker run --name test_mysql --restart always -p 3306:3306 --env="MYSQL_ROOT_PASSWORD=password" -v "$pwd"/tests/testing-database/test_mysql/my.cnf:/etc/mysql/my.cnf -v "$pwd"/tests/testing-database/test_mysql/mysql:/var/lib/mysql -d mysql:8.0
 
 
