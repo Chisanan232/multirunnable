@@ -98,8 +98,9 @@ commands:
          shell: powershell.exe
          command: |
             docker version
-            (Get-Content $HOME/.docker/config.json).replace('false', 'enabled') | Set-Content $HOME/.docker/config.json
-            (Get-Content $HOME/.docker/config.json).replace('disabled', 'enabled') | Set-Content $HOME/.docker/config.json
+            $env:DOCKER_CLI_EXPERIMENTAL = "enabled"
+            echo $env:DOCKER_CLI_EXPERIMENTAL
+#            (Get-Content $HOME/.docker/config.json).replace('false', 'enabled') | Set-Content $HOME/.docker/config.json
             restart-service *docker*
             docker pull --experimental --platform linux mysql:8.0
             docker run --name test_mysql --restart always -p 3306:3306 --env="MYSQL_ROOT_PASSWORD=password" -v "$pwd"/tests/testing-database/test_mysql/my.cnf:/etc/mysql/my.cnf -v "$pwd"/tests/testing-database/test_mysql/mysql:/var/lib/mysql -d mysql:8.0
