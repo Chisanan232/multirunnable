@@ -1,11 +1,11 @@
-from multirunnable import set_mode
-from multirunnable.persistence.database.layer import BaseDao
-
-from ...test_config import Under_Test_RunningModes, Test_Pool_Name, Test_Pool_Size,Database_Config, Database_Pool_Config
-from ._test_db_implement import MySQLSingleConnection, MySQLDriverConnectionPool, MySQLOperator
-
 import traceback
 import pytest
+
+from multirunnable.persistence.database.layer import BaseDao
+from multirunnable import set_mode
+
+from ....test_config import Under_Test_RunningModes,Database_Config, Database_Pool_Config
+from ._test_db_implement import MySQLSingleConnection, MySQLDriverConnectionPool, MySQLOperator
 
 
 _Data_Row_Number = 3
@@ -21,24 +21,19 @@ class TargetSingleDao(BaseDao):
 
 
     def _instantiate_database_opts(self, strategy: MySQLSingleConnection) -> MySQLOperator:
-        return MySQLOperator(conn_strategy=strategy)
+        return MySQLOperator(conn_strategy=strategy, db_config=Database_Config)
 
 
 
 class TargetPoolDao(BaseDao):
 
     def _instantiate_strategy(self) -> MySQLDriverConnectionPool:
-        Database_Pool_Config.update({
-            "pool_name": Test_Pool_Name,
-            "pool_size": Test_Pool_Size
-        })
         _strategy = MySQLDriverConnectionPool(**Database_Pool_Config)
-        _strategy.current_pool_name = Test_Pool_Name
         return _strategy
 
 
     def _instantiate_database_opts(self, strategy: MySQLDriverConnectionPool) -> MySQLOperator:
-        return MySQLOperator(conn_strategy=strategy)
+        return MySQLOperator(conn_strategy=strategy, db_config=Database_Pool_Config)
 
 
 @pytest.fixture(scope="function")

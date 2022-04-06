@@ -1,13 +1,13 @@
-from multirunnable.coroutine.context import green_thread_context, async_task_context
-
-from ..framework.context import _Function, ContextTestSpec
-from .._examples import RunByStrategy
-
 from typing import Type
-import asyncio
 import gevent.threading
+import asyncio
 import gevent
 import pytest
+
+from multirunnable.coroutine.context import green_thread_context, async_task_context
+
+from ..._examples import RunByStrategy
+from ..framework.context import _Function, ContextTestSpec
 
 
 

@@ -1,7 +1,7 @@
-from abc import ABCMeta, abstractmethod
 from typing import Union, NewType
+from abc import ABCMeta, abstractmethod
 
-from multirunnable.types import (
+from ...types import (
     MRLock as _MRLock,
     MRRLock as _MRRLock,
     MRSemaphore as _MRSemaphore,

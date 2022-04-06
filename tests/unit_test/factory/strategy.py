@@ -1,10 +1,10 @@
-from multirunnable.mode import RunningMode
-from multirunnable.factory.strategy import ExecutorStrategyAdapter, PoolStrategyAdapter
-from multirunnable.parallel.strategy import ProcessStrategy, ProcessPoolStrategy
 from multirunnable.concurrent.strategy import ThreadStrategy, ThreadPoolStrategy
 from multirunnable.coroutine.strategy import GreenThreadStrategy, GreenThreadPoolStrategy, AsynchronousStrategy
+from multirunnable.parallel.strategy import ProcessStrategy, ProcessPoolStrategy
+from multirunnable.factory.strategy import ExecutorStrategyAdapter, PoolStrategyAdapter
+from multirunnable.mode import RunningMode
 
-from ..test_config import Worker_Size, Worker_Pool_Size, Task_Size
+from ...test_config import Worker_Size, Worker_Pool_Size, Task_Size
 
 
 _Worker_Size = Worker_Size

@@ -1,8 +1,8 @@
 # from multirunnable.parallel.queue import ProcessQueueType
 
-from ..test_config import Semaphore_Value
-
 from multiprocessing.queues import Queue, SimpleQueue, JoinableQueue
+
+from ...test_config import Semaphore_Value
 
 
 _Semaphore_Value = Semaphore_Value

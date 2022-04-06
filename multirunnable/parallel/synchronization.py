@@ -1,12 +1,12 @@
-from multirunnable.framework.runnable import (
-    PosixThreadLock as _PosixThreadLock,
-    PosixThreadCommunication as _PosixThreadCommunication)
-
 from multiprocessing import (
     Lock as _Process_Lock, RLock as _Process_RLock,
     Semaphore as _Process_Semaphore, BoundedSemaphore as _Process_BoundedSemaphore,
     Event as _Process_Event, Condition as _Process_Condition)
 from typing import Union
+
+from ..framework.runnable import (
+    PosixThreadLock as _PosixThreadLock,
+    PosixThreadCommunication as _PosixThreadCommunication)
 
 
 

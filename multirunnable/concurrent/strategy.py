@@ -1,30 +1,30 @@
+from multiprocessing.pool import AsyncResult, ApplyResult
+from multiprocessing.pool import ThreadPool
+from multipledispatch import dispatch
+from collections.abc import Iterable
+from threading import Thread, current_thread
+from functools import wraps, partial as PartialFunction
+from typing import List, Dict, Callable, Iterable as IterableType, Optional, Union, Tuple
+from types import FunctionType, MethodType
 from abc import ABC
 from os import getpid
-from types import FunctionType, MethodType
-from typing import List, Dict, Callable, Iterable as IterableType, Optional, Union, Tuple
-from functools import wraps, partial as PartialFunction
-from collections.abc import Iterable
-from multipledispatch import dispatch
-from threading import Thread, current_thread
-from multiprocessing.pool import ThreadPool
-from multiprocessing.pool import AsyncResult, ApplyResult
 
-from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
-from multirunnable.mode import FeatureMode as _FeatureMode
-from multirunnable.types import MRTasks as _MRTasks
-from multirunnable.concurrent.result import ConcurrentResult as _ConcurrentResult, ThreadPoolResult as _ThreadPoolResult
-from multirunnable.framework import BaseQueueTask as _BaseQueueTask
-from multirunnable.framework.runnable import (
+from ..framework.runnable import (
     MRResult as _MRResult,
     GeneralRunnableStrategy as _GeneralRunnableStrategy,
     PoolRunnableStrategy as _PoolRunnableStrategy,
     Resultable as _Resultable,
     ResultState as _ResultState
 )
-from multirunnable.framework.factory import (
+from ..framework.factory import (
     BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory,
     BaseList as _BaseList
 )
+from ..framework import BaseQueueTask as _BaseQueueTask
+from ..concurrent.result import ConcurrentResult as _ConcurrentResult, ThreadPoolResult as _ThreadPoolResult
+from ..types import MRTasks as _MRTasks
+from ..mode import FeatureMode as _FeatureMode
+from .. import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 
 
 

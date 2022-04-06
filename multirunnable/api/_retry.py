@@ -1,6 +1,6 @@
-from abc import ABCMeta, abstractmethod
-from typing import Tuple, List, Dict, Callable, Optional
 from functools import wraps, update_wrapper, partial
+from typing import Tuple, List, Dict, Callable, Optional
+from abc import ABCMeta, abstractmethod
 import inspect
 import re
 

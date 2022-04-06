@@ -1,7 +1,7 @@
-from abc import ABCMeta, abstractmethod
 from enum import Enum
+from abc import ABCMeta, abstractmethod
 
-from multirunnable.types import MRQueue as _MRQueue
+from ...types import MRQueue as _MRQueue
 
 
 

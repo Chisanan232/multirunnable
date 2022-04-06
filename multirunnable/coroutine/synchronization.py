@@ -1,12 +1,3 @@
-from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
-from multirunnable.framework.runnable.synchronization import (
-    PosixThreadLock as _PosixThreadLock,
-    PosixThreadCommunication as _PosixThreadCommunication)
-from multirunnable.types import (
-    MRCondition as _MRCondition,
-    MREvent as _MREvent
-)
-
 from gevent.threading import Lock as _Greenlet_Lock
 from gevent.lock import (
     RLock as _Greenlet_RLock,
@@ -22,6 +13,15 @@ from asyncio import Event as _Async_Event, Condition as _Async_Condition
 
 from typing import Dict, Optional
 import logging
+
+from ..framework.runnable.synchronization import (
+    PosixThreadLock as _PosixThreadLock,
+    PosixThreadCommunication as _PosixThreadCommunication)
+from ..types import (
+    MRCondition as _MRCondition,
+    MREvent as _MREvent
+)
+from .. import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 
 
 

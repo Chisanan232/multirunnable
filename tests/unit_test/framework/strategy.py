@@ -1,10 +1,10 @@
-from multirunnable.framework.runnable.strategy import GeneralRunnableStrategy, PoolRunnableStrategy, AsyncRunnableStrategy
-
-from ..test_config import Worker_Pool_Size, Running_Diff_Time, Test_Function_Sleep_Time
-
-from abc import ABCMeta, abstractmethod, ABC
 from typing import List, Tuple, Dict, Callable
+from abc import ABCMeta, abstractmethod, ABC
 import re
+
+from multirunnable.framework.runnable.strategy import GeneralRunnableStrategy, PoolRunnableStrategy
+
+from ...test_config import Worker_Pool_Size, Running_Diff_Time, Test_Function_Sleep_Time
 
 
 

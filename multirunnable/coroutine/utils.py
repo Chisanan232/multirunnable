@@ -1,9 +1,9 @@
-from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
-
-from abc import ABCMeta, abstractmethod
-from gevent import sleep as gevent_sleep
 from asyncio import sleep as async_sleep, AbstractEventLoop, Future
+from gevent import sleep as gevent_sleep
+from abc import ABCMeta, abstractmethod
 import logging
+
+from .. import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 
 
 

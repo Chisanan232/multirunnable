@@ -1,8 +1,8 @@
-from multirunnable.framework.runnable.result import MRResult as _MRResult
-from ..types import MRTasks as _MRTasks
-
-from abc import ABCMeta, abstractmethod
 from typing import List, Tuple, Dict, Iterable, Callable
+from abc import ABCMeta, abstractmethod
+
+from .runnable.result import MRResult as _MRResult
+from ..types import MRTasks as _MRTasks
 
 
 

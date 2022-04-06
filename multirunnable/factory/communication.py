@@ -1,9 +1,9 @@
-from multirunnable.framework.runnable.synchronization import PosixThreadCommunication as _PosixThreadCommunication
-from multirunnable.mode import FeatureMode as _FeatureMode
-from multirunnable.api.manage import Globalize as _Globalize
-from multirunnable.types import MREvent as _MREvent, MRCondition as _MRCondition
-from multirunnable.factory.base import FeatureAdapterFactory as _FeatureAdapterFactory
-from multirunnable.factory._utils import _ModuleFactory, _AsyncUtils
+from ..framework.runnable.synchronization import PosixThreadCommunication as _PosixThreadCommunication
+from ..factory._utils import _ModuleFactory, _AsyncUtils
+from ..factory.base import FeatureAdapterFactory as _FeatureAdapterFactory
+from ..api.manage import Globalize as _Globalize
+from ..types import MREvent as _MREvent, MRCondition as _MRCondition
+from ..mode import FeatureMode as _FeatureMode
 
 
 

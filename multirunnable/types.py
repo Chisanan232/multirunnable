@@ -40,15 +40,6 @@ asynchronous:
 
 """
 
-from queue import Queue
-from threading import (Thread,
-                       Lock as ThreadingLock,
-                       RLock as ThreadingRLock,
-                       Semaphore as ThreadingSemaphore,
-                       BoundedSemaphore as ThreadingBoundedSemaphore,
-                       Event as ThreadingEvent,
-                       Condition as ThreadingCondition)
-
 from multiprocessing.pool import AsyncResult, ApplyResult
 from multiprocessing import (
     Process,
@@ -68,13 +59,22 @@ from gevent.lock import (RLock as GeventRLock,
                          DummySemaphore as GeventDummySemaphore)
 from gevent.event import Event as GeventEvent
 
-from asyncio.tasks import Task
 from asyncio.queues import Queue as AsyncIOQueue
+from asyncio.tasks import Task
 from asyncio.locks import (Lock as AsyncIOLock,
                            Semaphore as AsyncIOSemaphore,
                            BoundedSemaphore as AsyncIOBoundedSemaphore,
                            Event as AsyncIOEvent,
                            Condition as AsyncIOCondition)
+
+from threading import (Thread,
+                       Lock as ThreadingLock,
+                       RLock as ThreadingRLock,
+                       Semaphore as ThreadingSemaphore,
+                       BoundedSemaphore as ThreadingBoundedSemaphore,
+                       Event as ThreadingEvent,
+                       Condition as ThreadingCondition)
+from queue import Queue
 
 from typing import Union, NewType
 

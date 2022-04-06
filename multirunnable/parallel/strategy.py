@@ -1,27 +1,27 @@
+from multiprocessing.pool import Pool, AsyncResult, ApplyResult
+from multiprocessing import Process, current_process
+from multipledispatch import dispatch
+from collections.abc import Iterable
+from functools import wraps, partial as PartialFunction
+from typing import List, Tuple, Dict, Iterable as IterableType, Union, Callable, Optional
+from types import FunctionType, MethodType
 from abc import ABC, abstractmethod
 from os import getpid, getppid
-from types import FunctionType, MethodType
-from typing import List, Tuple, Dict, Iterable as IterableType, Union, Callable, Optional
-from functools import wraps, partial as PartialFunction
-from collections.abc import Iterable
-from multipledispatch import dispatch
-from multiprocessing import Process, current_process
-from multiprocessing.pool import Pool, AsyncResult, ApplyResult
 
-from multirunnable.mode import FeatureMode as _FeatureMode
-from multirunnable.parallel.result import ParallelResult as _ParallelResult, ProcessPoolResult as _ProcessPoolResult
-from multirunnable.parallel.share import Global_Manager, activate_manager_server
-from multirunnable.framework import BaseQueueTask as _BaseQueueTask
-from multirunnable.framework.runnable import (
+from ..framework.runnable import (
     GeneralRunnableStrategy as _GeneralRunnableStrategy,
     PoolRunnableStrategy as _PoolRunnableStrategy,
     Resultable as _Resultable,
     ResultState as _ResultState
 )
-from multirunnable.framework.factory import (
+from ..framework.factory import (
     BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory,
     BaseList as _BaseList
 )
+from ..framework import BaseQueueTask as _BaseQueueTask
+from ..parallel.result import ParallelResult as _ParallelResult, ProcessPoolResult as _ProcessPoolResult
+from ..parallel.share import Global_Manager, activate_manager_server
+from ..mode import FeatureMode as _FeatureMode
 
 
 

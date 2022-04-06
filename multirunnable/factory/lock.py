@@ -1,14 +1,14 @@
-from multirunnable.framework.runnable import PosixThreadLock as _PosixThreadLock
-from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
-from multirunnable.mode import FeatureMode as _FeatureMode
-from multirunnable.api.manage import Globalize as _Globalize
-from multirunnable.types import (
+from ..framework.runnable import PosixThreadLock as _PosixThreadLock
+from ..factory._utils import _ModuleFactory
+from ..factory.base import FeatureAdapterFactory as _FeatureAdapterFactory
+from ..api.manage import Globalize as _Globalize
+from ..types import (
     MRLock as _MRLock,
     MRRLock as _MRRLock,
     MRSemaphore as _MRSemaphore,
     MRBoundedSemaphore as _MRBoundedSemaphore)
-from multirunnable.factory.base import FeatureAdapterFactory as _FeatureAdapterFactory
-from multirunnable.factory._utils import _ModuleFactory
+from ..mode import FeatureMode as _FeatureMode
+from .. import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 
 
 

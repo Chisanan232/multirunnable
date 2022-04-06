@@ -5,7 +5,7 @@ from multirunnable.adapter.context import context as adapter_context
 from multirunnable.framework.runnable.context import BaseContext
 from multirunnable.persistence.file.mediator import SavingMediator
 
-from ...test_config import Under_Test_RunningModes, Under_Test_RunningModes_Without_Greenlet
+from tests.test_config import Under_Test_RunningModes, Under_Test_RunningModes_Without_Greenlet
 
 import pytest
 
