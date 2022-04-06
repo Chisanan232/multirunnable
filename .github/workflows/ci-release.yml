@@ -15,8 +15,108 @@ on:
 
 jobs:
 
-  unit-test:
+  prep-testbed-unit-test-core:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - id: set-matrix
+        run: |
+          sudo apt-get install jq
+          echo "::set-output name=matrix::$(bash scripts/get-unit-test-core-paths.sh unix)"
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+
+
+  prep-testbed-unit-test-persistence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - id: set-matrix
+        run: |
+          sudo apt-get install jq
+          echo "::set-output name=matrix::$(bash scripts/get-unit-test-persistence-paths.sh unix)"
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+
+
+  unit-test-core:
+    needs: prep-testbed-unit-test-core
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7,3.8,3.9,'3.10']
+        os: [ubuntu-18.04,ubuntu-latest, macos-10.15, macos-latest]
+        exclude:
+          - os: ubuntu-18.04
+            python-version: 3.7
+          - os: ubuntu-18.04
+            python-version: 3.9
+          - os: ubuntu-latest
+            python-version: 3.6
+          - os: ubuntu-latest
+            python-version: 3.8
+          - os: macos-10.15
+            python-version: 3.6
+          - os: macos-10.15
+            python-version: 3.8    # Pickle Issue
+          - os: macos-latest
+            python-version: 3.7
+          - os: macos-latest
+            python-version: 3.8    # Pickle Issue
+        test-path: ${{fromJson(needs.prep-testbed-unit-test-core.outputs.matrix)}}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Cache Python Runtime environment and dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('*requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Setup Python ${{ matrix.python-version }} in  ${{ matrix.os }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Python ${{ matrix.python-version }} dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -U pip
+          pip install codecov
+          pip install -U pytest
+          pip install -U pytest-cov
+          pip install pytest-rerunfailures
+          pip install -r dev-requirements.txt
+
+      - name: Change the setting of option *open files* of resource limit
+        run: |
+          ulimit -a
+          ulimit -n 512
+          ulimit -a
+
+      - name: Run tests with pytest
+        run: pytest ${{ matrix.test-path }}
+        continue-on-error: true
+
+      - name: Rename the code coverage result file
+        run: mv ./.coverage ./.coverage.unit-test-core.${{ matrix.os }}-${{ matrix.python-version }}
+
+      - name: Upload code coverage result file
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage
+          path: .coverage.unit-test-core.${{ matrix.os }}-${{ matrix.python-version }}
+          if-no-files-found: error
+
+
+  unit-test-persistence:
+    needs: prep-testbed-unit-test-persistence
     env:
+      DATABASE_DRIVER: mysql
       DB_HOST: 127.0.0.1
       DB_PORT: 3306
       DB_USER: root
@@ -51,75 +151,36 @@ jobs:
             python-version: 3.6
           - os: ubuntu-latest
             python-version: 3.8
+        test-path: ${{fromJson(needs.prep-testbed-unit-test-persistence.outputs.matrix)}}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-#      - name: Set up MySQL database
-#        run: |
-#          sudo /etc/init.d/mysql start
-##          mysql -e 'CREATE DATABASE ${{ env.DB_DATABASE }};' -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
-
-#      - name: Install MySQL driver connection tool
-#        run: |
-#            sudo apt-get update
-#            sudo apt-get install -y default-mysql-client
-
       - name: Waiting for MySQL to be ready
-        run: |
-            for i in `seq 1 10`;
-            do
-              nc -z 127.0.0.1 3306 && echo Success && exit 0
-              echo -n .
-              sleep 10
-            done
-            echo Failed waiting for MySQL && exit 1
+        run: bash scripts/wait_database_ready.sh
 
       - name: Test MySQL connection
-        run: mysql -h ${{ env.DB_HOST }} -u ${{ env.DB_USER }} -p${{ env.DB_PASSWORD }} --execute="show databases;"
+        run: bash scripts/database-execution.sh show_databases
 
       - name: Create database
-        run: |
-            mysql -h ${{ env.DB_HOST }} -u ${{ env.DB_USER }} -p${{ env.DB_PASSWORD }} --execute="CREATE DATABASE tw_stock;"
+        run: bash scripts/database-execution.sh create_database
 
       - name: Create table for saving testing data
-        run: |
-            mysql -h ${{ env.DB_HOST }} -u ${{ env.DB_USER }} -p${{ env.DB_PASSWORD }} --execute="
-                CREATE TABLE IF NOT EXISTS tw_stock.stock_data_2330 (
-                                                               stock_date DATETIME NOT NULL,
-                                                               trade_volume DECIMAL(12,4) NOT NULL,
-                                                               turnover_price DECIMAL(16,4) NOT NULL,
-                                                               opening_price DECIMAL(8,4) NOT NULL,
-                                                               highest_price DECIMAL(8,4) NOT NULL,
-                                                               lowest_price DECIMAL(8,4) NOT NULL,
-                                                               closing_price DECIMAL(8,4) NOT NULL,
-                                                               gross_spread DECIMAL(8,4) NOT NULL,
-                                                               turnover_volume DECIMAL(12,4) NOT NULL,
-                                                               PRIMARY KEY(stock_date)) DEFAULT CHARSET=utf8;"
+        run: bash scripts/database-execution.sh create_table
 
       - name: Insert testing data
-        run: |
-            mysql -h ${{ env.DB_HOST }} -u ${{ env.DB_USER }} -p${{ env.DB_PASSWORD }} --execute="
-                INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
-                    VALUES ('0108-01-02 00:00:00' , 32900482 , 7276419230 ,226.5000 ,226.5000 , 219.0000, 219.5000 ,-6.00 , 12329);"
-            mysql -h ${{ env.DB_HOST }} -u ${{ env.DB_USER }} -p${{ env.DB_PASSWORD }} --execute="
-                INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
-                    VALUES ('0108-01-03 00:00:00' , 34615620 , 7459051790 ,214.0000 ,218.0000 , 214.0000 ,215.5000 ,-4.00 , 14549);"
-            mysql -h ${{ env.DB_HOST }} -u ${{ env.DB_USER }} -p${{ env.DB_PASSWORD }} --execute="
-                INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
-                    VALUES ('0108-01-04 00:00:00' , 67043521 ,13987136785 ,211.5000 ,211.5000 , 206.5000 ,208.0000 ,-7.50 , 28786);"
-            mysql -h ${{ env.DB_HOST }} -u ${{ env.DB_USER }} -p${{ env.DB_PASSWORD }} --execute="
-                INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
-                    VALUES ('0108-01-07 00:00:00' , 35695176 , 7591116569 ,212.0000 ,214.0000 , 211.0000 ,213.0000 ,+5.00 , 11224);"
-            mysql -h ${{ env.DB_HOST }} -u ${{ env.DB_USER }} -p${{ env.DB_PASSWORD }} --execute="
-                INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
-                    VALUES ('0108-01-08 00:00:00' , 23794481 , 5019703557 ,212.0000 ,212.5000 , 210.0000 ,211.0000 ,-2.00 , 9377);"
-            mysql -h ${{ env.DB_HOST }} -u ${{ env.DB_USER }} -p${{ env.DB_PASSWORD }} --execute="
-                INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
-                    VALUES ('0108-01-09 00:00:00' , 51255446 ,11006827093 ,212.0000 ,216.5000 , 211.0000 ,215.5000 ,+4.50 , 14098);"
+        run: bash scripts/database-execution.sh insert_test_data_rows
 
-      - name: Install Python ${{ matrix.python-version }} in  ${{ matrix.os }}
+      - name: Cache Python Runtime environment and dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('*requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Setup Python ${{ matrix.python-version }} in  ${{ matrix.os }}
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
@@ -135,32 +196,66 @@ jobs:
           pip install mysql-connector-python
           pip install -r dev-requirements.txt
 
-      - name: Change the setting of option *open files* of resource limit
-        run: |
-          ulimit -a
-          ulimit -n 512
-          ulimit -a
-
       - name: Run tests with pytest
-        run: pytest
+        run: pytest ${{ matrix.test-path }}
+        continue-on-error: true
 
       - name: Rename the code coverage result file
-        run: mv ./.coverage ./.coverage.${{ matrix.os }}-${{ matrix.python-version }}
+        run: mv ./.coverage ./.coverage.unit-test-persistence.${{ matrix.os }}-${{ matrix.python-version }}
 
       - name: Upload code coverage result file
         uses: actions/upload-artifact@v3
         with:
           name: coverage
-          path: .coverage.${{ matrix.os }}-${{ matrix.python-version }}
+          path: .coverage.unit-test-persistence.${{ matrix.os }}-${{ matrix.python-version }}
           if-no-files-found: error
 
 
+  unit-test-codecov:
+    needs: [unit-test-core, unit-test-persistence]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Download code coverage result file
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage
+          path: .coverage.unit-test*
+
+      - name: Install Python tool 'coverage'
+        run: |
+          python -m pip install --upgrade pip
+          pip install -U pip
+          pip install coverage
+
+      - name: Combine all code coverage result files
+        run: coverage combine .coverage.*
+
+      - name: Report testing coverage of project code
+        run: coverage report -m
+
+
+  prep-testbed-integration-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - id: set-matrix
+        run: |
+          sudo apt-get install jq
+          echo "::set-output name=matrix::$(bash scripts/get-integration-test-paths.sh unix)"
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+
+
   integration-test:
+    needs: prep-testbed-integration-test
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         python-version: [3.6, 3.7,3.8,3.9,'3.10']
-        os: [ubuntu-18.04,ubuntu-latest]
+        os: [ubuntu-18.04,ubuntu-latest, macos-10.15, macos-latest]
         exclude:
           - os: ubuntu-18.04
             python-version: 3.7
@@ -170,6 +265,15 @@ jobs:
             python-version: 3.6
           - os: ubuntu-latest
             python-version: 3.8
+          - os: macos-10.15
+            python-version: 3.6
+          - os: macos-10.15
+            python-version: 3.8    # Pickle Issue
+          - os: macos-latest
+            python-version: 3.7
+          - os: macos-latest
+            python-version: 3.8    # Pickle Issue
+        test-path: ${{fromJson(needs.prep-testbed-integration-test.outputs.matrix)}}
 
     steps:
       - name: Checkout
@@ -199,78 +303,54 @@ jobs:
           pip install mysql-connector-python
           pip install -r dev-requirements.txt
 
-#      - name: Run tests with pytest
-#        run: pytest
-#
-#      - name: Rename the code coverage result file
-#        run: mv ./.coverage ./.coverage.integration.${{ matrix.os }}-${{ matrix.python-version }}
-#
-#      - name: Upload code coverage result file
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: coverage
-#          path: .coverage.integration.${{ matrix.os }}-${{ matrix.python-version }}
-#          if-no-files-found: error
+      - name: Run tests with pytest
+        run: pytest ${{ matrix.test-path }}
+        continue-on-error: true
+
+      - name: Rename the code coverage result file
+        run: mv ./.coverage ./.coverage.integration-test.${{ matrix.os }}-${{ matrix.python-version }}
+
+      - name: Upload code coverage result file
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage
+          path: .coverage.integration-test.${{ matrix.os }}-${{ matrix.python-version }}
+          if-no-files-found: error
 
 
-  database-compatibility-test:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        python-version: [3.6, 3.7,3.8,3.9,'3.10']
-        os: [ubuntu-latest]
-#        exclude:
-#          - os: ubuntu-latest
-#            python-version: 3.6
-#          - os: ubuntu-latest
-#            python-version: 3.8
-
+  integration-test-codecov:
+    needs: integration-test
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Cache Python Runtime environment and dependencies
-        uses: actions/cache@v3
+      - name: Download code coverage result file
+        uses: actions/download-artifact@v3
         with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('*requirements*.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          name: coverage
+          path: .coverage.integration-test*
 
-      - name: Setup Python ${{ matrix.python-version }} in  ${{ matrix.os }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install Python ${{ matrix.python-version }} dependencies
+      - name: Install Python tool 'coverage'
         run: |
           python -m pip install --upgrade pip
           pip install -U pip
-          pip install codecov
-          pip install -U pytest
-          pip install -U pytest-cov
-          pip install pytest-rerunfailures
-          pip install mysql-connector-python
-          pip install -r dev-requirements.txt
+          pip install coverage
 
-#      - name: Run tests with pytest
-#        run: pytest
-#
-#      - name: Rename the code coverage result file
-#        run: mv ./.coverage ./.coverage.database-compatibility.${{ matrix.os }}-${{ matrix.python-version }}
-#
-#      - name: Upload code coverage result file
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: coverage
-#          path: .coverage.database-compatibility.${{ matrix.os }}-${{ matrix.python-version }}
-#          if-no-files-found: error
+      - name: Combine all code coverage result files
+        run: coverage combine .coverage.*
+
+      - name: Report testing coverage of project code
+        run: coverage report -m
 
 
   codecov_finish:
-    needs: [unit-test, integration-test, database-compatibility-test]
+    needs: [unit-test-codecov, integration-test-codecov]
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
       - name: Download code coverage result file
         uses: actions/download-artifact@v3
         with:
@@ -286,6 +366,10 @@ jobs:
       - name: Combine all code coverage result files
         run: coverage combine .coverage.*
 
+      - name: Report testing coverage of project code
+        run: coverage report
+
+      # This usage be refer from https://about.codecov.io/blog/python-code-coverage-using-github-actions-and-codecov/
       - name: Upload testing coverage of project code to Codecov
         uses: codecov/codecov-action@v2
         with:
@@ -296,25 +380,37 @@ jobs:
           fail_ci_if_error: true   # optional (default = false)
           verbose: true    # optional (default = false)
 
-      # This usage be refer from https://about.codecov.io/blog/python-code-coverage-using-github-actions-and-codecov/
 
-#    Old way to upload testing result about code coverage to codecov.
-#
-#      - name: Install Python dependencies
-#        run: |
-#          python -m pip install --upgrade pip
-#          pip install -U pip
-#          pip install codecov
-#        with:
-#          parallel-finished: true
+  building_check:
+    needs: codecov_finish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
 
-#      - name: Get secret token from Base64
-#        env:
-#          KEYSTORE_BASE64: ${{ secrets.CODECOV_TOKEN }}
-#        run: |
-#          echo import certificate from secrets and regenerate the file
-#          echo $KEYSTORE_BASE64 | base64 -d > ./codecov.token
-#
-#      - name: Submit calculation result of testing coverage of project code to Codecov
-#        run: codecov -f ./codecov.token    # submit coverage to codecov
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -U pip
+          pip install -U setuptools
+          pip install wheel
+
+      - name: Install MultiRunnable with by setup.py
+        run: |
+          python setup.py install --user || exit 1
+
+      - name: Show the Python package information
+        run: pip show multirunnable
+
+      - name: Test to run script with package 'multirunnable' in command lines
+        run: |
+          import multirunnable as mr
+          import time
+          Workers_Number = 5
+          executor = mr.SimpleExecutor(mode=mr.RunningMode.Concurrent, executors=Workers_Number)
+          executor.run(function=lambda a: print(f"param: {a}, time: {time.time()}"), args={"index": f"test_arg"})
+        shell: python
+
+      - name: Test to run script with package 'multirunnable' with Python file
+        run: python ./scripts/mr_script.py
 

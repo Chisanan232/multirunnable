@@ -1,14 +1,14 @@
-from multirunnable import set_mode
-
-from ...test_config import (
-    Under_Test_RunningModes, Under_Test_RunningModes_Without_Greenlet, Test_Pool_Name, Test_Pool_Size, Database_Config, Database_Pool_Config,
-    Table_Columns, TEST_DATA_ROWS, SELECT_TEST_DATA_SQL_WITH_OPTION, INSERT_TEST_DATA_SQL_WITH_OPTION, DELETE_TEST_DATA_SQL_WITH_OPTION
-)
-from ._test_db_implement import MySQLSingleConnection, MySQLDriverConnectionPool, MySQLOperator
-
 import traceback
 import datetime
 import pytest
+
+from multirunnable import set_mode
+
+from ....test_config import (
+    Under_Test_RunningModes, Under_Test_RunningModes_Without_Greenlet, Database_Config, Database_Pool_Config,
+    Table_Columns, TEST_DATA_ROWS, SELECT_TEST_DATA_SQL_WITH_OPTION, INSERT_TEST_DATA_SQL_WITH_OPTION, DELETE_TEST_DATA_SQL_WITH_OPTION
+)
+from ._test_db_implement import MySQLSingleConnection, MySQLDriverConnectionPool, MySQLOperator
 
 
 _Single_Strategy: MySQLSingleConnection
@@ -19,11 +19,10 @@ _Fetch_Size = 2
 _Test_SQL = f"select * from stock_data_2330 limit {_Data_Row_Number};"
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture(scope="function")
 def opts_with_single_conn_strategy() -> MySQLOperator:
     global _Single_Strategy
     _Single_Strategy = MySQLSingleConnection(initial=False, **Database_Config)
-    # _Single_Strategy = MySQLSingleConnection(**Database_Config)
     return MySQLOperator(conn_strategy=_Single_Strategy, db_config=Database_Config)
 
 
@@ -31,13 +30,7 @@ def opts_with_single_conn_strategy() -> MySQLOperator:
 @pytest.fixture(scope="function")
 def opts_with_conn_pool_strategy(request) -> MySQLOperator:
     global _Pool_Strategy
-    Database_Pool_Config.update({
-        "pool_name": Test_Pool_Name,
-        "pool_size": Test_Pool_Size
-    })
     _Pool_Strategy = MySQLDriverConnectionPool(initial=False, **Database_Pool_Config)
-    # _Pool_Strategy = MySQLDriverConnectionPool(**Database_Pool_Config)
-    _Pool_Strategy.current_pool_name = Test_Pool_Name
 
     set_mode(mode=request.param)
 
@@ -213,7 +206,6 @@ class TestPersistenceDatabaseOperatorWithSingleConnection:
 
 
     def test_close_connection(self, opts_with_single_conn_strategy: MySQLOperator):
-        _db_connection = getattr(opts_with_single_conn_strategy, "_db_connection")
         try:
             opts_with_single_conn_strategy.close_connection()
         except Exception:
@@ -221,6 +213,7 @@ class TestPersistenceDatabaseOperatorWithSingleConnection:
         else:
             assert True, "It work finely."
 
+        _db_connection = opts_with_single_conn_strategy._connection
         assert _db_connection is not None, ""
         _is_connected = _db_connection.is_connected()
         assert _is_connected is False, ""

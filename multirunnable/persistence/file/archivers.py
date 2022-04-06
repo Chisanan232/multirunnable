@@ -1,6 +1,6 @@
-from abc import ABCMeta, abstractmethod, ABC
-from typing import List
 from collections import namedtuple
+from typing import List
+from abc import ABCMeta, abstractmethod, ABC
 
 
 

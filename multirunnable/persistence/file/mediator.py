@@ -1,8 +1,8 @@
-from ... import get_current_mode
+from abc import ABCMeta, abstractmethod
+
 from ...framework.runnable.context import BaseContext
 from ...adapter.context import context as context_adapter
-
-from abc import ABCMeta, abstractmethod
+from ... import get_current_mode
 
 
 

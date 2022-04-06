@@ -1,11 +1,3 @@
-from multirunnable.framework.runnable.synchronization import PosixThreadLock, PosixThreadCommunication
-from multirunnable.coroutine.synchronization import (
-    GreenThreadLock, GreenThreadCommunication,
-    AsynchronousLock, AsynchronousCommunication
-)
-
-from ..test_config import Semaphore_Value
-
 from gevent.threading import Lock as gevent_Lock
 from gevent.lock import (
     RLock as gevent_RLock,
@@ -20,6 +12,14 @@ from asyncio import (
     Condition as async_Condition)
 from asyncio import new_event_loop
 import pytest
+
+from multirunnable.framework.runnable.synchronization import PosixThreadLock, PosixThreadCommunication
+from multirunnable.coroutine.synchronization import (
+    GreenThreadLock, GreenThreadCommunication,
+    AsynchronousLock, AsynchronousCommunication
+)
+
+from ...test_config import Semaphore_Value
 
 
 _Semaphore_Value = Semaphore_Value

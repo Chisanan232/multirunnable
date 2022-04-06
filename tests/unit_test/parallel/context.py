@@ -1,12 +1,12 @@
-from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
-from multirunnable.parallel.context import context
-
-from ..framework.context import _Function, ContextTestSpec
-from .._examples import RunByStrategy
-
 from typing import Type
 import multiprocessing
 import pytest
+
+from multirunnable.parallel.context import context
+from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
+
+from ..framework.context import _Function, ContextTestSpec
+from ..._examples import RunByStrategy
 
 
 

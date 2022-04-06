@@ -1,12 +1,12 @@
-from multirunnable.mode import RunningMode, FeatureMode
-from multirunnable.adapter import Event, Condition
-from multirunnable.adapter.communication import AsyncEvent, AsyncCondition
-
-from .._examples import MapByStrategy
-from ..framework.lock import EventTestSpec, ConditionTestSpec
-
 from typing import Union
 import pytest
+
+from multirunnable.adapter.communication import AsyncEvent, AsyncCondition
+from multirunnable.adapter import Event, Condition
+from multirunnable.mode import RunningMode, FeatureMode
+
+from ..._examples import MapByStrategy
+from ..framework.lock import EventTestSpec, ConditionTestSpec
 
 
 def instantiate_event(_mode: Union[RunningMode, FeatureMode], _init: bool, **kwargs) -> Union[Event, AsyncEvent]:

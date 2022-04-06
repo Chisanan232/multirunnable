@@ -1,12 +1,12 @@
-from multirunnable.adapter.context import context
-from multirunnable.persistence.interface import BasePersistence
-from multirunnable.exceptions import GlobalizeObjectError
-
-from abc import ABC, abstractmethod
-from typing import Dict, Any, TypeVar, Generic, cast, Union
-from collections import defaultdict
 from multiprocessing import cpu_count
+from collections import defaultdict
+from typing import Dict, Any, TypeVar, Generic, cast, Union
+from abc import ABC, abstractmethod
 import logging
+
+from ...persistence.interface import BasePersistence
+from ...adapter.context import context
+from ...exceptions import GlobalizeObjectError
 
 
 T = TypeVar("T")
@@ -47,8 +47,6 @@ class BaseDatabaseConnection(BasePersistence):
         Therefore it should consider about sharing instances between multiple different workers.
     """
 
-    _DB_Connection_Config: Dict[str, Dict[str, Any]] = None
-
     _Default_Host: str = "127.0.0.1"
     _Default_Port: str = None
     _Default_User: str = "root"
@@ -66,70 +64,107 @@ class BaseDatabaseConnection(BasePersistence):
     _Default_Reconnect_Timeout: int = 3
 
     def __init__(self, **kwargs):
-        self._DB_Connection_Config = defaultdict(lambda: self._Default_DB_Conn_Config)
-
-        self._host = kwargs.get("host", self._Default_Host)
-        self._port = kwargs.get("port", self._Default_Port)
-        self._user = kwargs.get("user", self._Default_User)
-        self._password = kwargs.get("password", self._Default_Password)
-        self._database = kwargs.get("database", self._Default_Database)
-
-        self._current_database_config = {
-            "host": self._host,
-            "port": self._port,
-            "user": self._user,
-            "password": self._password,
-            "database": self._database
-        }
-
-        _instance_cls_name = self.__class__.__name__
-        self._DB_Connection_Config.update({str(_instance_cls_name): self._current_database_config})
+        self._initial_database_config()
+        self._update_database_config(db_config=kwargs)
 
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.database_config}) at {id(self.__class__)}"
 
 
+    @abstractmethod
+    def _initial_database_config(self) -> None:
+        pass
+
+
+    @abstractmethod
+    def _update_database_config(self, db_config: dict) -> None:
+        pass
+
+
+    def _format_config(self, **kwargs) -> Dict[str, Any]:
+        _host = kwargs.get("host", self._Default_Host)
+        _port = kwargs.get("port", self._Default_Port)
+        _user = kwargs.get("user", self._Default_User)
+        _password = kwargs.get("password", self._Default_Password)
+        _database = kwargs.get("database", self._Default_Database)
+
+        _current_database_config = {
+            "host": _host,
+            "port": _port,
+            "user": _user,
+            "password": _password,
+            "database": _database
+        }
+
+        return _current_database_config
+
+
     @property
+    @abstractmethod
     def database_config(self) -> Dict[str, object]:
         """
         Description:
             Get all database configuration content.
         :return:
         """
-        _instance_cls_name = self.__class__.__name__
-        _db_config = self._DB_Connection_Config[_instance_cls_name]
-        return _db_config
+        pass
 
 
     @database_config.setter
+    @abstractmethod
     def database_config(self, config: Dict[str, Any]) -> None:
         """
         Description:
             Get all database configuration content.
+
+        Note:
+            The object format would be like <class_name>: {<name>: <instance>}.
+
+            For example, for SingleConnectionStrategy:
+
+            {
+                "TestMySQLSingleStrategy": {
+                    "inst_key": <connection instance>
+                }
+            }
+
+            And for ConnectionPoolStrategy:
+
+            {
+                "ConnectionPoolStrategy": {
+                    "pool_name_1": <connection pool 1 instance>,
+                    "pool_name_2": <connection pool 2 instance>
+                }
+            }
+
         :return:
         """
-        _instance_cls_name = self.__class__.__name__
-        self._DB_Connection_Config.update({str(_instance_cls_name): config})
+        pass
 
 
+    @abstractmethod
     def update_database_config(self, key: str, value: Any) -> None:
         """
         Description:
             Get all database configuration content.
         :return:
         """
-        _instance_cls_name = self.__class__.__name__
-        self._DB_Connection_Config[str(_instance_cls_name)][key] = value
+        pass
 
 
+    def _get_instance_name(self) -> str:
+        return self.__class__.__name__
+
+
+    @abstractmethod
     def get_all_database_configs(self) -> Dict[str, Dict[str, Any]]:
         """
         Description:
             Get all database configurations.
         :return:
         """
-        return self._DB_Connection_Config
+        pass
 
 
     @property
@@ -211,6 +246,9 @@ class BaseDatabaseConnection(BasePersistence):
 
 class BaseSingleConnection(BaseDatabaseConnection, ABC):
 
+    _DB_Connection_Config: Dict[str, Dict[str, Any]] = {}
+
+
     def __init__(self, initial: bool = True, **kwargs):
         super(BaseSingleConnection, self).__init__(**kwargs)
         self._database_connection: Generic[T] = None
@@ -219,6 +257,41 @@ class BaseSingleConnection(BaseDatabaseConnection, ABC):
 
         if initial is True:
             self.initial(**self.database_config)
+
+
+    def _initial_database_config(self) -> None:
+        _instance_cls_name = self._get_instance_name()
+        self._DB_Connection_Config[_instance_cls_name] = {}
+        self._DB_Connection_Config[_instance_cls_name].update(self._Default_DB_Conn_Config)
+
+
+    def _update_database_config(self, db_config: dict) -> None:
+        _instance_cls_name = self._get_instance_name()
+        _current_db_config = self._format_config(**db_config)
+        self._DB_Connection_Config[str(_instance_cls_name)].update(_current_db_config)
+
+
+    @property
+    def database_config(self) -> Dict[str, object]:
+        _instance_cls_name = self._get_instance_name()
+        _db_config = self._DB_Connection_Config[_instance_cls_name]
+        return _db_config
+
+
+    @database_config.setter
+    def database_config(self, config: Dict[str, Any]) -> None:
+        _instance_cls_name = self._get_instance_name()
+        _inst_dict = self._DB_Connection_Config.get(str(_instance_cls_name), {})
+        _inst_dict.update(config)
+
+
+    def update_database_config(self, key: str, value: Any) -> None:
+        _instance_cls_name = self._get_instance_name()
+        self._DB_Connection_Config[str(_instance_cls_name)][key] = value
+
+
+    def get_all_database_configs(self) -> Dict[str, Dict[str, Any]]:
+        return self._DB_Connection_Config
 
 
     def initial(self, **kwargs) -> None:
@@ -348,26 +421,83 @@ class BaseSingleConnection(BaseDatabaseConnection, ABC):
 
 class BaseConnectionPool(BaseDatabaseConnection):
 
-    __Default_Pool_Name: str = ""
-    __Current_Pool_Name: str = ""
+    _DB_Pooled_Connection_Config: Dict[str, Dict[str, Dict[str, Any]]] = {}
+
 
     def __init__(self, initial: bool = True, **kwargs):
-        super().__init__(**kwargs)
-        _pool_name = cast(str, kwargs.get("pool_name", self.__Default_Pool_Name))
-        _pool_size = cast(int, kwargs.get("pool_size", cpu_count()))
-        if _pool_size < 0:
+        self._pool_name = cast(str, kwargs.get("pool_name", None))
+        if self._pool_name is None:
+            raise ValueError("The database pool name should not be None.")
+
+        self._pool_size = cast(int, kwargs.get("pool_size", cpu_count()))
+        if self._pool_size < 0:
             raise ValueError("The database connection pool size cannot less than 0.")
 
-        self.database_config.update({
-            "pool_name": _pool_name,
-            "pool_size": _pool_size
-        })
-        self.__Current_Pool_Name = _pool_name
+        super().__init__(**kwargs)
+
         self._current_db_conn: Dict[str, Generic[T]] = defaultdict(lambda: None)
         self._connection_is_connected: Dict[str, bool] = defaultdict(lambda: False)
 
         if initial is True:
             self.initial(**self.database_config)
+
+
+    def _initial_database_config(self) -> None:
+        _instance_cls_name = self._get_instance_name()
+        _default_val = {self._pool_name: self._Default_DB_Conn_Config}
+        self._DB_Pooled_Connection_Config[_instance_cls_name] = {}
+        self._DB_Pooled_Connection_Config[_instance_cls_name][self._pool_name] = {}
+        self._DB_Pooled_Connection_Config[_instance_cls_name][self._pool_name].update(self._Default_DB_Conn_Config)
+
+
+    def _update_database_config(self, db_config: dict) -> None:
+        _instance_cls_name = self._get_instance_name()
+        _current_db_config = self._format_config(**db_config)
+        _current_db_config.update({
+            "pool_name": self._pool_name,
+            "pool_size": self._pool_size
+        })
+        self._DB_Pooled_Connection_Config[str(_instance_cls_name)][self._pool_name].update(_current_db_config)
+
+
+    @property
+    def database_config(self) -> Dict[str, object]:
+        _instance_cls_name = self._get_instance_name()
+        if self._pool_name not in self._DB_Pooled_Connection_Config[_instance_cls_name].keys():
+            raise ValueError("Cannot find the target pool name in instances group.")
+
+        _db_config = self._DB_Pooled_Connection_Config[_instance_cls_name][self._pool_name]
+        return _db_config
+
+
+    @database_config.setter
+    def database_config(self, config: Dict[str, Any]) -> None:
+        _instance_cls_name = self._get_instance_name()
+        if self._pool_name not in self._DB_Pooled_Connection_Config[_instance_cls_name].keys():
+            raise ValueError("Cannot find the target pool name in instances group.")
+
+        _inst_dict = self._DB_Pooled_Connection_Config.get(str(_instance_cls_name), {})
+        _inst_dict.update({self._pool_name: config})
+
+
+    def update_database_config(self, key: str, value: Any) -> None:
+        _instance_cls_name = self._get_instance_name()
+        if self._pool_name not in self._DB_Pooled_Connection_Config[str(_instance_cls_name)].keys():
+            raise ValueError("Cannot find the target pool name in instances group.")
+
+        self._DB_Pooled_Connection_Config[str(_instance_cls_name)][self._pool_name].update({key: value})
+
+
+    def update_database_configs(self, config: Dict[str, Any]) -> None:
+        _instance_cls_name = self._get_instance_name()
+        if self._pool_name not in self._DB_Pooled_Connection_Config[str(_instance_cls_name)].keys():
+            raise ValueError("Cannot find the target pool name in instances group.")
+
+        self._DB_Pooled_Connection_Config[str(_instance_cls_name)][self._pool_name].update(config)
+
+
+    def get_all_database_configs(self) -> Dict[str, Dict[str, Any]]:
+        return self._DB_Pooled_Connection_Config
 
 
     def initial(self, **kwargs) -> None:
@@ -395,12 +525,12 @@ class BaseConnectionPool(BaseDatabaseConnection):
 
     @property
     def current_pool_name(self) -> str:
-        return self.__Current_Pool_Name
+        return self._pool_name
 
 
     @current_pool_name.setter
     def current_pool_name(self, pool_name: str) -> None:
-        self.__Current_Pool_Name = pool_name
+        self._pool_name = pool_name
 
 
     @property
@@ -578,7 +708,7 @@ class BaseConnectionPool(BaseDatabaseConnection):
         :return:
         """
         _ident = context.get_current_worker_name()
-        _cls_name = self.__class__.__name__
+        _cls_name = self._get_instance_name()
         return f"{_cls_name}_{_ident}"
 
 

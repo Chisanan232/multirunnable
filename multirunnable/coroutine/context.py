@@ -1,10 +1,10 @@
-from .. import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
-from ..framework.runnable.context import BaseContext
-
 from typing import List, Set
-import asyncio
 import gevent.threading
+import asyncio
 import gevent
+
+from ..framework.runnable.context import BaseContext
+from .. import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 
 
 

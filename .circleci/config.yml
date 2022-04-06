@@ -1,79 +1,222 @@
 version: 2.1
 
-commands:
-  prepare_testing_data:
-    steps:
-      - run:
-         name: Create database
-         command: |
-            mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD --execute="CREATE DATABASE tw_stock;"
-      - run:
-         name: Create table for saving testing data
-         command: |
-            mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD --execute="
-                CREATE TABLE IF NOT EXISTS tw_stock.stock_data_2330 (
-                                                               stock_date DATETIME NOT NULL,
-                                                               trade_volume DECIMAL(12,4) NOT NULL,
-                                                               turnover_price DECIMAL(16,4) NOT NULL,
-                                                               opening_price DECIMAL(8,4) NOT NULL,
-                                                               highest_price DECIMAL(8,4) NOT NULL,
-                                                               lowest_price DECIMAL(8,4) NOT NULL,
-                                                               closing_price DECIMAL(8,4) NOT NULL,
-                                                               gross_spread DECIMAL(8,4) NOT NULL,
-                                                               turnover_volume DECIMAL(12,4) NOT NULL,
-                                                               PRIMARY KEY(stock_date)) DEFAULT CHARSET=utf8;"
-      - run:
-         name: Insert testing data
-         command: |
-            mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD --execute="
-                INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
-                    VALUES ('0108-01-02 00:00:00' , 32900482 , 7276419230 ,226.5000 ,226.5000 , 219.0000, 219.5000 ,-6.00 , 12329);"
-            mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD --execute="
-                INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
-                    VALUES ('0108-01-03 00:00:00' , 34615620 , 7459051790 ,214.0000 ,218.0000 , 214.0000 ,215.5000 ,-4.00 , 14549);"
-            mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD --execute="
-                INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
-                    VALUES ('0108-01-04 00:00:00' , 67043521 ,13987136785 ,211.5000 ,211.5000 , 206.5000 ,208.0000 ,-7.50 , 28786);"
-            mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD --execute="
-                INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
-                    VALUES ('0108-01-07 00:00:00' , 35695176 , 7591116569 ,212.0000 ,214.0000 , 211.0000 ,213.0000 ,+5.00 , 11224);"
-            mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD --execute="
-                INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
-                    VALUES ('0108-01-08 00:00:00' , 23794481 , 5019703557 ,212.0000 ,212.5000 , 210.0000 ,211.0000 ,-2.00 , 9377);"
-            mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD --execute="
-                INSERT INTO tw_stock.stock_data_2330 (stock_date, trade_volume, turnover_price, opening_price, highest_price, lowest_price, closing_price, gross_spread, turnover_volume)
-                    VALUES ('0108-01-09 00:00:00' , 51255446 ,11006827093 ,212.0000 ,216.5000 , 211.0000 ,215.5000 ,+4.50 , 14098);"
+orbs:
+  win: circleci/windows@4.1.1    # The Windows orb give you everything you need to start using the Windows executor.
 
-  isntall_databade_driver_tool:
+commands:
+
+  get_execution_policy:
     steps:
       - run:
-         name: Install MySQL driver connection tool
-         command: sudo apt-get install default-mysql-client
+         name: Get the execution policy info
+         shell: powershell.exe
+         command: Get-ExecutionPolicy -List
+
+
+  install_chocolatey:
+    steps:
+      - run:
+         name: Installing the Package Manager Chocolatey
+         shell: powershell.exe
+         command: |
+            $script = New-Object Net.WebClient
+            $script.DownloadString("https://chocolatey.org/install.ps1")
+            iwr https://chocolatey.org/install.ps1 -UseBasicParsing | iex
+            choco -h
+
+
+  install_python_36:
+    steps:
+      - run:
+         name: Install Python version 3.6
+         shell: powershell.exe
+         command: |
+            choco install -y python --version=3.6
+            python -V
+            pip -V
+
+
+  install_python_37:
+    steps:
+      - run:
+         name: Install Python version 3.7
+         shell: powershell.exe
+         command: |
+            choco install -y python --version=3.7
+            python -V
+            pip -V
+
+
+  install_python_38:
+    steps:
+      - run:
+         name: Install Python version 3.8
+         shell: powershell.exe
+         command: |
+            choco install -y python --version=3.8
+            python -V
+            pip -V
+
+
+  install_python_39:
+    steps:
+      - run:
+         name: Install Python version 3.9
+         shell: powershell.exe
+         command: |
+            choco install -y python --version=3.9
+            python -V
+            pip -V
+
+
+  install_python_310:
+    steps:
+      - run:
+         name: Install Python version 3.10
+         shell: powershell.exe
+         command: |
+            choco install -y python --version=3.10
+            python -V
+            pip -V
+
+
+  install_docker:
+    steps:
+      - run:
+         name: Install Docker
+         shell: powershell.exe
+         command: |
+            choco install -y docker
+            choco install -y docker-machine
+            choco install virtualbox
+
+
+  initial_mysql:
+    steps:
+      - run:
+         name: Initial MySQL database and start service via Docker
+         shell: powershell.exe
+         command: |
+            docker version
+            $env:DOCKER_CLI_EXPERIMENTAL = "enabled"
+            echo $env:DOCKER_CLI_EXPERIMENTAL
+            (Get-Content C:\\Users\\circleci\\.docker\\config.json).replace('false', 'true') | Set-Content C:\\Users\\circleci\\.docker\\config.json
+            restart-service *docker*
+            docker version
+            docker pull mysql:8.0
+            docker run --name test_mysql --restart always -p 3306:3306 --env="MYSQL_ROOT_PASSWORD=password" -v "$pwd"/tests/testing-database/test_mysql/my.cnf:/etc/mysql/my.cnf -v "$pwd"/tests/testing-database/test_mysql/mysql:/var/lib/mysql -d mysql:8.0
+
+
+#  install_mysql:
+#    steps:
+#      - run:
+#         name: Install MySQL database and start database service
+#         shell: powershell.exe
+#         command: |
+#            choco install -y mysql --params "/port:3306 /dataLocation:./tests/database/test_mysql/mysql"
+##            choco install -y mysql
+
+#      - run:
+#         name: Start MySQL database service
+#         shell: powershell.exe
+#         command: net start mysql
+
+
+  install_mysql_cli:
+    steps:
+      - run:
+         name: Install MySQL command lines tool
+         shell: powershell.exe
+         command: |
+            choco install -y netcat
+            choco install -y mysql-cli
+
 
   test_databade_connection:
     steps:
       - run:
       # Our primary container isn't MYSQL so run a sleep command until it's ready.
           name: Waiting for MySQL to be ready
-          command: |
-            for i in `seq 1 10`;
-            do
-              nc -z $DB_HOST $DB_PORT && echo Success && exit 0
-              echo -n .
-              sleep 5
-            done
-            echo Failed waiting for MySQL && exit 1
+          shell: powershell.exe
+          command: bash scripts/wait_database_ready.sh
+
       - run:
          name: Test MySQL connection
-         command: mysql -u $DB_USER -h $DB_HOST -p$DB_PASSWORD --execute="show databases;"
+         shell: powershell.exe
+         command: bash scripts/database-execution.sh show_databases
 
-  preparing_python_dependecies:
+
+  prepare_testing_data:
+    steps:
+      - run:
+         name: Create database
+         shell: powershell.exe
+         command: bash scripts/database-execution.sh create_database
+
+      - run:
+         name: Create table for saving testing data
+         shell: powershell.exe
+         command: bash scripts/database-execution.sh create_table
+
+      - run:
+         name: Insert testing data
+         shell: powershell.exe
+         command: bash scripts/database-execution.sh insert_test_data_rows
+
+#  isntall_databade_driver_tool:
+#    steps:
+#      - run:
+#         name: Install MySQL driver connection tool
+#         command: sudo apt-get install default-mysql-client
+
+      - run:
+         name: Test MySQL connection
+         shell: powershell.exe
+         command: bash scripts/database-execution.sh show_databases
+
+
+  get_unit_test_core_cases:
+    steps:
+      - run:
+         name: Get all the unit test core cases (file paths)
+         shell: powershell.exe
+         command: |
+            choco install jq
+            mkdir -p workspace
+            bash scripts/get-unit-test-core-paths.sh windows > workspace/unit-test-core-cases
+
+      - persist_to_workspace:
+         root: workspace
+         paths:
+           - unit-test-core-cases
+
+
+  get_unit_test_persistence_cases:
+    steps:
+      - run:
+         name: Get all the unit test persistence cases (file paths)
+         shell: powershell.exe
+         command: |
+            choco install jq
+            mkdir -p workspace
+            bash scripts/get-unit-test-persistence-paths.sh windows > workspace/unit-test-persistence-cases
+
+      - persist_to_workspace:
+         root: workspace
+         paths:
+           - unit-test-persistence-cases
+
+
+  install_python_dependecies:
     steps:
       - run:
          name: Check Python Version
+         shell: powershell.exe
          command: python --version
+
       - run:
          name: Upgrade and install Python dependencies
+         shell: powershell.exe
          command: |
              pip install -U pip
              pip install -U pytest
@@ -83,214 +226,294 @@ commands:
              pip install pytest-rerunfailures
              pip install -r dev-requirements.txt
 
-  run_pytest:
+
+  run_pytest_unit_test_core:
     steps:
-      - run:
-         name: Change the setting of option *open files* of resource limit
-         command: |
-             ulimit -a
-             ulimit -n 512
-             ulimit -a
+      - attach_workspace:
+           at: /workspace
+
+#      - run:
+#         name: Get the test cases (file paths)
+#         shell: powershell.exe
+#         command: |
+#             ./workspace/unit-test-core-cases > $env:Unit_Test_Core
+##             $env:Unit_Test_Core
+##             echo $env:Unit_Test_Core_Data
+##             ConvertFrom-Json $env:Unit_Test_Core_Data > $env:Unit_Test_Core
+##             Set-Variable -Name $env:APPDATA -Value D:\
+
       - run:
          name: Run PyTest command to test
+         shell: powershell.exe
          command: |
-             pytest
+             bash scripts/windows/run_pytest_with_test_cases.sh ./workspace/unit-test-core-cases
+#             echo $env:Unit_Test_Core
+#             pytest $env:Unit_Test_Core
+
+      - run:
+         name: Upload the coverage result to Circle-CI workspace
+         shell: powershell.exe
+         command: |
+             python -V > $Python_Version
+             Move-Item -Path .coverage -Destination workspace/.coverage.unit-test-core.windows.$Python_Version
+
+      - persist_to_workspace:
+         root: workspace
+         shell: powershell.exe
+         paths:
+           - .coverage.unit-test-core.windows.*
+
+
+  run_pytest_unit_test_persistence:
+    steps:
+      - attach_workspace:
+           at: /workspace
+
+#      - run:
+#         name: Get the test cases (file paths)
+#         shell: powershell.exe
+#         command: |
+#             ./workspace/unit-test-persistence-cases > $env:Unit_Test_Persistence
+##             Set-Variable -Name $env:APPDATA -Value D:\
+
+      - run:
+         name: Run PyTest command to test
+         shell: powershell.exe
+         command: |
+             bash scripts/windows/run_pytest_with_test_cases.sh ./workspace/unit-test-persistence-cases
+#             pytest $Unit_Test_Persistence
+
+      - run:
+         name: Upload the coverage result to Circle-CI workspace
+         shell: powershell.exe
+         command: |
+             python -V > $Python_Version
+             Move-Item -Path .coverage -Destination workspace/.coverage.unit-test-persistence.windows.$Python_Version
+
+      - persist_to_workspace:
+         root: workspace
+         paths:
+           - .coverage.unit-test-persistence.windows.*
+
+
+  report_testing_coverage:
+    steps:
+      - attach_workspace:
+           at: /workspace
+      - run:
+         name:  Combine all coverage results
+         shell: powershell.exe
+         command: |
+             coverage combine .coverage.unit-test*
+
+      - run:
+         name:  Report testing coverage of project code
+         shell: powershell.exe
+         command: |
+             coverage report -m
+
 
   submit_testing_coverage:
     steps:
+      - report_testing_coverage
       - run:
-         name: Submit calculation result of testing coverage of project code to codecov
+         name: Submit calculation result of testing coverage of project code to coveralls
+         shell: powershell.exe
 #         command: |
 #             coveralls    # submit coverage to coveralls
          command: |
-             codecov -t $CODECOV_TOKEN    # submit coverage to codecov
+             python -m coveralls
+#             codecov -t $CODECOV_TOKEN    # submit coverage to codecov
 
-  run_python_test:
+
+  install_pkg_manager_chocolatey:
+    steps:
+      - get_execution_policy
+      - install_chocolatey
+
+
+  perpare_testing_database:
+    steps:
+#      - install_mysql
+      - install_docker
+      - initial_mysql
+      - install_mysql_cli
+      - test_databade_connection
+      - prepare_testing_data
+
+
+  prepare_unit_test_core:
     steps:
       - checkout    # this pulls code down from GitHub
-      - preparing_python_dependecies
-      - run_pytest
-      - submit_testing_coverage
+      - install_pkg_manager_chocolatey
+      - get_unit_test_core_cases
 
 
-executors:
-#  docker-mysql:
-#    docker:
-#      - image: circleci/mysql:8.0.23
-##          auth:
-##            username: chisanan232
-##            password: $DOCKERHUB_PASSWORD
-#      - environment:
-#           MYSQL_ROOT_HOST: 127.0.0.1
-#           MYSQL_ROOT_PASSWORD: password
-#           MYSQL_DATABASE: tw_stock
-#           MYSQL_USER: user
-#           MYSQL_PASSWORD: passw23mr
-#           DB_HOST: 127.0.0.1
-#           DB_PORT: 3306
+  prepare_unit_test_persistence:
+    steps:
+      - checkout    # this pulls code down from GitHub
+      - install_pkg_manager_chocolatey
+      - get_unit_test_persistence_cases
 
-  docker-py36:
-    docker:
-      - image: circleci/python:3.6
-        auth:
-          username: chisanan232
-          password: $DOCKERHUB_PASSWORD
-        environment:
-          MYSQL_PASSWORD: 'password'
-          MYSQL_DATABASE: 'tw_stock'
-          MYSQL_ROOT_HOST: 127.0.0.1
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          DB_USER: 'root'
-          DB_PASSWORD: 'password'
 
-      - image: circleci/mysql:8.0.23
-        auth:
-          username: chisanan232
-          password: $DOCKERHUB_PASSWORD
-        environment:
-          MYSQL_ROOT_PASSWORD: password
-          MYSQL_ALLOW_EMPTY_PASSWORD: true
+  run_unit_test_core:
+    steps:
+      - checkout    # this pulls code down from GitHub
+      - install_python_dependecies
+      - run_pytest_unit_test_core
+      - report_testing_coverage
 
-  docker-py37:
-    docker:
-      - image: circleci/python:3.7
-        auth:
-          username: chisanan232
-          password: $DOCKERHUB_PASSWORD
-        environment:
-          MYSQL_PASSWORD: 'password'
-          MYSQL_DATABASE: 'tw_stock'
-          MYSQL_ROOT_HOST: 127.0.0.1
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          DB_USER: 'root'
-          DB_PASSWORD: 'password'
 
-      - image: circleci/mysql:8.0.23
-        auth:
-          username: chisanan232
-          password: $DOCKERHUB_PASSWORD
-        environment:
-          MYSQL_ROOT_PASSWORD: password
-          MYSQL_ALLOW_EMPTY_PASSWORD: true
-
-  docker-py38:
-    docker:
-      - image: circleci/python:3.8
-        auth:
-          username: chisanan232
-          password: $DOCKERHUB_PASSWORD
-        environment:
-          MYSQL_PASSWORD: 'password'
-          MYSQL_DATABASE: 'tw_stock'
-          MYSQL_ROOT_HOST: 127.0.0.1
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          DB_USER: 'root'
-          DB_PASSWORD: 'password'
-
-      - image: circleci/mysql:8.0.23
-        auth:
-          username: chisanan232
-          password: $DOCKERHUB_PASSWORD
-        environment:
-          MYSQL_ROOT_PASSWORD: password
-          MYSQL_ALLOW_EMPTY_PASSWORD: true
-
-  docker-py39:
-    docker:
-      - image: circleci/python:3.9
-        auth:
-          username: chisanan232
-          password: $DOCKERHUB_PASSWORD
-        environment:
-          MYSQL_PASSWORD: 'password'
-          MYSQL_DATABASE: 'tw_stock'
-          MYSQL_ROOT_HOST: 127.0.0.1
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          DB_USER: 'root'
-          DB_PASSWORD: 'password'
-
-      - image: circleci/mysql:8.0.23
-        auth:
-          username: chisanan232
-          password: $DOCKERHUB_PASSWORD
-        environment:
-          MYSQL_ROOT_PASSWORD: password
-          MYSQL_ALLOW_EMPTY_PASSWORD: true
-
-  docker-py310:
-    docker:
-      - image: circleci/python:3.10
-        auth:
-          username: chisanan232
-          password: $DOCKERHUB_PASSWORD
-        environment:
-          MYSQL_PASSWORD: 'password'
-          MYSQL_DATABASE: 'tw_stock'
-          MYSQL_ROOT_HOST: 127.0.0.1
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          DB_USER: 'root'
-          DB_PASSWORD: 'password'
-
-      - image: circleci/mysql:8.0.23
-        auth:
-          username: chisanan232
-          password: $DOCKERHUB_PASSWORD
-        environment:
-          MYSQL_ROOT_PASSWORD: password
-          MYSQL_ALLOW_EMPTY_PASSWORD: true
+  run_unit_test_persistence:
+    steps:
+#      - checkout    # this pulls code down from GitHub
+      - install_python_dependecies
+      - run_pytest_unit_test_persistence
+      - report_testing_coverage
 
 
 jobs:
-  # This is job about database which saving the testing data for ensure the features work finely without any issue.
-#  build-testing-database:
-#    executor: docker-mysql
-#    steps:
-#      - prepare_testing_data
 
-  test-linux-python36:
-    executor: docker-py36
+  pre-testbed-unit-test-core:
+    executor: win/default # executor type
     steps:
-      - isntall_databade_driver_tool
-      - test_databade_connection
-      - prepare_testing_data
-      - run_python_test
+      - prepare_unit_test_core
 
-  test-linux-python37:
-    executor: docker-py37
+  pre-testbed-unit-test-persistence:
+    executor: win/default # executor type
     steps:
-      - isntall_databade_driver_tool
-      - test_databade_connection
-      - prepare_testing_data
-      - run_python_test
+      - prepare_unit_test_persistence
 
-  test-linux-python38:
-    executor: docker-py38
+  unit-test-core-python36:
+    executor: win/default # executor type
     steps:
-      - isntall_databade_driver_tool
-      - test_databade_connection
-      - prepare_testing_data
-      - run_python_test
+      - install_pkg_manager_chocolatey
+      - install_python_36
+      - run_unit_test_core
 
-  test-linux-python39:
-    executor: docker-py39
+  unit-test-core-python37:
+    executor: win/default # executor type
     steps:
-      - isntall_databade_driver_tool
-      - test_databade_connection
-      - prepare_testing_data
-      - run_python_test
+      - install_pkg_manager_chocolatey
+      - install_python_37
+      - run_unit_test_core
 
-  test-linux-python310:
-    executor: docker-py310
+  unit-test-core-python38:
+    executor: win/default # executor type
     steps:
-      - isntall_databade_driver_tool
-      - test_databade_connection
-      - prepare_testing_data
-      - run_python_test
+      - install_pkg_manager_chocolatey
+      - install_python_38
+      - run_unit_test_core
+
+  unit-test-core-python39:
+    executor: win/default # executor type
+    steps:
+      - install_pkg_manager_chocolatey
+      - install_python_39
+      - run_unit_test_core
+
+  unit-test-core-python310:
+    executor: win/default # executor type
+    steps:
+      - install_pkg_manager_chocolatey
+      - install_python_310
+      - run_unit_test_core
+
+  unit-test-persistence-python36:
+    executor: win/default # executor type
+    steps:
+      - checkout    # this pulls code down from GitHub
+      - install_pkg_manager_chocolatey
+      - install_python_36
+      - perpare_testing_database
+      - run_unit_test_persistence
+    environment:
+      DATABASE_DRIVER: 'mysql'
+      MYSQL_ROOT_PASSWORD: 'password'
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_USER: 'root'
+      DB_PASSWORD: 'root'
+
+  unit-test-persistence-python37:
+    executor: win/default # executor type
+    steps:
+      - checkout    # this pulls code down from GitHub
+      - install_pkg_manager_chocolatey
+      - install_python_37
+      - perpare_testing_database
+      - run_unit_test_persistence
+    environment:
+      DATABASE_DRIVER: 'mysql'
+      MYSQL_ROOT_PASSWORD: 'password'
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_USER: 'root'
+      DB_PASSWORD: 'root'
+
+  unit-test-persistence-python38:
+    executor: win/default # executor type
+    steps:
+      - checkout    # this pulls code down from GitHub
+      - install_pkg_manager_chocolatey
+      - install_python_38
+      - perpare_testing_database
+      - run_unit_test_persistence
+    environment:
+      DATABASE_DRIVER: 'mysql'
+      MYSQL_ROOT_PASSWORD: 'password'
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_USER: 'root'
+      DB_PASSWORD: 'root'
+
+  unit-test-persistence-python39:
+    executor: win/default # executor type
+    steps:
+      - checkout    # this pulls code down from GitHub
+      - install_pkg_manager_chocolatey
+      - install_python_39
+      - perpare_testing_database
+      - run_unit_test_persistence
+    environment:
+      DATABASE_DRIVER: 'mysql'
+      MYSQL_ROOT_PASSWORD: 'password'
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_USER: 'root'
+      DB_PASSWORD: 'root'
+
+  unit-test-persistence-python310:
+    executor: win/default # executor type
+    steps:
+      - checkout    # this pulls code down from GitHub
+      - install_pkg_manager_chocolatey
+      - install_python_310
+      - perpare_testing_database
+      - run_unit_test_persistence
+    environment:
+      DATABASE_DRIVER: 'mysql'
+      MYSQL_ROOT_PASSWORD: 'password'
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_USER: 'root'
+      DB_PASSWORD: 'root'
+
+  unit-test-coveralls-done:
+    executor: win/default # executor type
+    steps:
+      - checkout    # this pulls code down from GitHub
+      - install_pkg_manager_chocolatey
+      - install_python_310
+      - report_testing_coverage
+
+  all-coveralls-done:
+    executor: win/default # executor type
+    steps:
+      - checkout    # this pulls code down from GitHub
+      - install_pkg_manager_chocolatey
+      - install_python_310
+      - submit_testing_coverage
 
 
 # Under the workflows: map, we can coordinate above jobs, defined above.
@@ -298,17 +521,55 @@ workflows:
   version: 2.1
   build_and_test:    # this is the name of our workflow
     jobs:    # and here we list the jobs we are going to run.
-      # General work flow
-#      - build-testing-database
-      - test-linux-python36
-      - test-linux-python37
-      - test-linux-python38
-      - test-linux-python39
-      - test-linux-python310
+      - pre-testbed-unit-test-core
+      - pre-testbed-unit-test-persistence
 
-      # Sequence work flow
-#      - build-testing-database
-#      - test-linux-python37:
-#           requires:
-#             - build-testing-database
+      - unit-test-core-python36:
+           requires:
+             - pre-testbed-unit-test-core
+      - unit-test-core-python37:
+           requires:
+             - pre-testbed-unit-test-core
+      - unit-test-core-python38:
+           requires:
+             - pre-testbed-unit-test-core
+      - unit-test-core-python39:
+           requires:
+             - pre-testbed-unit-test-core
+      - unit-test-core-python310:
+           requires:
+             - pre-testbed-unit-test-core
+
+      - unit-test-persistence-python36:
+           requires:
+             - pre-testbed-unit-test-persistence
+      - unit-test-persistence-python37:
+           requires:
+             - pre-testbed-unit-test-persistence
+      - unit-test-persistence-python38:
+           requires:
+             - pre-testbed-unit-test-persistence
+      - unit-test-persistence-python39:
+           requires:
+             - pre-testbed-unit-test-persistence
+      - unit-test-persistence-python310:
+           requires:
+             - pre-testbed-unit-test-persistence
+
+      - unit-test-coveralls-done:
+           requires:
+             - unit-test-core-python36
+             - unit-test-core-python37
+             - unit-test-core-python38
+             - unit-test-core-python39
+             - unit-test-core-python310
+             - unit-test-persistence-python36
+             - unit-test-persistence-python37
+             - unit-test-persistence-python38
+             - unit-test-persistence-python39
+             - unit-test-persistence-python310
+
+      - all-coveralls-done:
+           requires:
+             - unit-test-coveralls-done
 

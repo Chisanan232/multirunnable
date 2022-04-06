@@ -1,29 +1,28 @@
-from multirunnable import set_mode, RunningMode
-from multirunnable.coroutine.strategy import GreenThreadStrategy, GreenThreadPoolStrategy, AsynchronousStrategy
-from multirunnable.coroutine.result import CoroutineResult, GreenThreadPoolResult
-from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
+import asyncio
+import gevent
+import pytest
+import re
 
-from ..framework.strategy import GeneralRunningTestSpec, PoolRunningTestSpec
-from ..test_config import (
+from multirunnable.coroutine.strategy import GreenThreadStrategy, GreenThreadPoolStrategy, AsynchronousStrategy
+from multirunnable.coroutine.result import CoroutineResult
+from multirunnable import set_mode, RunningMode, PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
+
+from ...test_config import (
     Worker_Size, Worker_Pool_Size, Task_Size,
     Test_Function_Args, Test_Function_Multiple_Args, Test_Function_Kwargs, Test_Function_Multiple_Diff_Args
 )
-from .._examples import (
+from ..._examples import (
     # # Import the flags
     get_running_cnt, get_current_workers, get_running_workers_ids, get_running_done_timestamps,
     # # Import some common functions
-    reset_running_flags, initial_lock, set_lock, initial_async_event_loop,
+    reset_running_flags, initial_lock, initial_async_event_loop,
     # # Import some target functions to run for Pool object
     target_function, target_error_function, target_function_for_map, target_function_for_map_with_diff_args, target_async_function,
     TargetCls, TargetMapCls, TargetAsyncCls,
     target_funcs_iter, target_methods_iter, target_classmethods_iter, target_staticmethods_iter,
     target_func_args_iter, target_funcs_kwargs_iter
 )
-
-import asyncio
-import gevent
-import pytest
-import re
+from ..framework.strategy import GeneralRunningTestSpec, PoolRunningTestSpec
 
 
 Green_Thread_Size: int = Worker_Size

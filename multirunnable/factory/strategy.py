@@ -1,11 +1,11 @@
-from multirunnable.framework.runnable.strategy import (
+from typing import Dict
+from abc import ABCMeta
+
+from ..framework.runnable.strategy import (
     GeneralRunnableStrategy as _GeneralRunnableStrategy,
     PoolRunnableStrategy as _PoolRunnableStrategy)
-from multirunnable.mode import RunningMode as _RunningMode
-from multirunnable._import_utils import ImportMultiRunnable as _ImportMultiRunnable
-
-from abc import ABCMeta
-from typing import Dict
+from .._import_utils import ImportMultiRunnable as _ImportMultiRunnable
+from ..mode import RunningMode as _RunningMode
 
 
 

@@ -1,11 +1,11 @@
-from multirunnable.concurrent.context import context
-
-from ..framework.context import _Function, ContextTestSpec
-from .._examples import RunByStrategy
-
 from typing import Type
 import threading
 import pytest
+
+from multirunnable.concurrent.context import context
+
+from ..._examples import RunByStrategy
+from ..framework.context import _Function, ContextTestSpec
 
 
 

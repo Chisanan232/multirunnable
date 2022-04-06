@@ -1,8 +1,8 @@
-from ..types import MRQueue as _MRQueue
-import multirunnable._utils as _utils
-
-from abc import ABCMeta, abstractmethod
 from typing import Iterable
+from abc import ABCMeta, abstractmethod
+
+import multirunnable._utils as _utils
+from ..types import MRQueue as _MRQueue
 
 
 

@@ -1,35 +1,35 @@
-from os import getpid
-from abc import ABCMeta, ABC
-from types import FunctionType, MethodType
-from typing import List, Iterable as IterableType, Callable, Optional, Union, Tuple, Dict
-from collections.abc import Iterable
 from multipledispatch import dispatch
-from gevent.greenlet import Greenlet
 from gevent.threading import get_ident, getcurrent
-from gevent.pool import Pool
+from gevent.greenlet import Greenlet
+from collections.abc import Iterable
 from asyncio.tasks import Task
+from gevent.pool import Pool
+from typing import List, Iterable as IterableType, Callable, Optional, Union, Tuple, Dict
+from types import FunctionType, MethodType
+from abc import ABCMeta, ABC
+from os import getpid
 import functools
 import asyncio
 import gevent
 
-from multirunnable import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
-from multirunnable.mode import FeatureMode as _FeatureMode
-from multirunnable.coroutine.result import (
-    CoroutineResult as _CoroutineResult,
-    GreenThreadPoolResult as _GreenThreadPoolResult,
-    AsynchronousResult as _AsynchronousResult)
-from multirunnable.framework import BaseQueueTask as _BaseQueueTask
-from multirunnable.framework.runnable import (
+from ..framework.runnable import (
     GeneralRunnableStrategy as _GeneralRunnableStrategy,
     PoolRunnableStrategy as _PoolRunnableStrategy,
     AsyncRunnableStrategy as _AsyncRunnableStrategy,
     Resultable as _Resultable,
     ResultState as _ResultState
 )
-from multirunnable.framework.factory import (
+from ..framework.factory import (
     BaseFeatureAdapterFactory as _BaseFeatureAdapterFactory,
     BaseList as _BaseList
 )
+from ..framework import BaseQueueTask as _BaseQueueTask
+from ..coroutine.result import (
+    CoroutineResult as _CoroutineResult,
+    GreenThreadPoolResult as _GreenThreadPoolResult,
+    AsynchronousResult as _AsynchronousResult)
+from ..mode import FeatureMode as _FeatureMode
+from .. import PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION
 
 
 

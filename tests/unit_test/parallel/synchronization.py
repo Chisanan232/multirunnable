@@ -1,10 +1,10 @@
+from multiprocessing.synchronize import Lock, RLock, Semaphore, BoundedSemaphore, Event, Condition
+import pytest
+
 from multirunnable.framework.runnable.synchronization import PosixThreadLock, PosixThreadCommunication
 from multirunnable.parallel.synchronization import ProcessLock, ProcessCommunication
 
-from ..test_config import Semaphore_Value
-
-from multiprocessing.synchronize import Lock, RLock, Semaphore, BoundedSemaphore, Event, Condition
-import pytest
+from ...test_config import Semaphore_Value
 
 
 _Semaphore_Value = Semaphore_Value
