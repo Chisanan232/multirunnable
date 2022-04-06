@@ -466,7 +466,7 @@ jobs:
         shell: python
 
       - name: Test to run script with package 'multirunnable' with Python file
-        run: python3 scripts/mr_script.py
+        run: python3 ./scripts/mr_script.py
 
 
   push_to_pypi:
@@ -489,7 +489,7 @@ jobs:
           pip install twine
 
       - name: Push Python package to PyPI
-        run: python3 -m twine upload ./dist/MultiRunnable-0.17.0*
+        run: python3 -m twine upload ./dist/MultiRunnable-*
         env:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}

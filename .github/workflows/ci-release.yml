@@ -442,5 +442,5 @@ jobs:
         shell: python
 
       - name: Test to run script with package 'multirunnable' with Python file
-        run: python3 scripts/mr_script.py
+        run: python3 ./scripts/mr_script.py
 
