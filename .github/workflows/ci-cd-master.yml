@@ -419,9 +419,9 @@ jobs:
           pip install -U setuptools
           pip install wheel
 
-      - name: Install MultiRunnable with .whl file via 'pip'
+      - name: Install MultiRunnable with by setup.py
         run: |
-          python setup.py install
+          python setup.py install --user || exit 1
 
       - name: Show the Python package information
         run: pip show multirunnable
