@@ -402,7 +402,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: MultiRunnable-Python-Package
-          path: ./dist/MultiRunnable-0.17.0*
+          path: ./dist/MultiRunnable-*
           if-no-files-found: error
 
 
@@ -413,18 +413,21 @@ jobs:
     needs: build_package
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
       - name: Download Python package files
         uses: actions/download-artifact@v3
         with:
           name: MultiRunnable-Python-Package
-          path: ./dist/MultiRunnable-0.17.0*
+          path: ./dist/MultiRunnable-*
           if-no-files-found: error
 
       - name: Install MultiRunnable with .whl file via 'pip'
         run: |
           python -m pip install --upgrade pip
           pip install -U pip
-          pip install dist/MultiRunnable-$MultiRunnableVersion*.whl
+          pip install dist/MultiRunnable-$MultiRunnableVersion-py3-none-any.whl
 
       - name: Show the Python package information
         run: pip show multirunnable
