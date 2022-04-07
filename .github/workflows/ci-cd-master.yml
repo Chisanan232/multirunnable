@@ -480,11 +480,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -U pip
           pip install -U setuptools
+#          pip install urllib3==1.26.9
+#          pip install chardet==3.0.4
           pip install wheel
           pip install twine
 
       - name: Push Python package to PyPI
-        run: python3 -m twine upload ./dist/MultiRunnable-*
+        run: python -m twine upload ./dist/MultiRunnable-*
         env:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
