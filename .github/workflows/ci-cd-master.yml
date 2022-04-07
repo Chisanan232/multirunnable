@@ -77,13 +77,13 @@ jobs:
 
       - name: Install Python ${{ matrix.python-version }} dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -U pip
-          pip install codecov
-          pip install -U pytest
-          pip install -U pytest-cov
-          pip install pytest-rerunfailures
-          pip install -r dev-requirements.txt
+          python3 -m pip install --upgrade pip
+          pip3 install -U pip
+          pip3 install codecov
+          pip3 install -U pytest
+          pip3 install -U pytest-cov
+          pip3 install pytest-rerunfailures
+          pip3 install -r dev-requirements.txt
 
       - name: Change the setting of option *open files* of resource limit
         run: |
@@ -190,14 +190,14 @@ jobs:
 
       - name: Install Python ${{ matrix.python-version }} dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -U pip
-          pip install codecov
-          pip install -U pytest
-          pip install -U pytest-cov
-          pip install pytest-rerunfailures
-          pip install mysql-connector-python
-          pip install -r dev-requirements.txt
+          python3 -m pip install --upgrade pip
+          pip3 install -U pip
+          pip3 install codecov
+          pip3 install -U pytest
+          pip3 install -U pytest-cov
+          pip3 install pytest-rerunfailures
+          pip3 install mysql-connector-python
+          pip3 install -r dev-requirements.txt
 
       - name: Run tests with pytest
         run: pytest ${{ matrix.test-path }}
@@ -227,11 +227,16 @@ jobs:
           name: coverage
           path: .coverage.unit-test*
 
+      - name: Setup Python 3.10 in Ubuntu OS
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+
       - name: Install Python tool 'coverage'
         run: |
-          python -m pip install --upgrade pip
-          pip install -U pip
-          pip install coverage
+          python3 -m pip install --upgrade pip
+          pip3 install -U pip
+          pip3 install coverage
 
       - name: Combine all code coverage result files
         run: coverage combine .coverage.*
@@ -334,11 +339,16 @@ jobs:
           name: coverage
           path: .coverage.integration-test*
 
+      - name: Setup Python 3.10 in Ubuntu OS
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+
       - name: Install Python tool 'coverage'
         run: |
-          python -m pip install --upgrade pip
-          pip install -U pip
-          pip install coverage
+          python3 -m pip install --upgrade pip
+          pip3 install -U pip
+          pip3 install coverage
 
       - name: Combine all code coverage result files
         run: coverage combine .coverage.*
@@ -360,11 +370,16 @@ jobs:
           name: coverage
           path: .coverage.*
 
+      - name: Setup Python 3.10 in Ubuntu OS
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+
       - name: Install Python tool 'coverage'
         run: |
-          python -m pip install --upgrade pip
-          pip install -U pip
-          pip install coverage
+          python3 -m pip install --upgrade pip
+          pip3 install -U pip
+          pip3 install coverage
 
       - name: Combine all code coverage result files
         run: coverage combine .coverage.*
@@ -412,19 +427,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Setup Python 3.10 in Ubuntu OS
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+
       - name: Install Python dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -U pip
-          pip install -U setuptools
-          pip install wheel
+          python3 -m pip install --upgrade pip
+          pip3 install -U pip
+          pip3 install -U setuptools
+          pip3 install wheel
 
       - name: Install MultiRunnable with by setup.py
         run: |
-          python setup.py install --user || exit 1
+          python3 setup.py install --user || exit 1
 
       - name: Show the Python package information
-        run: pip show multirunnable
+        run: pip3 show multirunnable
 
       - name: Test to run script with package 'multirunnable' in command lines
         run: |
@@ -436,7 +456,7 @@ jobs:
         shell: python
 
       - name: Test to run script with package 'multirunnable' with Python file
-        run: python ./scripts/mr_script.py
+        run: python3 ./scripts/mr_script.py
 
 
   build_package:
@@ -445,6 +465,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Setup Python 3.10 in Ubuntu OS
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
 
       - name: Install Python dependencies
         run: |
@@ -456,11 +481,11 @@ jobs:
       - name: Compile and package the code as Python package formatter
         run: python3 setup.py sdist bdist_wheel
 
-      - name: Upload Python package files
+      - name: Upload directory which saves Python package files
         uses: actions/upload-artifact@v3
         with:
           name: MultiRunnable-Python-Package
-          path: ./dist/MultiRunnable-*
+          path: ./dist/
           if-no-files-found: error
 
 
@@ -468,22 +493,27 @@ jobs:
     needs: build_package
     runs-on: ubuntu-latest
     steps:
-      - name: Download Python package files
+      - name: Download directory which saves Python package files
         uses: actions/download-artifact@v3
         with:
           name: MultiRunnable-Python-Package
-          path: ./dist/MultiRunnable-*
+          path: ./dist/
           if-no-files-found: error
+
+      - name: Setup Python 3.10 in Ubuntu OS
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
 
       - name: Install Python dependencies
         run: |
           python3 -m pip install --upgrade pip
           pip3 install -U pip
           pip3 install -U setuptools
-          pip3 install urllib3==1.26.9
-          pip3 install chardet==3.0.4
           pip3 install wheel
           pip3 install twine
+          pip3 install -U urllib3 requests
+          ls -la ./dist
 
       - name: Push Python package to PyPI
         run: python3 -m twine upload ./dist/MultiRunnable-*
