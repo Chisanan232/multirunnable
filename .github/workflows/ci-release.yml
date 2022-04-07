@@ -367,7 +367,7 @@ jobs:
         run: coverage combine .coverage.*
 
       - name: Report testing coverage of project code
-        run: coverage report
+        run: coverage report -m
 
       # This usage be refer from https://about.codecov.io/blog/python-code-coverage-using-github-actions-and-codecov/
       - name: Upload testing coverage of project code to Codecov
