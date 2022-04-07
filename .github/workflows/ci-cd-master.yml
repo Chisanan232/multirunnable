@@ -392,7 +392,8 @@ jobs:
         with:
           name: multirunnable-codecov
           token: ${{ secrets.CODECOV_TOKEN }}   # The token of project MultiRunnable in codecov
-          file: .coverage
+          flags: unittests # optional
+          files: .coverage
           env_vars: OS,PYTHON
           fail_ci_if_error: true   # optional (default = false)
           verbose: true    # optional (default = false)
