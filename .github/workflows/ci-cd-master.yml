@@ -480,10 +480,9 @@ jobs:
           python3 -m pip install --upgrade pip
           pip3 install -U pip
           pip3 install -U setuptools
-          pip3 install urllib3==1.26.9
-          pip3 install chardet==3.0.4
           pip3 install wheel
           pip3 install twine
+          pip3 install -U urllib3 requests
 
       - name: Push Python package to PyPI
         run: python3 -m twine upload ./dist/MultiRunnable-*
