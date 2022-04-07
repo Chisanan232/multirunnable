@@ -481,11 +481,11 @@ jobs:
       - name: Compile and package the code as Python package formatter
         run: python3 setup.py sdist bdist_wheel
 
-      - name: Upload Python package files
+      - name: Upload directory which saves Python package files
         uses: actions/upload-artifact@v3
         with:
           name: MultiRunnable-Python-Package
-          path: ./dist/MultiRunnable-*
+          path: ./dist/
           if-no-files-found: error
 
 
@@ -493,14 +493,11 @@ jobs:
     needs: build_package
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Download Python package files
+      - name: Download directory which saves Python package files
         uses: actions/download-artifact@v3
         with:
           name: MultiRunnable-Python-Package
-          path: ./dist/MultiRunnable-*
+          path: ./dist/
           if-no-files-found: error
 
       - name: Setup Python 3.10 in Ubuntu OS
