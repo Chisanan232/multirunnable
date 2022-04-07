@@ -448,10 +448,10 @@ jobs:
 
       - name: Install Python dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -U pip
-          pip install -U setuptools
-          pip install wheel
+          python3 -m pip install --upgrade pip
+          pip3 install -U pip
+          pip3 install -U setuptools
+          pip3 install wheel
 
       - name: Compile and package the code as Python package formatter
         run: python3 setup.py sdist bdist_wheel
@@ -477,16 +477,16 @@ jobs:
 
       - name: Install Python dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -U pip
-          pip install -U setuptools
-#          pip install urllib3==1.26.9
-#          pip install chardet==3.0.4
-          pip install wheel
-          pip install twine
+          python3 -m pip install --upgrade pip
+          pip3 install -U pip
+          pip3 install -U setuptools
+          pip3 install urllib3==1.26.9
+          pip3 install chardet==3.0.4
+          pip3 install wheel
+          pip3 install twine
 
       - name: Push Python package to PyPI
-        run: python -m twine upload ./dist/MultiRunnable-*
+        run: python3 -m twine upload ./dist/MultiRunnable-*
         env:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
