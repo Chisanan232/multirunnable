@@ -458,5 +458,5 @@ jobs:
         run: coverage combine .coverage.*
 
       - name: Report testing coverage of project code
-        run: coverage report
+        run: coverage report -m
 
