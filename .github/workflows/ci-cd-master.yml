@@ -387,41 +387,25 @@ jobs:
       - name: Report testing coverage of project code
         run: coverage report -m
 
+      - name: Generate testing coverage report as XML file
+        run: coverage xml
+
+      # This usage be refer from https://about.codecov.io/blog/python-code-coverage-using-github-actions-and-codecov/
+      # Official document: https://github.com/marketplace/actions/codecov
       - name: Upload testing coverage of project code to Codecov
         uses: codecov/codecov-action@v2
         with:
-          name: multirunnable-codecov
+          version: "v0.1.15"
+          name: official release codecov
           token: ${{ secrets.CODECOV_TOKEN }}   # The token of project MultiRunnable in codecov
-          flags: unittests # optional
-          files: .coverage
+          flags: unit-tests, integration-tests    # optional
+          files: coverage.xml
           env_vars: OS,PYTHON
           fail_ci_if_error: true   # optional (default = false)
           verbose: true    # optional (default = false)
 
-      # This usage be refer from https://about.codecov.io/blog/python-code-coverage-using-github-actions-and-codecov/
 
-#    Old way to upload testing result about code coverage to codecov.
-#
-#      - name: Install Python dependencies
-#        run: |
-#          python -m pip install --upgrade pip
-#          pip install -U pip
-#          pip install codecov
-#        with:
-#          parallel-finished: true
-
-#      - name: Get secret token from Base64
-#        env:
-#          KEYSTORE_BASE64: ${{ secrets.CODECOV_TOKEN }}
-#        run: |
-#          echo import certificate from secrets and regenerate the file
-#          echo $KEYSTORE_BASE64 | base64 -d > ./codecov.token
-#
-#      - name: Submit calculation result of testing coverage of project code to Codecov
-#        run: codecov -f ./codecov.token    # submit coverage to codecov
-
-
-  building_check:
+  pre-building_check:
     needs: codecov_finish
     runs-on: ubuntu-latest
     steps:
