@@ -406,7 +406,8 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: project_coverage_report
-          path: coverage.xml
+#          path: coverage.xml
+          path: ./
 
       # This usage be refer from https://about.codecov.io/blog/python-code-coverage-using-github-actions-and-codecov/
       # Official document: https://github.com/marketplace/actions/codecov
@@ -431,7 +432,8 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: project_coverage_report
-          path: coverage.xml
+#          path: coverage.xml
+          path: ./
 
       - name: Generate testing report for Codacy
         run: mv ./coverage.xml ./cobertura.xml

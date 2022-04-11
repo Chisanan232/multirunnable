@@ -479,7 +479,8 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: project_coverage_report
-          path: coverage.xml
+#          path: coverage.xml
+          path: ./
 
       - name: Generate testing report for Codacy
         run: mv ./coverage.xml ./cobertura.xml
