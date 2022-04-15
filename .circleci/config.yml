@@ -207,6 +207,22 @@ commands:
            - unit-test-persistence-cases
 
 
+  get_integration_test_cases:
+    steps:
+      - run:
+         name: Get all the unit test persistence cases (file paths)
+         shell: powershell.exe
+         command: |
+            choco install jq
+            mkdir -p workspace
+            bash scripts/get-integration-test-paths.sh windows > workspace/integration-test-cases
+
+      - persist_to_workspace:
+         root: workspace
+         paths:
+           - integration-test-cases
+
+
   install_python_dependecies:
     steps:
       - run:
@@ -296,21 +312,66 @@ commands:
            - .coverage.unit-test-persistence.windows.*
 
 
-  report_testing_coverage:
+  run_pytest_with_integration_test:
+    steps:
+      - attach_workspace:
+           at: /workspace
+
+#      - run:
+#         name: Get the test cases (file paths)
+#         shell: powershell.exe
+#         command: |
+#             ./workspace/unit-test-persistence-cases > $env:Unit_Test_Persistence
+##             Set-Variable -Name $env:APPDATA -Value D:\
+
+      - run:
+         name: Run PyTest command to test
+         shell: powershell.exe
+         command: |
+             bash scripts/windows/run_pytest_with_test_cases.sh ./workspace/integration-test-cases
+#             pytest $Unit_Test_Persistence
+
+      - run:
+         name: Upload the coverage result to Circle-CI workspace
+         shell: powershell.exe
+         command: |
+             python -V > $Python_Version
+             Move-Item -Path .coverage -Destination workspace/.coverage.integration-test.windows.$Python_Version
+
+      - persist_to_workspace:
+         root: workspace
+         paths:
+           - .coverage.integration-test.windows.*
+
+
+  report_unit_testing_coverage:
     steps:
       - attach_workspace:
            at: /workspace
       - run:
          name:  Combine all coverage results
          shell: powershell.exe
-         command: |
-             coverage combine .coverage.unit-test*
+         command: coverage combine .coverage.unit-test*
 
       - run:
          name:  Report testing coverage of project code
          shell: powershell.exe
-         command: |
-             coverage report -m
+         command: coverage report -m
+
+
+  report_integration_testing_coverage:
+    steps:
+      - attach_workspace:
+           at: /workspace
+      - run:
+         name:  Combine all coverage results
+         shell: powershell.exe
+         command: coverage combine .coverage.unit-test*
+
+      - run:
+         name:  Report testing coverage of project code
+         shell: powershell.exe
+         command: coverage report -m
 
 
   submit_testing_coverage:
@@ -361,7 +422,7 @@ commands:
       - checkout    # this pulls code down from GitHub
       - install_python_dependecies
       - run_pytest_unit_test_core
-      - report_testing_coverage
+      - report_unit_testing_coverage
 
 
   run_unit_test_persistence:
@@ -369,7 +430,15 @@ commands:
 #      - checkout    # this pulls code down from GitHub
       - install_python_dependecies
       - run_pytest_unit_test_persistence
-      - report_testing_coverage
+      - report_unit_testing_coverage
+
+
+  run_integration_test:
+    steps:
+#      - checkout    # this pulls code down from GitHub
+      - install_python_dependecies
+      - run_pytest_with_integration_test
+      - report_integration_testing_coverage
 
 
 jobs:
@@ -384,6 +453,12 @@ jobs:
     steps:
       - prepare_unit_test_persistence
 
+  pre-testbed-integration-test:
+    executor: win/default # executor type
+    steps:
+      - get_integration_test_cases
+
+  # # # # Unit Test  - Core Features
   unit-test-core-python36:
     executor: win/default # executor type
     steps:
@@ -419,6 +494,7 @@ jobs:
       - install_python_310
       - run_unit_test_core
 
+  # # # # Unit Test  - Persistence Features
   unit-test-persistence-python36:
     executor: win/default # executor type
     steps:
@@ -483,6 +559,7 @@ jobs:
       DB_USER: 'root'
       DB_PASSWORD: 'root'
 
+  # # # # Integration Test
   unit-test-persistence-python310:
     executor: win/default # executor type
     steps:
@@ -499,13 +576,56 @@ jobs:
       DB_USER: 'root'
       DB_PASSWORD: 'root'
 
+  integration-test-python36:
+    executor: win/default # executor type
+    steps:
+      - install_pkg_manager_chocolatey
+      - install_python_36
+      - run_integration_test
+
+  integration-test-python37:
+    executor: win/default # executor type
+    steps:
+      - install_pkg_manager_chocolatey
+      - install_python_37
+      - run_integration_test
+
+  integration-test-python38:
+    executor: win/default # executor type
+    steps:
+      - install_pkg_manager_chocolatey
+      - install_python_38
+      - run_integration_test
+
+  integration-test-python39:
+    executor: win/default # executor type
+    steps:
+      - install_pkg_manager_chocolatey
+      - install_python_39
+      - run_integration_test
+
+  integration-test-python310:
+    executor: win/default # executor type
+    steps:
+      - install_pkg_manager_chocolatey
+      - install_python_310
+      - run_integration_test
+
   unit-test-coveralls-done:
     executor: win/default # executor type
     steps:
       - checkout    # this pulls code down from GitHub
       - install_pkg_manager_chocolatey
       - install_python_310
-      - report_testing_coverage
+      - report_unit_testing_coverage
+
+  integration-test-coveralls-done:
+    executor: win/default # executor type
+    steps:
+      - checkout    # this pulls code down from GitHub
+      - install_pkg_manager_chocolatey
+      - install_python_310
+      - report_integration_testing_coverage
 
   all-coveralls-done:
     executor: win/default # executor type
@@ -523,6 +643,7 @@ workflows:
     jobs:    # and here we list the jobs we are going to run.
       - pre-testbed-unit-test-core
       - pre-testbed-unit-test-persistence
+      - pre-testbed-integration-test
 
       - unit-test-core-python36:
            requires:
@@ -556,6 +677,22 @@ workflows:
            requires:
              - pre-testbed-unit-test-persistence
 
+      - integration-test-python36:
+           requires:
+             - pre-testbed-integration-test
+      - integration-test-python37:
+           requires:
+             - pre-testbed-integration-test
+      - integration-test-python38:
+           requires:
+             - pre-testbed-integration-test
+      - integration-test-python39:
+           requires:
+             - pre-testbed-integration-test
+      - integration-test-python310:
+           requires:
+             - pre-testbed-integration-test
+
       - unit-test-coveralls-done:
            requires:
              - unit-test-core-python36
@@ -569,7 +706,16 @@ workflows:
              - unit-test-persistence-python39
              - unit-test-persistence-python310
 
+      - integration-test-coveralls-done:
+           requires:
+             - integration-test-python36
+             - integration-test-python37
+             - integration-test-python38
+             - integration-test-python39
+             - integration-test-python310
+
       - all-coveralls-done:
            requires:
              - unit-test-coveralls-done
+             - integration-test-coveralls-done
 
