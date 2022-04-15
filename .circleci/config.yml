@@ -376,7 +376,8 @@ commands:
 
   submit_testing_coverage:
     steps:
-      - report_testing_coverage
+      - report_unit_testing_coverage
+      - report_integration_testing_coverage
       - run:
          name: Submit calculation result of testing coverage of project code to coveralls
          shell: powershell.exe
