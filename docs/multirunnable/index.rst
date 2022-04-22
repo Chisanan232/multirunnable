@@ -14,15 +14,13 @@ Welcome to MultiRunnable's documentation!
 Building Status
 -----------------
 
-+------------+---------------------------------+----------------------+
-|     OS     |          Building Status        |    Coverage Status   |
-+============+=================================+======================+
-|    Linux   |     |circle-ci build-status|    |                      |
-+------------+---------------------------------+   |codecov-coverage| |
-|    Linux   |  |github-actions build-status|  |                      |
-+------------+---------------------------------+----------------------+
-|   Windows  |     |appveyor build-status|     | |coveralls-coverage| |
-+------------+---------------------------------+----------------------+
++------------------+-----------------------------------+----------------------+
+|        OS        |           Building Status         |    Coverage Status   |
++==================+===================================+======================+
+|    Linux/MacOS   |   |github-actions build-status|   |  |codecov-coverage|  |
++------------------+-----------------------------------+----------------------+
+|      Windows     |      |circle-ci build-status|     | |coveralls-coverage| |
++------------------+-----------------------------------+----------------------+
 
 
 Overview
@@ -54,15 +52,6 @@ Let's demonstrate an example to show how easy and clear it is!
 
 
 .. toctree::
-   :caption: Development documentation
-   :maxdepth: 2
-
-   flow
-   architecture
-   test
-
-
-.. toctree::
    :caption: API Reference
    :maxdepth: 2
 
@@ -78,20 +67,30 @@ Let's demonstrate an example to show how easy and clear it is!
    Persistence with Database </api_references/persistence_database.rst>
 
 
+.. toctree::
+   :caption: Development documentation
+   :maxdepth: 2
+
+   flow
+   architecture
+   test
+   ci_cd
+
+
 
 .. |python-versions| image:: https://img.shields.io/pypi/pyversions/multirunnable.svg?logo=python&logoColor=FBE072
     :alt: Travis-CI build status
     :target: https://pypi.org/project/multirunnable
 
 
-.. |release-version| image:: https://img.shields.io/github/release/Chisanan232/multirunnable.svg?label=Release
+.. |release-version| image:: https://img.shields.io/github/release/Chisanan232/multirunnable.svg?label=Release&amp;logo=github
     :alt: Package release version in GitHub
     :target: https://github.com/Chisanan232/multirunnable/releases
 
 
-.. |pypi-version| image:: https://badge.fury.io/py/MultiRunnable.svg
+.. |pypi-version| image:: https://img.shields.io/pypi/v/MultiRunnable?color=%23099cec&amp;label=PyPI&amp;logo=pypi&amp;logoColor=white
     :alt: Package version in PyPi
-    :target: https://badge.fury.io/py/MultiRunnable
+    :target: https://pypi.org/project/MultiRunnable/
 
 
 .. |license| image:: https://img.shields.io/badge/License-Apache%202.0-blue.svg
@@ -109,9 +108,9 @@ Let's demonstrate an example to show how easy and clear it is!
     :target: https://app.circleci.com/pipelines/github/Chisanan232/multirunnable
 
 
-.. |github-actions build-status| image:: https://github.com/Chisanan232/multirunnable/actions/workflows/ci.yml/badge.svg
+.. |github-actions build-status| image:: https://github.com/Chisanan232/multirunnable/actions/workflows/ci-cd-master.yml/badge.svg
     :alt: GitHub-Actions building status
-    :target: https://github.com/Chisanan232/multirunnable/actions/workflows/ci.yml
+    :target: https://github.com/Chisanan232/multirunnable/actions/workflows/ci-cd-master.yml
 
 
 .. |appveyor build-status| image:: https://ci.appveyor.com/api/projects/status/v0nq38jtof6vcm23?svg=true
