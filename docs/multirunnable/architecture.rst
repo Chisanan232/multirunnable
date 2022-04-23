@@ -52,8 +52,8 @@ Below are all the modules which be related with others in this section:
     * multirunnable.mode
     * multirunnable.executor
     * multirunnable.pool
-    * multirunnable.adapter.strategy
-    * multirunnable.framework.strategy
+    * multirunnable.factory.strategy
+    * multirunnable.framework.runnable.strategy
 
 From the  example of :doc:`home page <index>` or demonstration in section :ref:`Executor Usage<Executor Usage>` in :doc:`usage` (or :ref:`Pool Usage<Pool Usage>`) like below:
 
@@ -100,8 +100,8 @@ Below are all the modules which be related with others in this section:
 
 *modules*
     * multirunnable.mode
-    * multirunnable.adapter.strategy
-    * multirunnable.framework.strategy
+    * multirunnable.factory.strategy
+    * multirunnable.framework.runnable.strategy
     * multirunnable.parallel.strategy
     * multirunnable.concurrent.strategy
     * multirunnable.coroutine.strategy
@@ -135,38 +135,41 @@ Running Procedure:
 Synchronization
 =================
 
-The synchronization features of *MultiRunnable* be classified to 2 parts:
-*multirunnable.adapter* and *multirunnable.api*. The former responses of
-generating instance and the latter provides operators of the instance.
+The synchronization features of *MultiRunnable* be classified to 3 parts:
+*multirunnable.factory*, *multirunnable.api* and *multirunnable.adapter*.
+The first one responses of generating instance and the second one provides operators of the instance.
+And the third one combines the features of *multirunnable.factory* and *multirunnable.api* in it.
 
 Please refer to :doc:`Synchronization API<api_references/synchronizations>` to get more details if it needs.
 
-Synchronization - Adapter
---------------------------
+Synchronization - Factory
+----------------------------
 
 Below are all the modules which be related with others in this section:
 
 *modules*
-    * multirunnable.adapter.base
-    * multirunnable.adapter.lock
-    * multirunnable.adapter.communication
+    * multirunnable.factory.base
+    * multirunnable.factory.lock
+    * multirunnable.factory.communication
     * multirunnable.api.manage
-    * multirunnable.framework.feature
-    * multirunnable.parallel.feature
-    * multirunnable.concurrent.feature
-    * multirunnable.coroutine.feature
+    * multirunnable.framework.factory.base
+    * multirunnable.parallel.synchronization
+    * multirunnable.concurrent.synchronization
+    * multirunnable.coroutine.synchronization
 
-Subpackage *Adapter* generates instance only. It would generate instance with *RunningMode*
+Subpackage *Factory* generates instance only. It would generate instance with *RunningMode*
 and also could set it as a global variable (save in module *multirunnable.api.manage*) to let
 every runnable object uses.
 
+It was named *Adapter* before, it be renamed as *Factory* in version 0.17.0.
+
 UML:
 
-|synchronization-adapter|
+|synchronization-factory|
 
 Running Procedure:
 
-1. Set the *FeatureMode* to property *feature_mode* of objects in *multirunnable.adapter.lock* or *multirunnable.adapter.communication*.
+1. Set the *FeatureMode* to property *feature_mode* of objects in *multirunnable.factory.lock* or *multirunnable.factory.communication*.
 2. Parse the value of Enum object *FeatureMode* and initial feature object.
 3. Instantiate target feature instance and assign it to global variable.
 
@@ -197,6 +200,42 @@ Running Procedure:
 
 **Note**:
     About the entire working flow, please refer to :ref:`Synchronization Work Flow<Synchronization Work Flow>`.
+
+
+Synchronization - Adapter
+--------------------------
+
+Below are all the modules which be related with others in this section:
+
+*modules*
+    * multirunnable.adapter.lock
+    * multirunnable.adapter.communication
+    * multirunnable.factory.base
+    * multirunnable.factory.lock
+    * multirunnable.factory.communication
+    * multirunnable.api.operator
+    * multirunnable.framework.adapter.lock
+    * multirunnable.framework.factory.base
+    * multirunnable.framework.api.operator
+
+It combines features *Factory* and *API* in the subpackage *Adapter*. Therefore, it could
+generate mapping instance and provide all operators with the instance of synchronization feature.
+In generally, it's a great idea to choice to use *Adapter* instead of *Factory* or *API* because
+it could let you focus on one object when you're using synchronization feature.
+
+Subpackage *Adapter* is new in version 0.17.0.
+
+UML:
+
+|synchronization-adapter|
+
+Running Procedure:
+
+1. Set the *FeatureMode* to property *feature_mode* of objects in *multirunnable.adapter.lock* or *multirunnable.adapter.communication*.
+2. Parse the value of Enum object *FeatureMode* and initial feature object.
+3. Instantiate target feature instance and assign it to global variable.
+4. Get the target synchronization feature instance from the manage module.
+5. Operate via the instance.
 
 
 Persistence - File
@@ -293,30 +332,35 @@ About details, please refer to :doc:`Persistence with Database API<api_reference
 
 .. |general-usage| image:: images/architectures/MultiRunnable-General_Usage-UML.png
     :width: 400
-    :alt: work-flow image
+    :alt: software architecture image about basic APIs
 
 
 .. |running-strategy| image:: images/architectures/MultiRunnable-Running_Strategy.png
     :width: 800
-    :alt: work-flow image
+    :alt: software architecture image about running strategies
 
 
-.. |synchronization-adapter| image:: images/architectures/MultiRunnable-Synchronization(Adapter).png
+.. |synchronization-factory| image:: images/architectures/MultiRunnable-Synchronization(Factory).png
     :width: 850
-    :alt: work-flow image
+    :alt: software architecture image about synchronization feature with subpackage 'multirunnable.factory'
 
 
 .. |synchronization-api| image:: images/architectures/MultiRunnable-Synchronization(API).png
     :width: 850
-    :alt: work-flow image
+    :alt: software architecture image about synchronization feature with subpackage 'multirunnable.api'
+
+
+.. |synchronization-adapter| image:: images/architectures/MultiRunnable-Synchronization(Adapter).png
+    :width: 850
+    :alt: software architecture image about synchronization feature with subpackage 'multirunnable.adapter'
 
 
 .. |persistence-file| image:: images/architectures/MultiRunnable-Persistence-File.png
     :width: 750
-    :alt: work-flow image
+    :alt: software architecture image about persistence feature with subpackage 'multirunnable.persistence.file'
 
 
 .. |persistence-database| image:: images/architectures/MultiRunnable-Persistence-Database.png
     :width: 850
-    :alt: work-flow image
+    :alt: software architecture image about persistence feature with subpackage 'multirunnable.persistence.database'
 
