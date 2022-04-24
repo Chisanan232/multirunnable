@@ -10,18 +10,18 @@ its responsibility for operating.
 It will have a new feature in version 0.17.0 about integrating factory and operators
 into an object to let client site uses it conveniently and clearly.
 
-Adapter Modules
+Factory Modules
 ================
 
-*module* multirunnable.adapter
+*module* multirunnable.factory
 
 It focuses on generating instance but doesn't care about how to operating it.
-It's an adapter to generate the target instance, so it would returns different
+It's an factory to generate the target instance, so it would returns different
 instance with different *RunningMode*. Below are the mapping table about which
 instance it generates with different *RunningMode*:
 
 +-----------------------+------------------------------+--------------------------------------------+
-|         Adapter       |         Running Mode         |               Truly Instance               |
+|         Factory       |         Running Mode         |               Truly Instance               |
 +=======================+==============================+============================================+
 |                       |            Parallel          |            multiprocessing.Lock            |
 +                       +------------------------------+--------------------------------------------+
@@ -75,17 +75,19 @@ instance it generates with different *RunningMode*:
 Lock Modules
 -------------
 
-*module* multirunnable.adapter.lock
+*module* multirunnable.factory.lock
 
 The module doesn't only response of *Lock*. All synchronization features which could limit
 the performance but DOES NOT communicate with each others like *Lock*, *Semaphore*, etc.
 
-It will be modified to naming as *LockFactory* in version 0.17.0. Same as classes in it (Lock, Semaphore, etc).
+It was named as *LockAdapter* before version 0.17.0. Same as classes in it (Lock, Semaphore, etc).
 
-Lock
-~~~~~~
+.. _Factory.Lock - LockFactory:
 
-*class* multirunnable.adapter.lock.\ **Lock**
+LockFactory
+~~~~~~~~~~~~~
+
+*class* multirunnable.factory.lock.\ **LockFactory**
     The implement about generating *Lock* instance.
 
 **get_instance**\ *(**kwargs)*
@@ -96,46 +98,56 @@ Lock
 **globalize_instance**\ *(obj)*
     Assign the object as a global variable.
 
-RLock
-~~~~~~~
+.. _Factory.Lock - RLockFactory:
 
-*class* multirunnable.adapter.lock.\ **RLock**
-    It's same as *multirunnable.adapter.lock.Lock* but for *RLock*.
+RLockFactory
+~~~~~~~~~~~~~~
 
-Semaphore
-~~~~~~~~~~~
+*class* multirunnable.factory.lock.\ **RLockFactoryFactory**
+    It's same as *multirunnable.factory.lock.LockFactory* but for *RLock*.
 
-*class* multirunnable.adapter.lock.\ **Semaphore**
-    It's same as *multirunnable.adapter.lock.Lock* but for *Semaphore*.
+.. _Factory.Lock - SemaphoreFactory:
 
-Bounded Semaphore
-~~~~~~~~~~~~~~~~~~~
+SemaphoreFactory
+~~~~~~~~~~~~~~~~~~
 
-*class* multirunnable.adapter.lock.\ **BoundedSemaphore**
-    It's same as *multirunnable.adapter.lock.Lock* but for *BoundedSemaphore*.
+*class* multirunnable.factory.lock.\ **SemaphoreFactoryFactory**
+    It's same as *multirunnable.factory.lock.LockFactory* but for *Semaphore*.
+
+.. _Factory.Lock - BoundedSemaphoreFactory:
+
+BoundedSemaphoreFactory
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*class* multirunnable.factory.lock.\ **BoundedSemaphoreFactory**
+    It's same as *multirunnable.factory.lock.LockFactory* but for *BoundedSemaphore*.
 
 
 Communication Modules
 ----------------------
 
-*module* multirunnable.adapter.communication
+*module* multirunnable.factory.communication
 
 All synchronization features which could limit the performance AND could communicate with each others like *Event*, *Condition*.
 
 It will be modified to naming as *CommunicationFactory* in version 0.17.0. Same as classes in it (Event, Condition).
 
-Event
-~~~~~~~
+.. _Factory.Communication - EventFactory:
 
-*class* multirunnable.adapter.communication.\ **Event**
-    It's same as *multirunnable.adapter.lock.Lock* but for *Event*.
+EventFactory
+~~~~~~~~~~~~~
+
+*class* multirunnable.factory.communication.\ **EventFactory**
+    It's same as *multirunnable.factory.lock.LockFactory* but for *Event*.
 
 
-Condition
-~~~~~~~~~~~
+.. _Factory.Communication - ConditionFactory:
 
-*class* multirunnable.adapter.communication.\ **Condition**
-    It's same as *multirunnable.adapter.lock.Lock* but for *Condition*.
+ConditionFactory
+~~~~~~~~~~~~~~~~~
+
+*class* multirunnable.factory.communication.\ **ConditionFactory**
+    It's same as *multirunnable.factory.lock.LockFactory* but for *Condition*.
 
 
 
@@ -146,7 +158,7 @@ API Modules
 
 All operators of *MultiRunnable* is the responsibility of this subpackage.
 Including synchronizations like *Lock*, *Semaphore* or something like this and retry mechanism.
-For synchronization features, *multirunnable.adapter* focus on generating instance, *multirunnable.api* focus on operating something with the instance.
+For synchronization features, *multirunnable.factory* focus on generating instance, *multirunnable.api* focus on operating something with the instance.
 
 Operator Modules
 -----------------
@@ -154,6 +166,8 @@ Operator Modules
 *module* multirunnable.api.operator
 
 This module responses of some operators of synchronization-features.
+
+.. _API.Operator - LockOperator:
 
 LockOperator
 ~~~~~~~~~~~~~~
@@ -177,6 +191,8 @@ LockOperator
 **release**\ *()*
     Release the lock to let other runnable objects could acquire it.
 
+
+.. _API.Operator - RLockOperator:
 
 RLockOperator
 ~~~~~~~~~~~~~~
@@ -202,6 +218,8 @@ RLockOperator
     Same as *Lock.acquire*. Difference is program would keep run util last one *release* be called.
 
 
+.. _API.Operator - SemaphoreOperator:
+
 SemaphoreOperator
 ~~~~~~~~~~~~~~~~~~~
 
@@ -221,11 +239,13 @@ SemaphoreOperator
 **acquire**\ *(blocking: bool = True, timeout: int = None)*
     It's mostly same as *Lock*. It force to only one runnable object could run at the same time with *Lock*.
     For *Semaphore*, it permits multiple runnable objects to run simultaneously and the permitted amount
-    is the value of option *value* of *multirunnable.adapter.lock.Semaphore*.
+    is the value of option *value* of *multirunnable.factory.lock.Semaphore*.
 
 **release**\ *(n: int = 1)*
     The logic is same as *Lock.release* but be used for *Semaphore*.
 
+
+.. _API.Operator - BoundedSemaphoreOperator:
 
 BoundedSemaphoreOperator
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -250,6 +270,8 @@ BoundedSemaphoreOperator
     It's also same as *SemaphoreOperator.acquire* but the only one different is
     it has limitation (the argument *n*) in every time it releases.
 
+
+.. _API.Operator - EventOperator:
 
 EventOperator
 ~~~~~~~~~~~~~~~
@@ -282,6 +304,8 @@ EventOperator
 **clear**\ *()*
     Clear all flags.
 
+
+.. _API.Operator - ConditionOperator:
 
 ConditionOperator
 ~~~~~~~~~~~~~~~~~~~
@@ -316,4 +340,92 @@ ConditionOperator
 
 **notify_all**\ *()*
     Wait up all runnable objects on this condition.
+
+
+
+Adapter Modules
+================
+
+*module* multirunnable.adapter
+
+Subpackage *Adapter* for clear and convenient in usage. It combines the features of both 2 subpackages *Factory* and *API*.
+
+About synchronization usage in *multirunnable*, it divides to 2 sections: *Factory* and *API*.
+The former generates instance with *RunningMode*; the latter provides all operators of the instance.
+However, it doesn't be clear or be convenient to use sometimes. It also needs to care 2 different objects
+when you're using.
+
+Let's demonstrate some different usage between *Adapter* and *Factory* with *API*:
+
+Usage with *Adapter*:
+
+.. code-block:: python
+
+    from multirunnable import RunningMode, SimpleExecutor, sleep
+    from multirunnable.adapter import Lock
+
+    _lock = Lock(mode=RunningMode.Parallel, init=True)    # Use Lock feature with Adapter object
+
+    def lock_function():
+        _lock.acquire()
+        print("This is ExampleTargetFunction.target_function.")
+        sleep(3)
+        _lock.release()
+
+    executor = SimpleExecutor(mode=RunningMode.Parallel, executors=5)
+    executor.run(function=lock_function)
+
+
+Usage with *Factory* and *API*:
+
+.. code-block:: python
+
+    from multirunnable import RunningMode, SimpleExecutor, sleep
+    from multirunnable.api import LockOperator
+    from multirunnable.factory import LockFactory
+
+    def lock_function():
+        _lock_opt = LockOperator()    # Use Lock feature with Operator object
+        _lock_opt.acquire()
+        print("This is ExampleTargetFunction.target_function.")
+        sleep(3)
+        _lock_opt.release()
+
+    executor = SimpleExecutor(mode=RunningMode.Parallel, executors=5)
+    lock = LockFactory()    # Use Lock feature with Factory object
+    executor.run(function=lock_function, features=lock)
+
+
+About second one of above demonstrations, it generates instance by object *LockFactory*
+and operates the Lock feature with object *LockOperator*. It must to care about what thing
+to do and when to call it. But it doesn't if it uses with object *Lock*.
+
+Objects in it has all the attributes of *Factory* and *API*. And the attribute's name
+also the same between them. So what attributes *Factory* or *API* they have, what
+attributes *Adapter* it has.
+
+The modules of subpackage *Adapter*:
+
+* module: *multirunnable.adapter.lock*
+
+    * Lock
+        * :ref:`Factory.Lock - LockFactory`
+        * :ref:`API.Operator - LockOperator`
+    * RLock
+        * :ref:`Factory.Lock - RLockFactory`
+        * :ref:`API.Operator - RLockOperator`
+    * Semaphore
+        * :ref:`Factory.Lock - SemaphoreFactory`
+        * :ref:`API.Operator - SemaphoreOperator`
+    * BoundedSemaphore
+        * :ref:`Factory.Lock - BoundedSemaphoreFactory`
+        * :ref:`API.Operator - BoundedSemaphoreOperator`
+
+* module: *multirunnable.adapter.communication*
+    * Event
+        * :ref:`Factory.Communication - EventFactory`
+        * :ref:`API.Operator - EventOperator`
+    * Condition
+        * :ref:`Factory.Communication - ConditionFactory`
+        * :ref:`API.Operator - ConditionOperator`
 
