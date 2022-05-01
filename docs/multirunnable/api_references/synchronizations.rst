@@ -7,9 +7,6 @@ Modules in subpackage *multirunnable.adapter* be a factories which has responsib
 of generating target instance of running strategy. And for *multirunnable.api*,
 its responsibility for operating.
 
-It will have a new feature in version 0.17.0 about integrating factory and operators
-into an object to let client site uses it conveniently and clearly.
-
 Factory Modules
 ================
 
@@ -403,6 +400,8 @@ to do and when to call it. But it doesn't if it uses with object *Lock*.
 Objects in it has all the attributes of *Factory* and *API*. And the attribute's name
 also the same between them. So what attributes *Factory* or *API* they have, what
 attributes *Adapter* it has.
+
+This is new in version 0.17.0.
 
 The modules of subpackage *Adapter*:
 
