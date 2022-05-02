@@ -63,6 +63,7 @@ Let's demonstrate an example to show how easy and clear it is!
    Coroutine Modules </api_references/strategy_coroutine.rst>
    Synchronizations </api_references/synchronizations.rst>
    Decorators Modules </api_references/decorators.rst>
+   Context </api_references/context.rst>
    Persistence with File </api_references/persistence_file.rst>
    Persistence with Database </api_references/persistence_database.rst>
 
