@@ -62,7 +62,7 @@ Using *multirunnable.SimplePool*:
 
 .. code-block:: python
 
-    from multirunnable import RunningMode, SimplePool, sleep, async_sleep
+    from multirunnable import RunningMode, SimplePool, sleep
     import random
 
     def target_function(self, *args, **kwargs) -> str:
@@ -87,8 +87,7 @@ Using *multirunnable.SimplePool*:
         # # # # Get result
         # # # # You will get the result of 'map' only.
         _result = p.get_result()
-
-    print("Result: ", _result)
+        print("Result: ", _result)
 
 
 
