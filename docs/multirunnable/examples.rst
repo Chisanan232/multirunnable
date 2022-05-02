@@ -156,23 +156,22 @@ For *BaseSingleConnection* object:
 
     class MySQLSingleConnection(BaseSingleConnection):
 
-        @property
-        def connection(self) -> MySQLConnection:
-            return self._database_connection
-
-
-        def connect_database(self, **kwargs) -> MySQLConnection:
+        def _connect_database(self, **kwargs) -> MySQLConnection:
             _connection = mysql.connector.connect(**kwargs)
             return _connection
 
 
+        def _is_connected(self) -> bool:
+            return self.current_connection.is_connected()
+
+
         def commit(self) -> None:
-            self.connection.commit()
+            self.current_connection.commit()
 
 
-        def close(self) -> None:
-            if self.connection is not None and self.connection.is_connected():
-                self.connection.close()
+        def _close_connection(self) -> None:
+            if self.current_connection is not None and self.current_connection.is_connected():
+                self.current_connection.close()
 
 
 For *BaseConnectionPool* object:
@@ -193,7 +192,7 @@ For *BaseConnectionPool* object:
             return connection_pool
 
 
-        def get_one_connection(self, pool_name: str = "", **kwargs) -> PooledMySQLConnection:
+        def _get_one_connection(self, pool_name: str = "", **kwargs) -> PooledMySQLConnection:
             while True:
                 try:
                     __connection = get_connection_pool(pool_name=pool_name).get_connection()
@@ -207,17 +206,21 @@ For *BaseConnectionPool* object:
                     raise ConnectionError(f"Cannot get the one connection instance from connection pool because it doesn't exist the connection pool with the name '{pool_name}'.")
 
 
-        def commit(self) -> None:
+        def _is_connected(self, conn: PooledMySQLConnection) -> bool:
+            return conn.is_connected()
+
+
+        def _commit(self, conn: PooledMySQLConnection) -> None:
             self.connection.commit()
+
+
+        def _close_connection(self, conn: PooledMySQLConnection) -> None:
+            if self.connection is not None and self.connection.is_connected():
+                self.connection.close()
 
 
         def close_pool(self, pool_name: str) -> None:
             get_connection_pool(pool_name=pool_name).close()
-
-
-        def close(self) -> None:
-            if self.connection is not None and self.connection.is_connected():
-                self.connection.close()
 
 
 For *DatabaseOperator* object:
@@ -254,10 +257,6 @@ For *DatabaseOperator* object:
 
         def execute_many(self, operator: Any, seq_params=None) -> MySQLCursor:
             return self._cursor.executemany(operation=operator, seq_params=seq_params)
-
-
-        def fetch(self) -> MySQLCursor:
-            return self._cursor.fetch()
 
 
         def fetch_one(self) -> MySQLCursor:
