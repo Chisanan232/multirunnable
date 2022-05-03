@@ -29,11 +29,10 @@ An example shows how to use *multirunnable.SimpleExecutor*:
 
 .. code-block:: python
 
-    from multirunnable import RunningMode, SimpleExecutor
-    import multirunnable as mr
+    from multirunnable import RunningMode, SimpleExecutor, sleep
 
     def target_function(self, *args, **kwargs) -> str:
-        multirunnable.sleep(3)
+        sleep(3)
         print("This is target function args: ", args)
         print("This is target function kwargs: ", kwargs)
         return "Hello, Return"
@@ -71,17 +70,17 @@ Using *multirunnable.SimplePool*:
         print("This is target function kwargs: ", kwargs)
         return "Hello, Return"
 
+    _pool_size = 5
     # # # # Initial Pool object
-    _pool = SimplePool(mode=RunningMode.Parallel, pool_size=self.__Pool_Size, tasks_size=self.__Task_Size)
-    # _pool = SimplePool(mode=RunningMode.Concurrent, pool_size=self.__Pool_Size, tasks_size=self.__Task_Size)
-    # _pool = SimplePool(mode=RunningMode.GreenThread, pool_size=self.__Pool_Size, tasks_size=self.__Task_Size)
+    _pool = SimplePool(mode=RunningMode.Parallel, pool_size=_pool_size)
+    # _pool = SimplePool(mode=RunningMode.Concurrent, pool_size=_pool_size)
+    # _pool = SimplePool(mode=RunningMode.GreenThread, pool_size=_pool_size)
 
-    _result = None
     with _pool as p:
         # # # # Running Pool
-        # p.apply(function=target_function, kwargs={"index": f"test_{random.randrange(10,20)}"})
-        p.async_apply(function=target_function, kwargs={"index": f"test_{random.randrange(10,20)}"})
-        p.map(function=target_function, args_iter=("index_1", "index_2.2", "index_3"))
+        # p.apply(function=target_function, tasks_size=_pool_size, kwargs={"index": f"test_{random.randrange(10,20)}"})
+        p.async_apply(function=target_function, tasks_size=_pool_size, kwargs={"index": f"test_{random.randrange(10,20)}"})
+        # p.map(function=target_function, args_iter=("index_1", "index_2.2", "index_3"))
         # p.map_by_args(function=target_function, args_iter=[("index_1", "index_2.2"), ("index_3",), (1, 2, 3)])
 
         # # # # Get result
