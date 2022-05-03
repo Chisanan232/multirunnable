@@ -38,8 +38,14 @@ Let's demonstrate an example to show how easy and clear it is!
    from multirunnable import SimpleExecutor, RunningMode
 
    _executor = SimpleExecutor(mode=RunningMode.Parallel, executors=10)
-   _executor.run(function=target_function, args=("index_1", "index_2.2"))
+   _executor.run(function=lambda *args: print("This is target function args: ", args), args=("index_1", "index_2.2"))
+   _result = _executor.get_result()
 
+
+General documentation
+----------------------
+
+This part of documentation, which introduces the package and has some step-by-step instructions for using or building parallelism features.
 
 .. toctree::
    :caption: General documentation
@@ -47,9 +53,15 @@ Let's demonstrate an example to show how easy and clear it is!
 
    introduction
    installation
-   usage
+   quickly_start
    examples
+   usage
 
+
+API Reference
+--------------
+
+Information about some function, class or method.
 
 .. toctree::
    :caption: API Reference
@@ -67,6 +79,11 @@ Let's demonstrate an example to show how easy and clear it is!
    Persistence with File </api_references/persistence_file.rst>
    Persistence with Database </api_references/persistence_database.rst>
 
+
+Development documentation
+--------------------------
+
+If you're curious about the detail of implementation of this package includes workflow, software architecture, system design or development, this section is for you.
 
 .. toctree::
    :caption: Development documentation

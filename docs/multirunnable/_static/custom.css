@@ -1,0 +1,3 @@
+section#setup .toctree-wrapper > p > span.caption-text {
+    display: none;
+}
