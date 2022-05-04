@@ -134,41 +134,171 @@ The way to get running result is same as *Executor*:
 Running with Synchronizations
 ==============================
 
+In *multirunnable* realm, it has 2 ways to use *synchronization* object. One is usage with 2 objects: **Factory** and **Operator**,
+another one is usage with **Adapter**.
+
+* *Factory & Operator*
+
+    If you're building a parallelism with big software architecture, this way would be a good choice for you.
+    It divides the logic into 2 parts: generating synchronization instance and operating with the synchronization instance.
+    Hence you could implement them in different function, class or method.
+
+
+* *Adapter*
+
+    If you're building a simple parallelism, this way would be better for you.
+    It integrates all the features or APIs of *Factory* & *Operator* into itself.
+    Therefore you could do anything with it.
+
+
+Using Lock with *Factory & Operator*
+-------------------------------------
+
+We should import the modules from 2 different sub-packages *factory* and *api* to use *Lock* with **Factory & Operator**:
+
+.. code-block:: python
+
+    from multirunnable import SimpleExecutor, RunningMode, sleep
+    from multirunnable.factory import LockFactory
+    from multirunnable.api import LockOperator
+
+
+Initial **Factory**:
+
+.. code-block:: python
+
+    lock_factory = LockFactory()
+
+
+It could operate the *Lock* object via **Operator**:
+
+.. code-block:: python
+
+    lock_opt = LockOperator()
+
+    def lock_function():
+        lock_opt.acquire()
+        print("Running process in lock and will sleep 2 seconds.")
+        sleep(2)
+        print(f"Wake up process and release lock.")
+        lock_opt.release()
+
+
+or you also could use it via Python keyword *with*:
+
+.. code-block:: python
+
+    lock_opt = LockOperator()
+
+    def lock_function():
+        with lock_opt:
+            print("Running process in lock and will sleep 2 seconds.")
+            sleep(2)
+            print(f"Wake up process and release lock.")
+
+
+Finally, please don't forget pass the Lock Factory by argument *features* (it's same in *Executor* or *Pool*):
+
+.. code-block:: python
+
+    executor = SimpleExecutor(mode=RunningMode.Parallel, executors=3)
+    executor.run(function=lock_function, features=lock_factory)
+
+
+Using Lock with *Adapter*
+---------------------------
+
+It's only import 1 module if you use **Adapter**:
+
+.. code-block:: python
+
+    from multirunnable import SimpleExecutor, RunningMode, sleep
+    from multirunnable.adapter import Lock
+
+
+You would need to set option *init* to be *True* when you instantiates **Lock**.
+It would initial anything you need.
+
+.. code-block:: python
+
+    lock_adapter = Lock(mode=RunningMode.Parallel, init=True)
+
+
+So, you could operate it directly (absolutely, you also can use it via Python keyword *with*):
+
+.. code-block:: python
+
+    def lock_function():
+        lock_adapter.acquire()
+        print("This is ExampleTargetFunction.target_function.")
+        sleep(3)
+        lock_adapter.release()
+
+
+Furthermore, you don't need to pass it  by argument *features*:
+
+.. code-block:: python
+
+    executor = SimpleExecutor(mode=RunningMode.Parallel, executors=3)
+    executor.run(function=lock_function)
+
+
+Using RLock with *Factory & Operator*
+-------------------------------------
+
 content ...
 
 
-Lock
-------
+Using RLock with *Adapter*
+---------------------------
 
 content ...
 
 
-RLock
--------
+Using Semaphore with *Factory & Operator*
+-----------------------------------------
 
 content ...
 
 
-Semaphore
------------
+Using Semaphore with *Adapter*
+-------------------------------
 
 content ...
 
 
-Bounded Semaphore
--------------------
+Using Bounded Semaphore with *Factory & Operator*
+-------------------------------------------------
 
 content ...
 
 
-Event
--------
+Using Bounded Semaphore with *Adapter*
+---------------------------------------
 
 content ...
 
 
-Condition
------------
+Using Event with *Factory & Operator*
+-------------------------------------
+
+content ...
+
+
+Using Event with *Adapter*
+---------------------------
+
+content ...
+
+
+Using Condition with *Factory & Operator*
+-----------------------------------------
+
+content ...
+
+
+Using Condition with *Adapter*
+-------------------------------
 
 content ...
 
@@ -177,6 +307,7 @@ Context info in parallelism
 ============================
 
 content ...
+
 
 Current worker
 ---------------
