@@ -437,16 +437,37 @@ So, you could operate it directly (absolutely, you also can use it via Python ke
             print(f"Release Semaphore.")
 
 
-Using Bounded Semaphore with *Factory & Operator*
--------------------------------------------------
+Using Bounded Semaphore
+------------------------
 
-content ...
+The usage of *Bounded Semaphore* is completely same as *Semaphore*.
+You may get confused about why *Bounded Semaphore* exist if it already have *Semaphore*?
+There is a small note about *Semaphore*: it could release over times with *Semaphore* and it doesn't raise any exceptions.
+Let's see an example:
+
+.. code-block:: python
+
+    from multirunnable.adapter import Semaphore
+
+    smp_adapter = Semaphore(mode=<RunningMode>, value=2, init=True)
+
+    def lock_function():
+        smp_adapter.acquire()
+        print("Acquire Semaphore.")
+        sleep(2)
+        print(f"Release Semaphore.")
+        smp_adapter.release()
+        smp_adapter.release()    # all is fine, but here we want to test about release over times
 
 
-Using Bounded Semaphore with *Adapter*
----------------------------------------
+It would raise nothing and the value setting of *Semaphore* would be added 1.
+That might make sense here, but not in most. However, it would raise an exception
+if it releases over times with *Bounded Semaphore*. That's the reason why
+*Bounded Semaphore* exists and it guarantees that how many it acquires, how many
+it must to release exactly.
 
-content ...
+Here doesn't demonstrate the usage about *Bounded Semaphore* because it's completely same as *Semaphore*.
+Please refer to the demonstration of *Semaphore*.
 
 
 Using Event with *Factory & Operator*
