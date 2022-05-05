@@ -453,11 +453,9 @@ Let's see an example:
 
     def lock_function():
         smp_adapter.acquire()
-        print("Acquire Semaphore.")
-        sleep(2)
-        print(f"Release Semaphore.")
         smp_adapter.release()
-        smp_adapter.release()    # all is fine, but here we want to test about release over times
+        # all is fine, but here we want to test about release over times
+        smp_adapter.release()    # It won't occur anything
 
 
 It would raise nothing and the value setting of *Semaphore* would be added 1.
@@ -465,6 +463,20 @@ That might make sense here, but not in most. However, it would raise an exceptio
 if it releases over times with *Bounded Semaphore*. That's the reason why
 *Bounded Semaphore* exists and it guarantees that how many it acquires, how many
 it must to release exactly.
+
+So, you could modify the *Adapter* to be *Bounded Semaphore*:
+
+.. code-block:: python
+
+    from multirunnable.adapter import BoundedSemaphore
+
+    bsmp_adapter = BoundedSemaphore(mode=<RunningMode>, value=2, init=True)
+
+    def lock_function():
+        bsmp_adapter.acquire()
+        bsmp_adapter.release()
+        bsmp_adapter.release()    # It raises an exception
+
 
 Here doesn't demonstrate the usage about *Bounded Semaphore* because it's completely same as *Semaphore*.
 Please refer to the demonstration of *Semaphore*.
