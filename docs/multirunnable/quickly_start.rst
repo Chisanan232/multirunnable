@@ -361,13 +361,80 @@ So, you could operate it directly (absolutely, you also can use it via Python ke
 Using Semaphore with *Factory & Operator*
 -----------------------------------------
 
-content ...
+The usage of *Lock*, *RLock* or *Semaphore* are very close between each others. Actually,
+you could detect that by the APIs of them.
+
+The most different between *Lock* and *Semaphore* is former one accept ONLY ONE worker runs at the same time,
+but the latter one could accept MULTIPLE workers run simultaneously.
+
+Let's import module first:
+
+.. code-block:: python
+
+    from multirunnable.factory import SemaphoreFactory
+    from multirunnable.api import SemaphoreOperator
+
+
+Initial **Factory**. Remember, you should set the count how many workers it should accept to run simultaneously by argument *value*:
+
+.. code-block:: python
+
+    smp_factory = SemaphoreFactory(value=2)
+
+
+It could operate the *Semaphore* object via **Operator**. Please note that it could accept multiple workers:
+
+.. code-block:: python
+
+    smp_opt = SemaphoreOperator()
+
+    def lock_function():
+        smp_opt.acquire()
+        print("Acquire Semaphore.")
+        sleep(2)
+        print(f"Release Semaphore.")
+        smp_opt.release()
+
+
+Modify to implement with Python keyword *with*:
+
+.. code-block:: python
+
+    smp_opt = SemaphoreOperator()
+
+    def lock_function():
+        with smp_opt:
+            print("Acquire Semaphore.")
+            sleep(2)
+            print(f"Release Semaphore.")
 
 
 Using Semaphore with *Adapter*
 -------------------------------
 
-content ...
+Import module:
+
+.. code-block:: python
+
+    from multirunnable.adapter import Semaphore
+
+
+Instantiates **Semaphore** with option *init* as *True*, absolutely also with option *value*.
+
+.. code-block:: python
+
+    smp_adapter = Semaphore(mode=<RunningMode>, value=2, init=True)
+
+
+So, you could operate it directly (absolutely, you also can use it via Python keyword *with*):
+
+.. code-block:: python
+
+    def lock_function():
+        with smp_adapter:
+            print("Acquire Semaphore.")
+            sleep(2)
+            print(f"Release Semaphore.")
 
 
 Using Bounded Semaphore with *Factory & Operator*
