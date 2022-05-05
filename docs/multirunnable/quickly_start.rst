@@ -5,8 +5,8 @@ Quickly Start
 content ...
 
 
-Quickly build a parallelism
-============================
+Build a parallelism
+====================
 
 Here is a function for argument *target* to build parallelism.
 
