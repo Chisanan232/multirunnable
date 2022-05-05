@@ -246,13 +246,116 @@ Furthermore, you don't need to pass it  by argument *features*:
 Using RLock with *Factory & Operator*
 -------------------------------------
 
-content ...
+The usage of *RLock* is very similar with *Lock*, but the former one could acquire again and the latter one couldn't.
+In the other words, it could acquire or release lock again and again but it doesn't occur deadlock.
+
+Let's import module first:
+
+.. code-block:: python
+
+    from multirunnable.factory import RLockFactory
+    from multirunnable.api import RLockOperator
+
+
+Initial **Factory**:
+
+.. code-block:: python
+
+    rlock_factory = RLockFactory()
+
+
+It could operate the *RLock* object via **Operator**. Please note that it acquire and release twice:
+
+.. code-block:: python
+
+    rlock_opt = RLockOperator()
+
+    def lock_function():
+        rlock_opt.acquire()
+        print("Acquire RLock first time.")
+        rlock_opt.acquire()
+        print("Acquire RLock second time and will sleep 2 seconds.")
+        sleep(2)
+        print(f"Release RLock first time.")
+        rlock_opt.release()
+        print(f"Release RLock second time and wake up process.")
+        rlock_opt.release()
+
+
+Modify to implement with Python keyword *with*:
+
+.. code-block:: python
+
+    rlock_opt = RLockOperator()
+
+    def lock_function():
+        with rlock_opt:
+            print("Acquire RLock first time.")
+
+            with rlock_opt:
+                print("Acquire RLock second time and will sleep 2 seconds.")
+                sleep(2)
+                print(f"Release RLock first time.")
+
+            print(f"Release RLock second time and wake up process.")
+
+
+However, following code is a better usage with *RLock*:
+
+.. code-block:: python
+
+    rlock_opt = RLockOperator()
+
+    def lock_function_a():
+        with rlock_opt:
+            print("Acquire RLock at Function A.")
+            sleep(2)    # It could do something which should be managed by RLock
+            print(f"Release RLock at Function A and wake up process.")
+
+    def lock_function_b():
+        with rlock_opt:
+            print("Acquire RLock at Function B.")
+            sleep(2)    # It could do something which should be managed by RLock
+            print(f"Release RLock at Function B and wake up process.")
+
+
+If you have multiple tasks (in generally, it's a function or method) to do which needs to be managed by lock,
+*RLock* would be the better choice for you.
 
 
 Using RLock with *Adapter*
 ---------------------------
 
-content ...
+The usage of *RLock Adapter* is also very similar with *Lock Adapter*.
+
+Import module:
+
+.. code-block:: python
+
+    from multirunnable.adapter import RLock
+
+
+Instantiates **RLock** with option *init* as *True*. It would initial anything you need.
+
+.. code-block:: python
+
+    rlock_adapter = RLock(mode=<RunningMode>, init=True)
+
+
+So, you could operate it directly (absolutely, you also can use it via Python keyword *with*):
+
+.. code-block:: python
+
+    def lock_function():
+        with rlock_adapter:
+            print("Acquire RLock first time.")
+
+            with rlock_adapter:
+                print("Acquire RLock second time and will sleep 2 seconds.")
+                sleep(2)
+                print(f"Release RLock first time.")
+
+            print(f"Release RLock second time and wake up process.")
 
 
 Using Semaphore with *Factory & Operator*
@@ -303,8 +406,8 @@ Using Condition with *Adapter*
 content ...
 
 
-Context info in parallelism
-============================
+Get context info
+=================
 
 content ...
 
