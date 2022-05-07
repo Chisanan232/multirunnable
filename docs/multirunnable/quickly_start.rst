@@ -497,10 +497,11 @@ Beginning by importing modules:
     from multirunnable.factory import EventFactory
 
 
-Initial **Factory**:
+Initial **Factory** and *Operator*:
 
 .. code-block:: python
 
+    _event = EventFactory()
     _event_opt = EventOperator()
 
 
@@ -540,8 +541,6 @@ Its working is same as Python native function *map*, but it works with the colle
 
 .. code-block:: python
 
-    _event = EventFactory()
-
     _exe = SimpleExecutor(mode=RunningMode.Concurrent, executors=1)
     _exe.map_with_function(
         functions=[cls.__wakeup_p.wake_other_process, cls.__sleep_p.go_sleep],
@@ -565,13 +564,105 @@ So we could only modify the instantiation like following code:
 Using Condition with *Factory & Operator*
 -----------------------------------------
 
-content ...
+*Condition* like a high-class *Lock* or *RLock*. It provides all features of *Lock* (or *RLock*) and some operations like *Event*.
+So let's develop 2 workers to demonstrate *Condition* feature, one worker A save data to global list and notify other workers to run,
+another worker B wait to get data util worker A has saved data and notified it.
+
+Let's start to import modules:
+
+.. code-block:: python
+
+    from multirunnable import sleep
+    from multirunnable.api import ConditionOperator
+    from multirunnable.factory import ConditionFactory
+
+
+Initial **Factory** and *Operator*:
+
+.. code-block:: python
+
+    _condition_factory = ConditionFactory()
+    _condition_opt = ConditionOperator()
+
+
+Initial a global list to save data:
+
+.. code-block:: python
+
+    _glist = []
+
+
+Following code is worker A which would keep saving data to global list:
+
+.. code-block:: python
+
+    def send_process(*args):
+        print(f"[Producer] It will keep producing something useless message.")
+        while True:
+            _sleep_time = random.randrange(1, 10)
+            print(f"[Producer] It will sleep for {_sleep_time} seconds.")
+            _glist.append(__sleep_time)
+            sleep(_sleep_time)
+            _condition_opt.acquire()
+            _condition_opt.notify_all()
+            _condition_opt.release()
+
+
+Below is worker B which would wait for worker A util it has saved and notified:
+
+.. code-block:: python
+
+    def receive_process(*args):
+        print(f"[Consumer] It detects the message which be produced by ProducerThread.")
+        while True:
+            _condition_opt.acquire()
+            sleep(1)
+            print("[Consumer] ConsumerThread waiting ...")
+            _condition_opt.wait()
+            _sleep_time = _glist[-1]
+            print("[Consumer] ConsumerThread re-start.")
+            print(f"[Consumer] ProducerThread sleep {_sleep_time} seconds.")
+            _condition_opt.release()
+
+
+Since it has *Lock* (or *RLock*) features, absolutely it would use by Python keyword *with*:
+
+.. code-block:: python
+
+    def send_process(*args):
+        print(f"[Producer] It will keep producing something useless message.")
+        while True:
+            _sleep_time = random.randrange(1, 10)
+            print(f"[Producer] It will sleep for {_sleep_time} seconds.")
+            _glist.append(__sleep_time)
+            sleep(_sleep_time)
+            with _condition_opt:
+                _condition_opt.notify_all()
+
+
+    def receive_process(*args):
+        print(f"[Consumer] It detects the message which be produced by ProducerThread.")
+        while True:
+            with _condition_opt:
+                sleep(1)
+                print("[Consumer] ConsumerThread waiting ...")
+                _condition_opt.wait()
+                _sleep_time = _glist[-1]
+                print("[Consumer] ConsumerThread re-start.")
+                print(f"[Consumer] ProducerThread sleep {_sleep_time} seconds.")
 
 
 Using Condition with *Adapter*
 -------------------------------
 
-content ...
+About usage of **Condition** as *Adapter* is completely same as *Factory* with *Operator*.
+So we could only modify the instantiation like following code:
+
+.. code-block:: python
+
+    from multirunnable.adapter import Condition
+
+    _condition_adapter = Condition()
 
 
 Get context info
