@@ -485,13 +485,81 @@ Please refer to the demonstration of *Semaphore*.
 Using Event with *Factory & Operator*
 -------------------------------------
 
-content ...
+If you find a way to let each workers could run and communicate with each others, for example,
+worker A wait for worker B to do something util worker B done some task or set flag, *Event* is
+one of choices for you.
+
+Beginning by importing modules:
+
+.. code-block:: python
+
+    from multirunnable.api import EventOperator
+    from multirunnable.factory import EventFactory
+
+
+Initial **Factory**:
+
+.. code-block:: python
+
+    _event_opt = EventOperator()
+
+
+We needs 2 workers to do different things to verify the communication feature of *Event*.
+One worker is responsible of setting the event flag to be *True*, another one worker just
+wait for the flag util to be *True*, start to run and reset the flag back to be *False*.
+
+Let's demonstrate first one worker which would set the event flag to be *True*:
+
+.. code-block:: python
+
+    def wake_other_process():
+        print(f"[WakeupProcess] It will keep producing something useless message.")
+        while True:
+            __sleep_time = random.randrange(1, 10)
+            print(f"[WakeupProcess] It will sleep for {__sleep_time} seconds.")
+            sleep(__sleep_time)
+            _event_opt.set()
+
+
+Following code is the worker which is waiting for the event flag to be *True* and reset it:
+
+.. code-block:: python
+
+    def go_sleep():
+        print(f"[SleepProcess] It detects the message which be produced by ProducerThread.")
+        while True:
+            sleep(1)
+            print("[SleepProcess] ConsumerThread waiting ...")
+            _event_opt.wait()
+            print("[SleepProcess] ConsumerThread wait up.")
+            _event_opt.clear()
+
+
+You need to run both workers with 2 different functions so that you should use function *SimpleExecutor.map_with_function*.
+Its working is same as Python native function *map*, but it works with the collection of functions:
+
+.. code-block:: python
+
+    _event = EventFactory()
+
+    _exe = SimpleExecutor(mode=RunningMode.Concurrent, executors=1)
+    _exe.map_with_function(
+        functions=[cls.__wakeup_p.wake_other_process, cls.__sleep_p.go_sleep],
+        features=_event
+    )
 
 
 Using Event with *Adapter*
 ---------------------------
 
-content ...
+About usage of **Event** as *Adapter* is completely same as *Factory* with *Operator*.
+So we could only modify the instantiation like following code:
+
+.. code-block:: python
+
+    from multirunnable.adapter import Event
+
+    _event_adapter = Event()
 
 
 Using Condition with *Factory & Operator*
