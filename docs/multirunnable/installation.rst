@@ -2,6 +2,8 @@
 Installation
 ==============
 
+.. _Installation - pip install:
+
 Install via PIP
 ================
 
