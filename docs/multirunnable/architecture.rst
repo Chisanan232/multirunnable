@@ -55,7 +55,7 @@ Below are all the modules which be related with others in this section:
     * multirunnable.factory.strategy
     * multirunnable.framework.runnable.strategy
 
-From the  example of :doc:`home page <index>` or demonstration in section :ref:`Executor Usage<Executor Usage>` in :doc:`usage` (or :ref:`Pool Usage<Pool Usage>`) like below:
+From the  example of :doc:`home page <index>` or demonstration in section :ref:`Executor Usage<Build by Executor>` in :doc:`quickly_start` (or :ref:`Pool Usage<Build via Pool>`) like below:
 
 Executor:
 

@@ -52,6 +52,8 @@ would use it as the target function to activate *workers*.
         return "Hello, Return"
 
 
+.. _Build by Executor:
+
 Build by Executor
 ------------------
 
@@ -112,6 +114,8 @@ How easy it is, isn't it? That's also easy to get its running result:
     _result = p.get_result()
     print("Result: ", _result)
 
+
+.. _Build via Pool:
 
 Build via Pool
 ---------------

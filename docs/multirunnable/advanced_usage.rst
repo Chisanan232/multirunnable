@@ -1,6 +1,6 @@
-========
-Usages
-========
+================
+Advanced Usages
+================
 
 This package classifies the runnable unit to be Executor and Pool.
 It also supports doing some operators with running multiple tasks simultaneously 
