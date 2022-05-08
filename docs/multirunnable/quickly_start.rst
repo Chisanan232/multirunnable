@@ -721,7 +721,26 @@ You also can get the worker name of current worker via *context* module:
 Current worker's Identity
 --------------------------
 
-content ...
+Besides getting the name of current worker, it can get the identity of current worker:
+
+.. code-block:: python
+
+    >>> from multirunnable import set_mode, RunningMode
+    >>> from multirunnable.adapter.context import context as adapter_context
+
+    >>> set_mode(RunningMode.Parallel)
+    >>> adapter_context.get_current_worker_ident()
+    '39164'
+
+
+By the way, the ID of current worker is a PID if *RunningMode* is *Parallel*. So we also
+could verify the identity of process via command *ps*:
+
+.. code-block:: shell
+
+    >>> ps aux | grep -E 'python'
+    ...    # other process info
+    helloworld        39164   0.0  0.1  4320992  12296 s012  S+   10:15AM   0:00.43 /helloworld/.pyenv/shims/versions/test/bin/python
 
 
 Current worker's parent
