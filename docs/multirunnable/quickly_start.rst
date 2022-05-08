@@ -2,13 +2,44 @@
 Quickly Start
 ===============
 
-content ...
+Are you full of curiosity about *multirunnable*? This page would show you how easy the usage is.
+Before start with *MultiRunnable*, please make sure that you have :ref:`installed it<Installation - pip install>`.
+
+Let's start to enjoy parallelism development with *MultiRunnable*.
 
 
 Build a parallelism
 ====================
 
-Here is a function for argument *target* to build parallelism.
+It has 2 ways to implement parallelism with *multirunnable*:
+
+* Executor
+* Pool
+
+Before demonstrate how to use it, you need to know what *worker* means in *MultiRunnable*.
+*Worker* is a pronouns of runnable object in Python. In the other words, it may be a *Process*,
+*Thread*, *Green Thread* or *Async Task* object. What *worker* is be depends on what *RunningMode* is.
+
+Below is a mapping table to show the relation:
+
++--------------------+-------------------+
+|     RunningMode    |       Worker      |
++====================+===================+
+|       Parallel     |      Process      |
++--------------------+-------------------+
+|     Concurrent     |       Thread      |
++--------------------+-------------------+
+|     GreenThread    |    Green Thread   |
++--------------------+-------------------+
+|    Asynchronous    |     Async Task    |
++--------------------+-------------------+
+
+If you understand what *worker* is in *MultiRunnable*, let's back to *Executor* and *Pool*.
+So what's *Executor* and *Pool*? *Executor* initial and control how many *workers* you want to
+activate to run one by one; if you manage *workers* by a instances pool, it's *Pool*.
+
+Here is a function for argument *target* to build parallelism. All following code
+would use it as the target function to activate *workers*.
 
 .. code-block:: python
 
@@ -19,9 +50,6 @@ Here is a function for argument *target* to build parallelism.
         sleep(3)
         print("Wake up and finish.")
         return "Hello, Return"
-
-
-content ...
 
 
 Build by Executor
@@ -668,7 +696,8 @@ So we could only modify the instantiation like following code:
 Get context info
 =================
 
-content ...
+*MultiRunnable* also provides some APIs to let you get some context info about current running
+worker or global state.
 
 
 Current worker
