@@ -813,21 +813,3 @@ current worker alive state, the count of activated workers currently and all ins
     >>> adapter_context.children_workers()
     [<ForkProcess name='SyncManager-1' pid=47103 parent=39164 started>]
 
-
-Persistence in parallelism
-===========================
-
-content ...
-
-
-Operate with file
-------------------
-
-content ...
-
-
-Operate with database
-----------------------
-
-content ...
-
