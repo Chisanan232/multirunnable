@@ -674,7 +674,33 @@ content ...
 Current worker
 ---------------
 
-content ...
+You can get the instance of current worker via *context* module:
+
+.. code-block:: python
+
+    >>> from multirunnable import set_mode, RunningMode
+    >>> from multirunnable.adapter.context import context as adapter_context
+
+    >>> set_mode(RunningMode.Parallel)
+    >>> adapter_context.get_current_worker()
+    <_MainProcess name='MainProcess' parent=None started>
+
+
+Remember, you should set the *RunningMode* before you get the current worker because you use *adapter* to do it.
+
+You also can get the instance of current worker via **context** module of runnable strategy sub-package:
+
+.. code-block:: python
+
+    >>> from multirunnable.parallel.context import context as process_context
+
+    >>> process_context.get_current_worker()
+    <_MainProcess name='MainProcess' parent=None started>
+
+    >>> from multirunnable.concurrent.context import context as thread_context
+
+    >>> thread_context.get_current_worker()
+    <_MainThread(MainThread, started 4526204352)>
 
 
 Current worker's name
