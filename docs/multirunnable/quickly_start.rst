@@ -746,7 +746,16 @@ could verify the identity of process via command *ps*:
 Current worker's parent
 ------------------------
 
-content ...
+It also could get the instance of current worker's parent worker:
+
+.. code-block:: python
+
+    >>> from multirunnable import set_mode, RunningMode
+    >>> from multirunnable.adapter.context import context as adapter_context
+
+    >>> set_mode(RunningMode.Concurrent)
+    >>> adapter_context.get_parent_worker()
+    <_MainThread(MainThread, started 4526204352)>
 
 
 Globally context info
