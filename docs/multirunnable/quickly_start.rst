@@ -761,7 +761,24 @@ It also could get the instance of current worker's parent worker:
 Globally context info
 ----------------------
 
-content ...
+Besides getting some basic info of current worker, it can get some global context info like
+current worker alive state, the count of activated workers currently and all instance of workers.
+
+.. code-block:: python
+
+    >>> from multirunnable import set_mode, RunningMode
+    >>> from multirunnable.adapter.context import context as adapter_context
+
+    >>> set_mode(RunningMode.Concurrent)
+
+    >>> adapter_context.current_worker_is_alive()
+    True
+
+    >>> adapter_context.active_workers_count()
+    1
+
+    >>> adapter_context.children_workers()
+    [<ForkProcess name='SyncManager-1' pid=47103 parent=39164 started>]
 
 
 Persistence in parallelism
