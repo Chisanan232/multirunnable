@@ -706,7 +706,16 @@ You also can get the instance of current worker via **context** module of runnab
 Current worker's name
 ----------------------
 
-content ...
+You also can get the worker name of current worker via *context* module:
+
+.. code-block:: python
+
+    >>> from multirunnable import set_mode, RunningMode
+    >>> from multirunnable.adapter.context import context as adapter_context
+
+    >>> set_mode(RunningMode.Parallel)
+    >>> adapter_context.get_current_worker_name()
+    'MainProcess'
 
 
 Current worker's Identity
