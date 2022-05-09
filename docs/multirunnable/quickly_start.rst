@@ -163,6 +163,8 @@ The way to get running result is same as *Executor*:
     print("Result: ", _result)
 
 
+.. _Running with Synchronizations:
+
 Running with Synchronizations
 ==============================
 
