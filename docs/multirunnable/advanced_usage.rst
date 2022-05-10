@@ -125,7 +125,7 @@ lock.
 .. _Retry to run target function if it raises exception:
 
 Retry to run target function if it raises any exception
-======================================================
+=========================================================
 
 *retry* - Retry to do it
 ------------------------
