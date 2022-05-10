@@ -2,160 +2,116 @@
 Advanced Usages
 ================
 
-This package classifies the runnable unit to be Executor and Pool.
-It also supports doing some operators with running multiple tasks simultaneously 
-like Lock, Semaphore, Event, etc.
+This page for the people who have some requirements which doesn't be satisfied or resolved by :doc:`Quickly Start <quickly_start>`.
 
-Run Executor or Pool with RunningMode
+
+.. _Synchronization with Python decorator:
+
+Synchronization with Python decorator
 ======================================
 
-.. _Executor Usage:
+You could learn about how to use synchronization features in :ref:`Running with Synchronizations <Running with Synchronizations>` in Quickly Start.
+Actually, you also could use it with a easier way --- Python decorator.
 
-*Executor*
-------------
+No matter for *Lock*, *RLock*, *Semaphore* or *Bounded Semaphore*, they all could work with
+Python keyword *with*. The code in the same indentation would be run synchronously. For the
+same reason, *RunWith* implements some decorators so that function would run synchronously
+under the decorator.
 
-This object would operate with basic unit runnable object like Process or Thread by running strategy.
+The synchronization features of *MultiRunnable* which support usage with Python decorator are:
 
-.. code-block:: python
+* Lock
+* RLock
+* Semaphore
+* Bounded Semaphore
 
-    from multirunnable import SimpleExecutor, RunningMode
-
-    executor = SimpleExecutor(mode=RunningMode.Parallel, executors=3)
-    executor.run(function=<Your target function>, args=<The arguments of target function>)
-
-
-.. _Pool Usage:
-
-*Pool*
--------
-
-This is Pool of runnable object with running strategy.
-
-.. code-block:: python
-
-    from multirunnable import SimplePool, RunningMode
-
-    pool = SimplePool(mode=RunningMode.Parallel, pool_size=3, tasks_size=10)
-    pool.async_apply(function=<Your target function>, args=<The arguments of target function>)
-
-
-
-.. _Synchronize MultiRunnable Task --- Lock the performance:
-
-Synchronize MultiRunnable Task --- Lock the performance
-=========================================================
-
-It could synchronize tasks of *multirunnable* objects with Lock, Semaphore, etc.
-
-*Lock*
--------
-
-With *multirunnable*, it should initial Lock objects before you use it.
-
-.. code-block:: python
-
-    from multirunnable import SimpleExecutor, RunningMode
-    from multirunnable.adapter import Lock
-
-    # Initial Lock object
-    lock = Lock()
-
-    executor = SimpleExecutor(mode=RunningMode.Parallel, executors=3)
-    # Pass it into executor or pool via option *features*
-    executor.run(function=<Your target function>, features=lock)
-
-
-It could use the Lock object via object **LockOperator**.
-
-.. code-block:: python
-
-    from multirunnable.api import LockOperator
-    import time
-
-    lock = LockOperator()
-
-    def lock_function():
-        lock.acquire()
-        print("Running process in lock and will sleep 2 seconds.")
-        time.sleep(2)
-        print(f"Wake up process and release lock.")
-        lock.release()
-
-
-or implement via Python keyword **with**:
-
-.. code-block:: python
-
-    from multirunnable.api import LockOperator
-    import time
-
-    lock = LockOperator()
-
-    def lock_function():
-        with lock:
-            print("Running process in lock and will sleep 2 seconds.")
-            time.sleep(2)
-            print(f"Wake up process and release lock.")
-
-
-Above implementations with Lock feature is equal to below:
-
-.. code-block:: python
-
-    import threading
-    import time
-
-    ... # Some logic
-
-    lock = threading.Lock()
-
-    print(f"Here is sample function running with lock.")
-    lock.acquire()
-    print(f"Process in lock and it will sleep 2 seconds.")
-    time.sleep(2)
-    print(f"Wake up process and release lock.")
-    lock.release()
-
-    ... # Some logic
-
-
-Or with keyword **with**:
-
-.. code-block:: python
-
-    import threading
-    import time
-
-    ... # Some logic
-
-    lock = threading.Lock()
-
-    print(f"Here is sample function running with lock.")
-    with lock:
-        print(f"Process in lock and it will sleep 2 seconds.")
-        time.sleep(2)
-        print(f"Wake up process and release lock.")
-
-    ... # Some logic
-
-
-✨👀 **Using multirunnable features with Python decorator**
-
-It also could use Lock via decorator **RunWith** (it's **AsyncRunWith** with Asynchronous).
+You could enjoy this feature via **RunWith**. Let's import module before demonstrate:
 
 .. code-block:: python
 
     from multirunnable.api import RunWith
-    import time
+
+
+Let's start to use synchronization features.
+
+*Lock*
+-------
+
+Following code is a demonstration with *RunWith*:
+
+.. code-block:: python
+
+    from multirunnable import sleep
 
     @RunWith.Lock
     def lock_function():
         print("Running process in lock and will sleep 2 seconds.")
-        time.sleep(2)
-        print(f"Wake up process and release lock.")
+        sleep(2)
+        print("Wake up process and release lock.")
 
 
-Only these features support decorator: **Lock**, **RLock**, **Semaphore**, **Bounded Semaphore**.
+The function *lock_function* would work synchronously. Below code working is the same as above:
+
+.. code-block:: python
+
+    lock_opt = LockOperator()
+
+    def lock_function():
+        with lock_opt:
+            print("Running process in Lock and it will sleep 2 seconds.")
+            sleep(2)
+            print(f"Wake up process and release Lock.")
+
+
+In the other words, code would works synchronously which in the same indentation for Python keyword *with*;
+code would be blocking to run in the function with decorator *RunWith*.
+
+For other features, the usage is completely the same. So it only demonstrates the usage without introduction for others.
+
+
+*RLock*
+--------
+
+.. code-block:: python
+
+    from multirunnable import sleep
+
+    @RunWith.RLock
+    def rlock_function():
+        print("Running process in RLock and it will sleep 2 seconds.")
+        sleep(2)
+        print("Wake up process and release RLock.")
+
+
+
+*Semaphore*
+-------------
+
+.. code-block:: python
+
+    from multirunnable import sleep
+
+    @RunWith.Semaphore
+    def smp_function():
+        print("Running process with Semaphore and it will sleep 2 seconds.")
+        sleep(2)
+        print("Wake up process and release Semaphore.")
+
+
+
+*Bounded Semaphore*
+---------------------
+
+.. code-block:: python
+
+    from multirunnable import sleep
+
+    @RunWith.BoundedSemaphore
+    def bsmp_function():
+        print("Running process with Bounded Semaphore and it will sleep 2 seconds.")
+        sleep(2)
+        print("Wake up process and release Bounded Semaphore.")
+
 
 Why Lock with decorator?
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -166,223 +122,13 @@ let parallelism stay at high performance. It also could remind others this funct
 lock.
 
 
-*Semaphore*
--------------
-
-Semaphore could accept multiple runnable objects to run target function:
-
-.. code-block:: python
-
-    from multirunnable.api import RunWith
-    import time
-
-    @RunWith.Semaphore
-    def lock_function():
-        print("Running process in lock and will sleep 2 seconds.")
-        time.sleep(2)
-        print(f"Wake up process and release lock.")
-
-
-Synchronize MultiRunnable Task --- Communicate with each others
-================================================================
-
-For features Event and Condition, they all don't support using with decorator. 
-So it must use it via operator object.
-
-*Event*
----------
-
-.. code-block:: python
-
-    from multirunnable import SimpleExecutor, RunningMode, sleep
-    from multirunnable.api import EventOperator
-    from multirunnable.adapter import Event
-    import random
-
-
-    class WakeupProcess:
-
-        __event_opt = EventOperator()
-
-        def wake_other_process(self, *args):
-            print(f"[WakeupProcess] It will keep producing something useless message.")
-            while True:
-                __sleep_time = random.randrange(1, 10)
-                print(f"[WakeupProcess] It will sleep for {__sleep_time} seconds.")
-                sleep(__sleep_time)
-                self.__event_opt.set()
-
-
-    class SleepProcess:
-
-        __event_opt = EventOperator()
-
-        def go_sleep(self, *args):
-            print(f"[SleepProcess] It detects the message which be produced by ProducerThread.")
-            while True:
-                sleep(1)
-                print("[SleepProcess] ConsumerThread waiting ...")
-                self.__event_opt.wait()
-                print("[SleepProcess] ConsumerThread wait up.")
-                self.__event_opt.clear()
-
-
-    if __name__ == '__main__':
-
-        __wakeup_p = WakeupProcess()
-        __sleep_p = SleepProcess()
-
-        # Initialize Event object
-        __event = Event()
-
-        # # # # Run without arguments
-        executor = SimpleExecutor(mode=RunningMode.Parallel, executors=3)
-        executor.map_with_function(
-            functions=[__wakeup_p.wake_other_process, __sleep_p.go_sleep],
-            features=__event)
-
-
-*Condition*
--------------
-
-.. code-block:: python
-
-    from multirunnable import SimpleExecutor, RunningMode, QueueTask, sleep
-    from multirunnable.api import ConditionOperator, QueueOperator
-    from multirunnable.adapter import Condition
-    from multirunnable.concurrent import ThreadQueueType
-    import random
-
-
-    class ProducerProcess:
-      __Queue_Name = "test_queue"
-
-      def __init__(self):
-        self.__condition_opt = ConditionOperator()
-        self.__queue_opt = QueueOperator()
-
-      def send_process(self, *args):
-        print("[Producer] args: ", args)
-        test_queue = self.__queue_opt.get_queue_with_name(name=self.__Queue_Name)
-        print(f"[Producer] It will keep producing something useless message.")
-        while True:
-          __sleep_time = random.randrange(1, 10)
-          print(f"[Producer] It will sleep for {__sleep_time} seconds.")
-          test_queue.put(__sleep_time)
-          sleep(__sleep_time)
-          __condition = self.__condition_opt
-          with __condition:
-            self.__condition_opt.notify_all()
-
-
-    class ConsumerProcess:
-      __Queue_Name = "test_queue"
-
-      def __init__(self):
-        self.__condition_opt = ConditionOperator()
-        self.__queue_opt = QueueOperator()
-
-      def receive_process(self, *args):
-        print("[Consumer] args: ", args)
-        test_queue = self.__queue_opt.get_queue_with_name(name=self.__Queue_Name)
-        print(f"[Consumer] It detects the message which be produced by ProducerThread.")
-        while True:
-          __condition = self.__condition_opt
-          with __condition:
-            sleep(1)
-            print("[Consumer] ConsumerThread waiting ...")
-            self.__condition_opt.wait()
-            __sleep_time = test_queue.get()
-            print("[Consumer] ConsumerThread re-start.")
-            print(f"[Consumer] ProducerThread sleep {__sleep_time} seconds.")
-
-
-    class ExampleOceanSystem:
-      __Executor_Number = 1
-
-      __producer_p = ProducerProcess()
-      __consumer_p = ConsumerProcess()
-
-      @classmethod
-      def main_run(cls):
-        # Initialize Condition object
-        __condition = Condition()
-
-        # Initialize Queue object
-        __task = QueueTask()
-        __task.name = "test_queue"
-        __task.queue_type = ThreadQueueType.Queue
-        __task.value = []
-
-        # Initialize and run ocean-simple-executor
-        __exe = SimpleExecutor(mode=RunningMode.Concurrent, executors=cls.__Executor_Number)
-        # # # # Run without arguments
-        __exe.map_with_function(
-          functions=[cls.__producer_p.send_process, cls.__consumer_p.receive_process],
-          queue_tasks=__task,
-          features=__condition)
-
-
-    if __name__ == '__main__':
-      print("[MainProcess] This is system client: ")
-      system = ExampleOceanSystem()
-      system.main_run()
-      print("[MainProcess] Finish. ")
-
-
-
-Using Queue in MultiRunnable
-=============================
-
-The Queue in *multirunnable* classify to different type by running strategy.
-For usage, it should do 2 things: initial and get.
-
-*Queue*
----------
-
-It must use Queue feature with object **QueueTask**. It could configure some info like name, type and value.
-Name is a key of the queue object. Type means which one Queue object type you want to use.
-
-For example, we want to set a Queue with name "test_queue", type is **multiprocessing.Queue**:
-
-.. code-block:: python
-
-    from multirunnable import QueueTask
-    from multirunnable.parallel import ProcessQueueType
-
-    test_queue_task = QueueTask()
-    test_queue_task.name = "test_queue"
-    test_queue_task.queue_type = ProcessQueueType.Queue
-    test_queue_task.value = [f"value_{i}" for i in range(20)]
-
-
-We could get the queue object via **QueueOperator**:
-
-.. code-block:: python
-
-    from multirunnable.api import QueueOperator
-
-    queue = QueueOperator.get_queue_with_name(name="test_queue")
-
-
-Also, we need to pass it by parameter '_queue_task_' before we use it.
-
-.. code-block:: python
-
-    from multirunnable import SimpleExecutor, RunningMode
-
-    executor = SimpleExecutor(mode=RunningMode.Parallel, executors=3)
-    executor.run(function=<Your target function>, queue_tasks=test_queue_task)
-
-
-
 .. _Retry to run target function if it raises exception:
 
-Retry to run target function if it raises exception
-====================================================
+Retry to run target function if it raises any exception
+======================================================
 
-*retry*
---------
+*retry* - Retry to do it
+------------------------
 
 It's possible that occurs unexpected something when running. Sometimes, it needs 
 to catch that exceptions or errors to do some handling or it needs to do something
@@ -392,36 +138,45 @@ It could use the feature via Python decorator **retry** (It's **async_retry** wi
 
 .. code-block:: python
 
+    from multirunnable import sleep
     from multirunnable.api import retry
-    import multirunnable
 
     @retry
     def target_fail_function(*args, **kwargs):
         print("It will raise exception after 3 seconds ...")
-        multirunnable.sleep(3)
+        sleep(3)
         raise Exception("Test for error")
 
 
-It absolutely could configure timeout time (Default value is 1).
+Absolutely, it could configure how many times it would timeout (Default value is 1).
 
 .. code-block:: python
 
+    from multirunnable import sleep
     from multirunnable.api import retry
-    import multirunnable
 
     @retry(timeout=3)
     def target_fail_function(*args, **kwargs):
         print("It will raise exception after 3 seconds ...")
-        multirunnable.sleep(3)
+        sleep(3)
         raise Exception("Test for error")
 
 
 It would be decorated as a 'retry' object after adds decorator on it. 
-So we could add some features you need.
+So we could add some features if you need:
 
-* Initialization
+* :ref:`<retry function object>.initialization - Do it before run target retry function <initialization>`
+* :ref:`<retry function object>.done_handling - Do it after run target retry function successfully <done_handling>`
+* :ref:`<retry function object>.final_handling - No matter what it happens after it runs target retry function, it must to do it finally <final_handling>`
+* :ref:`<retry function object>.error_handling - Do it after run target retry function if it get fail <error_handling>`
 
-The function which should be run first before run target function.
+.. _initialization:
+
+*initialization* - Do it before retry
+--------------------------------------
+
+The function which should be run first before run target retry function. It doesn't receive any
+argument and it doesn't return value, too.
 
 .. code-block:: python
 
@@ -430,9 +185,14 @@ The function which should be run first before run target function.
         print("This is testing initialization")
 
 
-* Done Handling
+.. _done_handling:
 
-It will return value after run completely target function.
+*done_handling* - Do it after retry and run successfully
+---------------------------------------------------------
+
+It runs *done_handling* function after it runs target retry function successfully without
+raising any exception. It has an argument *result* which is the return value of target retry
+function. It also can return value which is the truly return value for outside caller.
 
 .. code-block:: python
 
@@ -440,11 +200,18 @@ It will return value after run completely target function.
     def done(result):
         print("This is testing done process")
         print("Get something result: ", result)
+        return result
 
 
-* Final Handling
+.. _final_handling:
 
-It's the feature run something which MUST to do. For example, close IO.
+*final_handling* - Must to do it after retry
+---------------------------------------------
+
+No matter what it happens in target retry function, it MUST to run this finally.
+For example, close IO stream.
+
+It doesn't receive any argument and it doesn't return any value.
 
 .. code-block:: python
 
@@ -453,9 +220,14 @@ It's the feature run something which MUST to do. For example, close IO.
         print("This is final process")
 
 
-* Exception & Error - Handling
+.. _error_handling:
 
-Target to handle every exception or error.
+*error_handling* - Do it if it get fail in retry
+------------------------------------------------
+
+Target to handle every exceptions or errors. It only receive one argument *error* which is
+what exception or error it got when it run the target retry function. It doesn't have any
+return value.
 
 .. code-block:: python
 
@@ -464,4 +236,259 @@ Target to handle every exception or error.
         print("This is error process")
         print("Get something error: ", error)
 
+
+Persistence in parallelism
+===========================
+
+For a parallelism development, persistence may be the most difficult problem.
+*MultiRunnable* provides some APIs or rules to let you use it or implement it if it needs.
+
+
+Operate with file
+------------------
+
+About persistence as file, it could use FAO (File Access Object) with object *BaseFao* directly:
+
+.. code-block:: python
+
+    fao = BaseFao(strategy=SavingStrategy.ALL_THREADS_ONE_FILE)
+    fao.save_as_csv(mode="a+", file="testing.csv", data=_data)
+    fao.save_as_excel(mode="a+", file="testing.xlsx", data=_data)
+    fao.save_as_json(mode="a+", file="testing.json", data=_data)
+
+
+Consider about remove the template implementations to let subclass to implement it like database subpackage.
+It will deprecate this at version 0.18.0 and remove this at version 0.19.0 if it ensures the decision.
+
+
+Operate with database
+----------------------
+
+It has 3 sections in subpackage *multirunnable.persistence.database*.
+
+* Connection Factory
+    module: *multirunnable.persistence.database.strategy*
+
+    * Single Connection
+    * Connection Pool
+
+* Database Operators
+    module: *multirunnable.persistence.database.operator*
+
+For connection factory section, literally, its responsibility is generating connection or connection pool instance(s).
+For another one --- operator, it responses of doing any operators with database via the connection instance which be generated from connection factory.
+
+
+About implementing customized persistence objects with database, it should inherit some classes if it needs:
+
+* Connection Factory
+    * Single Connection:
+        object: *BaseSingleConnection*
+    * Connection Pool:
+        object: *BaseConnectionPool*
+
+* Database Operators:
+    object: *DatabaseOperator*
+
+It could only select one of them of Connection Factory. Below are some demonstrations of how to implement them (demonstrating with MySQL).
+
+
+Connection Strategy
+~~~~~~~~~~~~~~~~~~~~~
+
+For *BaseSingleConnection* object, it should implement 4 functions:
+
+* **_connect_database**: connect to database to create session.
+* **_is_connected**: it should return *True* if session is connected.
+* **commit**: commit the execution in session to database.
+* **_close_connection**: close the session resource of database.
+
+.. code-block:: python
+
+    from mysql.connector.connection import MySQLConnection
+    from mysql.connector.cursor import MySQLCursor
+    import mysql.connector
+
+
+    class MySQLSingleConnection(BaseSingleConnection):
+
+        def _connect_database(self, **kwargs) -> MySQLConnection:
+            _connection = mysql.connector.connect(**kwargs)
+            return _connection
+
+
+        def _is_connected(self) -> bool:
+            return self.current_connection.is_connected()
+
+
+        def commit(self) -> None:
+            self.current_connection.commit()
+
+
+        def _close_connection(self) -> None:
+            if self.current_connection is not None and self.current_connection.is_connected():
+                self.current_connection.close()
+
+
+For *BaseConnectionPool* object, it should implement 6 functions:
+
+* **connect_database**: connect to database to build a connection pool.
+* **_get_one_connection**: get one connection instance from the connection pool.
+* **_is_connected**: it should return *True* if session is connected.
+* **_commit**: commit the execution in session to database.
+* **_close_connection**: close the connection resource of database.
+* **close_pool**: close the pool resource of database.
+
+.. code-block:: python
+
+    from mysql.connector.connection import MySQLConnection
+    from mysql.connector.pooling import MySQLConnectionPool, PooledMySQLConnection
+    from mysql.connector.errors import PoolError
+    from mysql.connector.cursor import MySQLCursor
+    import mysql.connector
+
+
+    class MySQLDriverConnectionPool(BaseConnectionPool):
+
+        def connect_database(self, **kwargs) -> MySQLConnectionPool:
+            connection_pool = MySQLConnectionPool(**kwargs)
+            return connection_pool
+
+
+        def _get_one_connection(self, pool_name: str = "", **kwargs) -> PooledMySQLConnection:
+            while True:
+                try:
+                    __connection = get_connection_pool(pool_name=pool_name).get_connection()
+                    logging.info(f"Get a valid connection: {__connection}")
+                    return __connection
+                except PoolError as e:
+                    logging.error(f"Connection Pool: {get_connection_pool(pool_name=pool_name)} ")
+                    logging.error(f"Will sleep for 5 seconds to wait for connection is available.")
+                    time.sleep(5)
+                except AttributeError as ae:
+                    raise ConnectionError(f"Cannot get the one connection instance from connection pool because it doesn't exist the connection pool with the name '{pool_name}'.")
+
+
+        def _is_connected(self, conn: PooledMySQLConnection) -> bool:
+            return conn.is_connected()
+
+
+        def _commit(self, conn: PooledMySQLConnection) -> None:
+            conn.commit()
+
+
+        def _close_connection(self, conn: PooledMySQLConnection) -> None:
+            if self.connection is not None and self.connection.is_connected():
+                self.connection.close()
+
+
+        def close_pool(self, pool_name: str) -> None:
+            get_connection_pool(pool_name=pool_name).close()
+
+
+Operator
+~~~~~~~~~~
+
+For *DatabaseOperator* object, it could implement some functions:
+
+* **initial_cursor**: initial a cursor instance for all functions to do some operators with database.
+* **execute**: execute the SQL query.
+* **execute_many**: batch execute the SQL query.
+* **fetch_one**: get one data row.
+* **fetch_many**: get a specific count of data rows.
+* **fetch_all**: get all data rows.
+
+.. code-block:: python
+
+    class MySQLOperator(DatabaseOperator):
+
+        def __init__(self, conn_strategy: BaseDatabaseConnection, db_config: Dict = {}):
+            super().__init__(conn_strategy=conn_strategy, db_config=db_config)
+
+
+        def initial_cursor(self, connection: Union[MySQLConnection, PooledMySQLConnection]) -> MySQLCursor:
+            return connection.cursor(buffered=True)
+
+
+        def execute(self, operator: Any, params: Tuple = None, multi: bool = False) -> MySQLCursor:
+            return self._cursor.execute(operation=operator, params=params, multi=multi)
+
+
+        def execute_many(self, operator: Any, seq_params=None) -> MySQLCursor:
+            return self._cursor.executemany(operation=operator, seq_params=seq_params)
+
+
+        def fetch_one(self) -> MySQLCursor:
+            return self._cursor.fetchone()
+
+
+        def fetch_many(self, size: int = None) -> MySQLCursor:
+            return self._cursor.fetchmany(size=size)
+
+
+        def fetch_all(self) -> MySQLCursor:
+            return self._cursor.fetchall()
+
+
+Dao
+~~~~~
+
+Finally, let's implement your customized DAO which extends *BaseDao*:
+
+* **_instantiate_strategy**: initial strategy.
+* **_instantiate_database_opts**: initial database operator.
+
+.. code-block:: python
+
+    class TestingDao(BaseDao):
+
+        def __init__(self, db_driver=None, use_pool=False):
+            self.db_driver = db_driver
+            self.use_pool = use_pool
+
+            # Initial and connect to database and get connection, cursor (or session) instance
+            self._database_config = {
+                "host": "127.0.0.1",
+                # "host": "172.17.0.6",
+                "port": "3306",
+                "user": "root",
+                "password": "password",
+                "database": "tw_stock"
+            }
+
+            super().__init__()
+            self._logger = logging.getLogger(self.__class__.__name__)
+
+
+        def _instantiate_strategy(self) -> BaseDatabaseConnection:
+            if self.db_driver == "mysql":
+                # from db_mysql import MySQLSingleConnection, MySQLDriverConnectionPool, MySQLOperator
+                if self.use_pool is True:
+                    db_conn_strategy = MySQLDriverConnectionPool(**self._database_config)
+                else:
+                    db_conn_strategy = MySQLSingleConnection(**self._database_config)
+                return db_conn_strategy
+            else:
+                raise ValueError
+
+
+        def _instantiate_database_opts(self, strategy: BaseDatabaseConnection) -> DatabaseOperator:
+            _database_opts = MySQLOperator(conn_strategy=strategy)
+            return _database_opts
+
+
+        def get_test_data(self):
+            self.execute('SELECT col_1, col_2 FROM test.test_table LIMIT 10')
+            data = self.fetch_all()
+            return data
+
+
+Okay, we done all tasks we need to implement! Let's try to use it via *DAO*:
+
+.. code-block:: python
+
+    _dao = TestingDao(db_driver="mysql")    # Use single connection strategy
+    # _dao = TestingDao(db_driver="mysql", use_pool=True)    # Use connections pool
+    _data = _dao.get_test_data()
+    print(f"Data: {_data}")
 
