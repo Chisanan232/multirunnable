@@ -190,8 +190,8 @@ It's also the same with Coroutine --- Asynchronous. But please remember that tar
         executor.run(function=function, args={"index": f"test_{random.randrange(1, 10)}"})
 
 
-Quickly Start
-==============
+Simple Demonstration
+======================
 
 Install this package by pip:
 
