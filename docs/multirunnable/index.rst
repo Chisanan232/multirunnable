@@ -54,7 +54,6 @@ This part of documentation, which introduces the package and has some step-by-st
    installation
    quickly_start
    advanced_usage
-   examples
 
 
 API Reference
