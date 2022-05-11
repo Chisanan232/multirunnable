@@ -113,13 +113,14 @@ For other features, the usage is completely the same. So it only demonstrates th
         print("Wake up process and release Bounded Semaphore.")
 
 
-Why Lock with decorator?
-~~~~~~~~~~~~~~~~~~~~~~~~~
+.. note::
 
-Lock, Semaphore or something else features would deeply affect the performance of parallelism.
-*MultiRunnable* require developers do as much as you can about ONLY lock the necessary section to
-let parallelism stay at high performance. It also could remind others this function would run with
-lock.
+    **Why design it could use Lock with decorator?**
+
+    *Lock*, *Semaphore* or something else features would deeply affect the performance of parallelism.
+    *MultiRunnable* require developers do as much as you can about ONLY lock the necessary section to
+    let parallelism stay at high performance. It also could remind others this function would run with
+    lock.
 
 
 .. _Retry to run target function if it raises exception:
