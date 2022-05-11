@@ -48,6 +48,7 @@ General documentation
 This part of documentation, which introduces the package and has some step-by-step instructions for using or building parallelism features.
 
 .. toctree::
+   :caption: General documentation
    :maxdepth: 3
 
    introduction
@@ -62,6 +63,7 @@ API Reference
 Information about some function, class or method.
 
 .. toctree::
+   :caption: API Reference
    :maxdepth: 2
 
    Mode </api_references/mode.rst>
@@ -83,6 +85,7 @@ Development documentation
 If you're curious about the detail of implementation of this package includes workflow, software architecture, system design or development, this section is for you.
 
 .. toctree::
+   :caption: Development documentation
    :maxdepth: 2
 
    flow
