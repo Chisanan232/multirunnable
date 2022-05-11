@@ -185,6 +185,42 @@ another one is usage with **Adapter**.
     Therefore you could do anything with it.
 
 
+The different in implementation between them is:
+
+* *Factory & Operator*
+
+    1. Need to pass the factory instance into *Executor* or *Pool* via argument *features*.
+    2. Generate instance by *Factory* and operator it by *Operator*.
+
+    .. _Factory & Operator final using example:
+
+    Therefore, it always has following code:
+
+    .. code-block:: python
+
+        from multirunnable import SimpleExecutor, RunningMode
+
+        executor = SimpleExecutor(mode=RunningMode.Parallel, executors=3)
+        executor.run(function=lock_function, features=<Factory instance>)    # Has argument *features*
+
+
+* *Adapter*
+
+    1. Does NOT need to pass adapter instance into *Executor* or *Pool*.
+    2. Generate instance and operator it by *Adapter*.
+
+    .. _Adapter final using example:
+
+    Therefore, it always has following code:
+
+    .. code-block:: python
+
+        from multirunnable import SimpleExecutor, RunningMode
+
+        executor = SimpleExecutor(mode=RunningMode.Parallel, executors=3)
+        executor.run(function=lock_function)    # Doesn't has argument *features*
+
+
 Using Lock with *Factory & Operator*
 -------------------------------------
 
@@ -192,7 +228,7 @@ We should import the modules from 2 different sub-packages *factory* and *api* t
 
 .. code-block:: python
 
-    from multirunnable import SimpleExecutor, RunningMode, sleep
+    from multirunnable import sleep
     from multirunnable.factory import LockFactory
     from multirunnable.api import LockOperator
 
@@ -231,12 +267,8 @@ or you also could use it via Python keyword *with*:
             print(f"Wake up process and release lock.")
 
 
-Finally, please don't forget pass the Lock Factory by argument *features* (it's same in *Executor* or *Pool*):
-
-.. code-block:: python
-
-    executor = SimpleExecutor(mode=RunningMode.Parallel, executors=3)
-    executor.run(function=lock_function, features=lock_factory)
+Finally, please don't forget pass the Lock Factory by argument *features* (it's same in *Executor* or *Pool*).
+You could refer to the :ref:`using example code with Factory and Operator<Factory & Operator final using example>`.
 
 
 Using Lock with *Adapter*
@@ -269,12 +301,8 @@ So, you could operate it directly (absolutely, you also can use it via Python ke
         lock_adapter.release()
 
 
-Furthermore, you don't need to pass it  by argument *features*:
-
-.. code-block:: python
-
-    executor = SimpleExecutor(mode=RunningMode.Parallel, executors=3)
-    executor.run(function=lock_function)
+Furthermore, you don't need to pass it  by argument *features*. You could refer to
+the :ref:`using example code with Adapter<Adapter final using example>`.
 
 
 Using RLock with *Factory & Operator*
@@ -356,6 +384,8 @@ However, following code is a better usage with *RLock*:
 If you have multiple tasks (in generally, it's a function or method) to do which needs to be managed by lock,
 *RLock* would be the better choice for you.
 
+Finally, you could refer to the :ref:`using example code with Factory and Operator<Factory & Operator final using example>`.
+
 
 Using RLock with *Adapter*
 ---------------------------
@@ -390,6 +420,9 @@ So, you could operate it directly (absolutely, you also can use it via Python ke
                 print(f"Release RLock first time.")
 
             print(f"Release RLock second time and wake up process.")
+
+
+Finally, you could refer to the :ref:`using example code with Adapter<Adapter final using example>`
 
 
 Using Semaphore with *Factory & Operator*
@@ -443,6 +476,9 @@ Modify to implement with Python keyword *with*:
             print(f"Release Semaphore.")
 
 
+Finally, you could refer to the :ref:`using example code with Factory and Operator<Factory & Operator final using example>`.
+
+
 Using Semaphore with *Adapter*
 -------------------------------
 
@@ -469,6 +505,9 @@ So, you could operate it directly (absolutely, you also can use it via Python ke
             print("Acquire Semaphore.")
             sleep(2)
             print(f"Release Semaphore.")
+
+
+Finally, you could refer to the :ref:`using example code with Adapter<Adapter final using example>`.
 
 
 Using Bounded Semaphore
@@ -570,6 +609,8 @@ Following code is the worker which is waiting for the event flag to be *True* an
             _event_opt.clear()
 
 
+.. _example code using Communication with Factory and Operator:
+
 You need to run both workers with 2 different functions so that you should use function *SimpleExecutor.map_with_function*.
 Its working is same as Python native function *map*, but it works with the collection of functions:
 
@@ -593,6 +634,18 @@ So we could only modify the instantiation like following code:
     from multirunnable.adapter import Event
 
     _event_adapter = Event()
+
+
+.. _example code using Communication with Adapter:
+
+And don't forget, you doesn't need to pass the instance to *Executor* or *Pool*:
+
+.. code-block:: python
+
+    _exe = SimpleExecutor(mode=RunningMode.Concurrent, executors=1)
+    _exe.map_with_function(
+        functions=[cls.__wakeup_p.wake_other_process, cls.__sleep_p.go_sleep]
+    )
 
 
 Using Condition with *Factory & Operator*
@@ -686,6 +739,9 @@ Since it has *Lock* (or *RLock*) features, absolutely it would use by Python key
                 print(f"[Consumer] ProducerThread sleep {_sleep_time} seconds.")
 
 
+About how to using it, you could refer to :ref:`using example code with Factory and Operator<example code using Communication with Factory and Operator>`
+
+
 Using Condition with *Adapter*
 -------------------------------
 
@@ -697,6 +753,9 @@ So we could only modify the instantiation like following code:
     from multirunnable.adapter import Condition
 
     _condition_adapter = Condition()
+
+
+About how to using it, you could refer to :ref:`using example code with Adapter<example code using Communication with Adapter>`
 
 
 Get context info
