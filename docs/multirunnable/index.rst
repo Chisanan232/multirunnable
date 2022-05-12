@@ -49,7 +49,7 @@ This part of documentation, which introduces the package and has some step-by-st
 
 .. toctree::
    :caption: General documentation
-   :maxdepth: 3
+   :maxdepth: 2
 
    introduction
    installation
