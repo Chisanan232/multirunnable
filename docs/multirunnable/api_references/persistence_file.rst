@@ -94,28 +94,43 @@ File
 --------------
 
 *class* multirunnable.persistence.file.files.\ **File**\ *()*
+
     This is the basically class to let every subclass which for different file format to implement details and extend features.
     It already has 3 properties for subclass: *file_path*, *mode* and *encoding*.
 
+
 *property* **file_path**\ *()*
+
     The target file path. It could use *getting* and *setting* of this property.
 
+
 *property* **mode**\ *()*
+
     The mode how to operate with file. It could use *getting* and *setting* of this property.
 
+
 *property* **encoding**\ *()*
+
     The encoding of file IO. It could use *getting* and *setting* of this property.
 
+
 *abstract* **open**\ *()*
+
     Open an target file as an object which would be assign to class level variable. So it won't return anything.
 
+
 *abstract* **write**\ *(data: List[list], io_wrapper=None)*
+
     Write the data into file IO object.
 
+
 *abstract* **close**\ *()*
+
     Close the file IO. It MUST to do finally no matter you operate with file successfully or not.
 
+
 *abstract* **stream**\ *(data: List[list])*
+
     Return a IO streaming (ex: io.StringIO) object which save the data content.
 
 
@@ -123,6 +138,7 @@ CSVFormatter
 --------------
 
 *class* multirunnable.persistence.file.files.\ **CSVFormatter**\ *()*
+
     The implementation for saving data as *CSV* format.
 
 
@@ -130,6 +146,7 @@ XLSXFormatter
 ---------------
 
 *class* multirunnable.persistence.file.files.\ **XLSXFormatter**\ *(sheet_page: str)*
+
     The implementation for saving data as *XLSX* format.
     It receive an option *sheet_page* which would be set as the name of first one sheet page.
 
@@ -138,6 +155,7 @@ JSONFormatter
 ---------------
 
 *class* multirunnable.persistence.file.files.\ **JSONFormatter**\ *()*
+
     The implementation for saving data as *JSON* format.
 
 
@@ -155,23 +173,34 @@ Archiver
 --------------
 
 *class* multirunnable.persistence.file.archivers.\ **ZIPArchiver**\ *()*
+
     This is the basically class to let every subclass which for different archiver format to implement details and extend features.
     It already has 2 properties for subclass: *file_path* and *mode*.
 
+
 *property* **file_path**\ *()*
+
     The target archiver path. It could use *getting* and *setting* of this property.
 
+
 *property* **mode**\ *()*
+
     The mode how to operate with archiver. It could use *getting* and *setting* of this property.
 
+
 *abstract* **init**\ *()*
+
     Initial processing before compress. In generally, it would instantiate needed object like *zipfile.ZipFile*.
 
+
 *abstract* **compress**\ *(data_map_list: List[namedtuple])*
+
     Compress the data into target archiver. The argument *data_map_list*
     receives a list of NamedTuple object which has 2 attributes *file_path* and *data*.
 
+
 *abstract* **close**\ *()*
+
     Close the archiver IO object. Same as *File* object, it MUST to do this.
 
 
@@ -179,9 +208,12 @@ ZIPArchiver
 --------------
 
 *class* multirunnable.persistence.file.archivers.\ **ZIPArchiver**\ *()*
+
     The implementation for compressing data as *ZIP* format.
 
+
 **init**\ *()*
+
     Instantiate *zipfile.ZipFile*.
 
 
@@ -198,10 +230,13 @@ BaseSaver
 ----------
 
 *class* multirunnable.persistence.file.saver.\ **BaseSaver**\ *()*
+
     This is the basically class to let every subclass which for different saver to implement
     details and extend features with different file format, archiver or mediator.
 
+
 *abstract* **register**\ *(mediator: BaseMediator, strategy: SavingStrategy)*
+
     Register saving strategy which you want to use. It would register strategy object
 
 
@@ -209,12 +244,17 @@ FileSaver
 ------------
 
 *class* multirunnable.persistence.file.saver.\ **FileSaver**\ *()*
+
     The implementation for saving data as target format.
 
+
 **register**\ *(mediator: BaseMediator, strategy: SavingStrategy)*
+
     Register a *Mediator* type object to let it know how could it to do (save data).
 
+
 **save**\ *(file: str, mode: str, data: List[list], encoding: str = "UTF-8")*
+
     The truly API for client site to use to save data. This methods would return different value with different **SavingStrategy**.
 
     SavingStrategy:
@@ -246,7 +286,9 @@ FileSaver
             It won't save data but it would return it back to main runnable object.
             It returns a streaming object which saving result data and method *has_data* would be *True*.
 
+
 **has_data**\ *()*
+
     Return bool value. It's *True* if it returns data or streaming data of method *save*. Otherwise, it would be *False*.
 
 
@@ -254,12 +296,17 @@ ArchiverSaver
 ---------------
 
 *class* multirunnable.persistence.file.saver.\ **ArchiverSaver**\ *()*
+
     The implementation for saving data and compressing data as *ZIP* format.
 
+
 **register**\ *(mediator: BaseMediator, strategy: SavingStrategy)*
+
     Register a *Mediator* type object to let it know how could it to do (compress data).
 
+
 **compress**\ *(file: str, mode: str, data: List[namedtuple])*
+
     The truly API for client site to use to save and compress data.
 
 
@@ -275,21 +322,32 @@ SavingMediator
 ----------------
 
 *class* multirunnable.persistence.file.mediator.\ **SavingMediator**\ *()*
+
     A basically class about saving some references to let *BasicSaver* type object to refer.
 
+
 *property* **worker_id**\ *()*
+
     ID of runnable object(s), it maybe a thread ID, Process ID, etc. It could use *getting*, *setting* and *delete* of this property.
 
+
 **is_super_worker**\ *()*
+
     Return a bool value. It's *True* if current runnable object is main runnable object (like main-thread or main-process) or it's *False*.
 
+
 *property* **super_worker_running**\ *()*
+
     It's a bool value. It's *True* if it's running as main runnable object or it's *False*.
 
+
 *property* **child_worker_running**\ *()*
+
     It's a bool value. It's *True* if it's running as children runnable object or it's *False*.
 
+
 *property* **enable_compress**\ *()*
+
     It's a bool value. It's *True* if it needs to run compressing process or it's *False*.
 
 
@@ -307,18 +365,27 @@ BaseFao
 ---------
 
 *class* multirunnable.persistence.file.layer.\ **BaseFao**\ *()*
+
     This is the basically class to let every subclass to use it directly or extend features.
     It already has 4 methods for subclass: *save_as_json*, *save_as_csv*, *save_as_excel* and *compress_as_zip*.
 
+
 **save_as_json**\ *(file: str, mode: str, data: List[list])*
+
     Save data as *JSON* format file.
 
+
 **save_as_csv**\ *(file: str, mode: str, data: List[list])*
+
     Save data as *CSV* format file.
 
+
 **save_as_excel**\ *(file: str, mode: str, data: List[list])*
+
     Save data as *XLSX* format file.
 
+
 **compress_as_zip**\ *(file: str, mode: str, data: List)*
+
     Save and compress data which is a list of NamedTuple object has *file_path* and *data* values as *ZIP* format file.
 
