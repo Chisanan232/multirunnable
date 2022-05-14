@@ -88,10 +88,10 @@ If you're curious about the detail of implementation of this package includes wo
    :caption: Development documentation
    :maxdepth: 2
 
-   flow
-   architecture
-   test
-   ci_cd
+   Flows </development/flow.rst>
+   Software Architectures </development/architecture.rst>
+   Tests </development/test.rst>
+   CI / CD </development/ci_cd.rst>
 
 
 

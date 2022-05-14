@@ -215,27 +215,27 @@ Travis-CI (Deprecated)
     :target: https://coveralls.io/github/Chisanan232/multirunnable?branch=master
 
 
-.. |ci-cd-work-flow| image:: images/ci_cd/MultiRunnable-CI-CD_work_flow.drawio.png
+.. |ci-cd-work-flow| image:: ../images/ci_cd/MultiRunnable-CI-CD_work_flow.drawio.png
     :width: 750
     :alt: CI/CD work flow
 
 
-.. |ci-cd-work-circle| image:: images/ci_cd/MultiRunnable-CI-CD_work_circle.drawio.png
+.. |ci-cd-work-circle| image:: ../images/ci_cd/MultiRunnable-CI-CD_work_circle.drawio.png
     :width: 750
     :alt: CI/CD work flow
 
 
-.. |ci-by-develop| image:: images/ci_cd/GitHub_Actions_by_branch_develop.png
+.. |ci-by-develop| image:: ../images/ci_cd/GitHub_Actions_by_branch_develop.png
     :width: 750
     :alt: CI work-flow by Git branch 'develop'
 
 
-.. |ci-by-release| image:: images/ci_cd/GitHub_Actions_by_branch_release.png
+.. |ci-by-release| image:: ../images/ci_cd/GitHub_Actions_by_branch_release.png
     :width: 750
     :alt: CI work-flow by Git branch 'release'
 
 
-.. |ci-cd-by-master| image:: images/ci_cd/GitHub_Actions_by_branch_master.png
+.. |ci-cd-by-master| image:: ../images/ci_cd/GitHub_Actions_by_branch_master.png
     :width: 750
     :alt: CI/CD work-flow by Git branch 'master'
 

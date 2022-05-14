@@ -55,7 +55,7 @@ Below are all the modules which be related with others in this section:
     * multirunnable.factory.strategy
     * multirunnable.framework.runnable.strategy
 
-From the  example of :doc:`home page <index>` or demonstration in section :ref:`Executor Usage<Build by Executor>` in :doc:`quickly_start` (or :ref:`Pool Usage<Build via Pool>`) like below:
+From the  example of :doc:`home page <../index>` or demonstration in section :ref:`Executor Usage<Build by Executor>` in :doc:`../quickly_start` (or :ref:`Pool Usage<Build via Pool>`) like below:
 
 Executor:
 
@@ -140,7 +140,7 @@ The synchronization features of *MultiRunnable* be classified to 3 parts:
 The first one responses of generating instance and the second one provides operators of the instance.
 And the third one combines the features of *multirunnable.factory* and *multirunnable.api* in it.
 
-Please refer to :doc:`Synchronization API<api_references/synchronizations>` to get more details if it needs.
+Please refer to :doc:`Synchronization API<../api_references/synchronizations>` to get more details if it needs.
 
 Synchronization - Factory
 ----------------------------
@@ -286,7 +286,7 @@ Running Procedure:
 
 It would run in different way with different saving strategy in the saving process.
 About working flows, please refer to :ref:`Persistence as file Work Flow<Persistence - File Work Flow>` to get more info.
-About details, please refer to :doc:`Persistence as File API<api_references/persistence_file>`.
+About details, please refer to :doc:`Persistence as File API<../api_references/persistence_file>`.
 
 
 Persistence - Database
@@ -327,40 +327,40 @@ Running Procedure:
 4. Do some operators by the instance of the subclass of *BaseDao*.
 
 About persistence with database working flows, please refer to :ref:`Persistence with database Work Flow<Persistence - Database Work Flow>` to get more info.
-About details, please refer to :doc:`Persistence with Database API<api_references/persistence_database>`.
+About details, please refer to :doc:`Persistence with Database API<../api_references/persistence_database>`.
 
 
-.. |general-usage| image:: images/architectures/MultiRunnable-General_Usage-UML.png
+.. |general-usage| image:: ../images/architectures/MultiRunnable-General_Usage-UML.png
     :width: 400
     :alt: software architecture image about basic APIs
 
 
-.. |running-strategy| image:: images/architectures/MultiRunnable-Running_Strategy.png
+.. |running-strategy| image:: ../images/architectures/MultiRunnable-Running_Strategy.png
     :width: 800
     :alt: software architecture image about running strategies
 
 
-.. |synchronization-factory| image:: images/architectures/MultiRunnable-Synchronization(Factory).png
+.. |synchronization-factory| image:: ../images/architectures/MultiRunnable-Synchronization(Factory).png
     :width: 850
     :alt: software architecture image about synchronization feature with subpackage 'multirunnable.factory'
 
 
-.. |synchronization-api| image:: images/architectures/MultiRunnable-Synchronization(API).png
+.. |synchronization-api| image:: ../images/architectures/MultiRunnable-Synchronization(API).png
     :width: 850
     :alt: software architecture image about synchronization feature with subpackage 'multirunnable.api'
 
 
-.. |synchronization-adapter| image:: images/architectures/MultiRunnable-Synchronization(Adapter).png
+.. |synchronization-adapter| image:: ../images/architectures/MultiRunnable-Synchronization(Adapter).png
     :width: 850
     :alt: software architecture image about synchronization feature with subpackage 'multirunnable.adapter'
 
 
-.. |persistence-file| image:: images/architectures/MultiRunnable-Persistence-File.png
+.. |persistence-file| image:: ../images/architectures/MultiRunnable-Persistence-File.png
     :width: 750
     :alt: software architecture image about persistence feature with subpackage 'multirunnable.persistence.file'
 
 
-.. |persistence-database| image:: images/architectures/MultiRunnable-Persistence-Database.png
+.. |persistence-database| image:: ../images/architectures/MultiRunnable-Persistence-Database.png
     :width: 850
     :alt: software architecture image about persistence feature with subpackage 'multirunnable.persistence.database'
 
