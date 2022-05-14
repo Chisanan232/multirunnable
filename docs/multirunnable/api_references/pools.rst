@@ -13,6 +13,7 @@ Pool
 *module* multirunnable.pool
 
 *class* multirunnable.pool.\ **Pool**
+
     An abstracted class which implement mostly all methods. The left one abstract
     method *_initial_running_strategy* is generating running strategy with option *mode*.
 
@@ -34,6 +35,7 @@ SimplePool
 *class* multirunnable.pool.\ **SimplePool**
 
 **_initial_running_strategy**
+
     Initial running strategy object which executor uses. The running
     strategy be controlled by option *mode*.
 
