@@ -13,26 +13,35 @@ to catch that exceptions or errors to do some handling, it even needs to do some
 finally and keep going run the code. That's the reason this feature exists.
 
 *decorator* multirunnable.api.decorator.\ **retry**\ *(timeout)*
+
     Decorate on target function which needs to implement its customized retry handling.
 
-*decorator* **retry.initialization**\ *(*args, **kwargs)*
+
+*decorator* **initialization**\ *(*args, **kwargs)*
+
     The function which should be run first before run target function.
     Default implementation is doing nothing.
     The usage is decorating as target function annotation name and call **.initialization** method:
 
-*decorator* **retry.done_handling**\ *(func_result)*
+
+*decorator* **done_handling**\ *(func_result)*
+
     It will return value after run completely target function. This feature argument
     receives the result. You could do some result-handling here to reach your own target,
     and it will return it out.
     Default implementation is doing nothing, just return the result it gets.
     The usage is decorating as target function annotation name and call **.done_handling** method.
 
-*decorator* **retry.error_handling**\ *(e)*
+
+*decorator* **error_handling**\ *(e)*
+
     Target to handle every exception or error. So the function argument absolutely receives exception or error.
     Default implementation is raising any exception or error it gets.
     The usage is decorating as target function annotation name and call **.error_handling** method.
 
-*decorator* **retry.final_handling**\ *(func_result)*
+
+*decorator* **final_handling**\ *(func_result)*
+
     It's the feature run something which MUST to do. For example, close IO.
     Default implementation is doing nothing.
     The usage is decorating as target function annotation name and call **.final_handling** method.
@@ -69,6 +78,7 @@ async_retry
 -------------
 
 *decorator* multirunnable.api.decorator.\ **async_retry**\ *(timeout)*
+
     Asynchronous version of decorator *async_retry*. All usages of APIs are same as it, too.
 
 
@@ -76,19 +86,28 @@ RunWith
 ----------
 
 *decorator* multirunnable.api.decorator.\ **RunWith**
+
     This is a syntactic sugar for features (Lock, Semaphore, etc) of *multirunnable*.
     Please refer to the :doc:`./synchronizations` to get more details.
 
-*decorator* RunWith.**Lock**\ *(function)*
+
+*decorator* **Lock**\ *(function)*
+
     Using Lock feature via Python decorator with object *RunWith*.
 
-*decorator* RunWith.**RLock**\ *(function)*
+
+*decorator* **RLock**\ *(function)*
+
     Using RLock feature via Python decorator with object *RunWith*.
 
-*decorator* RunWith.**Semaphore**\ *(function)*
+
+*decorator* **Semaphore**\ *(function)*
+
     Using Semaphore feature via Python decorator with object *RunWith*.
 
-*decorator* RunWith.**BoundedSemaphore**\ *(function)*
+
+*decorator* **BoundedSemaphore**\ *(function)*
+
     Using BoundedSemaphore feature via Python decorator with object *RunWith*.
 
 
@@ -110,5 +129,6 @@ AsyncRunWith
 -------------
 
 *decorator* multirunnable.api.decorator.\ **AsyncRunWith**
+
     Asynchronous version of decorator *RunWith*. All usages of APIs are same as it, too.
 
