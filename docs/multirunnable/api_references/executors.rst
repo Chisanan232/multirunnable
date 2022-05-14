@@ -41,14 +41,9 @@ Executor
     Same as method *run*, but the mount of runnable workers which be created are same as mount of functions.
 
 
-**terminal**\ *()*
+**close**\ *()*
 
-    Terminate runnable worker(s).
-
-
-**kill**\ *()*
-
-    this function content ...
+    Close the resource of runnable worker(s).
 
 
 **result**\ *()*
