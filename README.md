@@ -16,7 +16,7 @@
 
 A Python library integrates the APIs of 3 strategies (Parallel, Concurrent, Coroutine) and 4 libraries (multiprocessing, threading, gevent, asyncio) to help developers build parallelism humanly.
 
-[Overview](#overview) | [Quickly Start](#quickly-start) | [Syntactic Sugar](#syntactic-sugar) | [Resource](#resource) | [Code Example](https://github.com/Chisanan232/multirunnable/tree/master/example)
+[Overview](#overview) | [Quickly Start](#quickly-start) | [Syntactic Sugar](#syntactic-sugar) | [Documentation](#documentation) | [Code Example](https://github.com/Chisanan232/multirunnable/tree/master/example)
 <hr>
 
 ## Overview
@@ -102,7 +102,18 @@ def lock_function():
 *Lock*, *RLock*, *Semaphore*, *Bounded Semaphore*.
 
 
-## Resource
+## Documentation
 
 The [documentation](https://multirunnable.readthedocs.io) contains more details, and examples.
 
+* [Quickly Start](https://multirunnable.readthedocs.io/en/latest/quickly_start.html) to develop parallelism with *MultiRunnable*
+* Detail *MultiRunnable* usage information of functions, classes and methods in [API References](https://multirunnable.readthedocs.io/en/latest/index.html#api-reference).
+* Be curious about how to join and develop *MultiRunnable*? [Development Documentation](https://multirunnable.readthedocs.io/en/latest/index.html#development-documentation) could be a good guide for you. 
+
+
+## Download 
+
+*MultiRunnable* still a young open source which keep growing. Here's its download state: 
+
+[![Downloads](https://pepy.tech/badge/multirunnable)](https://pepy.tech/project/multirunnable)
+[![Downloads](https://pepy.tech/badge/multirunnable/month)](https://pepy.tech/project/multirunnable)
