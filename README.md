@@ -14,9 +14,9 @@
 
 [comment]: <> (| Windows |[![Build status]&#40;https://ci.appveyor.com/api/projects/status/v0nq38jtof6vcm23?svg=true&#41;]&#40;https://ci.appveyor.com/project/Chisanan232/multirunnable&#41;|[![Coverage Status]&#40;https://coveralls.io/repos/github/Chisanan232/multirunnable/badge.svg?branch=master&#41;]&#40;https://coveralls.io/github/Chisanan232/multirunnable?branch=master&#41;|)
 
-A Python library integrates the APIs of 3 strategies (Parallel, Concurrent, Coroutine) and 4 libraries (multiprocessing, threading, gevent, asyncio) to help developers build parallelism humanly.
+A Python library integrates the APIs of 3 strategies (Parallel, Concurrent, Coroutine) via 4 libraries (multiprocessing, threading, gevent, asyncio) to help developers build parallelism humanly.
 
-[Overview](#overview) | [Quickly Start](#quickly-start) | [Syntactic Sugar](#syntactic-sugar) | [Documentation](#documentation) | [Code Example](https://github.com/Chisanan232/multirunnable/tree/master/example)
+[Overview](#overview) | [Quickly Start](#quickly-start) | [Syntactic Sugar in *MultiRunnable*](#syntactic-sugar-in-multirunnable) | [Documentation](#documentation) | [Code Example](https://github.com/Chisanan232/multirunnable/tree/master/example)
 <hr>
 
 ## Overview
@@ -24,7 +24,7 @@ A Python library integrates the APIs of 3 strategies (Parallel, Concurrent, Coro
 Package '_multirunnable_' is a library which could easily build a parallelism with different running strategy by mode option. 
 Currently, it has 4 options could use: Parallel, Concurrent, GreenThread and Asynchronous.
 
-Here's an example which implements parallelism as concurrent with _multirunnable_:
+Here's an example which builds parallelism as concurrent with _multirunnable_:
 
 ```python
 from multirunnable import SimpleExecutor, RunningMode
@@ -82,11 +82,11 @@ Write a simple code to run it.
     >>> 
 
 
-## Syntactic Sugar
+## Syntactic Sugar in *MultiRunnable*
 
-It could implement some features via Python decorator in _MultiRunnable_.
+It could use some features via Python decorator in _MultiRunnable_.
 
-For example, Lock via decorator **RunWith** (it's **AsyncRunWith** with Asynchronous):
+Following code is a demonstration about usage with Lock via decorator **RunWith** (it's **AsyncRunWith** with Asynchronous):
 
 ```python
 from multirunnable.api import RunWith
