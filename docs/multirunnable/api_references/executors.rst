@@ -68,3 +68,19 @@ SimpleExecutor
     Initial running strategy object which executor uses. The running
     strategy be controlled by option *mode*.
 
+
+
+AdapterExecutor
+=================
+
+*module* multirunnable.executor
+
+*class*  multirunnable.executor.\ **AdapterExecutor**\ *(strategy: _General_Runnable_Type = None)*
+
+
+**_initial_running_strategy**\ *()*
+
+    Initial running strategy object which executor uses. It would annotate the global
+    variable *General_Runnable_Strategy* with the strategy object it gets from parameter
+    *strategy*.
+
