@@ -11,7 +11,7 @@ Executor
 
 *module* multirunnable.executor
 
-*class*  multirunnable.executor.\ **Executor**\ *(mode=None, executors=1)*
+*class*  multirunnable.executor.\ **Executor**\ *(executors: int)*
 
     An abstracted class which implement mostly all methods. The left one abstract
     method *_initial_running_strategy* is generating running strategy with option *mode*.
@@ -19,29 +19,29 @@ Executor
     About️ option *mode* and *executors*, it will be deprecated in version 0.17.0.
 
 
-**start_new_worker**\ *(target, *args, **kwargs)*
+**start_new_worker**\ *(target: Callable, args: Tuple = (), kwargs: Dict = {})*
 
     It would initial a runnable worker and run it immediately. It won't close runnable worker.
 
 
-**run**\ *(function, args, queue_tasks, features)*
+**run**\ *(function: CallableType, args: Optional[Union[Tuple, Dict]] = None, queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None, features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None)*
 
     It would do initialing first (before instantiate runnable worker).
     It instantiates runnable workers as the mount by option *executors* and runs them.
     It would close the runnable worker finally.
 
 
-**map**\ *(function, args_iter, queue_tasks, features)*
+**map**\ *(function: CallableType, args_iter: IterableType = [], queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None, features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None)*
 
     Same as method *run*, but the mount of runnable workers which be created are same as mount of arguments.
 
 
-**map_with_function**\ *(functions, args_iter, queue_tasks, features)*
+**map_with_function**\ *(functions: IterableType[Callable], args_iter: IterableType = [], queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None, features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None)*
 
     Same as method *run*, but the mount of runnable workers which be created are same as mount of functions.
 
 
-**close**\ *()*
+**close**\ *(workers: Union[_MRTasks, List[_MRTasks]])*
 
     Close the resource of runnable worker(s).
 
@@ -60,7 +60,7 @@ SimpleExecutor
 
 *module* multirunnable.executor
 
-*class*  multirunnable.executor.\ **SimpleExecutor**\ *(mode=None, executors=1)*
+*class*  multirunnable.executor.\ **SimpleExecutor**\ *(executors: int, mode: _RunningMode = None)*
 
 
 **_initial_running_strategy**\ *()*
