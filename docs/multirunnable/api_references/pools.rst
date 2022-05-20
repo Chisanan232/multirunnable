@@ -24,7 +24,7 @@ Pool
 
     Therefore, all the APIs is the same as *PoolRunnableStrategy*.
 
-    About️ option *mode* and *executors*, it will be deprecated in version 0.17.0.
+    About️ option *mode* and *executors*, it has been deprecated in version 0.17.0.
 
 
 SimplePool
@@ -34,7 +34,7 @@ SimplePool
 
 *class* multirunnable.pool.\ **SimplePool**
 
-**_initial_running_strategy**
+**_initial_running_strategy**\ *()*
 
     Initial running strategy object which executor uses. The running
     strategy be controlled by option *mode*.
