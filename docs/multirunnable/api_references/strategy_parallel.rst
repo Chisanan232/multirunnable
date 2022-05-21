@@ -20,7 +20,7 @@ Process Strategy
     This class is an adapter of object `multiprocessing.Process <https://docs.python.org/3/library/multiprocessing.html#process-and-exceptions>`_.
 
 
-**initialization**\ *(queue_tasks, features, *args, **kwargs)*
+**initialization**\ *(queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None, features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None, *args, **kwargs)*
 
     Initialing something before instantiating and running Processes.
 
@@ -31,12 +31,12 @@ Process Strategy
     Its logic is equal to instantiating *multiprocessing.Process* and calling function *run*.
 
 
-*overload* **start_new_worker**\ *(target: Iterable, args, kwargs)*
+*overload* **start_new_worker**\ *(target: Callable, args: Tuple = (), kwargs: Dict = {})*
 
     Instantiating and running Processes.
 
 
-**generate_worker**\ *(target, *args, **kwargs)*
+**generate_worker**\ *(target: Callable, *args, **kwargs)*
 
     Instantiating Processes.
     Its logic is equal to instantiating *multiprocessing.Process*.
@@ -48,7 +48,7 @@ Process Strategy
     Its logic is equal to calling function *run*.
 
 
-*overload* **activate_workers**\ *(workers: Iterable)*
+*overload* **activate_workers**\ *(workers: List[Process])*
 
     Running Processes.
 
@@ -59,7 +59,7 @@ Process Strategy
     Its logic is equal to calling function *join* and *close* (calling *join* only in Python 3.6).
 
 
-*overload* **close**\ *(workers: Iterable)*
+*overload* **close**\ *(workers: List[Process])*
 
     Close Processes.
 
@@ -93,7 +93,7 @@ Process Pool Strategy
     So below only recording some functions which is different or new.
 
 
-**initialization**\ *(queue_tasks, features, *args, **kwargs)*
+**initialization**\ *(queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None, features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None, *args, **kwargs)*
 
     The initialization before run in parallel. It also initials features or queues here.
 
