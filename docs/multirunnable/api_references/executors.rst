@@ -124,7 +124,7 @@ SimpleExecutor
 
     Parameters:
         * *mode* (Optional[RunningMode]) : Which *RunningMode* choice to use.
-        * *executors* (int) : The count of :ref:`worker (MultiRunnable Worker Concept)` it would use.
+        * *executors* (int) : The count of :ref:`worker <MultiRunnable Worker Concept>` it would use.
     Return:
         **Executor** object.
 
