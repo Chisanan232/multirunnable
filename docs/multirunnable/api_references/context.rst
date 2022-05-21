@@ -37,38 +37,61 @@ This is new in version 0.17.0.
 
     Get the instance of current  worker. From above all, it may get *Process*, *Thread*, *Greenlet* or *Task* object.
 
+        Return:
+            An object of *Process*, *Thread*, *Greenlet* or *Task*.
+
 
 *staticmethod* **get_parent_worker**\ *()*
 
     Get the instance of parent worker means it's the worker which generate and activate current worker.
+
+        Return:
+            An object of *Process*, *Thread*, *Greenlet* or *Task*.
 
 
 *staticmethod* **current_worker_is_parent**\ *()*
 
     Return *True* if current worker is parent for each workers it activates, or it returns *False*.
 
+        Return:
+            A boolean value.
+
 
 *staticmethod* **get_current_worker_ident**\ *()*
 
     Get ID of current worker.
+
+        Return:
+            A string value.
 
 
 *staticmethod* **get_current_worker_name**\ *()*
 
     Get name of current worker.
 
+        Return:
+            A string value.
+
 
 *staticmethod* **current_worker_is_alive**\ *()*
 
     Return *True* if current worker is activated in running, or it returns *False*.
+
+        Return:
+            A boolean value.
 
 
 *staticmethod* **active_workers_count**\ *()*
 
     Get the count of all workers it activates.
 
+        Return:
+            An integer value.
+
 
 *staticmethod* **children_workers**\ *()*
 
     Get a list which saves instances of all worker.
 
+        Return:
+            A list of instances of *Process*, *Thread*, *Greenlet* or *Task*.
