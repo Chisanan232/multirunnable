@@ -89,16 +89,26 @@ LockFactory
     The implement about generating *Lock* instance.
 
 
-**get_instance**\ *(**kwargs)*
+    **get_instance**\ *(**kwargs)*
 
-    Instantiate the *Lock* instance by FeatureMode which be assigned by RunningMode.
+        Instantiate the *Lock* instance by FeatureMode which be assigned by RunningMode.
 
-    It could pass arguments if its instantiating needs.
+        It could pass arguments if its instantiating needs.
+
+        Parameters:
+            * *kwargs* (Dict) : A argument of the Lock object.
+        Return:
+            An instance of **Lock**.
 
 
-**globalize_instance**\ *(obj)*
+    **globalize_instance**\ *(obj: MRLock)*
 
-    Assign the object as a global variable.
+        Assign the object as a global variable.
+
+        Parameters:
+            * *obj* (multirunnsble.types.MRLock) : An instance of **Lock**.
+        Return:
+            None.
 
 .. _Factory.Lock - RLockFactory:
 
@@ -190,20 +200,29 @@ LockOperator
     * `Coroutine - Asynchronous Lock <https://docs.python.org/3/library/asyncio-sync.html#asyncio.Lock>`_
 
 
-**_get_feature_instance**\ *()*
+    **_get_feature_instance**\ *()*
 
-    Return a *Lock* instance which be get from global variable be saved in module *multirunnable.api.manage*.
-    Therefore, this return value would be the same as *multirunnable.api.manage.Running_Lock*.
+        Return a *Lock* instance which be get from global variable be saved in module *multirunnable.api.manage*.
+        Therefore, this return value would be the same as *multirunnable.api.manage.Running_Lock*.
 
-
-**acquire**\ *()*
-
-    Acquire a lock to limit performance so that it's force to run ONLY ONE runnable object at the same time.
+        Return:
+            An instance of **Lock**.
 
 
-**release**\ *()*
+    **acquire**\ *()*
 
-    Release the lock to let other runnable objects could acquire it.
+        Acquire a lock to limit performance so that it's force to run ONLY ONE runnable object at the same time.
+
+        Return:
+            None.
+
+
+    **release**\ *()*
+
+        Release the lock to let other runnable objects could acquire it.
+
+        Return:
+            None.
 
 
 .. _API.Operator - RLockOperator:
@@ -222,21 +241,33 @@ RLockOperator
     * Coroutine - Asynchronous does NOT support this feature
 
 
-**_get_feature_instance**\ *()*
+    **_get_feature_instance**\ *()*
 
-    Same as *LockOperator._get_feature_instance*. It returns value would be the
-    same as *multirunnable.api.manage.Running_RLock*.
+        Same as *LockOperator._get_feature_instance*. It returns value would be the
+        same as *multirunnable.api.manage.Running_RLock*.
 
-
-**acquire**\ *(blocking: bool = True, timeout: int = None)*
-
-    Acquire a lock to limit performance so that it's force to run ONLY ONE runnable object at the same time.
-    Different is it could acquire lock again and again in runtime. But remember, how many it acquires, how many it needs to release.
+        Return:
+            An instance of **RLock**.
 
 
-**release**\ *()*
+    **acquire**\ *(blocking=True, timeout=None)*
 
-    Same as *Lock.acquire*. Difference is program would keep run util last one *release* be called.
+        Acquire a lock to limit performance so that it's force to run ONLY ONE runnable object at the same time.
+        Different is it could acquire lock again and again in runtime. But remember, how many it acquires, how many it needs to release.
+
+        Parameters:
+            * *blocking* (bool) : It would block until **RLock** resource has been released if *blocking* is True, or it doesn't.
+            * *timeout* (int) : The most number of seconds it would block.
+        Return:
+            None.
+
+
+    **release**\ *()*
+
+        Same as *Lock.acquire*. Difference is program would keep run util last one *release* be called.
+
+        Return:
+            None.
 
 
 .. _API.Operator - SemaphoreOperator:
@@ -255,22 +286,36 @@ SemaphoreOperator
     * `Coroutine - Asynchronous Semaphore <https://docs.python.org/3/library/asyncio-sync.html#asyncio.Semaphore>`_
 
 
-**_get_feature_instance**\ *()*
+    **_get_feature_instance**\ *()*
 
-    Same as *LockOperator._get_feature_instance*. It returns value would be the
-    same as *multirunnable.api.manage.Running_Semaphore*.
+        Same as *LockOperator._get_feature_instance*. It returns value would be the
+        same as *multirunnable.api.manage.Running_Semaphore*.
 
-
-**acquire**\ *(blocking: bool = True, timeout: int = None)*
-
-    It's mostly same as *Lock*. It force to only one runnable object could run at the same time with *Lock*.
-    For *Semaphore*, it permits multiple runnable objects to run simultaneously and the permitted amount
-    is the value of option *value* of *multirunnable.factory.lock.Semaphore*.
+        Return:
+            An instance of **Semaphore**.
 
 
-**release**\ *(n: int = 1)*
+    **acquire**\ *(blocking: bool = True, timeout: int = None)*
 
-    The logic is same as *Lock.release* but be used for *Semaphore*.
+        It's mostly same as *Lock*. It force to only one runnable object could run at the same time with *Lock*.
+        For *Semaphore*, it permits multiple runnable objects to run simultaneously and the permitted amount
+        is the value of option *value* of *multirunnable.factory.lock.Semaphore*.
+
+        Parameters:
+            * *blocking* (bool) : It would block until **Semaphore** resource has been released if *blocking* is True, or it doesn't.
+            * *timeout* (int) : The most number of seconds it would block.
+        Return:
+            None.
+
+
+    **release**\ *(n: int = 1)*
+
+        The logic is same as *Lock.release* but be used for *Semaphore*.
+
+        Parameters:
+            * *n* (int) : How many semaphore it should release.
+        Return:
+            None.
 
 
 .. _API.Operator - BoundedSemaphoreOperator:
@@ -289,21 +334,35 @@ BoundedSemaphoreOperator
     * `Coroutine - Asynchronous Bounded Semaphore <https://docs.python.org/3/library/asyncio-sync.html#asyncio.BoundedSemaphore>`_
 
 
-**_get_feature_instance**\ *()*
+    **_get_feature_instance**\ *()*
 
-    Same as *LockOperator._get_feature_instance*. It returns value would be the
-    same as *multirunnable.api.manage.Running_Bounded_Semaphore*.
+        Same as *LockOperator._get_feature_instance*. It returns value would be the
+        same as *multirunnable.api.manage.Running_Bounded_Semaphore*.
 
-
-**acquire**\ *(blocking: bool = True, timeout: int = None)*
-
-    This implement is same as *SemaphoreOperator.acquire*.
+        Return:
+            An instance of **BoundedSemaphore**.
 
 
-**release**\ *(n: int = 1)*
+    **acquire**\ *(blocking: bool = True, timeout: int = None)*
 
-    It's also same as *SemaphoreOperator.acquire* but the only one different is
-    it has limitation (the argument *n*) in every time it releases.
+        This implement is same as *SemaphoreOperator.acquire*.
+
+        Parameters:
+            * *blocking* (bool) : It would block until **BoundedSemaphore** resource has been released if *blocking* is True, or it doesn't.
+            * *timeout* (int) : The most number of seconds it would block.
+        Return:
+            None.
+
+
+    **release**\ *(n: int = 1)*
+
+        It's also same as *SemaphoreOperator.acquire* but the only one different is
+        it has limitation (the argument *n*) in every time it releases.
+
+        Parameters:
+            * *n* (int) : How many semaphore it should release.
+        Return:
+            None.
 
 
 .. _API.Operator - EventOperator:
@@ -322,35 +381,55 @@ EventOperator
     * `Coroutine - Asynchronous Event <https://docs.python.org/3/library/asyncio-sync.html#asyncio.Event>`_
 
 
-**_event_instance**\ *()*
+    **_event_instance**\ *()*
 
-    Return the *Event* instance.
+        Return the *Event* instance.
 
-
-**_get_feature_instance**\ *()*
-
-    Same as *LockOperator._get_feature_instance*. It returns value would be the
-    same as *multirunnable.api.manage.Running_Event*.
+        Return:
+            An instance of **Event**.
 
 
-**set**\ *()*
+    **_get_feature_instance**\ *()*
 
-    Set a flag to tell other runnable objects could run.
+        Same as *LockOperator._get_feature_instance*. It returns value would be the
+        same as *multirunnable.api.manage.Running_Event*.
 
-
-**is_set**\ *()*
-
-    Return bool type value. It's *True* if flag be set or it's *False*.
-
-
-**wait**\ *(timeout: int = None)*
-
-    Let runnable object waits util flag be set by the method *set*.
+        Return:
+            An instance of **Event**.
 
 
-**clear**\ *()*
+    **set**\ *()*
 
-    Clear all flags.
+        Set a flag to tell other runnable objects could run.
+
+        Return:
+            None.
+
+
+    **is_set**\ *()*
+
+        Return bool type value. It's *True* if flag be set or it's *False*.
+
+        Return:
+            A boolean value.
+
+
+    **wait**\ *(timeout: int = None)*
+
+        Let runnable object waits util flag be set by the method *set*.
+
+        Parameters:
+            * *timeout* (int) : The most number of seconds it would block.
+        Return:
+            A boolean value.
+
+
+    **clear**\ *()*
+
+        Clear all flags.
+
+        Return:
+            None.
 
 
 .. _API.Operator - ConditionOperator:
@@ -369,40 +448,71 @@ ConditionOperator
     * `Coroutine - Asynchronous Condition <https://docs.python.org/3/library/asyncio-sync.html#asyncio.Condition>`_
 
 
-**_get_feature_instance**\ *()*
+    **_get_feature_instance**\ *()*
 
-    Same as *LockOperator._get_feature_instance*. It returns value would be the
-    same as *multirunnable.api.manage.Running_Condition*.
+        Same as *LockOperator._get_feature_instance*. It returns value would be the
+        same as *multirunnable.api.manage.Running_Condition*.
 
-
-**acquire**\ *(blocking: bool = True, timeout: int = None)*
-
-    Acquire a lock to limit performance. It's same as *LockOperator.acquire*.
+        Return:
+            An instance of **Condition**.
 
 
-**release**\ *()*
+    **acquire**\ *(blocking: bool = True, timeout: int = None)*
 
-    Same as *LockOperator.release*.
+        Acquire a lock to limit performance. It's same as *LockOperator.acquire*.
 
-
-**wait**\ *(timeout: int = None)*
-
-    Wait util notified or util a timeout occurs.
-
-
-**wait_for**\ *(predicate, timeout: int = None)*
-
-    Wait until a condition evaluates to true.
+        Parameters:
+            * *blocking* (bool) : It would block until **Condition** resource has been released if *blocking* is True, or it doesn't.
+            * *timeout* (int) : The most number of seconds it would block.
+        Return:
+            A boolean value.
 
 
-**notify**\ *(n: int = 1)*
+    **release**\ *()*
 
-    By default, wait up one runnable object on this condition.
+        Same as *LockOperator.release*.
+
+        Return:
+            None.
 
 
-**notify_all**\ *()*
+    **wait**\ *(timeout: int = None)*
 
-    Wait up all runnable objects on this condition.
+        Wait util notified or util a timeout occurs.
+
+        Parameters:
+            * *timeout* (int) : The most number of seconds it would block.
+        Return:
+            None.
+
+
+    **wait_for**\ *(predicate, timeout: int = None)*
+
+        Wait until a condition evaluates to true.
+
+        Parameters:
+            * *predicate* (Callable) : This should be a function which return value is boolean type. It would keep running if it satisfy *predicate*.
+            * *timeout* (int) : The most number of seconds it would block.
+        Return:
+            A boolean value.
+
+
+    **notify**\ *(n: int = 1)*
+
+        By default, wait up one runnable object on this condition.
+
+        Parameters:
+            * *n* (int) : How many runnable objects it should wake up to run on the condition.
+        Return:
+            None.
+
+
+    **notify_all**\ *()*
+
+        Wait up all runnable objects on this condition.
+
+        Return:
+            None.
 
 
 
