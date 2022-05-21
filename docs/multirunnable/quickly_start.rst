@@ -16,6 +16,8 @@ It has 2 ways to implement parallelism with *multirunnable*:
 * Executor
 * Pool
 
+.. _MultiRunnable Worker Concept:
+
 Before demonstrate how to use it, you need to know what *worker* means in *MultiRunnable*.
 *Worker* is a pronouns of runnable object in Python. In the other words, it may be a *Process*,
 *Thread*, *Green Thread* or *Async Task* object. What *worker* is be depends on what *RunningMode* is.
