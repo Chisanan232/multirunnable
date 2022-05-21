@@ -34,8 +34,45 @@ SimplePool
 
 *class* multirunnable.pool.\ **SimplePool**
 
-**_initial_running_strategy**\ *()*
+    An *Pool* object which could build parallelism as Parallel, Concurrent or Coroutine via option *mode*.
 
-    Initial running strategy object which executor uses. The running
-    strategy be controlled by option *mode*.
+    Parameters:
+        * *mode* (Optional[RunningMode]) : Which *RunningMode* choice to use.
+        * *pool_size* (int) : The size of pool which would preprocessing about initialing :ref:`workers <MultiRunnable Worker Concept>`.
+    Return:
+        **Pool** object.
+
+
+    **_initial_running_strategy**\ *()*
+
+        Initial running strategy object which executor uses. The running strategy be
+        controlled by option *mode*.
+
+        Return:
+            None.
+
+
+AdapterPool
+============
+
+*module* multirunnable.pool
+
+*class* multirunnable.pool.\ **AdapterPool**
+
+    An *Pool* object which could build parallelism with customized features as Parallel, Concurrent or Coroutine via option *strategy*.
+
+    Parameters:
+        * *strategy* (Union[PoolRunnableStrategy, Resultable]) : The customized running strategy object which be extends *multirunnable.framework.runnable.PoolRunnableStrategy* and implements all methods.
+    Return:
+        **Pool** object.
+
+
+    **_initial_running_strategy**\ *()*
+
+        Initial running strategy object which executor uses. It would annotate the global
+        variable *Pool_Runnable_Strategy* with the strategy object it gets from parameter
+        *strategy*.
+
+        Return:
+            None.
 
