@@ -20,55 +20,111 @@ Thread Strategy
     A generally runnable strategy object which controls runnable object. For *RunningMode.Concurrent*, it controls processes.
     This class is an adapter of object `threading.Thread <https://docs.python.org/3/library/threading.html#thread-objects>`_.
 
-
-**initialization**\ *(queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None, features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None, *args, **kwargs)*
-
-    Initialing something before instantiating and running Threads.
-
-
-*overload* **start_new_worker**\ *(target: (FunctionType, MethodType, PartialFunction), args, kwargs)*
-
-    Instantiating and running Threads.
-    Its logic is equal to instantiating *threading.Thread* and calling function *run*.
+    Parameters:
+        * *executors* (int) : The count of **Thread** it would use.
+    Return:
+        **ThreadStrategy** object.
 
 
-*overload* **start_new_worker**\ *(target: (FunctionType, MethodType, PartialFunction), args, kwargs)*
+    **initialization**\ *(queue_tasks=None, features=None, *args, **kwargs)*
 
-    Instantiating and running Threads.
+        Initialing something before instantiating and running Threads.
 
-
-**generate_worker**\ *(target: Callable, *args, **kwargs)*
-
-    Instantiating Threads.
-    Its logic is equal to instantiating *threading.Thread*.
-
-
-*overload* **activate_workers**\ *(workers: Thread)*
-
-    Running Threads.
-    Its logic is equal to calling function *run*.
+        Parameters:
+            * *queue_tasks* (Optional[Union[BaseQueueTask, BaseList]]) : Initial the QueueTask so that it could operate the queue in the parallelism.
+            * *features* (Optional[Union[BaseFeatureAdapterFactory, BaseList]]) : Initial the synchronization feature object so that it could operate the synchronization in parallelism.
+            * *args & kwargs* (tuple & dict) : The argument of initial function. This option may be deprecated in version 0.18.0 or 0.19.0.
+        Return:
+            None
 
 
-*overload* **activate_workers**\ *(workers: List[Thread])*
+    *overload* **start_new_worker**\ *(target, args, kwargs)*
 
-    Running Threads.
+        Instantiating and running Threads.
+        Its logic is equal to instantiating *threading.Thread* and calling function *run*.
 
-
-*overload* **close**\ *(workers: Thread)*
-
-    Close Threads.
-    Its logic is equal to calling function *join*.
-
-
-*overload* **close**\ *(workers: List[Thread])*
-
-    Close Threads.
+        Parameters:
+            * *target* (Union(FunctionType, MethodType, PartialFunction)) : The target function.
+            * *args* (Tuple) : The argument of target function. It would pass the arguments to the function via *(opt1, opt2, ...)*.
+            * *kwargs* (Dict) : The argument of target function, It would pass the arguments to the function via *(param1=opt1, param2=opt2, ...)*.
+        Return:
+            A **Thread** object.
 
 
-**get_result**\ *()*
+    *overload* **start_new_worker**\ *(target, args, kwargs)*
 
-    Get the result data of the running task in parallel. It returns a List type value and all the element in it
-    is a *MRResult* type object.
+        Instantiating and running Threads.
+
+        Parameters:
+            * *target* (List[Callable]) : A list of target functions.
+            * *args* (Tuple) : The argument of target function. It would pass the arguments to the function via *(opt1, opt2, ...)*.
+            * *kwargs* (Dict) : The argument of target function, It would pass the arguments to the function via *(param1=opt1, param2=opt2, ...)*.
+        Return:
+            A list of **Thread** objects.
+
+
+    **generate_worker**\ *(target, *args, **kwargs)*
+
+        Instantiating Threads.
+        Its logic is equal to instantiating *threading.Thread*.
+
+        Parameters:
+            * *target* (Callable) : The target functions.
+            * *args* (Tuple) : The argument of target function. It would pass the arguments to the function via *(opt1, opt2, ...)*.
+            * *kwargs* (Dict) : The argument of target function, It would pass the arguments to the function via *(param1=opt1, param2=opt2, ...)*.
+        Return:
+            A **Thread** object.
+
+
+    *overload* **activate_workers**\ *(workers)*
+
+        Running Threads.
+        Its logic is equal to calling function *run*.
+
+        Parameters:
+            * *workers* (Thread) : A **Thread** object.
+        Return:
+            None
+
+
+    *overload* **activate_workers**\ *(workers)*
+
+        Running Threads.
+
+        Parameters:
+            * *workers* (List[Thread]) : A list of **Thread** objects.
+        Return:
+            None
+
+
+    *overload* **close**\ *(workers)*
+
+        Close Threads.
+        Its logic is equal to calling function *join*.
+
+        Parameters:
+            * *workers* (Thread) : A **Thread** object.
+        Return:
+            None
+
+
+    *overload* **close**\ *(workers)*
+
+        Close Threads.
+
+        Parameters:
+            * *workers* (List[Thread]) : A list of **Thread** objects.
+        Return:
+            None
+
+
+    **get_result**\ *()*
+
+        Get the result data of the running task in parallel. It returns a List type value and all the element in it
+        is a *MRResult* type object.
+
+        Return:
+            A list of *MRResult* object.
 
 
 Thread Pool Strategy
@@ -81,19 +137,36 @@ Thread Pool Strategy
     And the feature of mostly APIs of this class is the same as *multiprocessing.pool.ThreadPool*.
     So below only recording some functions which is different or new.
 
-
-**initialization**\ *(queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None, features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None, *args, **kwargs)*
-
-    The initialization before run in concurrent. It also initials features or queues here.
-
-
-**close**\ *()*
-
-    It call methods *close* and *join* in object *multiprocessing.pool.ThreadPool*.
+    Parameters:
+        * *pool_size* (int) : The size of pool which would preprocessing about initialing **Thread**.
+    Return:
+        **ThreadPoolStrategy** object.
 
 
-**get_result**\ *()*
+    **initialization**\ *(queue_tasks=None, features=None, *args, **kwargs)*
 
-    Get the result data of the running task in parallel. It returns a List type value and all the element in it
-    is a *PoolResult* type object.
+        The initialization before run in concurrent. It also initials features or queues here.
 
+        Parameters:
+            * *queue_tasks* (Optional[Union[BaseQueueTask, BaseList]]) : Initial the QueueTask so that it could operate the queue in the parallelism.
+            * *features* (Optional[Union[BaseFeatureAdapterFactory, BaseList]]) : Initial the synchronization feature object so that it could operate the synchronization in parallelism.
+            * *args & kwargs* (tuple & dict) : The argument of initial function. This option may be deprecated in version 0.18.0 or 0.19.0.
+        Return:
+            None
+
+
+    **close**\ *()*
+
+        It call methods *close* and *join* in object *multiprocessing.pool.ThreadPool*.
+
+        Return:
+            None
+
+
+    **get_result**\ *()*
+
+        Get the result data of the running task in parallel. It returns a List type value and all the element in it
+        is a *PoolResult* type object.
+
+        Return:
+            A list of *ThreadPoolStrategy* object.

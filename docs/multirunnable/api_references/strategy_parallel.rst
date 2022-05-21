@@ -19,67 +19,129 @@ Process Strategy
     A generally runnable strategy object which controls runnable object. For *RunningMode.Parallel*, it controls processes.
     This class is an adapter of object `multiprocessing.Process <https://docs.python.org/3/library/multiprocessing.html#process-and-exceptions>`_.
 
-
-**initialization**\ *(queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None, features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None, *args, **kwargs)*
-
-    Initialing something before instantiating and running Processes.
-
-
-*overload* **start_new_worker**\ *(target: (FunctionType, MethodType, PartialFunction), args, kwargs)*
-
-    Instantiating and running Processes.
-    Its logic is equal to instantiating *multiprocessing.Process* and calling function *run*.
+    Parameters:
+        * *executors* (int) : The count of **Process** it would use.
+    Return:
+        **ProcessStrategy** object.
 
 
-*overload* **start_new_worker**\ *(target: Callable, args: Tuple = (), kwargs: Dict = {})*
+    **initialization**\ *(queue_tasks=None, features=None, *args, **kwargs)*
 
-    Instantiating and running Processes.
+        Initialing something before instantiating and running Processes.
 
-
-**generate_worker**\ *(target: Callable, *args, **kwargs)*
-
-    Instantiating Processes.
-    Its logic is equal to instantiating *multiprocessing.Process*.
-
-
-*overload* **activate_workers**\ *(workers: Process)*
-
-    Running Processes.
-    Its logic is equal to calling function *run*.
+        Parameters:
+            * *queue_tasks* (Optional[Union[BaseQueueTask, BaseList]]) : Initial the QueueTask so that it could operate the queue in the parallelism.
+            * *features* (Optional[Union[BaseFeatureAdapterFactory, BaseList]]) : Initial the synchronization feature object so that it could operate the synchronization in parallelism.
+            * *args & kwargs* (tuple & dict) : The argument of initial function. This option may be deprecated in version 0.18.0 or 0.19.0.
+        Return:
+            None
 
 
-*overload* **activate_workers**\ *(workers: List[Process])*
+    *overload* **start_new_worker**\ *(target, args=(), kwargs={})*
 
-    Running Processes.
+        Instantiating and running Processes.
+        Its logic is equal to instantiating *multiprocessing.Process* and calling function *run*.
 
-
-*overload* **close**\ *(workers: Process)*
-
-    Close Processes.
-    Its logic is equal to calling function *join* and *close* (calling *join* only in Python 3.6).
-
-
-*overload* **close**\ *(workers: List[Process])*
-
-    Close Processes.
+        Parameters:
+            * *target* (Union(FunctionType, MethodType, PartialFunction)) : The target function.
+            * *args* (Tuple) : The argument of target function. It would pass the arguments to the function via *(opt1, opt2, ...)*.
+            * *kwargs* (Dict) : The argument of target function, It would pass the arguments to the function via *(param1=opt1, param2=opt2, ...)*.
+        Return:
+            A **Process** object.
 
 
-**terminal**\ *()*
+    *overload* **start_new_worker**\ *(target, args=(), kwargs={})*
 
-    Terminate Processes.
-    Its logic is equal to function *terminal* in object *multiprocessing.Process*.
+        Instantiating and running Processes.
+
+        Parameters:
+            * *target* (List[Callable]) : A list of target functions.
+            * *args* (Tuple) : The argument of target function. It would pass the arguments to the function via *(opt1, opt2, ...)*.
+            * *kwargs* (Dict) : The argument of target function, It would pass the arguments to the function via *(param1=opt1, param2=opt2, ...)*.
+        Return:
+            A list of **Process** objects.
 
 
-**kill**\ *()*
+    **generate_worker**\ *(target: Callable, *args, **kwargs)*
 
-    Kill Processes.
-    Its logic is equal to function *kill* in object *multiprocessing.Process*.
+        Instantiating Processes.
+        Its logic is equal to instantiating *multiprocessing.Process*.
+
+        Parameters:
+            * *target* (Callable) : The target functions.
+            * *args* (Tuple) : The argument of target function. It would pass the arguments to the function via *(opt1, opt2, ...)*.
+            * *kwargs* (Dict) : The argument of target function, It would pass the arguments to the function via *(param1=opt1, param2=opt2, ...)*.
+        Return:
+            A **Process** object.
 
 
-**get_result**\ *()*
+    *overload* **activate_workers**\ *(workers)*
 
-    Get the result data of the running task in parallel. It returns a List type value and all the element in it
-    is a *MRResult* type object.
+        Running Processes.
+        Its logic is equal to calling function *run*.
+
+        Parameters:
+            * *workers* (Process) : A **Process** object.
+        Return:
+            None
+
+
+    *overload* **activate_workers**\ *(workers)*
+
+        Running Processes.
+
+        Parameters:
+            * *workers* (List[Process]) : A list of **Process** objects.
+        Return:
+            None
+
+
+    *overload* **close**\ *(workers: Process)*
+
+        Close Processes.
+        Its logic is equal to calling function *join* and *close* (calling *join* only in Python 3.6).
+
+        Parameters:
+            * *workers* (Process) : A **Process** object.
+        Return:
+            None
+
+
+    *overload* **close**\ *(workers: List[Process])*
+
+        Close Processes.
+
+        Parameters:
+            * *workers* (List[Process]) : A list of **Process** objects.
+        Return:
+            None
+
+
+    **terminal**\ *()*
+
+        Terminate Processes.
+        Its logic is equal to function *terminal* in object *multiprocessing.Process*.
+
+        Return:
+            None
+
+
+    **kill**\ *()*
+
+        Kill Processes.
+        Its logic is equal to function *kill* in object *multiprocessing.Process*.
+
+        Return:
+            None
+
+
+    **get_result**\ *()*
+
+        Get the result data of the running task in parallel. It returns a List type value and all the element in it
+        is a *MRResult* type object.
+
+        Return:
+            A list of *ParallelResult* object.
 
 
 Process Pool Strategy
@@ -92,19 +154,37 @@ Process Pool Strategy
     And the feature of mostly APIs of this class is the same as *multiprocessing.pool.Pool*.
     So below only recording some functions which is different or new.
 
-
-**initialization**\ *(queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None, features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None, *args, **kwargs)*
-
-    The initialization before run in parallel. It also initials features or queues here.
-
-
-**close**\ *()*
-
-    It call methods *close* and *join* in object *multiprocessing.pool.Pool*.
+    Parameters:
+        * *pool_size* (int) : The size of pool which would preprocessing about initialing **Process**.
+    Return:
+        **ProcessPoolStrategy** object.
 
 
-**get_result**\ *()*
+    **initialization**\ *(queue_tasks=None, features=None, *args, **kwargs)*
 
-    Get the result data of the running task in parallel. It returns a List type value and all the element in it
-    is a *PoolResult* type object.
+        The initialization before run in parallel. It also initials features or queues here.
+
+        Parameters:
+            * *queue_tasks* (Optional[Union[BaseQueueTask, BaseList]]) : Initial the QueueTask so that it could operate the queue in the parallelism.
+            * *features* (Optional[Union[BaseFeatureAdapterFactory, BaseList]]) : Initial the synchronization feature object so that it could operate the synchronization in parallelism.
+            * *args & kwargs* (tuple & dict) : The argument of initial function. This option may be deprecated in version 0.18.0 or 0.19.0.
+        Return:
+            None
+
+
+    **close**\ *()*
+
+        It call methods *close* and *join* in object *multiprocessing.pool.Pool*.
+
+        Return:
+            None
+
+
+    **get_result**\ *()*
+
+        Get the result data of the running task in parallel. It returns a List type value and all the element in it
+        is a *PoolResult* type object.
+
+        Return:
+            A list of *ProcessPoolResult* object.
 
