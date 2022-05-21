@@ -228,7 +228,7 @@ RLockOperator
     same as *multirunnable.api.manage.Running_RLock*.
 
 
-**acquire**\ *(blocking: bool = True, timeout: int = -1)*
+**acquire**\ *(blocking: bool = True, timeout: int = None)*
 
     Acquire a lock to limit performance so that it's force to run ONLY ONE runnable object at the same time.
     Different is it could acquire lock again and again in runtime. But remember, how many it acquires, how many it needs to release.
