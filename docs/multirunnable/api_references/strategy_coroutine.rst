@@ -22,23 +22,23 @@ Green Thread Strategy
     This class is an adapter of object `gevent.Greenlet <https://www.gevent.org/api/gevent.greenlet.html>`_.
 
 
-**initialization**\ *(queue_tasks, features, *args, **kwargs)*
+**initialization**\ *(queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None, features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None, *args, **kwargs)*
 
     Initialing something before instantiating and running green threads.
 
 
-*overload* **start_new_worker**\ *(target: (FunctionType, MethodType, PartialFunction), args, kwargs)*
+*overload* **start_new_worker**\ *(target: Callable, args: Tuple = (), kwargs: Dict = {})*
 
     Instantiating and running green threads.
     Its logic is equal to instantiating *gevent.greenlet.Greenlet* and calling function *run*.
 
 
-*overload* **start_new_worker**\ *(target: Iterable, args, kwargs)*
+*overload* **start_new_worker**\ *(target: List[Callable], args: Tuple = (), kwargs: Dict = {})*
 
     Instantiating and running green threads.
 
 
-**generate_worker**\ *(target, *args, **kwargs)*
+**generate_worker**\ *(target: Callable, *args, **kwargs)*
 
     Instantiating green threads.
     Its logic is equal to instantiating *gevent.greenlet.Greenlet*.
@@ -50,7 +50,7 @@ Green Thread Strategy
     Its logic is equal to calling function *run*.
 
 
-*overload* **activate_workers**\ *(workers: Iterable)*
+*overload* **activate_workers**\ *(workers: List[Greenlet])*
 
     Running green threads.
 
@@ -61,16 +61,9 @@ Green Thread Strategy
     Its logic is equal to calling function *join*.
 
 
-*overload* **close**\ *(workers: Iterable)*
+*overload* **close**\ *(workers: List[Greenlet])*
 
     Close green threads.
-
-
-**terminal**\ *()*
-
-    No support this feature.
-
-    It is deprecated in version 0.16.0 and removed in version 0.17.0.
 
 
 **kill**\ *()*
@@ -97,19 +90,19 @@ GreenThreadStrategy Pool Strategy
     So below only recording some functions which is different or new.
 
 
-**initialization**\ *(queue_tasks, features, *args, **kwargs)*
+**initialization**\ *(queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None, features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None, *args, **kwargs)*
 
     The initialization before run in coroutine. It also initials features or queues here.
 
 
-**map_by_args**\ *(function, args_iter, chunksize)*
+**map_by_args**\ *(function: Callable, args_iter: IterableType[IterableType] = (), chunksize: int = None)*
 
     It doesn't support the feature like *startmap* of *multiprocessing.pool.Pool* in *gevent.pool.Pool*.
     *MultiRunnable* implement this base on *map* of *gevent.pool.Pool*.
     It does the same thing as *starmap* of *multiprocessing.pool.Pool*.
 
 
-**async_map_by_args**\ *(function, args_iter, chunksize, callback, error_callback)*
+**async_map_by_args**\ *(function: Callable, args_iter: IterableType[IterableType] = (), chunksize: int = None, callback: Callable = None, error_callback: Callable = None)*
 
     Mostly same as *map_by_args* but it's asynchronous.
 
@@ -139,18 +132,18 @@ Asynchronous Strategy
     This class is an adapter of object `asyncio.tasks.Task <https://docs.python.org/3/library/asyncio-task.html>`_.
 
 
-**initialization**\ *(queue_tasks, features, *args, **kwargs)*
+*coroutine* **initialization**\ *(queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None, features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None, *args, **kwargs)*
 
     Initialing something before instantiating and running asynchronous tasks.
 
 
-*overload* **start_new_worker**\ *(target: (FunctionType, MethodType, PartialFunction), args, kwargs)*
+*coroutine* *overload* **start_new_worker**\ *(target: Callable, args: Tuple = (), kwargs: Dict = {})*
 
     Instantiating and running asynchronous tasks.
     Its logic is equal to instantiating *multiprocessing.Process* and calling function *run*.
 
 
-*overload* **start_new_worker**\ *(target: Iterable, args, kwargs)*
+*coroutine* *overload* **start_new_worker**\ *(target: List[Callable], args: Tuple = (), kwargs: Dict = {})*
 
     Instantiating and running asynchronous tasks.
 
@@ -161,39 +154,25 @@ Asynchronous Strategy
     Its logic is equal to instantiating *multiprocessing.Process*.
 
 
-*overload* **activate_workers**\ *(workers: Process)*
+*coroutine* *overload* **activate_workers**\ *(workers: Task)*
 
     Running asynchronous tasks.
     Its logic is equal to calling function *run*.
 
 
-*overload* **activate_workers**\ *(workers: Iterable)*
+*coroutine* *overload* **activate_workers**\ *(workers: List[Task])*
 
     Running asynchronous tasks.
 
 
-*overload* **close**\ *(workers: Process)*
+*coroutine* *overload* **close**\ *(workers: Task)*
 
     No support this feature.
 
 
-*overload* **close**\ *(workers: Iterable)*
+*coroutine* *overload* **close**\ *(workers: List[Task])*
 
     No support this feature.
-
-
-**terminal**\ *()*
-
-    No support this feature.
-
-    It is deprecated in version 0.16.0 and removed in version 0.17.0.
-
-
-**kill**\ *()*
-
-    No support this feature.
-
-    It is deprecated in version 0.16.0 and removed in version 0.17.0.
 
 
 **get_result**\ *()*
