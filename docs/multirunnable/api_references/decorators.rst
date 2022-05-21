@@ -12,9 +12,44 @@ It's possible that occurs unexpected something when running. Sometimes, it needs
 to catch that exceptions or errors to do some handling, it even needs to do something
 finally and keep going run the code. That's the reason this feature exists.
 
-*decorator* multirunnable.api.decorator.\ **retry**\ *(timeout)*
+*object* multirunnable.api.decorator.\ **retry**
 
     Decorate on target function which needs to implement its customized retry handling.
+    However, it needs to use the different decorators for the different type of function.
+
+    * general function -> multirunnable.api.decorator.\ **retry.function**\ *(timeout: int = 1)*
+    * bounded function -> multirunnable.api.decorator.\ **retry.bounded_function**\ *(timeout: int = 1)*
+
+    Actually, it's a **static factory**. It means that you cannot instantiate this object,
+    or you will get an RuntimeError. Except for decorator type, all the APIs usage are
+    the same between them.
+
+    Still doesn't understand its usage? Don't worry, following demonstration for you:
+
+    * **General function**: multirunnable.api.decorator.\ **retry.function**\ *(timeout: int = 1)*
+
+    .. code-block:: python
+
+        from multirunnable.api import retry
+
+        @retry.function    # Default timeout is 1.
+        # @retry.function(timeout=3)    # It also could set the timeout setting.
+        def retry_function(*args, **kwargs):
+            pass
+
+
+    * **Bounded function**: multirunnable.api.decorator.\ **retry.bounded_function**\ *(timeout: int = 1)*
+
+    .. code-block:: python
+
+        from multirunnable.api import retry
+
+        class RetryTest:
+
+            @retry.bounded_function    # Default timeout is 1.
+            # @retry.bounded_function(timeout=3)    # It also could set the timeout setting.
+            def retry_bounded_function(self, *args, **kwargs):
+                pass
 
 
 *decorator* **initialization**\ *(*args, **kwargs)*
@@ -33,14 +68,14 @@ finally and keep going run the code. That's the reason this feature exists.
     The usage is decorating as target function annotation name and call **.done_handling** method.
 
 
-*decorator* **error_handling**\ *(e)*
+*decorator* **error_handling**\ *(e: Exception)*
 
     Target to handle every exception or error. So the function argument absolutely receives exception or error.
     Default implementation is raising any exception or error it gets.
     The usage is decorating as target function annotation name and call **.error_handling** method.
 
 
-*decorator* **final_handling**\ *(func_result)*
+*decorator* **final_handling**\ *()*
 
     It's the feature run something which MUST to do. For example, close IO.
     Default implementation is doing nothing.
@@ -77,7 +112,7 @@ Example usage of decorator *retry*:
 async_retry
 -------------
 
-*decorator* multirunnable.api.decorator.\ **async_retry**\ *(timeout)*
+*object* multirunnable.api.decorator.\ **async_retry**\ *(timeout)*
 
     Asynchronous version of decorator *async_retry*. All usages of APIs are same as it, too.
 
@@ -85,28 +120,30 @@ async_retry
 RunWith
 ----------
 
-*decorator* multirunnable.api.decorator.\ **RunWith**
+*object* multirunnable.api.decorator.\ **RunWith**
 
     This is a syntactic sugar for features (Lock, Semaphore, etc) of *multirunnable*.
     Please refer to the :doc:`./synchronizations` to get more details.
 
+    By the way, this object also a static factory so that it also cannot be instantiated.
 
-*decorator* **Lock**\ *(function)*
+
+*decorator* **Lock**\ *(*args, **kwargs)*
 
     Using Lock feature via Python decorator with object *RunWith*.
 
 
-*decorator* **RLock**\ *(function)*
+*decorator* **RLock**\ *(*args, **kwargs)*
 
     Using RLock feature via Python decorator with object *RunWith*.
 
 
-*decorator* **Semaphore**\ *(function)*
+*decorator* **Semaphore**\ *(*args, **kwargs)*
 
     Using Semaphore feature via Python decorator with object *RunWith*.
 
 
-*decorator* **BoundedSemaphore**\ *(function)*
+*decorator* **BoundedSemaphore**\ *(*args, **kwargs)*
 
     Using BoundedSemaphore feature via Python decorator with object *RunWith*.
 
@@ -116,19 +153,16 @@ Example usage of decorator *RunWith*:
 .. code-block:: python
 
     from multirunnable.api import RunWith
-    import time
 
     @RunWith.Lock
     def lock_function():
-        print("Running process in lock and will sleep 2 seconds.")
-        time.sleep(2)
-        print(f"Wake up process and release lock.")
+        pass
 
 
 AsyncRunWith
 -------------
 
-*decorator* multirunnable.api.decorator.\ **AsyncRunWith**
+*object* multirunnable.api.decorator.\ **AsyncRunWith**
 
     Asynchronous version of decorator *RunWith*. All usages of APIs are same as it, too.
 
