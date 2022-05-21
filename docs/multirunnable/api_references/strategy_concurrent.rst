@@ -21,7 +21,7 @@ Thread Strategy
     This class is an adapter of object `threading.Thread <https://docs.python.org/3/library/threading.html#thread-objects>`_.
 
 
-**initialization**\ *(queue_tasks, features, *args, **kwargs)*
+**initialization**\ *(queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None, features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None, *args, **kwargs)*
 
     Initialing something before instantiating and running Threads.
 
@@ -32,12 +32,12 @@ Thread Strategy
     Its logic is equal to instantiating *threading.Thread* and calling function *run*.
 
 
-*overload* **start_new_worker**\ *(target: Iterable, args, kwargs)*
+*overload* **start_new_worker**\ *(target: (FunctionType, MethodType, PartialFunction), args, kwargs)*
 
     Instantiating and running Threads.
 
 
-**generate_worker**\ *(target, *args, **kwargs)*
+**generate_worker**\ *(target: Callable, *args, **kwargs)*
 
     Instantiating Threads.
     Its logic is equal to instantiating *threading.Thread*.
@@ -49,7 +49,7 @@ Thread Strategy
     Its logic is equal to calling function *run*.
 
 
-*overload* **activate_workers**\ *(workers: Iterable)*
+*overload* **activate_workers**\ *(workers: List[Thread])*
 
     Running Threads.
 
@@ -60,23 +60,9 @@ Thread Strategy
     Its logic is equal to calling function *join*.
 
 
-*overload* **close**\ *(workers: Iterable)*
+*overload* **close**\ *(workers: List[Thread])*
 
     Close Threads.
-
-
-**terminal**\ *()*
-
-    No support this feature.
-
-    It is deprecated in version 0.16.0 and removed in version 0.17.0.
-
-
-**kill**\ *()*
-
-    No support this feature.
-
-    It is deprecated in version 0.16.0 and removed in version 0.17.0.
 
 
 **get_result**\ *()*
@@ -96,7 +82,7 @@ Thread Pool Strategy
     So below only recording some functions which is different or new.
 
 
-**initialization**\ *(queue_tasks, features, *args, **kwargs)*
+**initialization**\ *(queue_tasks: Optional[Union[_BaseQueueTask, _BaseList]] = None, features: Optional[Union[_BaseFeatureAdapterFactory, _BaseList]] = None, *args, **kwargs)*
 
     The initialization before run in concurrent. It also initials features or queues here.
 
