@@ -98,30 +98,20 @@ class MySQLDriverConnectionPool(BaseConnectionPool):
             logging.info("Connection has been disconnect or be killed before.")
 
 
+    def close_pool(self, pool_name: str) -> None:
+        pass
+
+
 
 # @sharing_in_processes(proxytype=MySQLOperatorProxy)
 class MySQLOperator(DatabaseOperator):
-    
+
     def __init__(self, conn_strategy: BaseDatabaseConnection, db_config: Dict = {}):
         super().__init__(conn_strategy=conn_strategy, db_config=db_config)
 
 
     def initial_cursor(self, connection: Union[MySQLConnection, PooledMySQLConnection]) -> MySQLCursor:
         return connection.cursor(buffered=True)
-
-
-    @property
-    def column_names(self) -> MySQLCursor:
-        return self._cursor.column_names
-
-
-    @property
-    def row_count(self) -> MySQLCursor:
-        return self._cursor.rowcount
-
-
-    def next(self) -> MySQLCursor:
-        return self._cursor.next()
 
 
     def execute(self, operator: Any, params: Tuple = None, multi: bool = False) -> MySQLCursor:
@@ -142,8 +132,4 @@ class MySQLOperator(DatabaseOperator):
 
     def fetch_all(self) -> list:
         return self._cursor.fetchall()
-
-
-    def reset(self) -> None:
-        self._cursor.reset()
 
