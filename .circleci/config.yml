@@ -443,7 +443,7 @@ commands:
 
   run_integration_test:
     steps:
-#      - checkout    # this pulls code down from GitHub
+      - checkout    # this pulls code down from GitHub
       - install_python_dependecies
       - run_pytest_with_integration_test
       - report_integration_testing_coverage
@@ -649,41 +649,41 @@ workflows:
   version: 2.1
   build_and_test:    # this is the name of our workflow
     jobs:    # and here we list the jobs we are going to run.
-      - pre-testbed-unit-test-core
-      - pre-testbed-unit-test-persistence
       - pre-testbed-integration-test
+#      - pre-testbed-unit-test-core
+#      - pre-testbed-unit-test-persistence
 
-      - unit-test-core-python36:
-           requires:
-             - pre-testbed-unit-test-core
-      - unit-test-core-python37:
-           requires:
-             - pre-testbed-unit-test-core
-      - unit-test-core-python38:
-           requires:
-             - pre-testbed-unit-test-core
-      - unit-test-core-python39:
-           requires:
-             - pre-testbed-unit-test-core
-      - unit-test-core-python310:
-           requires:
-             - pre-testbed-unit-test-core
+#      - unit-test-core-python36:
+#           requires:
+#             - pre-testbed-unit-test-core
+#      - unit-test-core-python37:
+#           requires:
+#             - pre-testbed-unit-test-core
+#      - unit-test-core-python38:
+#           requires:
+#             - pre-testbed-unit-test-core
+#      - unit-test-core-python39:
+#           requires:
+#             - pre-testbed-unit-test-core
+#      - unit-test-core-python310:
+#           requires:
+#             - pre-testbed-unit-test-core
 
-      - unit-test-persistence-python36:
-           requires:
-             - pre-testbed-unit-test-persistence
-      - unit-test-persistence-python37:
-           requires:
-             - pre-testbed-unit-test-persistence
-      - unit-test-persistence-python38:
-           requires:
-             - pre-testbed-unit-test-persistence
-      - unit-test-persistence-python39:
-           requires:
-             - pre-testbed-unit-test-persistence
-      - unit-test-persistence-python310:
-           requires:
-             - pre-testbed-unit-test-persistence
+#      - unit-test-persistence-python36:
+#           requires:
+#             - pre-testbed-unit-test-persistence
+#      - unit-test-persistence-python37:
+#           requires:
+#             - pre-testbed-unit-test-persistence
+#      - unit-test-persistence-python38:
+#           requires:
+#             - pre-testbed-unit-test-persistence
+#      - unit-test-persistence-python39:
+#           requires:
+#             - pre-testbed-unit-test-persistence
+#      - unit-test-persistence-python310:
+#           requires:
+#             - pre-testbed-unit-test-persistence
 
       - integration-test-python36:
            requires:
@@ -701,18 +701,18 @@ workflows:
            requires:
              - pre-testbed-integration-test
 
-      - unit-test-coveralls-done:
-           requires:
-             - unit-test-core-python36
-             - unit-test-core-python37
-             - unit-test-core-python38
-             - unit-test-core-python39
-             - unit-test-core-python310
-             - unit-test-persistence-python36
-             - unit-test-persistence-python37
-             - unit-test-persistence-python38
-             - unit-test-persistence-python39
-             - unit-test-persistence-python310
+#      - unit-test-coveralls-done:
+#           requires:
+#             - unit-test-core-python36
+#             - unit-test-core-python37
+#             - unit-test-core-python38
+#             - unit-test-core-python39
+#             - unit-test-core-python310
+#             - unit-test-persistence-python36
+#             - unit-test-persistence-python37
+#             - unit-test-persistence-python38
+#             - unit-test-persistence-python39
+#             - unit-test-persistence-python310
 
       - integration-test-coveralls-done:
            requires:
@@ -724,6 +724,6 @@ workflows:
 
       - all-coveralls-done:
            requires:
-             - unit-test-coveralls-done
              - integration-test-coveralls-done
+#             - unit-test-coveralls-done
 
