@@ -1,10 +1,12 @@
 from gevent.threading import get_ident as get_gevent_ident
 from gevent import sleep as gevent_sleep
+from typing import Callable
 import threading
 import asyncio
 import pytest
 import time
 import os
+import re
 
 from multirunnable.coroutine.strategy import AsynchronousStrategy
 from multirunnable.parallel.share import Global_Manager
@@ -22,7 +24,7 @@ from ..._examples_with_synchronization import (
 from ..framework.lock import LockTestSpec, SemaphoreTestSpec
 from ._retry_sample import (
     _Retry_Time, _Default_Retry_Time, _Test_Return_Value, _Test_Exception,
-    init_flag, get_process_flag,
+    instantiate_retry_decorator, instantiate_async_retry_decorator, init_flag, get_process_flag,
     target_function_with_default, target_function_raising_exception_with_default,
     target_function, target_function_raising_exception,
     async_target_function_with_default, async_target_function_raising_exception_with_default,
@@ -59,7 +61,21 @@ def async_strategy() -> AsynchronousStrategy:
     return AsynchronousStrategy(executors=_Worker_Size)
 
 
+def _test_instantiate_decorator(instantiate_decorator: Callable) -> None:
+    try:
+        instantiate_decorator()
+    except RuntimeError as e:
+        _error_msg = re.search(r"It shouldn't instantiate \w{2,64} object.", str(e))
+        assert _error_msg is not None, "It should raise a RuntimeError about it cannot instantiate static factory."
+    else:
+        assert False, "It should raise a RuntimeError about it cannot instantiate static factory."
+
+
 class TestRetryMechanism:
+
+    def test_cannot_instantiate_decorator(self):
+        _test_instantiate_decorator(instantiate_retry_decorator)
+
 
     def test_retry_decorating_at_function_with_default(self):
         init_flag()
@@ -185,6 +201,10 @@ class TestRetryMechanism:
 
 
 class TestAsyncRetryMechanism:
+
+    def test_cannot_instantiate_decorator(self):
+        _test_instantiate_decorator(instantiate_async_retry_decorator)
+
 
     def test_async_retry_decorating_at_function_with_default(self, async_strategy: AsynchronousStrategy):
         init_flag()
@@ -321,6 +341,10 @@ class TestAsyncRetryMechanism:
 
 
 class TestFeaturesDecorator:
+
+    def test_cannot_instantiate_decorator(self):
+        _test_instantiate_decorator(RunWith)
+
 
     def test_lock_decorator_in_parallel(self):
 
@@ -547,6 +571,10 @@ class TestFeaturesDecorator:
 
 
 class TestAsyncFeaturesDecorator:
+
+    def test_cannot_instantiate_decorator(self):
+        _test_instantiate_decorator(AsyncRunWith)
+
 
     def test_lock_decorator(self):
         _event_loop = asyncio.new_event_loop()
