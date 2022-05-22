@@ -27,7 +27,7 @@ class ExampleTargetFunction:
         return "You are 87."
 
 
-    @retry
+    @retry.bounded_function
     def target_fail_function(self, *args, **kwargs) -> None:
         print("This is ExampleParallelClient.target_function.")
         print("This is target function args: ", args)

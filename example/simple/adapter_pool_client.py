@@ -43,16 +43,16 @@ class ExampleAdapterPool:
     def main_run(self):
         # # # # Initial Executor object
         __pool = AdapterPool(
-            strategy=ProcessPoolStrategy(pool_size=self.__Executor_Number, tasks_size=self.__Executor_Number))
-        # __pool = AdapterPool(strategy=ThreadPoolStrategy(pool_size=self.__Executor_Number, tasks_size=self.__Executor_Number))
-        # __pool = AdapterPool(strategy=GreenThreadPoolStrategy(pool_size=self.__Executor_Number, tasks_size=self.__Executor_Number))
+            strategy=ProcessPoolStrategy(pool_size=self.__Executor_Number))
+        # __pool = AdapterPool(strategy=ThreadPoolStrategy(pool_size=self.__Executor_Number))
+        # __pool = AdapterPool(strategy=GreenThreadPoolStrategy(pool_size=self.__Executor_Number))
 
         __result = None
         with __pool as pool:
             # # # # Running Pool
-            # pool.apply(function=self.__Example_Target.target_function, index=f"test_{random.randrange(10,20)}")
-            # pool.async_apply(function=self.__Example_Target.target_function, kwargs={"index": f"test_{random.randrange(10,20)}"})
-            pool.map(function=self.__Example_Target.target_function, args_iter=("index_1", "index_2.2", "index_3"))
+            # pool.apply(function=self.__Example_Target.target_function, tasks_size=self.__Executor_Number)
+            pool.async_apply(function=self.__Example_Target.target_function, kwargs={"index": f"test_{random.randrange(10,20)}"}, tasks_size=self.__Executor_Number)
+            # pool.map(function=self.__Example_Target.target_function, args_iter=("index_1", "index_2.2", "index_3"))
             # pool.map_by_args(function=self.__Example_Target.target_function, args_iter=[("index_1", "index_2.2"), ("index_3",), (1, 2, 3)])
 
             # # # # Get result
