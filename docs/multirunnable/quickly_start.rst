@@ -175,52 +175,52 @@ another one is usage with **Adapter**.
 
 * *Factory & Operator*
 
-    If you're building a parallelism with big software architecture, this way would be a good choice for you.
-    It divides the logic into 2 parts: generating synchronization instance and operating with the synchronization instance.
-    Hence you could implement them in different function, class or method.
+If you're building a parallelism with big software architecture, this way would be a good choice for you.
+It divides the logic into 2 parts: generating synchronization instance and operating with the synchronization instance.
+Hence you could implement them in different function, class or method.
 
 
 * *Adapter*
 
-    If you're building a simple parallelism, this way would be better for you.
-    It integrates all the features or APIs of *Factory* & *Operator* into itself.
-    Therefore you could do anything with it.
+If you're building a simple parallelism, this way would be better for you.
+It integrates all the features or APIs of *Factory* & *Operator* into itself.
+Therefore you could do anything with it.
 
 
 The different in implementation between them is:
 
 * *Factory & Operator*
 
-    1. Need to pass the factory instance into *Executor* or *Pool* via argument *features*.
-    2. Generate instance by *Factory* and operator it by *Operator*.
+1. Need to pass the factory instance into *Executor* or *Pool* via argument *features*.
+2. Generate instance by *Factory* and operator it by *Operator*.
 
-    .. _Factory & Operator final using example:
+.. _Factory & Operator final using example:
 
-    Therefore, it always has following code:
+Therefore, it always has following code:
 
-    .. code-block:: python
+.. code-block:: python
 
-        from multirunnable import SimpleExecutor, RunningMode
+    from multirunnable import SimpleExecutor, RunningMode
 
-        executor = SimpleExecutor(mode=RunningMode.Parallel, executors=3)
-        executor.run(function=lock_function, features=<Factory instance>)    # Has argument *features*
+    executor = SimpleExecutor(mode=RunningMode.Parallel, executors=3)
+    executor.run(function=lock_function, features=<Factory instance>)    # Has argument *features*
 
 
 * *Adapter*
 
-    1. Does NOT need to pass adapter instance into *Executor* or *Pool*.
-    2. Generate instance and operator it by *Adapter*.
+1. Does NOT need to pass adapter instance into *Executor* or *Pool*.
+2. Generate instance and operator it by *Adapter*.
 
-    .. _Adapter final using example:
+.. _Adapter final using example:
 
-    Therefore, it always has following code:
+Therefore, it always has following code:
 
-    .. code-block:: python
+.. code-block:: python
 
-        from multirunnable import SimpleExecutor, RunningMode
+    from multirunnable import SimpleExecutor, RunningMode
 
-        executor = SimpleExecutor(mode=RunningMode.Parallel, executors=3)
-        executor.run(function=lock_function)    # Doesn't has argument *features*
+    executor = SimpleExecutor(mode=RunningMode.Parallel, executors=3)
+    executor.run(function=lock_function)    # Doesn't has argument *features*
 
 
 Using Lock with *Factory & Operator*
