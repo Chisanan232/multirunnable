@@ -100,17 +100,17 @@ If you're curious about the detail of implementation of this package includes wo
     :target: https://pypi.org/project/multirunnable
 
 
-.. |release-version| image:: https://img.shields.io/github/release/Chisanan232/multirunnable.svg?label=Release&amp;logo=github
+.. |release-version| image:: https://img.shields.io/github/v/release/Chisanan232/multirunnable.svg?logo=github
     :alt: Package release version in GitHub
     :target: https://github.com/Chisanan232/multirunnable/releases
 
 
-.. |pypi-version| image:: https://img.shields.io/pypi/v/MultiRunnable?color=%23099cec&amp;label=PyPI&amp;logo=pypi&amp;logoColor=white
+.. |pypi-version| image:: https://img.shields.io/pypi/v/MultiRunnable?color=%23099cec&label=PyPI&logo=pypi&logoColor=white
     :alt: Package version in PyPi
     :target: https://pypi.org/project/MultiRunnable/
 
 
-.. |license| image:: https://img.shields.io/badge/License-Apache%202.0-blue.svg
+.. |license| image:: https://img.shields.io/badge/License-Apache%202.0-blue.svg?logo=apache
     :alt: License
     :target: https://opensource.org/licenses/Apache-2.0
 
