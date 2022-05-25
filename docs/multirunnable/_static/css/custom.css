@@ -1,0 +1,7 @@
+.toctree-wrapper > p.caption {
+    display: none;
+}
+
+section#welcome-to-multirunnable-s-documentation > p {
+    text-align: center;
+}

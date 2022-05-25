@@ -19,6 +19,8 @@ from multirunnable.concurrent import Thread_Queue
 from multirunnable.coroutine import Greenlet_Queue, Async_Queue
 
 
+glist = []
+
 
 class ProducerProcess:
 
@@ -32,12 +34,13 @@ class ProducerProcess:
 
     def send_process(self, *args):
         print("[Producer] args: ", args)
-        test_queue = self.__queue_opt.get_queue_with_name(name=self.__Queue_Name)
+        # test_queue = self.__queue_opt.get_queue_with_name(name=self.__Queue_Name)
         print(f"[Producer] It will keep producing something useless message.")
         while True:
             __sleep_time = random.randrange(1, 10)
             print(f"[Producer] It will sleep for {__sleep_time} seconds.")
-            test_queue.put(__sleep_time)
+            # test_queue.put(__sleep_time)
+            glist.append(__sleep_time)
             sleep(__sleep_time)
             # # # # # 1. Method
             # self.__condition_opt.acquire()
@@ -88,7 +91,7 @@ class ConsumerProcess:
 
     def receive_process(self, *args):
         print("[Consumer] args: ", args)
-        test_queue = self.__queue_opt.get_queue_with_name(name=self.__Queue_Name)
+        # test_queue = self.__queue_opt.get_queue_with_name(name=self.__Queue_Name)
         print(f"[Consumer] It detects the message which be produced by ProducerThread.")
         while True:
             # # # # 1. Method
@@ -107,7 +110,8 @@ class ConsumerProcess:
                 sleep(1)
                 print("[Consumer] ConsumerThread waiting ...")
                 self.__condition_opt.wait()
-                __sleep_time = test_queue.get()
+                # __sleep_time = test_queue.get()
+                __sleep_time = glist[-1]
                 print("[Consumer] ConsumerThread re-start.")
                 print(f"[Consumer] ProducerThread sleep {__sleep_time} seconds.")
 
@@ -152,12 +156,12 @@ class ExampleExecutor:
         __condition = ConditionFactory()
 
         # Initialize Queue object
-        __task = QueueTask()
-        __task.name = "test_queue"
-        # __task.queue_type =Process_Queue()
-        __task.queue_type = Thread_Queue()
-        # __task.queue_type = Async_Queue()
-        __task.value = []
+        # __task = QueueTask()
+        # __task.name = "test_queue"
+        # # __task.queue_type =Process_Queue()
+        # __task.queue_type = Thread_Queue()
+        # # __task.queue_type = Async_Queue()
+        # __task.value = []
 
         # Initialize and run ocean-simple-executor
         # __exe = SimpleExecutor(mode=RunningMode.Parallel, executors=cls.__Executor_Number)
@@ -168,7 +172,7 @@ class ExampleExecutor:
         # # # # Run without arguments
         __exe.map_with_function(
             functions=[cls.__producer_p.send_process, cls.__consumer_p.receive_process],
-            queue_tasks=__task,
+            # queue_tasks=__task,
             features=__condition)
 
         # # # # Asynchronous version of running without arguments

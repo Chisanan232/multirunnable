@@ -10,8 +10,8 @@ No matter which way developers choose to use, they all have some rules:
 
     Initial multiple runnable objects -> Run them -> Join and Close them
 
-About **runnable objects**, it means a object which would be configured target functions (sometimes, including its parameters).
-Developers could initial multiple it and run them simultaneously. Like *threading.Thread* or *multiprocessing.Process*.
+About **runnable objects**, it means an object which would be configured target functions (sometimes, including its parameters).
+Developers could initial multiple instances of it and run them simultaneously. Like *threading.Thread* or *multiprocessing.Process*.
 No matter Parallel, Concurrent or Coroutine, they're different, absolutely. But their usage-procedure are similar, too.
 *MultiRunnable* target to integrate the usage-procedure and try to let developers to implement parallelism code easily and clearly
 with different running strategy, event it still isn't a stable and entire package (It's release version is |release|) currently.
@@ -190,8 +190,8 @@ It's also the same with Coroutine --- Asynchronous. But please remember that tar
         executor.run(function=function, args={"index": f"test_{random.randrange(1, 10)}"})
 
 
-Quickly Start
-==============
+Simple Demonstration
+======================
 
 Install this package by pip:
 

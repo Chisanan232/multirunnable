@@ -112,7 +112,7 @@ About *Running Strategy Feature*, it's different feature module with different *
 For example, it's *multirunnable.parallel.feature* module if *FeatureMode* is *Parallel*.
 The global variable is the mapping of each synchronization feature classes.
 
-About details of APIs, please refer to :doc:`Synchronization API<api_references/synchronizations>`.
+About details of APIs, please refer to :doc:`Synchronization API<../api_references/synchronizations>`.
 About software architecture of synchronization features, please refer to :ref:`Software Architecture of Synchronization<Synchronization Software Architecture>`.
 
 
@@ -255,43 +255,43 @@ Here's the activity diagram of *Retry Mechanism*:
 |retry-activity-diagram|
 
 
-.. |executor-activity-diagram| image:: images/flows/MultiRunnable-Executor_Life_Cycle-Activity_diagram.png
+.. |executor-activity-diagram| image:: ../images/flows/MultiRunnable-Executor_Life_Cycle-Activity_diagram.png
     :width: 150
     :alt: work-flow image
 
 
-.. |pool-activity-diagram| image:: images/flows/MultiRunnable-Pool_Life_Cycle-Activity_Diagram.png
+.. |pool-activity-diagram| image:: ../images/flows/MultiRunnable-Pool_Life_Cycle-Activity_Diagram.png
     :width: 300
     :alt: work-flow image
 
 
-.. |synchronization-sequence-diagram| image:: images/flows/MultiRunnable-Synchronous-Sequence_Flow.png
+.. |synchronization-sequence-diagram| image:: ../images/flows/MultiRunnable-Synchronous-Sequence_Flow.png
     :width: 750
     :alt: work-flow image
 
 
-.. |persistence-file-otof-sequence-diagram| image:: images/flows/MultiRunnable-Persistence_File_Strategy-One_Thread_One_File.png
+.. |persistence-file-otof-sequence-diagram| image:: ../images/flows/MultiRunnable-Persistence_File_Strategy-One_Thread_One_File.png
     :width: 750
     :alt: work-flow image
 
 
-.. |persistence-file-atof-sequence-diagram| image:: images/flows/MultiRunnable-Persistence_File_Strategy-All_Threads_One_File.png
+.. |persistence-file-atof-sequence-diagram| image:: ../images/flows/MultiRunnable-Persistence_File_Strategy-All_Threads_One_File.png
     :width: 750
     :alt: work-flow image
 
 
-.. |persistence-file-otofca-sequence-diagram| image:: images/flows/MultiRunnable-Persistence_File_Strategy-One_Thread_One_File_and_Compress_All.png
+.. |persistence-file-otofca-sequence-diagram| image:: ../images/flows/MultiRunnable-Persistence_File_Strategy-One_Thread_One_File_and_Compress_All.png
     :width: 750
     :alt: work-flow image
 
 
-.. |persistence-database-sequence-diagram| image:: images/flows/MultiRunnable-Persistence-Database-Sequence_Diagram.png
+.. |persistence-database-sequence-diagram| image:: ../images/flows/MultiRunnable-Persistence-Database-Sequence_Diagram.png
     :width: 750
     :alt: work-flow image
 
 
 
-.. |retry-activity-diagram| image:: images/flows/MultiRunnable-Retry_Mechanism_Work_Flow.png
+.. |retry-activity-diagram| image:: ../images/flows/MultiRunnable-Retry_Mechanism_Work_Flow.png
     :width: 450
     :alt: work-flow image
 

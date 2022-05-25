@@ -44,7 +44,7 @@ class ExampleTargetFunction:
         return "You are 87."
 
 
-    @async_retry
+    @async_retry.bounded_function
     async def async_target_fail_function(self, *args, **kwargs) -> None:
         print("This is ExampleParallelClient.target_function.")
         print("This is target function args: ", args)

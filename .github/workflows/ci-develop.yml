@@ -460,3 +460,36 @@ jobs:
       - name: Report testing coverage of project code
         run: coverage report -m
 
+      - name: Generate testing report for Codacy
+        run: coverage xml
+
+      - name: Upload testing coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: project_coverage_report
+          path: coverage.xml
+          if-no-files-found: error
+
+
+  codacy_finish:
+    needs: total_codecov_finish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download testing coverage report
+        uses: actions/download-artifact@v3
+        with:
+          name: project_coverage_report
+#          path: coverage.xml
+          path: ./
+
+      - name: Generate testing report for Codacy
+        run: mv ./coverage.xml ./cobertura.xml
+
+      - name: Upload testing report to Codacy
+        uses: codacy/codacy-coverage-reporter-action@v1
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          # or
+          # api-token: ${{ secrets.CODACY_API_TOKEN }}
+          coverage-reports: cobertura.xml
+

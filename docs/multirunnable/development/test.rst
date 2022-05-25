@@ -7,17 +7,13 @@ Tests
 Building Status
 =================
 
-+------------+---------------------------------+----------------------+
-|     OS     |          Building Status        |    Coverage Status   |
-+============+=================================+======================+
-|    Linux   |    |travis-ci build-status|     |    (Deprecated CI)   |
-+------------+---------------------------------+----------------------+
-|    Linux   |     |circle-ci build-status|    |                      |
-+------------+---------------------------------+   |codecov-coverage| |
-|    Linux   |  |github-actions build-status|  |                      |
-+------------+---------------------------------+----------------------+
-|   Windows  |     |appveyor build-status|     | |coveralls-coverage| |
-+------------+---------------------------------+----------------------+
++------------------+-----------------------------------+----------------------+
+|        OS        |           Building Status         |    Coverage Status   |
++==================+===================================+======================+
+|    Linux/MacOS   |   |github-actions build-status|   |  |codecov-coverage|  |
++------------------+-----------------------------------+----------------------+
+|      Windows     |      |circle-ci build-status|     | |coveralls-coverage| |
++------------------+-----------------------------------+----------------------+
 
 
 .. _Testing Concerns:
@@ -188,14 +184,14 @@ Currently, *MultiRunnable* uses **Circle-CI**, **GitHub Actions** and **AppVeyor
     :target: https://pypi.org/project/multirunnable
 
 
-.. |release-version| image:: https://img.shields.io/github/release/Chisanan232/multirunnable.svg?label=Release
+.. |release-version| image:: https://img.shields.io/github/release/Chisanan232/multirunnable.svg?label=Release&amp;logo=github
     :alt: travis-ci build status
     :target: https://github.com/Chisanan232/multirunnable/releases
 
 
-.. |pypi-version| image:: https://badge.fury.io/py/MultiRunnable.svg
+.. |pypi-version| image:: https://img.shields.io/pypi/v/MultiRunnable?color=%23099cec&amp;label=PyPI&amp;logo=pypi&amp;logoColor=white
     :alt: travis-ci build status
-    :target: https://badge.fury.io/py/MultiRunnable
+    :target: https://pypi.org/project/MultiRunnable/
 
 
 .. |license| image:: https://img.shields.io/badge/License-Apache%202.0-blue.svg
@@ -203,24 +199,14 @@ Currently, *MultiRunnable* uses **Circle-CI**, **GitHub Actions** and **AppVeyor
     :target: https://opensource.org/licenses/Apache-2.0
 
 
-.. |travis-ci build-status| image:: https://app.travis-ci.com/Chisanan232/multirunnable.svg?branch=master
-    :alt: travis-ci build status
-    :target: https://app.travis-ci.com/Chisanan232/multirunnable
-
-
 .. |circle-ci build-status| image:: https://circleci.com/gh/Chisanan232/multirunnable.svg?style=svg
     :alt: circle-ci build status
     :target: https://app.circleci.com/pipelines/github/Chisanan232/multirunnable
 
 
-.. |github-actions build-status| image:: https://github.com/Chisanan232/multirunnable/actions/workflows/ci.yml/badge.svg
+.. |github-actions build-status| image:: https://github.com/Chisanan232/multirunnable/actions/workflows/ci-cd-master.yml/badge.svg
     :alt: github-actions build status
-    :target: https://github.com/Chisanan232/multirunnable/actions/workflows/ci.yml
-
-
-.. |appveyor build-status| image:: https://ci.appveyor.com/api/projects/status/v0nq38jtof6vcm23?svg=true
-    :alt: github-actions build status
-    :target: https://ci.appveyor.com/project/Chisanan232/multirunnable
+    :target: https://github.com/Chisanan232/multirunnable/actions/workflows/ci-cd-master.yml
 
 
 .. |codecov-coverage| image:: https://codecov.io/gh/Chisanan232/multirunnable/branch/master/graph/badge.svg?token=E2AGK1ZIDH

@@ -7,21 +7,18 @@ Modules in subpackage *multirunnable.adapter* be a factories which has responsib
 of generating target instance of running strategy. And for *multirunnable.api*,
 its responsibility for operating.
 
-It will have a new feature in version 0.17.0 about integrating factory and operators
-into an object to let client site uses it conveniently and clearly.
-
-Adapter Modules
+Factory Modules
 ================
 
-*module* multirunnable.adapter
+*module* multirunnable.factory
 
 It focuses on generating instance but doesn't care about how to operating it.
-It's an adapter to generate the target instance, so it would returns different
+It's an factory to generate the target instance, so it would returns different
 instance with different *RunningMode*. Below are the mapping table about which
 instance it generates with different *RunningMode*:
 
 +-----------------------+------------------------------+--------------------------------------------+
-|         Adapter       |         Running Mode         |               Truly Instance               |
+|         Factory       |         Running Mode         |               Truly Instance               |
 +=======================+==============================+============================================+
 |                       |            Parallel          |            multiprocessing.Lock            |
 +                       +------------------------------+--------------------------------------------+
@@ -75,67 +72,99 @@ instance it generates with different *RunningMode*:
 Lock Modules
 -------------
 
-*module* multirunnable.adapter.lock
+*module* multirunnable.factory.lock
 
 The module doesn't only response of *Lock*. All synchronization features which could limit
 the performance but DOES NOT communicate with each others like *Lock*, *Semaphore*, etc.
 
-It will be modified to naming as *LockFactory* in version 0.17.0. Same as classes in it (Lock, Semaphore, etc).
+It was named as *LockAdapter* before version 0.17.0. Same as classes in it (Lock, Semaphore, etc).
 
-Lock
-~~~~~~
+.. _Factory.Lock - LockFactory:
 
-*class* multirunnable.adapter.lock.\ **Lock**
+LockFactory
+~~~~~~~~~~~~~
+
+*class* multirunnable.factory.lock.\ **LockFactory**
+
     The implement about generating *Lock* instance.
 
-**get_instance**\ *(**kwargs)*
-    Instantiate the *Lock* instance by FeatureMode which be assigned by RunningMode.
 
-    It could pass arguments if its instantiating needs.
+    **get_instance**\ *(**kwargs)*
 
-**globalize_instance**\ *(obj)*
-    Assign the object as a global variable.
+        Instantiate the *Lock* instance by FeatureMode which be assigned by RunningMode.
 
-RLock
-~~~~~~~
+        It could pass arguments if its instantiating needs.
 
-*class* multirunnable.adapter.lock.\ **RLock**
-    It's same as *multirunnable.adapter.lock.Lock* but for *RLock*.
+        Parameters:
+            * *kwargs* (Dict) : A argument of the Lock object.
+        Return:
+            An instance of **Lock**.
 
-Semaphore
-~~~~~~~~~~~
 
-*class* multirunnable.adapter.lock.\ **Semaphore**
-    It's same as *multirunnable.adapter.lock.Lock* but for *Semaphore*.
+    **globalize_instance**\ *(obj: MRLock)*
 
-Bounded Semaphore
-~~~~~~~~~~~~~~~~~~~
+        Assign the object as a global variable.
 
-*class* multirunnable.adapter.lock.\ **BoundedSemaphore**
-    It's same as *multirunnable.adapter.lock.Lock* but for *BoundedSemaphore*.
+        Parameters:
+            * *obj* (multirunnsble.types.MRLock) : An instance of **Lock**.
+        Return:
+            None.
+
+.. _Factory.Lock - RLockFactory:
+
+RLockFactory
+~~~~~~~~~~~~~~
+
+*class* multirunnable.factory.lock.\ **RLockFactoryFactory**
+
+    It's same as *multirunnable.factory.lock.LockFactory* but for *RLock*.
+
+.. _Factory.Lock - SemaphoreFactory:
+
+SemaphoreFactory
+~~~~~~~~~~~~~~~~~~
+
+*class* multirunnable.factory.lock.\ **SemaphoreFactoryFactory**
+
+    It's same as *multirunnable.factory.lock.LockFactory* but for *Semaphore*.
+
+.. _Factory.Lock - BoundedSemaphoreFactory:
+
+BoundedSemaphoreFactory
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*class* multirunnable.factory.lock.\ **BoundedSemaphoreFactory**
+
+    It's same as *multirunnable.factory.lock.LockFactory* but for *BoundedSemaphore*.
 
 
 Communication Modules
 ----------------------
 
-*module* multirunnable.adapter.communication
+*module* multirunnable.factory.communication
 
 All synchronization features which could limit the performance AND could communicate with each others like *Event*, *Condition*.
 
 It will be modified to naming as *CommunicationFactory* in version 0.17.0. Same as classes in it (Event, Condition).
 
-Event
-~~~~~~~
+.. _Factory.Communication - EventFactory:
 
-*class* multirunnable.adapter.communication.\ **Event**
-    It's same as *multirunnable.adapter.lock.Lock* but for *Event*.
+EventFactory
+~~~~~~~~~~~~~
+
+*class* multirunnable.factory.communication.\ **EventFactory**
+
+    It's same as *multirunnable.factory.lock.LockFactory* but for *Event*.
 
 
-Condition
-~~~~~~~~~~~
+.. _Factory.Communication - ConditionFactory:
 
-*class* multirunnable.adapter.communication.\ **Condition**
-    It's same as *multirunnable.adapter.lock.Lock* but for *Condition*.
+ConditionFactory
+~~~~~~~~~~~~~~~~~
+
+*class* multirunnable.factory.communication.\ **ConditionFactory**
+
+    It's same as *multirunnable.factory.lock.LockFactory* but for *Condition*.
 
 
 
@@ -146,7 +175,7 @@ API Modules
 
 All operators of *MultiRunnable* is the responsibility of this subpackage.
 Including synchronizations like *Lock*, *Semaphore* or something like this and retry mechanism.
-For synchronization features, *multirunnable.adapter* focus on generating instance, *multirunnable.api* focus on operating something with the instance.
+For synchronization features, *multirunnable.factory* focus on generating instance, *multirunnable.api* focus on operating something with the instance.
 
 Operator Modules
 -----------------
@@ -155,10 +184,13 @@ Operator Modules
 
 This module responses of some operators of synchronization-features.
 
+.. _API.Operator - LockOperator:
+
 LockOperator
 ~~~~~~~~~~~~~~
 
 *class* multirunnable.api.operator.\ **LockOperator**\ *()*
+
     Operators of feature *Lock*.
     This feature do the same thing as the truly instance we call. Please refer to below to get more details:
 
@@ -167,21 +199,39 @@ LockOperator
     * `Coroutine - Green Thread Lock <https://www.gevent.org/api/gevent.lock.html>`_
     * `Coroutine - Asynchronous Lock <https://docs.python.org/3/library/asyncio-sync.html#asyncio.Lock>`_
 
-**_get_feature_instance**\ *()*
-    Return a *Lock* instance which be get from global variable be saved in module *multirunnable.api.manage*.
-    Therefore, this return value would be the same as *multirunnable.api.manage.Running_Lock*.
 
-**acquire**\ *()*
-    Acquire a lock to limit performance so that it's force to run ONLY ONE runnable object at the same time.
+    **_get_feature_instance**\ *()*
 
-**release**\ *()*
-    Release the lock to let other runnable objects could acquire it.
+        Return a *Lock* instance which be get from global variable be saved in module *multirunnable.api.manage*.
+        Therefore, this return value would be the same as *multirunnable.api.manage.Running_Lock*.
 
+        Return:
+            An instance of **Lock**.
+
+
+    **acquire**\ *()*
+
+        Acquire a lock to limit performance so that it's force to run ONLY ONE runnable object at the same time.
+
+        Return:
+            None.
+
+
+    **release**\ *()*
+
+        Release the lock to let other runnable objects could acquire it.
+
+        Return:
+            None.
+
+
+.. _API.Operator - RLockOperator:
 
 RLockOperator
 ~~~~~~~~~~~~~~
 
 *class* multirunnable.api.operator.\ **RLockOperator**\ *()*
+
     Operators of feature *RLock*.
     This feature do the same thing as the truly instance we call. Please refer to below to get more details:
 
@@ -190,22 +240,43 @@ RLockOperator
     * `Coroutine - Green Thread RLock <https://www.gevent.org/api/gevent.lock.html>`_
     * Coroutine - Asynchronous does NOT support this feature
 
-**_get_feature_instance**\ *()*
-    Same as *LockOperator._get_feature_instance*. It returns value would be the
-    same as *multirunnable.api.manage.Running_RLock*.
 
-**acquire**\ *(blocking: bool = True, timeout: int = -1)*
-    Acquire a lock to limit performance so that it's force to run ONLY ONE runnable object at the same time.
-    Different is it could acquire lock again and again in runtime. But remember, how many it acquires, how many it needs to release.
+    **_get_feature_instance**\ *()*
 
-**release**\ *()*
-    Same as *Lock.acquire*. Difference is program would keep run util last one *release* be called.
+        Same as *LockOperator._get_feature_instance*. It returns value would be the
+        same as *multirunnable.api.manage.Running_RLock*.
 
+        Return:
+            An instance of **RLock**.
+
+
+    **acquire**\ *(blocking=True, timeout=None)*
+
+        Acquire a lock to limit performance so that it's force to run ONLY ONE runnable object at the same time.
+        Different is it could acquire lock again and again in runtime. But remember, how many it acquires, how many it needs to release.
+
+        Parameters:
+            * *blocking* (bool) : It would block until **RLock** resource has been released if *blocking* is True, or it doesn't.
+            * *timeout* (int) : The most number of seconds it would block.
+        Return:
+            None.
+
+
+    **release**\ *()*
+
+        Same as *Lock.acquire*. Difference is program would keep run util last one *release* be called.
+
+        Return:
+            None.
+
+
+.. _API.Operator - SemaphoreOperator:
 
 SemaphoreOperator
 ~~~~~~~~~~~~~~~~~~~
 
 *class* multirunnable.api.operator.\ **SemaphoreOperator**\ *()*
+
     Operators of feature *Semaphore*.
     This feature do the same thing as the truly instance we call. Please refer to below to get more details:
 
@@ -214,23 +285,46 @@ SemaphoreOperator
     * `Coroutine - Green Thread Semaphore <https://www.gevent.org/api/gevent.lock.html>`_
     * `Coroutine - Asynchronous Semaphore <https://docs.python.org/3/library/asyncio-sync.html#asyncio.Semaphore>`_
 
-**_get_feature_instance**\ *()*
-    Same as *LockOperator._get_feature_instance*. It returns value would be the
-    same as *multirunnable.api.manage.Running_Semaphore*.
 
-**acquire**\ *(blocking: bool = True, timeout: int = None)*
-    It's mostly same as *Lock*. It force to only one runnable object could run at the same time with *Lock*.
-    For *Semaphore*, it permits multiple runnable objects to run simultaneously and the permitted amount
-    is the value of option *value* of *multirunnable.adapter.lock.Semaphore*.
+    **_get_feature_instance**\ *()*
 
-**release**\ *(n: int = 1)*
-    The logic is same as *Lock.release* but be used for *Semaphore*.
+        Same as *LockOperator._get_feature_instance*. It returns value would be the
+        same as *multirunnable.api.manage.Running_Semaphore*.
 
+        Return:
+            An instance of **Semaphore**.
+
+
+    **acquire**\ *(blocking: bool = True, timeout: int = None)*
+
+        It's mostly same as *Lock*. It force to only one runnable object could run at the same time with *Lock*.
+        For *Semaphore*, it permits multiple runnable objects to run simultaneously and the permitted amount
+        is the value of option *value* of *multirunnable.factory.lock.Semaphore*.
+
+        Parameters:
+            * *blocking* (bool) : It would block until **Semaphore** resource has been released if *blocking* is True, or it doesn't.
+            * *timeout* (int) : The most number of seconds it would block.
+        Return:
+            None.
+
+
+    **release**\ *(n: int = 1)*
+
+        The logic is same as *Lock.release* but be used for *Semaphore*.
+
+        Parameters:
+            * *n* (int) : How many semaphore it should release.
+        Return:
+            None.
+
+
+.. _API.Operator - BoundedSemaphoreOperator:
 
 BoundedSemaphoreOperator
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 *class* multirunnable.api.operator.\ **BoundedSemaphoreOperator**\ *()*
+
     Operators of feature *Bounded Semaphore*.
     This feature do the same thing as the truly instance we call. Please refer to below to get more details:
 
@@ -239,22 +333,45 @@ BoundedSemaphoreOperator
     * `Coroutine - Green Thread Bounded Semaphore <https://www.gevent.org/api/gevent.lock.html>`_
     * `Coroutine - Asynchronous Bounded Semaphore <https://docs.python.org/3/library/asyncio-sync.html#asyncio.BoundedSemaphore>`_
 
-**_get_feature_instance**\ *()*
-    Same as *LockOperator._get_feature_instance*. It returns value would be the
-    same as *multirunnable.api.manage.Running_Bounded_Semaphore*.
 
-**acquire**\ *(blocking: bool = True, timeout: int = None)*
-    This implement is same as *SemaphoreOperator.acquire*.
+    **_get_feature_instance**\ *()*
 
-**release**\ *(n: int = 1)*
-    It's also same as *SemaphoreOperator.acquire* but the only one different is
-    it has limitation (the argument *n*) in every time it releases.
+        Same as *LockOperator._get_feature_instance*. It returns value would be the
+        same as *multirunnable.api.manage.Running_Bounded_Semaphore*.
 
+        Return:
+            An instance of **BoundedSemaphore**.
+
+
+    **acquire**\ *(blocking: bool = True, timeout: int = None)*
+
+        This implement is same as *SemaphoreOperator.acquire*.
+
+        Parameters:
+            * *blocking* (bool) : It would block until **BoundedSemaphore** resource has been released if *blocking* is True, or it doesn't.
+            * *timeout* (int) : The most number of seconds it would block.
+        Return:
+            None.
+
+
+    **release**\ *(n: int = 1)*
+
+        It's also same as *SemaphoreOperator.acquire* but the only one different is
+        it has limitation (the argument *n*) in every time it releases.
+
+        Parameters:
+            * *n* (int) : How many semaphore it should release.
+        Return:
+            None.
+
+
+.. _API.Operator - EventOperator:
 
 EventOperator
 ~~~~~~~~~~~~~~~
 
 *class* multirunnable.api.operator.\ **EventOperator**\ *()*
+
     Operators of feature *Event*.
     This feature do the same thing as the truly instance we call. Please refer to below to get more details:
 
@@ -263,30 +380,65 @@ EventOperator
     * `Coroutine - Green Thread Event <https://www.gevent.org/api/gevent.event.html>`_
     * `Coroutine - Asynchronous Event <https://docs.python.org/3/library/asyncio-sync.html#asyncio.Event>`_
 
-**_event_instance**\ *()*
-    Return the *Event* instance.
 
-**_get_feature_instance**\ *()*
-    Same as *LockOperator._get_feature_instance*. It returns value would be the
-    same as *multirunnable.api.manage.Running_Event*.
+    **_event_instance**\ *()*
 
-**set**\ *()*
-    Set a flag to tell other runnable objects could run.
+        Return the *Event* instance.
 
-**is_set**\ *()*
-    Return bool type value. It's *True* if flag be set or it's *False*.
+        Return:
+            An instance of **Event**.
 
-**wait**\ *(timeout: int = None)*
-    Let runnable object waits util flag be set by the method *set*.
 
-**clear**\ *()*
-    Clear all flags.
+    **_get_feature_instance**\ *()*
 
+        Same as *LockOperator._get_feature_instance*. It returns value would be the
+        same as *multirunnable.api.manage.Running_Event*.
+
+        Return:
+            An instance of **Event**.
+
+
+    **set**\ *()*
+
+        Set a flag to tell other runnable objects could run.
+
+        Return:
+            None.
+
+
+    **is_set**\ *()*
+
+        Return bool type value. It's *True* if flag be set or it's *False*.
+
+        Return:
+            A boolean value.
+
+
+    **wait**\ *(timeout: int = None)*
+
+        Let runnable object waits util flag be set by the method *set*.
+
+        Parameters:
+            * *timeout* (int) : The most number of seconds it would block.
+        Return:
+            A boolean value.
+
+
+    **clear**\ *()*
+
+        Clear all flags.
+
+        Return:
+            None.
+
+
+.. _API.Operator - ConditionOperator:
 
 ConditionOperator
 ~~~~~~~~~~~~~~~~~~~
 
 *class* multirunnable.api.operator.\ **ConditionOperator**\ *()*
+
     Operators of feature *Condition*.
     This feature do the same thing as the truly instance we call. Please refer to below to get more details:
 
@@ -295,25 +447,160 @@ ConditionOperator
     * Coroutine - Green Thread does NOT support this feature
     * `Coroutine - Asynchronous Condition <https://docs.python.org/3/library/asyncio-sync.html#asyncio.Condition>`_
 
-**_get_feature_instance**\ *()*
-    Same as *LockOperator._get_feature_instance*. It returns value would be the
-    same as *multirunnable.api.manage.Running_Condition*.
 
-**acquire**\ *(blocking: bool = True, timeout: int = None)*
-    Acquire a lock to limit performance. It's same as *LockOperator.acquire*.
+    **_get_feature_instance**\ *()*
 
-**release**\ *()*
-    Same as *LockOperator.release*.
+        Same as *LockOperator._get_feature_instance*. It returns value would be the
+        same as *multirunnable.api.manage.Running_Condition*.
 
-**wait**\ *(timeout: int = None)*
-    Wait util notified or util a timeout occurs.
+        Return:
+            An instance of **Condition**.
 
-**wait_for**\ *(predicate, timeout: int = None)*
-    Wait until a condition evaluates to true.
 
-**notify**\ *(n: int = 1)*
-    By default, wait up one runnable object on this condition.
+    **acquire**\ *(blocking: bool = True, timeout: int = None)*
 
-**notify_all**\ *()*
-    Wait up all runnable objects on this condition.
+        Acquire a lock to limit performance. It's same as *LockOperator.acquire*.
+
+        Parameters:
+            * *blocking* (bool) : It would block until **Condition** resource has been released if *blocking* is True, or it doesn't.
+            * *timeout* (int) : The most number of seconds it would block.
+        Return:
+            A boolean value.
+
+
+    **release**\ *()*
+
+        Same as *LockOperator.release*.
+
+        Return:
+            None.
+
+
+    **wait**\ *(timeout: int = None)*
+
+        Wait util notified or util a timeout occurs.
+
+        Parameters:
+            * *timeout* (int) : The most number of seconds it would block.
+        Return:
+            None.
+
+
+    **wait_for**\ *(predicate, timeout: int = None)*
+
+        Wait until a condition evaluates to true.
+
+        Parameters:
+            * *predicate* (Callable) : This should be a function which return value is boolean type. It would keep running if it satisfy *predicate*.
+            * *timeout* (int) : The most number of seconds it would block.
+        Return:
+            A boolean value.
+
+
+    **notify**\ *(n: int = 1)*
+
+        By default, wait up one runnable object on this condition.
+
+        Parameters:
+            * *n* (int) : How many runnable objects it should wake up to run on the condition.
+        Return:
+            None.
+
+
+    **notify_all**\ *()*
+
+        Wait up all runnable objects on this condition.
+
+        Return:
+            None.
+
+
+
+Adapter Modules
+================
+
+*module* multirunnable.adapter
+
+Subpackage *Adapter* for clear and convenient in usage. It combines the features of both 2 subpackages *Factory* and *API*.
+
+About synchronization usage in *multirunnable*, it divides to 2 sections: *Factory* and *API*.
+The former generates instance with *RunningMode*; the latter provides all operators of the instance.
+However, it doesn't be clear or be convenient to use sometimes. It also needs to care 2 different objects
+when you're using.
+
+Let's demonstrate some different usage between *Adapter* and *Factory* with *API*:
+
+Usage with *Adapter*:
+
+.. code-block:: python
+
+    from multirunnable import RunningMode, SimpleExecutor, sleep
+    from multirunnable.adapter import Lock
+
+    _lock = Lock(mode=RunningMode.Parallel, init=True)    # Use Lock feature with Adapter object
+
+    def lock_function():
+        _lock.acquire()
+        print("This is ExampleTargetFunction.target_function.")
+        sleep(3)
+        _lock.release()
+
+    executor = SimpleExecutor(mode=RunningMode.Parallel, executors=5)
+    executor.run(function=lock_function)
+
+
+Usage with *Factory* and *API*:
+
+.. code-block:: python
+
+    from multirunnable import RunningMode, SimpleExecutor, sleep
+    from multirunnable.api import LockOperator
+    from multirunnable.factory import LockFactory
+
+    def lock_function():
+        _lock_opt = LockOperator()    # Use Lock feature with Operator object
+        _lock_opt.acquire()
+        print("This is ExampleTargetFunction.target_function.")
+        sleep(3)
+        _lock_opt.release()
+
+    executor = SimpleExecutor(mode=RunningMode.Parallel, executors=5)
+    lock = LockFactory()    # Use Lock feature with Factory object
+    executor.run(function=lock_function, features=lock)
+
+
+About second one of above demonstrations, it generates instance by object *LockFactory*
+and operates the Lock feature with object *LockOperator*. It must to care about what thing
+to do and when to call it. But it doesn't if it uses with object *Lock*.
+
+Objects in it has all the attributes of *Factory* and *API*. And the attribute's name
+also the same between them. So what attributes *Factory* or *API* they have, what
+attributes *Adapter* it has.
+
+This is new in version 0.17.0.
+
+The modules of subpackage *Adapter*:
+
+* module: *multirunnable.adapter.lock*
+
+    * Lock
+        * :ref:`Factory.Lock - LockFactory`
+        * :ref:`API.Operator - LockOperator`
+    * RLock
+        * :ref:`Factory.Lock - RLockFactory`
+        * :ref:`API.Operator - RLockOperator`
+    * Semaphore
+        * :ref:`Factory.Lock - SemaphoreFactory`
+        * :ref:`API.Operator - SemaphoreOperator`
+    * BoundedSemaphore
+        * :ref:`Factory.Lock - BoundedSemaphoreFactory`
+        * :ref:`API.Operator - BoundedSemaphoreOperator`
+
+* module: *multirunnable.adapter.communication*
+    * Event
+        * :ref:`Factory.Communication - EventFactory`
+        * :ref:`API.Operator - EventOperator`
+    * Condition
+        * :ref:`Factory.Communication - ConditionFactory`
+        * :ref:`API.Operator - ConditionOperator`
 
