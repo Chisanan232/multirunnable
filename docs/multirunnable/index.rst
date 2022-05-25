@@ -8,12 +8,6 @@ Welcome to MultiRunnable's documentation!
 
 |python-versions| |release-version| |pypi-version| |license| |codacy-level|
 
-:Date: |today|
-
-
-Building Status
------------------
-
 +------------------+-----------------------------------+----------------------+
 |        OS        |           Building Status         |    Coverage Status   |
 +==================+===================================+======================+
