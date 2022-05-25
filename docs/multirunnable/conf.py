@@ -37,10 +37,16 @@ master_doc = 'index'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.napoleon',
-    'sphinx.ext.intersphinx'
+    "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.intersphinx",
 ]
+
+# The suffix(es) of source filenames.
+# You can specify multiple suffix as a list of string:
+#
+# source_suffix = ['.rst', '.md']
+source_suffix = ".rst"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -58,6 +64,7 @@ exclude_patterns = ['build']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
+# pygments_dark_style = "monokai"
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -66,7 +73,13 @@ pygments_style = 'sphinx'
 # a list of builtin themes.
 #
 # html_theme = 'alabaster'    # Default theme
-html_theme = 'sphinx_rtd_theme'
+# html_theme = 'sphinx_rtd_theme'
+html_theme = 'furo'
+# html_theme = 'piccolo_theme'
+html_short_title = "MultiRunnable Documentation"
+# html_logo = "logo.png"
+html_show_sphinx = False
+globaltoc_maxdepth = 3
 
 
 def setup(app):
@@ -87,9 +100,21 @@ html_css_files = ['css/custom.css']
 # refs: http://alabaster.readthedocs.io/en/latest/installation.html#sidebars
 html_sidebars = {
     '**': [
-        'relations.html',  # needs 'show_related': True theme option to display
+        # 'globaltoc.html',
+        # # 'relations.html',  # needs 'show_related': True theme option to display
+        # 'searchbox.html'
+
+        "sidebar/scroll-start.html",
+        "sidebar/brand.html",
+        "sidebar/search.html",
+        "sidebar/navigation.html",
+        "sidebar/ethical-ads.html",
+        "sidebar/scroll-end.html",
+    ],
+    'using/windows': [
+        'windowssidebar.html',
         'searchbox.html'
-    ]
+    ],
 }
 
 # -- Options for HTMLHelp output ------------------------------------------
