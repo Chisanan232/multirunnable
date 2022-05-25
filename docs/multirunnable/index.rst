@@ -94,7 +94,7 @@ If you're curious about the detail of implementation of this package includes wo
     :target: https://pypi.org/project/multirunnable
 
 
-.. |release-version| image:: https://img.shields.io/github/v/release/Chisanan232/multirunnable.svg?logo=github
+.. |release-version| image:: https://img.shields.io/github/v/release/Chisanan232/multirunnable.svg?logo=github&color=orange
     :alt: Package release version in GitHub
     :target: https://github.com/Chisanan232/multirunnable/releases
 
