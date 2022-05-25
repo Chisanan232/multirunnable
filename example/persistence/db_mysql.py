@@ -133,3 +133,7 @@ class MySQLOperator(DatabaseOperator):
     def fetch_all(self) -> list:
         return self._cursor.fetchall()
 
+
+    def close_cursor(self) -> None:
+        self._cursor.close()
+
