@@ -478,7 +478,7 @@ jobs:
 
 
   total_codecov_finish:
-    needs: [unit-test-codecov, integration-test-codecov]
+    needs: [unit-test_codecov_and_codacy, integration-test_codecov_and_codacy]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
