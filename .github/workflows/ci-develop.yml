@@ -227,7 +227,7 @@ jobs:
           pip install coverage
 
       - name: Combine all code coverage result files
-        run: coverage combine .coverage.*
+        run: coverage combine --keep .coverage.*
 
       - name: Report testing coverage of project code
         run: coverage report -m
@@ -334,7 +334,7 @@ jobs:
           pip install coverage
 
       - name: Combine all code coverage result files
-        run: coverage combine .coverage.*
+        run: coverage combine --keep .coverage.*
 
       - name: Report testing coverage of project code
         run: coverage report -m
@@ -429,7 +429,7 @@ jobs:
 #          pip install coverage
 #
 #      - name: Combine all code coverage result files
-#        run: coverage combine .coverage.*
+#        run: coverage combine --keep .coverage.*
 #
 #      - name: Report testing coverage of project code
 #        run: coverage report -m
@@ -455,7 +455,7 @@ jobs:
           pip install coverage
 
       - name: Combine all code coverage result files
-        run: coverage combine .coverage.*
+        run: coverage combine --keep .coverage.*
 
       - name: Report testing coverage of project code
         run: coverage report -m
