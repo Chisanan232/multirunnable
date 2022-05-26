@@ -543,5 +543,5 @@ jobs:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           # or
           # api-token: ${{ secrets.CODACY_API_TOKEN }}
-          coverage-reports: [unit-test_coverage.xml, integration-test_coverage.xml]
+          coverage-reports: "unit-test_coverage.xml,integration-test_coverage.xml"
 
