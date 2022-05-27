@@ -357,7 +357,7 @@ jobs:
         run: coverage report -m
 
 
-  codecov_finish:
+  generate_coverage_report:
     needs: [unit-test-codecov, integration-test-codecov]
     runs-on: ubuntu-latest
     steps:
@@ -377,9 +377,9 @@ jobs:
 
       - name: Install Python tool 'coverage'
         run: |
-          python3 -m pip install --upgrade pip
-          pip3 install -U pip
-          pip3 install coverage
+          python -m pip install --upgrade pip
+          pip install -U pip
+          pip install coverage
 
       - name: Combine all code coverage result files
         run: coverage combine .coverage.*
@@ -387,41 +387,68 @@ jobs:
       - name: Report testing coverage of project code
         run: coverage report -m
 
+      - name: Generate testing coverage report as XML file
+        run: coverage xml
+
+      - name: Upload testing coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: project_coverage_report
+          path: coverage.xml
+          if-no-files-found: error
+
+
+  codecov_finish:
+    needs: generate_coverage_report
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download testing coverage report
+        uses: actions/download-artifact@v3
+        with:
+          name: project_coverage_report
+#          path: coverage.xml
+          path: ./
+
+      # This usage be refer from https://about.codecov.io/blog/python-code-coverage-using-github-actions-and-codecov/
+      # Official document: https://github.com/marketplace/actions/codecov
       - name: Upload testing coverage of project code to Codecov
         uses: codecov/codecov-action@v2
         with:
-          name: multirunnable-codecov
+          version: "v0.1.15"
+          name: official release codecov
           token: ${{ secrets.CODECOV_TOKEN }}   # The token of project MultiRunnable in codecov
-          file: .coverage
+          flags: unit-tests, integration-tests    # optional
+          files: coverage.xml
           env_vars: OS,PYTHON
           fail_ci_if_error: true   # optional (default = false)
           verbose: true    # optional (default = false)
 
-      # This usage be refer from https://about.codecov.io/blog/python-code-coverage-using-github-actions-and-codecov/
 
-#    Old way to upload testing result about code coverage to codecov.
-#
-#      - name: Install Python dependencies
-#        run: |
-#          python -m pip install --upgrade pip
-#          pip install -U pip
-#          pip install codecov
-#        with:
-#          parallel-finished: true
+  codacy_finish:
+    needs: generate_coverage_report
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download testing coverage report
+        uses: actions/download-artifact@v3
+        with:
+          name: project_coverage_report
+#          path: coverage.xml
+          path: ./
 
-#      - name: Get secret token from Base64
-#        env:
-#          KEYSTORE_BASE64: ${{ secrets.CODECOV_TOKEN }}
-#        run: |
-#          echo import certificate from secrets and regenerate the file
-#          echo $KEYSTORE_BASE64 | base64 -d > ./codecov.token
-#
-#      - name: Submit calculation result of testing coverage of project code to Codecov
-#        run: codecov -f ./codecov.token    # submit coverage to codecov
+      - name: Generate testing report for Codacy
+        run: mv ./coverage.xml ./cobertura.xml
+
+      - name: Upload testing report to Codacy
+        uses: codacy/codacy-coverage-reporter-action@v1
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          # or
+          # api-token: ${{ secrets.CODACY_API_TOKEN }}
+          coverage-reports: cobertura.xml
 
 
-  building_check:
-    needs: codecov_finish
+  pre-building_check:
+    needs: [codecov_finish, codacy_finish]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -460,7 +487,7 @@ jobs:
 
 
   build_package:
-    needs: building_check
+    needs: pre-building_check
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

@@ -8,8 +8,8 @@ _Worker_Size = 7
 _Semaphore_Value = 2
 
 
-def target_function_with_bsmp() -> None:
-    retry_success_with_bsmp()
+def target_function_with_bsmp() -> str:
+    return retry_success_with_bsmp()
 
 
 @retry.function

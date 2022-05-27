@@ -7,7 +7,6 @@ declare -a array1=(
 "tests/unit_test/_singletons.py"
 )
 
-declare -a init_tests
 declare -a basic_api_tests
 declare -a parallel_tests
 declare -a concurrent_tests
@@ -43,7 +42,7 @@ getalltests() {
     then
         adapter_tests=${alltestpaths[@]}
     else
-        init_tests=${alltestpaths[@]}
+        basic_api_tests=${alltestpaths[@]}
     fi
 }
 
@@ -64,7 +63,7 @@ getalltests $factory_path
 getalltests $api_path
 getalltests $adapter_path
 
-dest=( "${array1[@]} ${init_tests[@]} ${parallel_tests[@]} ${concurrent_tests[@]} ${coroutine_tests[@]} ${factory_tests[@]} ${apis_tests[@]} ${adapter_tests[@]}" )
+dest=( "${array1[@]} ${basic_api_tests[@]} ${parallel_tests[@]} ${concurrent_tests[@]} ${coroutine_tests[@]} ${factory_tests[@]} ${apis_tests[@]} ${adapter_tests[@]}" )
 
 
 if echo $runtime_os | grep -q "windows";

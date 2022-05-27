@@ -207,7 +207,7 @@ jobs:
           if-no-files-found: error
 
 
-  unit-test-codecov:
+  unit-test_codecov:
     needs: [unit-test-core, unit-test-persistence]
     runs-on: ubuntu-latest
     steps:
@@ -227,10 +227,20 @@ jobs:
           pip install coverage
 
       - name: Combine all code coverage result files
-        run: coverage combine .coverage.*
+        run: coverage combine --keep .coverage.*
 
       - name: Report testing coverage of project code
         run: coverage report -m
+
+      - name: Generate testing report for Codacy
+        run: coverage xml -o unit-test_coverage.xml
+
+      - name: Upload testing coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: project_unit_test_coverage_xml_report
+          path: unit-test_coverage.xml
+          if-no-files-found: error
 
 
   prep-testbed-integration-test:
@@ -314,7 +324,7 @@ jobs:
           if-no-files-found: error
 
 
-  integration-test-codecov:
+  integration-test_codecov:
     needs: integration-test
     runs-on: ubuntu-latest
     steps:
@@ -334,10 +344,20 @@ jobs:
           pip install coverage
 
       - name: Combine all code coverage result files
-        run: coverage combine .coverage.*
+        run: coverage combine --keep .coverage.*
 
       - name: Report testing coverage of project code
         run: coverage report -m
+
+      - name: Generate testing report for Codacy
+        run: coverage xml -o integration-test_coverage.xml
+
+      - name: Upload testing coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: project_integration_test_coverage_xml_report
+          path: integration-test_coverage.xml
+          if-no-files-found: error
 
 
 #  prep-testbed-database-compatibility:
@@ -429,14 +449,14 @@ jobs:
 #          pip install coverage
 #
 #      - name: Combine all code coverage result files
-#        run: coverage combine .coverage.*
+#        run: coverage combine --keep .coverage.*
 #
 #      - name: Report testing coverage of project code
 #        run: coverage report -m
 
 
   total_codecov_finish:
-    needs: [unit-test-codecov, integration-test-codecov]
+    needs: [unit-test_codecov, integration-test_codecov]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -455,8 +475,45 @@ jobs:
           pip install coverage
 
       - name: Combine all code coverage result files
-        run: coverage combine .coverage.*
+        run: coverage combine --keep .coverage.*
 
       - name: Report testing coverage of project code
-        run: coverage report
+        run: coverage report -m
+
+      - name: Generate testing report for Codacy
+        run: coverage xml
+
+      - name: Upload testing coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: project_coverage_report
+          path: coverage.xml
+          if-no-files-found: error
+
+
+  codacy_finish:
+    needs: total_codecov_finish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download unit testing coverage report
+        uses: actions/download-artifact@v3
+        with:
+          name: project_unit_test_coverage_xml_report
+#          path: unit-test_coverage.xml
+          path: ./
+
+      - name: Download integration testing coverage report
+        uses: actions/download-artifact@v3
+        with:
+          name: project_integration_test_coverage_xml_report
+#          path: integration-test_coverage.xml
+          path: ./
+
+      - name: Upload testing report to Codacy
+        uses: codacy/codacy-coverage-reporter-action@v1
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          # or
+          # api-token: ${{ secrets.CODACY_API_TOKEN }}
+          coverage-reports: "unit-test_coverage.xml,integration-test_coverage.xml"
 

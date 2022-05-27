@@ -33,6 +33,10 @@ import re
 if (PYTHON_MAJOR_VERSION, PYTHON_MINOR_VERSION) >= (3, 9):
     logging.info("Force 'multiprocessing' to use 'fork'.")
     if re.search(re.escape(runtime_os()), "Windows", re.IGNORECASE) is not None:
+        # multiprocessing usage in Windows OS:
+        # https://docs.python.org/3/library/multiprocessing.html#multiprocessing.get_all_start_methods
+        # The key point is 'On Windows only 'spawn' is available.'. This is the reason why
+        # this condition determine exists.
         set_multiprocessing_start_method('spawn', force=True)
     else:
         set_multiprocessing_start_method('fork', force=True)

@@ -1,9 +1,9 @@
 # MultiRunnable
 
 [![Supported Versions](https://img.shields.io/pypi/pyversions/multirunnable.svg?logo=python&logoColor=FBE072)](https://pypi.org/project/multirunnable)
-[![Release](https://img.shields.io/github/release/Chisanan232/multirunnable.svg?label=Release&amp;logo=github)](https://github.com/Chisanan232/multirunnable/releases)
+[![Release](https://img.shields.io/github/release/Chisanan232/multirunnable.svg?label=Release&amp;logo=github&color=orange)](https://github.com/Chisanan232/multirunnable/releases)
 [![PyPI version](https://img.shields.io/pypi/v/MultiRunnable?color=%23099cec&amp;label=PyPI&amp;logo=pypi&amp;logoColor=white)](https://pypi.org/project/MultiRunnable/)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?logo=apache)](https://opensource.org/licenses/Apache-2.0)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/6733a68742a64b3dbcfa57b1309de4ce)](https://www.codacy.com/gh/Chisanan232/multirunnable/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Chisanan232/multirunnable&amp;utm_campaign=Badge_Grade)
 [![Documentation Status](https://readthedocs.org/projects/multirunnable/badge/?version=latest)](https://multirunnable.readthedocs.io/en/latest/?badge=latest)
 
@@ -14,9 +14,9 @@
 
 [comment]: <> (| Windows |[![Build status]&#40;https://ci.appveyor.com/api/projects/status/v0nq38jtof6vcm23?svg=true&#41;]&#40;https://ci.appveyor.com/project/Chisanan232/multirunnable&#41;|[![Coverage Status]&#40;https://coveralls.io/repos/github/Chisanan232/multirunnable/badge.svg?branch=master&#41;]&#40;https://coveralls.io/github/Chisanan232/multirunnable?branch=master&#41;|)
 
-A Python library integrates the APIs of 3 strategies (Parallel, Concurrent, Coroutine) and 4 libraries (multiprocessing, threading, gevent, asyncio) to help developers build parallelism humanly.
+A Python library integrates the APIs of 3 strategies (Parallel, Concurrent, Coroutine) via 4 libraries (multiprocessing, threading, gevent, asyncio) to help developers build parallelism humanly.
 
-[Overview](#overview) | [Quickly Start](#quickly-start) | [Syntactic Sugar](#syntactic-sugar) | [Resource](#resource) | [Code Example](https://github.com/Chisanan232/multirunnable/tree/master/example)
+[Overview](#overview) | [Quickly Start](#quickly-start) | [Syntactic Sugar in *MultiRunnable*](#syntactic-sugar-in-multirunnable) | [Documentation](#documentation) | [Code Example](https://github.com/Chisanan232/multirunnable/tree/master/example)
 <hr>
 
 ## Overview
@@ -24,7 +24,7 @@ A Python library integrates the APIs of 3 strategies (Parallel, Concurrent, Coro
 Package '_multirunnable_' is a library which could easily build a parallelism with different running strategy by mode option. 
 Currently, it has 4 options could use: Parallel, Concurrent, GreenThread and Asynchronous.
 
-Here's an example which implements parallelism as concurrent with _multirunnable_:
+Here's an example which builds parallelism as concurrent with _multirunnable_:
 
 ```python
 from multirunnable import SimpleExecutor, RunningMode
@@ -82,11 +82,11 @@ Write a simple code to run it.
     >>> 
 
 
-## Syntactic Sugar
+## Syntactic Sugar in *MultiRunnable*
 
-It could implement some features via Python decorator in _MultiRunnable_.
+It could use some features via Python decorator in _MultiRunnable_.
 
-For example, Lock via decorator **RunWith** (it's **AsyncRunWith** with Asynchronous):
+Following code is a demonstration about usage with Lock via decorator **RunWith** (it's **AsyncRunWith** with Asynchronous):
 
 ```python
 from multirunnable.api import RunWith
@@ -102,7 +102,18 @@ def lock_function():
 *Lock*, *RLock*, *Semaphore*, *Bounded Semaphore*.
 
 
-## Resource
+## Documentation
 
 The [documentation](https://multirunnable.readthedocs.io) contains more details, and examples.
 
+* [Quickly Start](https://multirunnable.readthedocs.io/en/latest/quickly_start.html) to develop parallelism with *MultiRunnable*
+* Detail *MultiRunnable* usage information of functions, classes and methods in [API References](https://multirunnable.readthedocs.io/en/latest/index.html#api-reference).
+* Be curious about how to join and develop *MultiRunnable*? [Development Documentation](https://multirunnable.readthedocs.io/en/latest/index.html#development-documentation) could be a good guide for you. 
+
+
+## Download 
+
+*MultiRunnable* still a young open source which keep growing. Here's its download state: 
+
+[![Downloads](https://pepy.tech/badge/multirunnable)](https://pepy.tech/project/multirunnable)
+[![Downloads](https://pepy.tech/badge/multirunnable/month)](https://pepy.tech/project/multirunnable)

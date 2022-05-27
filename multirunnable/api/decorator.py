@@ -22,8 +22,21 @@ from ._retry import (
 )
 
 
+class InstantiateError(RuntimeError):
+
+    def __init__(self, cls_name: str):
+        self.__cls_name = cls_name
+
+    def __str__(self):
+        return f"It shouldn't instantiate {self.__cls_name} object."
+
+
 
 class _BaseRetryDecorator(metaclass=ABCMeta):
+
+    def __init__(self):
+        raise InstantiateError(self.__class__.__name__)
+
 
     @staticmethod
     @abstractmethod
@@ -97,6 +110,10 @@ def async_retry_bounded_function(function: Callable = None, timeout: int = 1):
 
 
 class RunWith:
+
+    def __init__(self):
+        raise InstantiateError(self.__class__.__name__)
+
 
     @staticmethod
     def Lock(function: Callable[[Any, Any], List[Type[_MRResult]]]):
@@ -180,6 +197,10 @@ class RunWith:
 
 
 class AsyncRunWith:
+
+    def __init__(self):
+        raise InstantiateError(self.__class__.__name__)
+
 
     @staticmethod
     def Lock(function: Callable):

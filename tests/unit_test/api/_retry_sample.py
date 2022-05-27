@@ -114,6 +114,14 @@ def get_running_function_flag() -> Run_Function_Flag:
     return _run_func_falg
 
 
+def instantiate_retry_decorator() -> None:
+    retry()
+
+
+def instantiate_async_retry_decorator() -> None:
+    async_retry()
+
+
 @retry.function
 def target_function_with_default():
     """

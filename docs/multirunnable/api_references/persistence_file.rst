@@ -94,42 +94,88 @@ File
 --------------
 
 *class* multirunnable.persistence.file.files.\ **File**\ *()*
+
     This is the basically class to let every subclass which for different file format to implement details and extend features.
     It already has 3 properties for subclass: *file_path*, *mode* and *encoding*.
 
-*property* **file_path**\ *()*
-    The target file path. It could use *getting* and *setting* of this property.
+    Return:
+        *File* object.
 
-*property* **mode**\ *()*
-    The mode how to operate with file. It could use *getting* and *setting* of this property.
 
-*property* **encoding**\ *()*
-    The encoding of file IO. It could use *getting* and *setting* of this property.
+    *property* **file_path**\ *()*
 
-*abstract* **open**\ *()*
-    Open an target file as an object which would be assign to class level variable. So it won't return anything.
+        The target file path. It could use *getting* and *setting* of this property.
 
-*abstract* **write**\ *(data: List[list], io_wrapper=None)*
-    Write the data into file IO object.
 
-*abstract* **close**\ *()*
-    Close the file IO. It MUST to do finally no matter you operate with file successfully or not.
+    *property* **mode**\ *()*
 
-*abstract* **stream**\ *(data: List[list])*
-    Return a IO streaming (ex: io.StringIO) object which save the data content.
+        The mode how to operate with file. It could use *getting* and *setting* of this property.
+
+
+    *property* **encoding**\ *()*
+
+        The encoding of file IO. It could use *getting* and *setting* of this property.
+
+
+    *abstract* **open**\ *()*
+
+        Open an target file as an object which would be assign to class level variable. So it won't return anything.
+
+        Return:
+            None.
+
+
+    *abstract* **write**\ *(data: List[list])*
+
+        Write the data into file IO object.
+
+        Parameters:
+            * *data* (List[list]) : Data rows.
+        Return:
+            None.
+
+
+    *abstract* **close**\ *()*
+
+        Close the file IO. It MUST to do finally no matter you operate with file successfully or not.
+
+        Return:
+            None.
+
+
+    *abstract* **stream**\ *(data)*
+
+        Return a IO streaming (ex: io.StringIO) object which save the data content.
+
+        Parameters:
+            * *data* (List[list]) : An iterator of *Workers*.
+        Return:
+            A string value.
 
 
 CSVFormatter
 --------------
 
 *class* multirunnable.persistence.file.files.\ **CSVFormatter**\ *()*
+
     The implementation for saving data as *CSV* format.
+
+    **write**\ *(data: List[list], io_wrapper=None)*
+
+        Write the data into file IO object.
+
+        Parameters:
+            * *data* (List[list]) : Data rows.
+            * *io_wrapper* (Any) : IO object.
+        Return:
+            None.
 
 
 XLSXFormatter
 ---------------
 
 *class* multirunnable.persistence.file.files.\ **XLSXFormatter**\ *(sheet_page: str)*
+
     The implementation for saving data as *XLSX* format.
     It receive an option *sheet_page* which would be set as the name of first one sheet page.
 
@@ -138,6 +184,7 @@ JSONFormatter
 ---------------
 
 *class* multirunnable.persistence.file.files.\ **JSONFormatter**\ *()*
+
     The implementation for saving data as *JSON* format.
 
 
@@ -155,34 +202,62 @@ Archiver
 --------------
 
 *class* multirunnable.persistence.file.archivers.\ **ZIPArchiver**\ *()*
+
     This is the basically class to let every subclass which for different archiver format to implement details and extend features.
     It already has 2 properties for subclass: *file_path* and *mode*.
 
-*property* **file_path**\ *()*
-    The target archiver path. It could use *getting* and *setting* of this property.
+    Return:
+        *ZIPArchiver* object.
 
-*property* **mode**\ *()*
-    The mode how to operate with archiver. It could use *getting* and *setting* of this property.
 
-*abstract* **init**\ *()*
-    Initial processing before compress. In generally, it would instantiate needed object like *zipfile.ZipFile*.
+    *property* **file_path**\ *()*
 
-*abstract* **compress**\ *(data_map_list: List[namedtuple])*
-    Compress the data into target archiver. The argument *data_map_list*
-    receives a list of NamedTuple object which has 2 attributes *file_path* and *data*.
+        The target archiver path. It could use *getting* and *setting* of this property.
 
-*abstract* **close**\ *()*
-    Close the archiver IO object. Same as *File* object, it MUST to do this.
+
+    *property* **mode**\ *()*
+
+        The mode how to operate with archiver. It could use *getting* and *setting* of this property.
+
+
+    *abstract* **init**\ *()*
+
+        Initial processing before compress. In generally, it would instantiate needed object like *zipfile.ZipFile*.
+
+        Return:
+            None.
+
+
+    *abstract* **compress**\ *(data_map_list)*
+
+        Compress the data into target archiver. The argument *data_map_list*
+        receives a list of NamedTuple object which has 2 attributes *file_path* and *data*.
+
+        Parameters:
+            * *data_map_list* (List[namedtuple]) : A list of element which save 2 attributes: file name and file IO stream value.
+        Return:
+            None.
+
+
+    *abstract* **close**\ *()*
+
+        Close the archiver IO object. Same as *File* object, it MUST to do this.
+
+        Return:
+            None.
 
 
 ZIPArchiver
 --------------
 
 *class* multirunnable.persistence.file.archivers.\ **ZIPArchiver**\ *()*
+
     The implementation for compressing data as *ZIP* format.
 
-**init**\ *()*
-    Instantiate *zipfile.ZipFile*.
+
+    **init**\ *()*
+
+        Instantiate *zipfile.ZipFile*.
 
 
 Savers Objects
@@ -198,69 +273,125 @@ BaseSaver
 ----------
 
 *class* multirunnable.persistence.file.saver.\ **BaseSaver**\ *()*
+
     This is the basically class to let every subclass which for different saver to implement
     details and extend features with different file format, archiver or mediator.
 
-*abstract* **register**\ *(mediator: BaseMediator, strategy: SavingStrategy)*
-    Register saving strategy which you want to use. It would register strategy object
+
+    *abstract* **register**\ *(mediator, strategy)*
+
+        Register saving strategy which you want to use. It would register strategy object
+
+        Parameters:
+            * *mediator* (BaseMediator) : The mediator object which could determine how the saving process works.
+            * *strategy* (SavingStrategy) : Saving file strategy.
+        Return:
+            None.
 
 
 FileSaver
 ------------
 
-*class* multirunnable.persistence.file.saver.\ **FileSaver**\ *()*
+*class* multirunnable.persistence.file.saver.\ **FileSaver**\ *(file)*
+
     The implementation for saving data as target format.
 
-**register**\ *(mediator: BaseMediator, strategy: SavingStrategy)*
-    Register a *Mediator* type object to let it know how could it to do (save data).
+    Parameters:
+        * *file* (BaseFile) : The type of file formatter.
+    Return:
+        *FileSaver* object.
 
-**save**\ *(file: str, mode: str, data: List[list], encoding: str = "UTF-8")*
-    The truly API for client site to use to save data. This methods would return different value with different **SavingStrategy**.
 
-    SavingStrategy:
+    **register**\ *(mediator: BaseMediator, strategy: SavingStrategy)*
 
-    * ONE_THREAD_ONE_FILE
-        * Main Runnable Object:
-            It shouldn't do anything with this strategy.
-            Hence it returns a *Do_Nothing_Flag* flag.
+        Register a *Mediator* type object to let it know how could it to do (save data).
 
-        * Child Runnable Object:
-            It needs to save data as target format of file.
-            It returns a *Done_Flag* flag after saving data.
 
-    * ALL_THREADS_ONE_FILE
-        * Main Runnable Object:
-            It should wait for every runnable objects done and get the result data from them to save it as target file format.
-            It returns a *Done_Flag* flag.
+    **save**\ *(file: str, mode: str, data: List[list], encoding: str = "UTF-8")*
 
-        * Child Runnable Object:
-            It won't save data but it would return it back to main runnable object.
-            It returns result data and method *has_data* would be *True*.
+        The truly API for client site to use to save data. This methods would return different value with different **SavingStrategy**.
 
-    * ONE_THREAD_ONE_FILE_AND_COMPRESS_ALL
-        * Main Runnable Object:
-            It waits for every runnable objects done and get the result data from
-            It returns a *Do_Nothing_Flag* flag.
+        SavingStrategy:
 
-        * Child Runnable Object:
-            It won't save data but it would return it back to main runnable object.
-            It returns a streaming object which saving result data and method *has_data* would be *True*.
+        * ONE_THREAD_ONE_FILE
+            * Main Runnable Object:
+                It shouldn't do anything with this strategy.
+                Hence it returns a *Do_Nothing_Flag* flag.
 
-**has_data**\ *()*
-    Return bool value. It's *True* if it returns data or streaming data of method *save*. Otherwise, it would be *False*.
+            * Child Runnable Object:
+                It needs to save data as target format of file.
+                It returns a *Done_Flag* flag after saving data.
+
+        * ALL_THREADS_ONE_FILE
+            * Main Runnable Object:
+                It should wait for every runnable objects done and get the result data from them to save it as target file format.
+                It returns a *Done_Flag* flag.
+
+            * Child Runnable Object:
+                It won't save data but it would return it back to main runnable object.
+                It returns result data and method *has_data* would be *True*.
+
+        * ONE_THREAD_ONE_FILE_AND_COMPRESS_ALL
+            * Main Runnable Object:
+                It waits for every runnable objects done and get the result data from
+                It returns a *Do_Nothing_Flag* flag.
+
+            * Child Runnable Object:
+                It won't save data but it would return it back to main runnable object.
+                It returns a streaming object which saving result data and method *has_data* would be *True*.
+
+        Parameters:
+            * *file* (str) : File path.
+            * *mode* (str) : The mode to open file IO.
+            * *data* ( List[list]) : Target data rows.
+            * *encoding* (str) : Encoding of opening file IO.
+        Return:
+            For different saving, it has different return value. *1* means working finely and finish; *0* means it does nothing.
+
+            * ONE_THREAD_ONE_FILE:
+                * Main Runnable Object: it returns *1* if its child didn't run before, or it would returns *0*.
+                * Child Runnable Object: it returns *1*.
+
+            * ALL_THREADS_ONE_FILE:
+                * Main Runnable Object: it returns *1*.
+                * Child Runnable Object: it returns the data rows back to outside.
+
+            * ONE_THREAD_ONE_FILE_AND_COMPRESS_ALL:
+                * Main Runnable Object:it returns streaming object of data rows if its child didn't run before, or it would returns *0*.
+                * Child Runnable Object: it returns streaming object of data rows.
+
+
+    **has_data**\ *()*
+
+        Return bool value. It's *True* if it returns data or streaming data of method *save*. Otherwise, it would be *False*.
+
+        Return:
+            A boolean value.
 
 
 ArchiverSaver
 ---------------
 
 *class* multirunnable.persistence.file.saver.\ **ArchiverSaver**\ *()*
+
     The implementation for saving data and compressing data as *ZIP* format.
 
-**register**\ *(mediator: BaseMediator, strategy: SavingStrategy)*
-    Register a *Mediator* type object to let it know how could it to do (compress data).
 
-**compress**\ *(file: str, mode: str, data: List[namedtuple])*
-    The truly API for client site to use to save and compress data.
+    **register**\ *(mediator: BaseMediator, strategy: SavingStrategy)*
+
+        Register a *Mediator* type object to let it know how could it to do (compress data).
+
+
+    **compress**\ *(file: str, mode: str, data: List[namedtuple])*
+
+        The truly API for client site to use to save and compress data.
+
+        Parameters:
+            * *file* (str) : File path.
+            * *mode* (str) : The mode to open file IO.
+            * *data* (List[namedtuple]) : A list of element which save 2 attributes: file name and file IO stream value.
+        Return:
+            None.
 
 
 Mediators Objects
@@ -275,22 +406,36 @@ SavingMediator
 ----------------
 
 *class* multirunnable.persistence.file.mediator.\ **SavingMediator**\ *()*
+
     A basically class about saving some references to let *BasicSaver* type object to refer.
 
-*property* **worker_id**\ *()*
-    ID of runnable object(s), it maybe a thread ID, Process ID, etc. It could use *getting*, *setting* and *delete* of this property.
 
-**is_super_worker**\ *()*
-    Return a bool value. It's *True* if current runnable object is main runnable object (like main-thread or main-process) or it's *False*.
+    *property* **worker_id**\ *()*
 
-*property* **super_worker_running**\ *()*
-    It's a bool value. It's *True* if it's running as main runnable object or it's *False*.
+        ID of runnable object(s), it maybe a thread ID, Process ID, etc. It could use *getting*, *setting* and *delete* of this property.
 
-*property* **child_worker_running**\ *()*
-    It's a bool value. It's *True* if it's running as children runnable object or it's *False*.
 
-*property* **enable_compress**\ *()*
-    It's a bool value. It's *True* if it needs to run compressing process or it's *False*.
+    **is_super_worker**\ *()*
+
+        Return a bool value. It's *True* if current runnable object is main runnable object (like main-thread or main-process) or it's *False*.
+
+        Return:
+            A boolean value.
+
+
+    *property* **super_worker_running**\ *()*
+
+        It's a bool value. It's *True* if it's running as main runnable object or it's *False*.
+
+
+    *property* **child_worker_running**\ *()*
+
+        It's a bool value. It's *True* if it's running as children runnable object or it's *False*.
+
+
+    *property* **enable_compress**\ *()*
+
+        It's a bool value. It's *True* if it needs to run compressing process or it's *False*.
 
 
 Persistence Layer Objects
@@ -306,19 +451,61 @@ how to save data as *CSV* format file or compress to a *ZIP* file.
 BaseFao
 ---------
 
-*class* multirunnable.persistence.file.layer.\ **BaseFao**\ *()*
+*class* multirunnable.persistence.file.layer.\ **BaseFao**\ *(strategy, **kwargs)*
+
     This is the basically class to let every subclass to use it directly or extend features.
     It already has 4 methods for subclass: *save_as_json*, *save_as_csv*, *save_as_excel* and *compress_as_zip*.
 
-**save_as_json**\ *(file: str, mode: str, data: List[list])*
-    Save data as *JSON* format file.
+    Parameters:
+        * *strategy* (SavingStrategy) : Saving file strategy.
+    Return:
+        *BaseFao* object.
 
-**save_as_csv**\ *(file: str, mode: str, data: List[list])*
-    Save data as *CSV* format file.
 
-**save_as_excel**\ *(file: str, mode: str, data: List[list])*
-    Save data as *XLSX* format file.
+    **save_as_json**\ *(file: str, mode: str, data: List[list])*
 
-**compress_as_zip**\ *(file: str, mode: str, data: List)*
-    Save and compress data which is a list of NamedTuple object has *file_path* and *data* values as *ZIP* format file.
+        Save data as *JSON* format file.
+
+        Parameters:
+            * *file* (str) : File path.
+            * *mode* (str) : The mode to open file IO.
+            * *data* (List[list]) : Data rows.
+        Return:
+            A boolean value.
+
+
+    **save_as_csv**\ *(file: str, mode: str, data: List[list])*
+
+        Save data as *CSV* format file.
+
+        Parameters:
+            * *file* (str) : File path.
+            * *mode* (str) : The mode to open file IO.
+            * *data* (List[list]) : Data rows.
+        Return:
+            A boolean value.
+
+
+    **save_as_excel**\ *(file: str, mode: str, data: List[list])*
+
+        Save data as *XLSX* format file.
+
+        Parameters:
+            * *file* (str) : File path.
+            * *mode* (str) : The mode to open file IO.
+            * *data* (List[list]) : Data rows.
+        Return:
+            A boolean value.
+
+
+    **compress_as_zip**\ *(file: str, mode: str, data: List)*
+
+        Save and compress data which is a list of NamedTuple object has *file_path* and *data* values as *ZIP* format file.
+
+        Parameters:
+            * *file* (str) : File path.
+            * *mode* (str) : The mode to open file IO.
+            * *data* (List[namedtuple]) : A list of element which save 2 attributes: file name and file IO stream value.
+        Return:
+            A boolean value.
 
