@@ -1,3 +1,11 @@
+> [!WARNING]
+> **Maintenance status: unmaintained (legacy project).**
+>
+> This project is no longer actively maintained. Compatibility updates, dependency upgrades
+> and security fixes are not currently planned. If you use it — especially in production —
+> please evaluate it carefully and pin your dependency versions. Existing releases and the
+> historical documentation remain available.
+
 # MultiRunnable
 
 [![Supported Versions](https://img.shields.io/pypi/pyversions/multirunnable.svg?logo=python&logoColor=FBE072)](https://pypi.org/project/multirunnable)
